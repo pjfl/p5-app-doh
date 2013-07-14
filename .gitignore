@@ -22,5 +22,5 @@ README
 README.pod
 t/ipc_srlock*
 *.tar.gz
-Daux-*
-lib/Daux/daux.json
+Doh-*
+lib/Doh/doh.json

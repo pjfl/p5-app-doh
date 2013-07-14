@@ -1,15 +1,15 @@
 # Name
 
-Daux - One-line description of the modules purpose
+Doh - One-line description of the modules purpose
 
 # Synopsis
 
-    use Daux;
+    use Doh;
     # Brief but working code examples
 
 # Version
 
-This documents version v0.1.$Rev: 4 $ of [Daux](https://metacpan.org/module/Daux)
+This documents version v0.1.$Rev: 4 $ of [Doh](https://metacpan.org/module/Doh)
 
 # Description
 

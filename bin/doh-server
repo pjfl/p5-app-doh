@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# @(#)Ident: daux-server 2013-07-14 01:27 pjf ;
+# @(#)Ident: doh-server 2013-07-14 23:22 pjf ;
 
 use strict;
 use warnings;
@@ -8,9 +8,9 @@ use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
 
-use Daux;
+use Doh;
 
-my $app = Daux->new;
+my $app = Doh->new;
 
 $app->run_if_script;
 

@@ -1,6 +1,6 @@
-# @(#)Ident: Daux.pm 2013-07-14 21:11 pjf ;
+# @(#)Ident: Doh.pm 2013-07-14 23:22 pjf ;
 
-package Daux;
+package Doh;
 
 use 5.01;
 use strict;
@@ -11,8 +11,8 @@ use Class::Usul;
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_apphome get_cfgfiles );
 use Class::Usul::Types      qw( Maybe Object SimpleStr );
-use Daux::Model::Documentation;
-use Daux::View::HTML;
+use Doh::Model::Documentation;
+use Doh::View::HTML;
 use Plack::Builder;
 use Scalar::Util            qw( blessed );
 use Web::Simple;
@@ -62,16 +62,16 @@ sub dispatch_request {
 
 # Private methods
 sub _build_html_view {
-   return Daux::View::HTML->new( builder => $_[ 0 ]->usul );
+   return Doh::View::HTML->new( builder => $_[ 0 ]->usul );
 }
 
 sub _build_model {
-   return Daux::Model::Documentation->new( builder => $_[ 0 ]->usul );
+   return Doh::Model::Documentation->new( builder => $_[ 0 ]->usul );
 }
 
 sub _build_usul {
    my $self = shift;
-   my $attr = { config => {}, config_class => 'Daux::Config' };
+   my $attr = { config => {}, config_class => 'Doh::Config' };
    my $conf = $attr->{config};
 
    $conf->{appclass} = $self->appclass || blessed $self || $self;
@@ -91,16 +91,16 @@ __END__
 
 =head1 Name
 
-Daux - One-line description of the modules purpose
+Doh - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Daux;
+   use Doh;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 4 $ of L<Daux>
+This documents version v0.1.$Rev: 4 $ of L<Doh>
 
 =head1 Description
 

@@ -1,6 +1,6 @@
-# @(#)Ident: Config.pm 2013-07-14 16:42 pjf ;
+# @(#)Ident: Config.pm 2013-07-14 23:21 pjf ;
 
-package Daux::Config;
+package Doh::Config;
 
 
 use namespace::sweep;
@@ -71,16 +71,16 @@ __END__
 
 =head1 Name
 
-Daux::Config - One-line description of the modules purpose
+Doh::Config - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Daux::Config;
+   use Doh::Config;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 4 $ of L<Daux::Config>
+This documents version v0.1.$Rev: 4 $ of L<Doh::Config>
 
 =head1 Description
 

@@ -60,4 +60,4 @@ Thumbs.db
 \bipc_srlock
 
 # Avoid archives of this distribution
-\bDaux-v?[\d\.\_]+
+\bDoh-v?[\d\.\_]+

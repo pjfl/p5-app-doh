@@ -1,4 +1,4 @@
-# @(#)$Ident: Build.PL 2013-07-14 12:47 pjf ;
+# @(#)$Ident: Build.PL 2013-07-14 23:19 pjf ;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use inc::Bob; # Module::Build subclass
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
 
 Bob->new( {
-   module    => 'Daux',
+   module    => 'Doh',
    home_page => 'http://www.roxsoft.co.uk',
    requires  => {
       'perl'            => 5.01,
@@ -26,7 +26,7 @@ Bob->new( {
 
 # Local Variables:
 # mode: perl
-# eval: (load-project-state "daux")
-# tab-title: Daux
+# eval: (load-project-state "doh")
+# tab-title: Doh
 # tab-width: 3
 # End:

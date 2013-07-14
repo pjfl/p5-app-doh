@@ -1,6 +1,6 @@
-# @(#)Ident: HTML.pm 2013-07-14 18:36 pjf ;
+# @(#)Ident: HTML.pm 2013-07-14 23:22 pjf ;
 
-package Daux::View::HTML;
+package Doh::View::HTML;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
@@ -76,16 +76,16 @@ __END__
 
 =head1 Name
 
-Daux::View::HTML - One-line description of the modules purpose
+Doh::View::HTML - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Daux::View::HTML;
+   use Doh::View::HTML;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 4 $ of L<Daux::View::HTML>
+This documents version v0.1.$Rev: 4 $ of L<Doh::View::HTML>
 
 =head1 Description
 

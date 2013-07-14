@@ -1,4 +1,4 @@
-# @(#)Ident: 10test_script.t 2013-07-13 23:32 pjf ;
+# @(#)Ident: 10test_script.t 2013-07-14 23:21 pjf ;
 
 use strict;
 use warnings;
@@ -22,9 +22,9 @@ BEGIN {
 use Data::Dumper; $Data::Dumper::Terse    = 1; $Data::Dumper::Indent = 1;
                   $Data::Dumper::Sortkeys = sub { [ sort keys %{ $_[ 0 ] } ] };
 
-use_ok 'Daux';
+use_ok 'Doh';
 
-my $self  = Daux->new;
+my $self  = Doh->new;
 my $model = $self->model;
 my $tree  = $model->docs_tree;
 

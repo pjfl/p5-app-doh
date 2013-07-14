@@ -1,6 +1,6 @@
-# @(#)Ident: Documentation.pm 2013-07-14 20:08 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-14 23:21 pjf ;
 
-package Daux::Model::Documentation;
+package Doh::Model::Documentation;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
@@ -202,16 +202,16 @@ __END__
 
 =head1 Name
 
-Daux::Model::Documentation - One-line description of the modules purpose
+Doh::Model::Documentation - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Daux::Model::Documentation;
+   use Doh::Model::Documentation;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 4 $ of L<Daux::Model::Documentation>
+This documents version v0.1.$Rev: 4 $ of L<Doh::Model::Documentation>
 
 =head1 Description
 
