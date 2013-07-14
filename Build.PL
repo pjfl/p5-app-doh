@@ -1,25 +1,27 @@
-# @(#)$Ident: Build.PL 2013-05-11 10:26 pjf ;
+# @(#)$Ident: Build.PL 2013-07-13 19:45 pjf ;
 
 use strict;
 use warnings;
 use inc::Bob; # Module::Build subclass
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 1 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
 
 Bob->new( {
-   module    => q(Daux),
-   home_page => q(http://www.roxsoft.co.uk),
+   module    => 'Daux',
+   home_page => 'http://www.roxsoft.co.uk',
    requires  => {
-      'perl'           => 5.01,
-      'Class::Usul'    => q(0.19.0),
+      'perl'            => 5.01,
+      'Class::Usul'     => q(0.19.0),
+      'File::DataClass' => q(0.21.0),
+      'Text::Markdown'  => 1.000031,
    },
-   recommends          => {
-      'App::cpanminus' => 1.6005, },
-   configure_requires  => {
-      'version'        => 0.88,
-      'Module::Build'  => 0.4004, },
-   build_requires      => {
-      'version'        => 0.88,
-      'Module::Build'  => 0.4004, },
+   recommends           => {
+      'App::cpanminus'  => 1.6005, },
+   configure_requires   => {
+      'version'         => 0.88,
+      'Module::Build'   => 0.4004, },
+   build_requires       => {
+      'version'         => 0.88,
+      'Module::Build'   => 0.4004, },
 } )->create_build_script; # Goal!
 
 # Local Variables:

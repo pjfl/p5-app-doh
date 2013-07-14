@@ -1,15 +1,57 @@
-# @(#)Ident: perl_module.pm 2013-07-06 14:16 pjf ;
+# @(#)Ident: Daux.pm 2013-07-14 02:04 pjf ;
 
 package Daux;
 
 use 5.01;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 1 $ =~ /\d+/gmx );
+use strict;
+use warnings;
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
 
+use Class::Usul;
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( throw );
-use Moo;
+use Class::Usul::Functions  qw( find_apphome get_cfgfiles );
+use Daux::Model::Documentation;
+use Daux::View::HTML;
+use Scalar::Util            qw( blessed );
+use Web::Simple;
 
-extends qw(Class::Usul::Programs);
+my $EXTNS = [ qw( .json ) ];
+
+has 'appclass'  => is => 'ro';
+has 'html_view' => is => 'lazy';
+has 'model'     => is => 'lazy';
+has 'usul'      => is => 'lazy';
+
+sub dispatch_request {
+   sub (GET + / | /**) {
+      my ($self, @args) = @_;
+      my $stash = $self->model->get_stash( @args );
+      my $res   = $self->html_view->render( $stash );
+
+      return [ $res->[ 0 ], [ 'Content-type', 'text/html' ], [ $res->[ 1 ] ] ];
+   };
+}
+
+# Private methods
+sub _build_html_view {
+   return Daux::View::HTML->new( builder => $_[ 0 ]->usul );
+}
+
+sub _build_model {
+   return Daux::Model::Documentation->new( builder => $_[ 0 ]->usul );
+}
+
+sub _build_usul {
+   my $self = shift;
+   my $attr = { config => {}, config_class => 'Daux::Config' };
+   my $conf = $attr->{config};
+
+   $conf->{appclass} = $self->appclass || blessed $self || $self;
+   $conf->{home    } = find_apphome( $conf->{appclass}, NUL, $EXTNS );
+   $conf->{cfgfiles} = get_cfgfiles( $conf->{appclass}, $conf->{home}, $EXTNS );
+
+   return Class::Usul->new( $attr );
+}
 
 1;
 
@@ -30,7 +72,7 @@ Daux - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 1 $ of L<Daux>
+This documents version v0.1.$Rev: 2 $ of L<Daux>
 
 =head1 Description
 
