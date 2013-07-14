@@ -12,9 +12,9 @@
    <meta name="apple-mobile-web-app-capable" content="yes">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 [% IF colours.0 -%]
-   <link rel="icon" href="[% images %]favicon.png" type="image/x-icon">
+   <link rel="icon" href="[% config.images %]favicon.png" type="image/x-icon">
 [% ELSE -%]
-   <link rel="icon" href="[% images %]favicon-[% config.theme %].png"
+   <link rel="icon" href="[% config.images %]favicon-[% config.theme %].png"
       type="image/x-icon">
 [% END -%]
    <!-- Font -->
@@ -25,18 +25,18 @@
    [% FOREACH colour = colours -%]
       @[% colour.key %]: [% colour.value %];
    [% END -%]
-      @import "/less/import/daux-base.less";
+      @import "[% config.less %]import/daux-base.less";
    </style>
-   <script src="[% js %]less.min.js"></script>
+   <script src="[% config.js %]less.min.js"></script>
 [% ELSE -%]
-   <link rel="stylesheet" href="[% css %]daux-[% config.theme %].css">
+   <link rel="stylesheet" href="[% config.css %]daux-[% config.theme %].css">
 [% END -%]
    <!-- hightlight.js -->
-   <script src="[% js %]highlight.min.js"></script>
+   <script src="[% config.js %]highlight.min.js"></script>
    <script>hljs.initHighlightingOnLoad();</script>
    <!-- Navigation -->
    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
-   <script src="[% js %]custom.js"></script>
+   <script src="[% config.js %]custom.js"></script>
    <!--[if lt IE 9]>
    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
    <![endif]-->
@@ -67,9 +67,9 @@
          </div>
          <div class="row">
             <div class="span10 offset1">
-   [% IF config.image -%]
-               <img class="homepage-image" src="[% images %][% config.image %]"
-                    alt="[% config.title %]">
+   [% IF config.logo -%]
+               <img class="homepage-image" alt="[% config.title %]"
+                    src="[% config.images %][% config.logo %]">
    [% END -%]
             </div>
          </div>
@@ -81,7 +81,7 @@
             <div class="text-center span12">
    [% IF config.repo_url -%]
                <a href="[% config.repo_url %]"
-                  class="btn btn-secondary btn-hero">View On Repository</a>
+                  class="btn btn-secondary btn-hero">View Repository</a>
    [% END -%]
                <a href="[% docs_url %]" class="btn btn-primary btn-hero">
                   View Documentation</a>

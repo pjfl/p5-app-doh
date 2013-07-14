@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-07-13 23:48 pjf ;
+# @(#)Ident: HTML.pm 2013-07-14 05:44 pjf ;
 
 package Daux::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
@@ -25,8 +25,9 @@ has 'template' => is => 'lazy', isa => Object,
       Template->new( $_[ 0 ]->_template_args ) or throw $Template::ERROR };
 
 # Private attributes
-has '_usul'    => is => 'ro', isa => Object, handles => [ qw(config loc log) ],
-   init_arg    => 'builder', required => TRUE, weak_ref => TRUE;
+has '_usul'    => is => 'ro',   isa => Object,
+   handles     => [ qw( config loc log ) ], init_arg => 'builder',
+   required    => TRUE, weak_ref => TRUE;
 
 # Public methods
 sub render {
@@ -80,7 +81,7 @@ Daux::View::HTML - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 2 $ of L<Daux::View::HTML>
+This documents version v0.1.$Rev: 3 $ of L<Daux::View::HTML>
 
 =head1 Description
 

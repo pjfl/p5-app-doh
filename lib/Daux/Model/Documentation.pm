@@ -1,52 +1,42 @@
-# @(#)Ident: Documentation.pm 2013-07-14 02:13 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-14 16:13 pjf ;
 
 package Daux::Model::Documentation;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_hashref trim );
 use File::DataClass::IO;
-use File::DataClass::Types  qw( Directory HashRef Object );
+use File::DataClass::Types  qw( HashRef Object );
 use File::Spec::Functions   qw( curdir );
 use Moo;
 
 # Public attributes
-has 'docs_path' => is => 'lazy', isa => Directory,
-   coerce       => Directory->coercion,
-   default      => sub { $_[ 0 ]->config->root->catdir( 'docs' ) };
-
 has 'docs_tree' => is => 'lazy', isa => HashRef,
-   default      => sub { __get_tree( $_[ 0 ]->docs_path ) };
+   default      => sub { __get_tree( $_[ 0 ]->config->docs_path ) };
 
 # Private attributes
-has '_usul'     => is => 'ro', isa => Object, handles => [ qw(config log) ],
+has '_usul'     => is => 'ro',   isa => Object, handles => [ qw( config log ) ],
    init_arg     => 'builder', required => TRUE, weak_ref => TRUE;
 
 # Public methods
 sub get_stash {
    my ($self, @args) = @_;
 
+   my $conf     = $self->config;
    my $env      = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    my @parts    = split m{ [/] }mx, trim $args[ 0 ] || 'index', '/';
    my $docs_url = $self->_docs_url( my $tree = $self->docs_tree );
 
    return {
-      colours      => [ map { my ($k, $v) = each %{ $_ };
-                              { key => $k, value => $v } }
-                           @{ $self->config->colours } ],
-      config       => $self->config,
-      css          => '/css/',
+      colours      => __to_array_of_hash( $conf->colours, qw( key value ) ),
+      config       => $conf,
       docs_url     => $docs_url,
       homepage     => $args[ 0 ] ? FALSE : TRUE,
       homepage_url => exists $tree->{index} ? '/' : $docs_url,
       http_host    => $env->{HTTP_HOST},
-      images       => '/img/',
-      js           => '/js/',
-      links        => [ map { my ($k, $v) = each %{ $_ };
-                              { name => $k, url => $v } }
-                           @{ $self->config->links } ],
+      links        => __to_array_of_hash( $conf->links, qw( name url ) ),
       nav          => __build_nav( $tree, [ @parts ] ),
       page         => __load_page( $tree, [ @parts ] ),
    };
@@ -141,7 +131,7 @@ sub __get_tree {
       my $full_path  = $file->pathname;
       my $full_title;
 
-      if ($title) { $full_title = "${title}:${clean_name}" }
+      if ($title) { $full_title = "${title}: ${clean_name}" }
       else { $full_title = $clean_name }
 
       my $node = $tree->{ $clean_sort } = { clean  => $clean_sort,
@@ -186,6 +176,13 @@ sub __sort_pages {
             grep { $_ ne '_iterator' } keys %{ $href } );
 }
 
+sub __to_array_of_hash {
+   my ($href, $key_key, $val_key) = @_;
+
+   return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
+            sort keys %{ $href } ],
+}
+
 1;
 
 __END__
@@ -205,7 +202,7 @@ Daux::Model::Documentation - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 2 $ of L<Daux::Model::Documentation>
+This documents version v0.1.$Rev: 3 $ of L<Daux::Model::Documentation>
 
 =head1 Description
 

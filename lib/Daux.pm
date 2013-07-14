@@ -1,30 +1,58 @@
-# @(#)Ident: Daux.pm 2013-07-14 02:04 pjf ;
+# @(#)Ident: Daux.pm 2013-07-14 15:44 pjf ;
 
 package Daux;
 
 use 5.01;
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_apphome get_cfgfiles );
+use Class::Usul::Types      qw( Maybe Object SimpleStr );
 use Daux::Model::Documentation;
 use Daux::View::HTML;
+use Plack::Builder;
 use Scalar::Util            qw( blessed );
 use Web::Simple;
 
 my $EXTNS = [ qw( .json ) ];
 
-has 'appclass'  => is => 'ro';
-has 'html_view' => is => 'lazy';
-has 'model'     => is => 'lazy';
-has 'usul'      => is => 'lazy';
+# Public attributes
+has 'appclass'  => is => 'ro',   isa => Maybe[SimpleStr];
 
+has 'html_view' => is => 'lazy', isa => Object, init_arg => undef;
+
+has 'model'     => is => 'lazy', isa => Object, init_arg => undef;
+
+has 'usul'      => is => 'lazy', isa => Object, init_arg => undef;
+
+# Construction
+around 'to_psgi_app' => sub {
+   my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
+
+   my $debug = $ENV{PLACK_ENV} eq 'development' ? TRUE : FALSE;
+   my $conf  = $self->usul->config;
+
+   builder {
+      enable_if { $debug } 'Debug',
+         panels => [ qw( DBITrace Memory Timer Environment ) ];
+      enable 'Plack::Middleware::Static',
+         path   => qr{ \A /(css|img|js|less) }mx, root => $conf->root;
+      enable 'Deflater',
+         content_type =>
+            [ qw( text/css text/html text/javascript application/javascript ) ],
+         vary_user_agent => TRUE;
+      $app;
+   };
+};
+
+# Public methods
 sub dispatch_request {
    sub (GET + / | /**) {
       my ($self, @args) = @_;
+
       my $stash = $self->model->get_stash( @args );
       my $res   = $self->html_view->render( $stash );
 
@@ -72,7 +100,7 @@ Daux - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 2 $ of L<Daux>
+This documents version v0.1.$Rev: 3 $ of L<Daux>
 
 =head1 Description
 

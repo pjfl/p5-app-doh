@@ -1,48 +1,65 @@
-# @(#)Ident: Config.pm 2013-07-14 00:39 pjf ;
+# @(#)Ident: Config.pm 2013-07-14 16:14 pjf ;
 
 package Daux::Config;
 
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( throw );
-use Class::Usul::Types      qw( ArrayRef HashRef NonEmptySimpleStr SimpleStr );
+use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
+                                NonNumericSimpleStr SimpleStr );
 use Moo;
 
 extends q(Class::Usul::Config);
 
-has 'colours'          => is => 'ro', isa => ArrayRef[HashRef],
-   default             => sub { [] };
+has 'colours'          => is => 'ro',   isa => HashRef,
+   default             => sub { {} };
 
-has 'float'            => is => 'ro', isa => SimpleStr,
-   coerce              => sub { $_ ? 'float-view' : q() }, default => TRUE;
+has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => '/css/';
 
-has 'font'             => is => 'ro', isa => SimpleStr,
+has 'docs_path'        => is => 'lazy', isa => Directory,
+   coerce              => Directory->coercion,
+   default             => sub { $_[ 0 ]->root->catdir( 'docs' ) };
+
+has 'float'            => is => 'ro',   isa => NonNumericSimpleStr,
+   coerce              => sub { $_[ 0 ] ? 'float-view' : q() }, default => TRUE;
+
+has 'font'             => is => 'ro',   isa => SimpleStr,
    default             => sub {
       'http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' };
 
-has 'generator_url'    => is => 'ro', isa => SimpleStr, default => '#';
+has 'generator_url'    => is => 'ro',   isa => SimpleStr, default => '#';
 
-has 'google_analytics' => is => 'ro', isa => SimpleStr, default => NUL;
+has 'google_analytics' => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'image'            => is => 'ro', isa => SimpleStr, default => NUL;
+has 'images'           => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => '/img/';
 
-has 'links'            => is => 'ro', isa => ArrayRef[HashRef],
-   default             => sub { [] };
+has 'js'               => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => '/js/';
 
-has 'repo_url'         => is => 'ro', isa => SimpleStr, default => NUL;
+has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => '/less/';
 
-has 'tagline'          => is => 'ro', isa => SimpleStr, default => NUL;
+has 'links'            => is => 'ro',   isa => HashRef,
+   default             => sub { {} };
 
-has 'theme'            => is => 'ro', isa => NonEmptySimpleStr,
+has 'logo'             => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'tagline'          => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'theme'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'green';
 
-has 'title'            => is => 'ro', isa => NonEmptySimpleStr,
+has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Documentation';
 
-has 'twitter'          => is => 'ro', isa => ArrayRef, default => sub { [] };
+has 'twitter'          => is => 'ro',   isa => ArrayRef, default => sub { [] };
 
 1;
 
@@ -63,7 +80,7 @@ Daux::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 2 $ of L<Daux::Config>
+This documents version v0.1.$Rev: 3 $ of L<Daux::Config>
 
 =head1 Description
 
