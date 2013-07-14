@@ -1,20 +1,22 @@
-# @(#)Ident: Documentation.pm 2013-07-14 16:13 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-14 20:08 pjf ;
 
 package Daux::Model::Documentation;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_hashref trim );
 use File::DataClass::IO;
-use File::DataClass::Types  qw( HashRef Object );
+use File::DataClass::Types  qw( HashRef NonEmptySimpleStr Object );
 use File::Spec::Functions   qw( curdir );
 use Moo;
 
 # Public attributes
 has 'docs_tree' => is => 'lazy', isa => HashRef,
    default      => sub { __get_tree( $_[ 0 ]->config->docs_path ) };
+
+has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
 
 # Private attributes
 has '_usul'     => is => 'ro',   isa => Object, handles => [ qw( config log ) ],
@@ -24,17 +26,18 @@ has '_usul'     => is => 'ro',   isa => Object, handles => [ qw( config log ) ],
 sub get_stash {
    my ($self, @args) = @_;
 
-   my $conf     = $self->config;
-   my $env      = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-   my @parts    = split m{ [/] }mx, trim $args[ 0 ] || 'index', '/';
-   my $docs_url = $self->_docs_url( my $tree = $self->docs_tree );
+   my $conf  = $self->config;
+   my $url   = $self->docs_url;
+   my $tree  = $self->docs_tree;
+   my $env   = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
+   my @parts = split m{ [/] }mx, trim $args[ 0 ] || 'index', '/';
 
    return {
       colours      => __to_array_of_hash( $conf->colours, qw( key value ) ),
       config       => $conf,
-      docs_url     => $docs_url,
+      docs_url     => $url,
       homepage     => $args[ 0 ] ? FALSE : TRUE,
-      homepage_url => exists $tree->{index} ? '/' : $docs_url,
+      homepage_url => exists $tree->{index} ? '/' : $url,
       http_host    => $env->{HTTP_HOST},
       links        => __to_array_of_hash( $conf->links, qw( name url ) ),
       nav          => __build_nav( $tree, [ @parts ] ),
@@ -43,27 +46,31 @@ sub get_stash {
 }
 
 # Private methods
-sub _docs_url {
-   my ($self, $tree, $branch) = @_; $branch //= __current( $tree );
+sub _build_docs_url {
+   my ($self, $tree, $branch) = @_;
+
+   $tree //= $self->docs_tree; $branch //= __current( $tree );
 
    if ($branch->{type} eq 'file') { return $branch->{url} }
-   elsif (exists $branch->{tree}) { return $self->_docs_url( $branch->{tree} ) }
+   elsif (exists $branch->{tree}) {
+      return $self->_build_docs_url( $branch->{tree} );
+   }
 
-   $branch = __next( $tree ) and return $self->_docs_url( $tree, $branch );
+   $branch = __next( $tree ) or $self->log->fatal( 'Config Error: Unable to find the first page in the /docs folder. Double check you have at least one file in the root of of the /docs folder. Also make sure you do not have any empty folders' );
 
-   $self->log->fatal( 'Config Error: Unable to find the first page in the /docs folder. Double check you have at least one file in the root of of the /docs folder. Also make sure you do not have any empty folders. Visit the docs at http://daux.io to learn more about how the default routing works.' );
-   return; # Never reached
+   return $self->_build_docs_url( $tree, $branch );
 }
 
 # Private functions
 sub __build_nav {
-   my ($tree, $parts, $path_url) = @_;
+   my ($tree, $parts, $path_url, $level) = @_; my @nav = ();
 
-   $path_url //= join '/', NUL, @{ $parts }; my @nav = ();
+   $path_url //= join '/', NUL, @{ $parts }; $level //= 0;
 
    for my $node (map  { $tree->{ $_ } }
                  grep { $_ ne 'index' } __sort_pages( $tree )) {
-      my $page = { name => $node->{name}, type => $node->{type} };
+      my $page = { level => $level, name => $node->{name},
+                   type  => $node->{type} };
 
       if (defined $parts->[ 0 ] and $parts->[ 0 ] eq $node->{clean}) {
          $page->{class} = $path_url eq $node->{url} ? 'active' : 'open';
@@ -72,7 +79,8 @@ sub __build_nav {
 
       if ($page->{type} eq 'folder') {
          $page->{url} = '#'; push @nav, $page;
-         push @nav, @{ __build_nav( $node->{tree}, $parts, $path_url ) };
+         push @nav, @{ __build_nav( $node->{tree}, $parts,
+                                    $path_url, $level + 1 ) };
       }
       else { $page->{url} = $node->{url}; push @nav, $page }
    }
@@ -105,7 +113,7 @@ sub __find_branch {
    my ($tree, $path) = @_;
 
    for my $node (@{ $path }) {
-      $node or $node = 'index'; exists  $tree->{ $node } or return FALSE;
+      $node or $node = 'index'; exists $tree->{ $node } or return FALSE;
 
       $tree = $tree->{ $node }->{type} eq 'folder'
             ? $tree->{ $node }->{tree} : $tree->{ $node };
@@ -157,9 +165,10 @@ sub __load_page {
    ($branch and exists $branch->{type} and $branch->{type} eq 'file')
       or return { content => "Oh no. That page doesn't exist" };
 
-   my $page = { content => io( $branch->{path} )->all };
+   my $page = { content => io( $branch->{path} )->utf8->all };
 
    $branch->{name} ne 'index' and $page->{header} = $branch->{title};
+   $page->{format} = 'markdown';
    return $page;
 }
 
@@ -202,7 +211,7 @@ Daux::Model::Documentation - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 3 $ of L<Daux::Model::Documentation>
+This documents version v0.1.$Rev: 4 $ of L<Daux::Model::Documentation>
 
 =head1 Description
 

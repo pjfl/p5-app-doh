@@ -9,7 +9,7 @@ Daux - One-line description of the modules purpose
 
 # Version
 
-This documents version v0.1.$Rev: 2 $ of [Daux](https://metacpan.org/module/Daux)
+This documents version v0.1.$Rev: 4 $ of [Daux](https://metacpan.org/module/Daux)
 
 # Description
 

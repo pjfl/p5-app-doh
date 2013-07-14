@@ -2,7 +2,7 @@
 <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
 <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
 <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en">  <!--<![endif]-->
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -19,26 +19,26 @@
 [% END -%]
    <!-- Font -->
    <link href="[% config.font %]" rel="stylesheet" type="text/css">
-   <!-- LESS -->
+   <!-- Less -->
 [% IF colours.0 -%]
    <style type="text/less">
    [% FOREACH colour = colours -%]
       @[% colour.key %]: [% colour.value %];
    [% END -%]
-      @import "[% config.less %]import/daux-base.less";
+      @import "[% config.less %]import/theme-base.less";
    </style>
    <script src="[% config.js %]less.min.js"></script>
 [% ELSE -%]
-   <link rel="stylesheet" href="[% config.css %]daux-[% config.theme %].css">
+   <link rel="stylesheet" href="[% config.css %]theme-[% config.theme %].css">
 [% END -%]
-   <!-- hightlight.js -->
+   <!-- Code Highlighter -->
    <script src="[% config.js %]highlight.min.js"></script>
    <script>hljs.initHighlightingOnLoad();</script>
    <!-- Navigation -->
-   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+   <script src="[% config.js %]jquery.min.js"></script>
    <script src="[% config.js %]custom.js"></script>
    <!--[if lt IE 9]>
-   <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+   <script src="[% config.js %]html5shiv.js"></script>
    <![endif]-->
    <title>[% config.title %]</title>
 </head>
@@ -67,9 +67,9 @@
          </div>
          <div class="row">
             <div class="span10 offset1">
-   [% IF config.logo -%]
+   [% IF config.brand -%]
                <img class="homepage-image" alt="[% config.title %]"
-                    src="[% config.images %][% config.logo %]">
+                    src="[% config.images %][% config.brand %]">
    [% END -%]
             </div>
          </div>
@@ -132,7 +132,7 @@
    <!-- Docs -->
    [% IF config.repo_url -%]
    <a href="[% config.repo_url %]" target="_blank" id="github-ribbon">
-      <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+      <img src="[% config.images %]fork-me.png" alt="Fork me on GitHub"></a>
    [% END -%]
    <div class="container-fluid fluid-height wrapper">
       <div class="navbar navbar-fixed-top">
@@ -157,15 +157,25 @@
             </div>
             <div id="sub-nav-collapse" class="collapse in">
                <!-- Navigation -->
+   [% level = 0 -%]
                <ul class="nav nav-list">
    [% FOREACH node = nav -%]
+      [% IF node.level < level; level = level - 1 -%]
+                     </ul>
+                  </li>
+      [% END -%]
                   <li class="[% node.class %]">
-      [% IF node.type == 'folder' -%]
+      [% IF node.type == 'folder'; level = level + 1 -%]
                      <a href="[% node.url %]" class="aj-nav folder">
                         [% node.name %]</a>
+                     <ul class="nav nav-list">
       [% ELSE -%]
                      <a href="[% node.url %]">[% node.name %]</a>
+                  </li>
       [% END -%]
+   [% END -%]
+   [% WHILE level > 0; level = level - 1 -%]
+                     </ul>
                   </li>
    [% END -%]
                </ul>

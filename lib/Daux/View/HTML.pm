@@ -1,12 +1,13 @@
-# @(#)Ident: HTML.pm 2013-07-14 05:44 pjf ;
+# @(#)Ident: HTML.pm 2013-07-14 18:36 pjf ;
 
 package Daux::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
+use Encode;
 use File::DataClass::Types  qw( Directory Object );
 use Moo;
 use Scalar::Util            qw( weaken );
@@ -45,12 +46,15 @@ sub render {
       $self->log->error( $msg ); return [ 500, $msg ];
    }
 
-   $stash->{page}->{content} = $self->tm->markdown( $stash->{page}->{content} );
+   my $page = $stash->{page};
+
+   $page->{format} eq 'markdown'
+      and $page->{content} = $self->tm->markdown( $page->{content} );
 
    $self->template->process( $template->pathname, $stash, \$text )
       or return [ 500, $self->template->error ];
 
-   return [ 200, $text ];
+   return [ 200, encode( 'UTF-8', $text ) ];
 }
 
 # Private methods
@@ -81,7 +85,7 @@ Daux::View::HTML - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 3 $ of L<Daux::View::HTML>
+This documents version v0.1.$Rev: 4 $ of L<Daux::View::HTML>
 
 =head1 Description
 

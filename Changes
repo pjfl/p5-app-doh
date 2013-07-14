@@ -1,6 +1,7 @@
 Revision history for Daux
 
-0.1.3     2013-07-14 17:32:05
+0.1.4     2013-07-14 22:11:20
+          - Navigation slider works
           - Removing original name
           - Serves static files
           - Serves pages via plack

@@ -1,11 +1,11 @@
-# @(#)Ident: Daux.pm 2013-07-14 15:44 pjf ;
+# @(#)Ident: Daux.pm 2013-07-14 21:11 pjf ;
 
 package Daux;
 
 use 5.01;
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
@@ -100,7 +100,7 @@ Daux - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 3 $ of L<Daux>
+This documents version v0.1.$Rev: 4 $ of L<Daux>
 
 =head1 Description
 

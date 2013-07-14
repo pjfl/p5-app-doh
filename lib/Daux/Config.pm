@@ -1,10 +1,10 @@
-# @(#)Ident: Config.pm 2013-07-14 16:14 pjf ;
+# @(#)Ident: Config.pm 2013-07-14 16:42 pjf ;
 
 package Daux::Config;
 
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( throw );
@@ -13,6 +13,8 @@ use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
 use Moo;
 
 extends q(Class::Usul::Config);
+
+has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'colours'          => is => 'ro',   isa => HashRef,
    default             => sub { {} };
@@ -47,8 +49,6 @@ has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
 has 'links'            => is => 'ro',   isa => HashRef,
    default             => sub { {} };
 
-has 'logo'             => is => 'ro',   isa => SimpleStr, default => NUL;
-
 has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'tagline'          => is => 'ro',   isa => SimpleStr, default => NUL;
@@ -80,7 +80,7 @@ Daux::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 3 $ of L<Daux::Config>
+This documents version v0.1.$Rev: 4 $ of L<Daux::Config>
 
 =head1 Description
 
