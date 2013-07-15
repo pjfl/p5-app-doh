@@ -1,8 +1,8 @@
-# @(#)Ident: 10test_script.t 2013-07-14 23:21 pjf ;
+# @(#)Ident: 10test_script.t 2013-07-14 23:41 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, q(lib) );
@@ -19,24 +19,18 @@ BEGIN {
    $reason  and $reason =~ m{ \A TESTS: }mx and plan skip_all => $reason;
 }
 
-use Data::Dumper; $Data::Dumper::Terse    = 1; $Data::Dumper::Indent = 1;
-                  $Data::Dumper::Sortkeys = sub { [ sort keys %{ $_[ 0 ] } ] };
-
 use_ok 'Doh';
 
 my $self  = Doh->new;
 my $model = $self->model;
 my $tree  = $model->docs_tree;
-
-ok exists $tree->{Getting_Started}, 'Creates docs tree';
-
 my $stash = $model->get_stash( 'Getting_Started' );
-
-warn Dumper( $stash );
-
 my $res   = $self->html_view->render( $stash );
 
-warn Dumper( $res->[ 1 ] );
+ok exists $tree->{Getting_Started}, 'Creates docs tree';
+is $model->docs_url, '/Getting_Started', 'Docs url';
+
+#$self->usul->dumper( $stash );
 
 done_testing;
 

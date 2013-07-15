@@ -1,9 +1,9 @@
-# @(#)Ident: Documentation.pm 2013-07-14 23:21 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-15 19:48 pjf ;
 
 package Doh::Model::Documentation;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_hashref trim );
@@ -13,8 +13,7 @@ use File::Spec::Functions   qw( curdir );
 use Moo;
 
 # Public attributes
-has 'docs_tree' => is => 'lazy', isa => HashRef,
-   default      => sub { __get_tree( $_[ 0 ]->config->docs_path ) };
+has 'docs_tree' => is => 'lazy', isa => HashRef;
 
 has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
 
@@ -27,7 +26,6 @@ sub get_stash {
    my ($self, @args) = @_;
 
    my $conf  = $self->config;
-   my $url   = $self->docs_url;
    my $tree  = $self->docs_tree;
    my $env   = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    my @parts = split m{ [/] }mx, trim $args[ 0 ] || 'index', '/';
@@ -35,9 +33,9 @@ sub get_stash {
    return {
       colours      => __to_array_of_hash( $conf->colours, qw( key value ) ),
       config       => $conf,
-      docs_url     => $url,
+      docs_url     => $self->docs_url,
       homepage     => $args[ 0 ] ? FALSE : TRUE,
-      homepage_url => exists $tree->{index} ? '/' : $url,
+      homepage_url => exists $tree->{index} ? '/' : $self->docs_url,
       http_host    => $env->{HTTP_HOST},
       links        => __to_array_of_hash( $conf->links, qw( name url ) ),
       nav          => __build_nav( $tree, [ @parts ] ),
@@ -46,6 +44,36 @@ sub get_stash {
 }
 
 # Private methods
+sub _build_docs_tree {
+   my ($self, $path, $clean_path, $title) = @_; my $tree = {};
+
+   $path //= $self->config->docs_path; $clean_path //= NUL; $title //= NUL;
+
+   my $filter = sub { not m{ (?: doh.json | cgi-bin ) }mx }; my $index = 0;
+
+   for my $file (io( $path )->filter( $filter )->all) {
+      my $clean_sort =  __clean_sort( $file->filename );
+      my $url        =  "${clean_path}/${clean_sort}";
+      my $clean_name =  __clean_name( $clean_sort );
+      my $full_path  =  $file->pathname;
+      my $full_title =  $title ? "${title}: ${clean_name}" : $clean_name;
+      my $node       =  $tree->{ $clean_sort } = {
+         clean       => $clean_sort,
+         name        => $clean_name,
+         path        => $full_path,
+         title       => $full_title,
+         type        => 'file',
+         url         => $url,
+         _order      => $index++, };
+
+      $file->is_dir or next;
+      $node->{tree} = $self->_build_docs_tree( $full_path, $url, $full_title );
+      $node->{type} = 'folder';
+   }
+
+   return $tree;
+}
+
 sub _build_docs_url {
    my ($self, $tree, $branch) = @_;
 
@@ -122,43 +150,6 @@ sub __find_branch {
    return $tree;
 }
 
-sub __get_tree {
-   my ($path, $clean_path, $title) = @_;
-
-   $path //= curdir; $clean_path //= NUL; $title //= NUL;
-
-   my $dir   = io( $path )->filter
-      ( sub { not m{ (?: config.json | cgi-bin ) }mx } );
-
-   my $index = 0; my $tree = {};
-
-   for my $file ($dir->all) {
-      my $clean_sort = __clean_sort( $file->filename );
-      my $url        = "${clean_path}/${clean_sort}";
-      my $clean_name = __clean_name( $clean_sort );
-      my $full_path  = $file->pathname;
-      my $full_title;
-
-      if ($title) { $full_title = "${title}: ${clean_name}" }
-      else { $full_title = $clean_name }
-
-      my $node = $tree->{ $clean_sort } = { clean  => $clean_sort,
-                                            name   => $clean_name,
-                                            path   => $full_path,
-                                            title  => $full_title,
-                                            type   => 'file',
-                                            url    => $url,
-                                            _order => $index++, };
-
-      if ($file->is_dir) {
-         $node->{tree} = __get_tree( $full_path, $url, $full_title );
-         $node->{type} = 'folder';
-      }
-   }
-
-   return $tree;
-}
-
 sub __load_page {
    my ($tree, $path) = @_; my $branch = __find_branch( $tree, $path );
 
@@ -211,7 +202,7 @@ Doh::Model::Documentation - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 4 $ of L<Doh::Model::Documentation>
+This documents version v0.1.$Rev: 5 $ of L<Doh::Model::Documentation>
 
 =head1 Description
 

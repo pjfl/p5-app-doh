@@ -1,27 +1,33 @@
-# @(#)$Ident: Build.PL 2013-07-14 23:19 pjf ;
+# @(#)$Ident: Build.PL 2013-07-15 19:14 pjf ;
 
 use strict;
 use warnings;
 use inc::Bob; # Module::Build subclass
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 3 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
 
 Bob->new( {
    module    => 'Doh',
    home_page => 'http://www.roxsoft.co.uk',
    requires  => {
-      'perl'            => 5.01,
-      'Class::Usul'     => q(0.19.0),
-      'File::DataClass' => q(0.21.0),
-      'Moo'             => 1.002,
-      'Text::Markdown'  => 1.000031, },
-   recommends           => {
-      'App::cpanminus'  => 1.6005, },
-   configure_requires   => {
-      'version'         => 0.88,
-      'Module::Build'   => 0.4004, },
-   build_requires       => {
-      'version'         => 0.88,
-      'Module::Build'   => 0.4004, },
+      'perl'             => 5.01,
+      'namespace::sweep' => 0.006,
+      'Class::Usul'      => q(0.19.0),
+      'File::DataClass'  => q(0.21.0),
+      'Moo'              => 1.002,
+      'Plack'            => 1.0018,
+      'Plack::Middleware::Deflater'  => 0.08,
+      'Plack::Middleware::LogErrors' => 0.001,
+      'Template'         => 2.22,
+      'Text::Markdown'   => 1.000031,
+      'Web::Simple'      => 0.020, },
+   recommends            => {
+      'App::cpanminus'   => 1.6005, },
+   configure_requires    => {
+      'version'          => 0.88,
+      'Module::Build'    => 0.4004, },
+   build_requires        => {
+      'version'          => 0.88,
+      'Module::Build'    => 0.4004, },
 } )->create_build_script; # Goal!
 
 # Local Variables:

@@ -22,5 +22,6 @@ README
 README.pod
 t/ipc_srlock*
 *.tar.gz
+var/logs
+var/tmp
 Doh-*
-lib/Doh/doh.json

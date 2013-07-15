@@ -1,13 +1,11 @@
-# @(#)Ident: Config.pm 2013-07-14 23:21 pjf ;
+# @(#)Ident: Config.pm 2013-07-15 20:40 pjf ;
 
 package Doh::Config;
 
-
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( throw );
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
                                 NonNumericSimpleStr SimpleStr );
 use Moo;
@@ -80,7 +78,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 4 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 5 $ of L<Doh::Config>
 
 =head1 Description
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env perl
-# @(#)Ident: doh-server 2013-07-14 23:22 pjf ;
+# @(#)Ident: doh-server 2013-07-14 23:37 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 2 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
@@ -22,29 +22,21 @@ __END__
 
 =head1 NAME
 
-daux-server - One-line description of the programs purpose
+doh-server - One-line description of the programs purpose
 
 =head1 SYNOPSIS
 
 =over 3
 
-=item B<daux-server> B<> I<>
+=item B<doh-server> B</index>
 
-I<Command line description>
-
-=item B<daux-server> B<-H> | B<-h> I<[method]> | B<-?>
-
-Display man page / method help  / usage strings
-
-=item B<daux-server> B<list_methods>
-
-Lists the methods available in this program
+Command line access to the web application
 
 =back
 
 =head1 VERSION
 
-This documents version v0.1.$Rev: 2 $ of C<daux-server>
+This documents version v0.1.$Rev: 5 $ of C<doh-server>
 
 =head1 DESCRIPTION
 

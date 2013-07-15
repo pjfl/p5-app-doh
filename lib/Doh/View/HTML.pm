@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-07-14 23:22 pjf ;
+# @(#)Ident: HTML.pm 2013-07-15 17:56 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 4 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
@@ -85,7 +85,7 @@ Doh::View::HTML - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 4 $ of L<Doh::View::HTML>
+This documents version v0.1.$Rev: 5 $ of L<Doh::View::HTML>
 
 =head1 Description
 

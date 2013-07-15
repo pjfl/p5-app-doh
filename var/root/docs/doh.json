@@ -1,0 +1,14 @@
+{
+   "brand": "app.png",
+   "google_analytics": "UA-12653604-10",
+   "links": {
+      "Download": "https://github.com/pjfl/Doh/archive/master.zip",
+      "Github Repo": "https://github.com/pjfl/Doh.git",
+      "Help/Support/Bugs": "https://github.com/pjfl/Doh/issues",
+      "Made by Web::Simple": "http://www.shadowcat.co.uk"
+   },
+   "repo_url": "https://github.com/pjfl/Doh.git",
+   "tagline": "The Easiest Way To Document Your Project",
+   "title": "Doh!",
+   "twitter": [ "peter_flanigan", "web-simple" ]
+}

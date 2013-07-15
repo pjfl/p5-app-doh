@@ -12,10 +12,10 @@
    <meta name="apple-mobile-web-app-capable" content="yes">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 [% IF colours.0 -%]
-   <link rel="icon" href="[% config.images %]favicon.png" type="image/x-icon">
+   <link rel="icon" href="[% config.images %]favicon.png" type="image/png">
 [% ELSE -%]
    <link rel="icon" href="[% config.images %]favicon-[% config.theme %].png"
-      type="image/x-icon">
+      type="image/png">
 [% END -%]
    <!-- Font -->
    <link href="[% config.font %]" rel="stylesheet" type="text/css">
