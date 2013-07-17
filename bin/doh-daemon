@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# @(#)Ident: doh-server 2013-07-17 18:00 pjf ;
+# @(#)Ident: doh-daemon 2013-07-17 17:59 pjf ;
 
 use strict;
 use warnings;
@@ -8,9 +8,9 @@ use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
 
-use Doh::Server;
+use Doh::Daemon;
 
-Doh::Server->new( appclass => 'Doh' )->run_if_script;
+exit Doh::Daemon->new_with_options( appclass => 'Doh', nodebug => 1 )->run;
 
 __END__
 
@@ -20,21 +20,29 @@ __END__
 
 =head1 NAME
 
-doh-server - One-line description of the programs purpose
+doh-daemon - One-line description of the programs purpose
 
 =head1 SYNOPSIS
 
 =over 3
 
-=item B<doh-server> B</index>
+=item B<doh-daemon> B<> I<>
 
-Command line access to the web application
+I<Command line description>
+
+=item B<doh-daemon> B<-H> | B<-h> I<[method]> | B<-?>
+
+Display man page / method help  / usage strings
+
+=item B<doh-daemon> B<list_methods>
+
+Lists the methods available in this program
 
 =back
 
 =head1 VERSION
 
-This documents version v0.1.$Rev: 6 $ of C<doh-server>
+This documents version v0.1.$Rev: 6 $ of C<doh-daemon>
 
 =head1 DESCRIPTION
 

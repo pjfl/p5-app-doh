@@ -1,11 +1,13 @@
-# @(#)Ident: Doh.pm 2013-07-17 17:42 pjf ;
+# @(#)Ident: Help.pm 2013-07-17 01:07 pjf ;
 
-package Doh;
+package Doh::Model::Help;
 
-use 5.01;
-use strict;
-use warnings;
+use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 6 $ =~ /\d+/gmx );
+
+use Class::Usul::Constants;
+use Class::Usul::Functions  qw( throw );
+use Moo;
 
 1;
 
@@ -17,16 +19,16 @@ __END__
 
 =head1 Name
 
-Doh - One-line description of the modules purpose
+Doh::Model::Help - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Doh;
+   use Doh::Model::Help;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 6 $ of L<Doh>
+This documents version v0.1.$Rev: 6 $ of L<Doh::Model::Help>
 
 =head1 Description
 

@@ -23,5 +23,6 @@ README.pod
 t/ipc_srlock*
 *.tar.gz
 var/logs
+var/run
 var/tmp
 Doh-*

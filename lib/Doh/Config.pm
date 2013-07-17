@@ -1,16 +1,17 @@
-# @(#)Ident: Config.pm 2013-07-15 20:40 pjf ;
+# @(#)Ident: Config.pm 2013-07-17 18:34 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 6 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
-                                NonNumericSimpleStr SimpleStr );
+                                NonNumericSimpleStr NonZeroPositiveInt
+                                SimpleStr );
 use Moo;
 
-extends q(Class::Usul::Config);
+extends q(Class::Usul::Config::Programs);
 
 has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -47,7 +48,15 @@ has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
 has 'links'            => is => 'ro',   isa => HashRef,
    default             => sub { {} };
 
+has 'port'             => is => 'lazy', isa => NonZeroPositiveInt;
+
+has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
+
 has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'server'           => is => 'ro',   isa => NonEmptySimpleStr,
+   documentation       => 'Plack server class used for the event listener',
+   default             => 'Twiggy';
 
 has 'tagline'          => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -57,7 +66,11 @@ has 'theme'            => is => 'ro',   isa => NonEmptySimpleStr,
 has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Documentation';
 
-has 'twitter'          => is => 'ro',   isa => ArrayRef, default => sub { [] };
+has 'twitter'          => is => 'ro',   isa => ArrayRef,  default => sub { [] };
+
+sub _build_port {
+   my $self = shift; return 8085;
+}
 
 1;
 
@@ -78,7 +91,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 5 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 6 $ of L<Doh::Config>
 
 =head1 Description
 

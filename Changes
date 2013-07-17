@@ -1,6 +1,7 @@
 Revision history for Daux
 
-0.1.5     2013-07-15 21:50:07
+0.1.6     2013-07-17 19:43:50
+          - Added Daemon
           - Favicon, cfg files and Plack sorted
           - Rename to Doh complete
           - Navigation slider works
