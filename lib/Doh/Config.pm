@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-07-17 18:34 pjf ;
+# @(#)Ident: Config.pm 2013-07-17 18:50 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 6 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
@@ -48,14 +48,14 @@ has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
 has 'links'            => is => 'ro',   isa => HashRef,
    default             => sub { {} };
 
-has 'port'             => is => 'lazy', isa => NonZeroPositiveInt;
+has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
+   default             => 8085;
 
 has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
 
 has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'server'           => is => 'ro',   isa => NonEmptySimpleStr,
-   documentation       => 'Plack server class used for the event listener',
    default             => 'Twiggy';
 
 has 'tagline'          => is => 'ro',   isa => SimpleStr, default => NUL;
@@ -67,10 +67,6 @@ has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Documentation';
 
 has 'twitter'          => is => 'ro',   isa => ArrayRef,  default => sub { [] };
-
-sub _build_port {
-   my $self = shift; return 8085;
-}
 
 1;
 
@@ -91,7 +87,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 6 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 7 $ of L<Doh::Config>
 
 =head1 Description
 

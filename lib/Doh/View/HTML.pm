@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-07-15 17:56 pjf ;
+# @(#)Ident: HTML.pm 2013-07-17 20:55 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
@@ -48,7 +48,7 @@ sub render {
 
    my $page = $stash->{page};
 
-   $page->{format} eq 'markdown'
+   defined $page->{format} and $page->{format} eq 'markdown'
       and $page->{content} = $self->tm->markdown( $page->{content} );
 
    $self->template->process( $template->pathname, $stash, \$text )
@@ -85,7 +85,7 @@ Doh::View::HTML - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 5 $ of L<Doh::View::HTML>
+This documents version v0.1.$Rev: 7 $ of L<Doh::View::HTML>
 
 =head1 Description
 

@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-07-17 18:39 pjf ;
+# @(#)Ident: Daemon.pm 2013-07-17 20:48 pjf ;
 
 package Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 6 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( NonZeroPositiveInt );
@@ -18,28 +18,28 @@ with    q(Class::Usul::TraitFor::UntaintedGetopts);
 
 has '+config_class' => default => 'Doh::Config';
 
-option 'port'    => is => 'ro',   isa => NonZeroPositiveInt,
-   documentation => 'Port number for the documentation server',
-   default       => sub { $_[ 0 ]->config->port }, format => 'i', short => 'p';
+option 'port'    => is => 'ro', isa => NonZeroPositiveInt,
+   documentation => 'Port number for the input event listener',
+   default       => sub { $_[ 0 ]->config->port }, format => 'i';
 
 around 'run_chain' => sub {
    my ($orig, $self, @args) = @_; @ARGV = @{ $self->extra_argv };
 
-   my $config = $self->config; my $name = $config->name;
+   my $config  = $self->config; my $name = $config->name;
 
    Daemon::Control->new( {
       name         => blessed $self || $self,
       lsb_start    => '$syslog $remote_fs',
       lsb_stop     => '$syslog',
       lsb_sdesc    => 'Documentation Server',
-      lsb_desc     => 'Manages the Documentation Server daemon',
+      lsb_desc     => 'Manages the Documentation Server daemons',
       path         => $config->pathname,
 
       directory    => $config->appldir,
       program      => sub { shift; $self->daemon( @_ ) },
       program_args => [],
 
-      pid_file     => $config->rundir->catfile( "${name}.pid" ),
+      pid_file     => $config->rundir->catfile( "${name}_".$self->port.'.pid' ),
       stderr_file  => $self->_stdio_file( 'err' ),
       stdout_file  => $self->_stdio_file( 'out' ),
 
@@ -50,19 +50,17 @@ around 'run_chain' => sub {
 };
 
 sub daemon {
-   my $self = shift; $ENV{DOH_SERVER_PORT} = $self->port;
-
-   Plack::Runner->run( $self->_get_listener_args );
-   exit OK;
+   Plack::Runner->run( $_[ 0 ]->_get_listener_args ); exit OK;
 }
 
 sub _get_listener_args {
    my $self   = shift;
    my $config = $self->config;
+   my $port   = $ENV{DOH_SERVER_PORT} = $self->port;
    my $args   = {
-      '--port'       => $self->port,
+      '--port'       => $port,
       '--server'     => $config->server,
-      '--access-log' => $config->logsdir->catfile( 'access.log' ),
+      '--access-log' => $config->logsdir->catfile( "access_${port}.log" ),
       '--app'        => $config->binsdir->catfile( 'doh-server' ), };
 
    return %{ $args };
@@ -93,7 +91,7 @@ Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 6 $ of L<Doh::Daemon>
+This documents version v0.1.$Rev: 7 $ of L<Doh::Daemon>
 
 =head1 Description
 

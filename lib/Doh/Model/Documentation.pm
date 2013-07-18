@@ -1,9 +1,9 @@
-# @(#)Ident: Documentation.pm 2013-07-15 19:48 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-17 21:12 pjf ;
 
 package Doh::Model::Documentation;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_hashref trim );
@@ -41,6 +41,10 @@ sub get_stash {
       nav          => __build_nav( $tree, [ @parts ] ),
       page         => __load_page( $tree, [ @parts ] ),
    };
+}
+
+sub initialize {
+   $_[ 0 ]->docs_url; return;
 }
 
 # Private methods
@@ -202,7 +206,7 @@ Doh::Model::Documentation - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 5 $ of L<Doh::Model::Documentation>
+This documents version v0.1.$Rev: 7 $ of L<Doh::Model::Documentation>
 
 =head1 Description
 

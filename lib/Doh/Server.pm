@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-07-17 18:38 pjf ;
+# @(#)Ident: Server.pm 2013-07-17 21:07 pjf ;
 
 package Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
@@ -46,6 +46,10 @@ around 'to_psgi_app' => sub {
       $app;
    };
 };
+
+sub BUILD {
+   $_[ 0 ]->model->initialize; return;
+}
 
 # Public methods
 sub dispatch_request {
@@ -113,7 +117,7 @@ Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 1 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 7 $ of L<Doh::Server>
 
 =head1 Description
 

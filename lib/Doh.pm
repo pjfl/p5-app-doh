@@ -1,11 +1,9 @@
-# @(#)Ident: Doh.pm 2013-07-17 17:42 pjf ;
+# @(#)Ident: Doh.pm 2013-07-17 21:30 pjf ;
 
 package Doh;
 
 use 5.01;
-use strict;
-use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 6 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
 
 1;
 
@@ -26,7 +24,7 @@ Doh - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 6 $ of L<Doh>
+This documents version v0.1.$Rev: 7 $ of L<Doh>
 
 =head1 Description
 

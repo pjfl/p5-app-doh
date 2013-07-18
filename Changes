@@ -1,6 +1,7 @@
 Revision history for Daux
 
-0.1.6     2013-07-17 19:43:50
+0.1.7     2013-07-18 01:52:10
+          - Daemon can start multiple instances
           - Added Daemon
           - Favicon, cfg files and Plack sorted
           - Rename to Doh complete

@@ -25,4 +25,5 @@ t/ipc_srlock*
 var/logs
 var/run
 var/tmp
+var/root/docs/Projects
 Doh-*
