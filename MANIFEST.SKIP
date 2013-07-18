@@ -58,6 +58,9 @@
 TAGS
 Thumbs.db
 \bipc_srlock
+\bvar/run
+\bvar/tmp
+\bvar/logs
 
 # Avoid archives of this distribution
 \bDoh-v?[\d\.\_]+

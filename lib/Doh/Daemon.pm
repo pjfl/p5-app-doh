@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-07-17 20:48 pjf ;
+# @(#)Ident: Daemon.pm 2013-07-18 11:10 pjf ;
 
 package Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( NonZeroPositiveInt );
@@ -25,7 +25,7 @@ option 'port'    => is => 'ro', isa => NonZeroPositiveInt,
 around 'run_chain' => sub {
    my ($orig, $self, @args) = @_; @ARGV = @{ $self->extra_argv };
 
-   my $config  = $self->config; my $name = $config->name;
+   my $config = $self->config; my $name = $config->name;
 
    Daemon::Control->new( {
       name         => blessed $self || $self,
@@ -91,7 +91,7 @@ Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 7 $ of L<Doh::Daemon>
+This documents version v0.1.$Rev: 8 $ of L<Doh::Daemon>
 
 =head1 Description
 

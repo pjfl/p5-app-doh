@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-07-17 18:50 pjf ;
+# @(#)Ident: Config.pm 2013-07-18 20:27 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
@@ -12,6 +12,9 @@ use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
 use Moo;
 
 extends q(Class::Usul::Config::Programs);
+
+has 'author'           => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => 'Dave';
 
 has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -87,7 +90,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 7 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 8 $ of L<Doh::Config>
 
 =head1 Description
 

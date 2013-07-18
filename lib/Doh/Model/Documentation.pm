@@ -1,9 +1,9 @@
-# @(#)Ident: Documentation.pm 2013-07-17 21:12 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-18 18:48 pjf ;
 
 package Doh::Model::Documentation;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_hashref trim );
@@ -12,14 +12,12 @@ use File::DataClass::Types  qw( HashRef NonEmptySimpleStr Object );
 use File::Spec::Functions   qw( curdir );
 use Moo;
 
+extends q(Doh);
+
 # Public attributes
 has 'docs_tree' => is => 'lazy', isa => HashRef;
 
 has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
-
-# Private attributes
-has '_usul'     => is => 'ro',   isa => Object, handles => [ qw( config log ) ],
-   init_arg     => 'builder', required => TRUE, weak_ref => TRUE;
 
 # Public methods
 sub get_stash {
@@ -206,7 +204,7 @@ Doh::Model::Documentation - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 7 $ of L<Doh::Model::Documentation>
+This documents version v0.1.$Rev: 8 $ of L<Doh::Model::Documentation>
 
 =head1 Description
 

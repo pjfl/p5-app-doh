@@ -1,15 +1,16 @@
-# @(#)Ident: Server.pm 2013-07-17 21:07 pjf ;
+# @(#)Ident: Server.pm 2013-07-18 18:58 pjf ;
 
 package Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_apphome get_cfgfiles );
 use Class::Usul::Types      qw( Maybe Object SimpleStr );
 use Doh::Model::Documentation;
+use Doh::Model::Help;
 use Doh::View::HTML;
 use File::Spec::Functions   qw( catfile updir );
 use Plack::Builder;
@@ -17,13 +18,15 @@ use Scalar::Util            qw( blessed );
 use Web::Simple;
 
 # Public attributes
-has 'appclass'  => is => 'ro',   isa => Maybe[SimpleStr];
+has 'appclass'   => is => 'ro',   isa => Maybe[SimpleStr];
 
-has 'html_view' => is => 'lazy', isa => Object, init_arg => undef;
+has 'help_model' => is => 'lazy', isa => Object, init_arg => undef;
 
-has 'model'     => is => 'lazy', isa => Object, init_arg => undef;
+has 'doc_model'  => is => 'lazy', isa => Object, init_arg => undef;
 
-has 'usul'      => is => 'lazy', isa => Object, init_arg => undef;
+has 'html_view'  => is => 'lazy', isa => Object, init_arg => undef;
+
+has 'usul'       => is => 'lazy', isa => Object, init_arg => undef;
 
 # Construction
 around 'to_psgi_app' => sub {
@@ -48,28 +51,40 @@ around 'to_psgi_app' => sub {
 };
 
 sub BUILD {
-   $_[ 0 ]->model->initialize; return;
+   $_[ 0 ]->doc_model->initialize; return;
 }
 
 # Public methods
 sub dispatch_request {
+   sub (GET + /help) {
+      my ($self, @args) = @_;
+
+      return $self->_as_html( $self->help_model->get_stash( @args ) );
+   },
    sub (GET + / | /**) {
       my ($self, @args) = @_;
 
-      my $stash = $self->model->get_stash( @args );
-      my $res   = $self->html_view->render( $stash );
-
-      return [ $res->[ 0 ], [ 'Content-Type', 'text/html' ], [ $res->[ 1 ] ] ];
+      return $self->_as_html( $self->doc_model->get_stash( @args ) );
    };
 }
 
 # Private methods
-sub _build_html_view {
-   return Doh::View::HTML->new( builder => $_[ 0 ]->usul );
+sub _as_html {
+   my ($self, $stash) = @_; my $res = $self->html_view->render( $stash );
+
+   return [ $res->[ 0 ], [ 'Content-Type', 'text/html' ], [ $res->[ 1 ] ] ];
 }
 
-sub _build_model {
+sub _build_doc_model {
    return Doh::Model::Documentation->new( builder => $_[ 0 ]->usul );
+}
+
+sub _build_help_model {
+   return Doh::Model::Help->new( builder => $_[ 0 ]->usul );
+}
+
+sub _build_html_view {
+   return Doh::View::HTML->new( builder => $_[ 0 ]->usul );
 }
 
 sub _build_usul {
@@ -78,7 +93,7 @@ sub _build_usul {
    my $home   = $myconf->{home};
    my $extns  = $myconf->{extensions  } || [ '.json' ];
    my $class  = $myconf->{config_class} || 'Doh::Config';
-   my $attr   = { config => {}, config_class => $class };
+   my $attr   = { config => { name => 'doh' }, config_class => $class, };
    my $conf   = $attr->{config};
 
    $conf->{appclass} = $self->appclass || blessed $self || $self;
@@ -117,7 +132,7 @@ Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 7 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 8 $ of L<Doh::Server>
 
 =head1 Description
 

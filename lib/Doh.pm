@@ -1,9 +1,34 @@
-# @(#)Ident: Doh.pm 2013-07-17 21:30 pjf ;
+# @(#)Ident: Doh.pm 2013-07-18 18:55 pjf ;
 
 package Doh;
 
 use 5.01;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
+use namespace::sweep;
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+
+use Class::Usul::Constants;
+use Class::Usul::Functions  qw( is_arrayref is_hashref );
+use Class::Usul::Types      qw( NonEmptySimpleStr Object );
+use Moo;
+
+has 'language'  => is => 'ro', isa => NonEmptySimpleStr, default => LANG;
+
+# Private attributes
+has '_usul'     => is => 'ro', isa => Object,
+   handles      => [ qw( config localize log ) ],
+   init_arg     => 'builder', required => TRUE, weak_ref => TRUE;
+
+sub loc {
+   my ($self, $key, @args) = @_; my $car = $args[ 0 ];
+
+   my $args = (is_hashref $car) ? { %{ $car } }
+            : { params => (is_arrayref $car) ? $car : [ @args ] };
+
+   $args->{domain_names} ||= [ DEFAULT_L10N_DOMAIN, $self->config->name ];
+   $args->{locale      } ||= $self->language;
+
+   return $self->localize( $key, $args );
+}
 
 1;
 
@@ -24,7 +49,7 @@ Doh - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 7 $ of L<Doh>
+This documents version v0.1.$Rev: 8 $ of L<Doh>
 
 =head1 Description
 
@@ -33,6 +58,8 @@ This documents version v0.1.$Rev: 7 $ of L<Doh>
 Defines the following attributes;
 
 =over 3
+
+=item C<language>
 
 =back
 

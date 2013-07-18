@@ -3,8 +3,9 @@
    "links": {
       "Download": "https://github.com/pjfl/Doh/archive/master.zip",
       "Github Repo": "https://github.com/pjfl/Doh.git",
-      "Help/Support/Bugs": "https://github.com/pjfl/Doh/issues",
-      "Made by Web::Simple": "http://www.shadowcat.co.uk"
+      "Help": "/help",
+      "Issues/Wishlist": "http://rt.cpan.org/NoAuth/Bugs.html?Dist=Doh",
+      "Made by Roxsoft": "http://www.roxsoft.co.uk"
    },
    "repo_url": "https://github.com/pjfl/Doh.git",
    "tagline": "The Easiest Way To Document Your Project",

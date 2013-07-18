@@ -1,13 +1,43 @@
-# @(#)Ident: Help.pm 2013-07-17 01:07 pjf ;
+# @(#)Ident: Help.pm 2013-07-18 18:49 pjf ;
 
 package Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 6 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( throw );
+use Class::Usul::Functions  qw( is_hashref trim );
+use File::DataClass::Types  qw( Object );
 use Moo;
+
+extends q(Doh);
+
+sub get_stash {
+   my ($self, @args) = @_;
+
+   my $conf  = $self->config;
+   my $env   = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
+   my @parts = split m{ [/] }mx, trim $args[ 0 ] || 'index', '/';
+
+   return {
+      colours      => __to_array_of_hash( $conf->colours, qw( key value ) ),
+      config       => $conf,
+      homepage     => FALSE,
+      links        => __to_array_of_hash( $conf->links, qw( name url ) ),
+      nav          => [],
+      page         => { content => { src   => $self->config->appldir->catfile( qw( lib Doh.pm ) )->pathname,
+                                     title => 'Help',
+                                     url   => 'https://metacpan.org/module/', },
+                        format  => 'pod', },
+   };
+}
+
+sub __to_array_of_hash {
+   my ($href, $key_key, $val_key) = @_;
+
+   return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
+            sort keys %{ $href } ],
+}
 
 1;
 
@@ -28,7 +58,7 @@ Doh::Model::Help - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 6 $ of L<Doh::Model::Help>
+This documents version v0.1.$Rev: 8 $ of L<Doh::Model::Help>
 
 =head1 Description
 

@@ -1,12 +1,13 @@
-# @(#)Ident: HTML.pm 2013-07-17 20:55 pjf ;
+# @(#)Ident: HTML.pm 2013-07-18 18:56 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 7 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
+use Doh::View::HTML::POD;
 use Encode;
 use File::DataClass::Types  qw( Directory Object );
 use Moo;
@@ -14,7 +15,12 @@ use Scalar::Util            qw( weaken );
 use Template;
 use Text::Markdown;
 
+extends q(Doh);
+
 # Public attributes
+has 'pod'      => is => 'lazy', isa => Object,
+   default     => sub { Doh::View::HTML::POD->new( builder => $_[ 0 ]->_usul )};
+
 has 'tm'       => is => 'lazy', isa => Object,
    default     => sub { Text::Markdown->new( tab_width => 3 ) };
 
@@ -24,11 +30,6 @@ has 'skin_dir' => is => 'lazy', isa => Directory, coerce => Directory->coercion,
 has 'template' => is => 'lazy', isa => Object,
    default     => sub {
       Template->new( $_[ 0 ]->_template_args ) or throw $Template::ERROR };
-
-# Private attributes
-has '_usul'    => is => 'ro',   isa => Object,
-   handles     => [ qw( config loc log ) ], init_arg => 'builder',
-   required    => TRUE, weak_ref => TRUE;
 
 # Public methods
 sub render {
@@ -48,12 +49,18 @@ sub render {
 
    my $page = $stash->{page};
 
-   defined $page->{format} and $page->{format} eq 'markdown'
-      and $page->{content} = $self->tm->markdown( $page->{content} );
+   if (defined $page->{format}) {
+      $page->{format} eq 'markdown'
+         and $page->{content} = $self->tm->markdown( $page->{content} )
+         and $page->{format } = 'html';
+      $page->{format} eq 'pod'
+         and $page->{content} = $self->pod->render( $page->{content} )
+         and $page->{format } = 'html';
+   }
 
    $self->template->process( $template->pathname, $stash, \$text )
       or return [ 500, $self->template->error ];
-
+   $self->_usul->dumper( $self->config );
    return [ 200, encode( 'UTF-8', $text ) ];
 }
 
@@ -85,7 +92,7 @@ Doh::View::HTML - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 7 $ of L<Doh::View::HTML>
+This documents version v0.1.$Rev: 8 $ of L<Doh::View::HTML>
 
 =head1 Description
 
