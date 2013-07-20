@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-07-18 11:10 pjf ;
+# @(#)Ident: Daemon.pm 2013-07-19 16:02 pjf ;
 
 package Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( NonZeroPositiveInt );
@@ -20,7 +20,7 @@ has '+config_class' => default => 'Doh::Config';
 
 option 'port'    => is => 'ro', isa => NonZeroPositiveInt,
    documentation => 'Port number for the input event listener',
-   default       => sub { $_[ 0 ]->config->port }, format => 'i';
+   default       => sub { $_[ 0 ]->config->port }, format => 'i', short => 'p';
 
 around 'run_chain' => sub {
    my ($orig, $self, @args) = @_; @ARGV = @{ $self->extra_argv };
@@ -91,7 +91,7 @@ Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 8 $ of L<Doh::Daemon>
+This documents version v0.1.$Rev: 9 $ of L<Doh::Daemon>
 
 =head1 Description
 

@@ -1,0 +1,48 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en">  <!--<![endif]-->
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <meta name="description" content="[% config.tagline %]">
+   <meta name="author" content="[% config.author %]">
+   <!-- Mobile -->
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+[% IF config.colours.0 -%]
+   <link rel="icon" href="[% config.images %]favicon.png" type="image/png">
+[% ELSE -%]
+   <link rel="icon" href="[% config.images %]favicon-[% theme %].png"
+      type="image/png">
+[% END -%]
+   <!-- Font -->
+   <link href="[% config.font %]" rel="stylesheet" type="text/css">
+   <!-- Less -->
+[% IF config.colours.0 -%]
+   <style type="text/less">
+   [% FOREACH colour = config.colours -%]
+      @[% colour.key %]: [% colour.value %];
+   [% END -%]
+      @import "[% config.less %]import/theme-base.less";
+   </style>
+   <script src="[% config.js %]less.min.js"></script>
+[% ELSE -%]
+   <link rel="stylesheet" href="[% config.css %]theme-[% theme %].css">
+[% END -%]
+   <!-- Code Highlighter -->
+   <script src="[% config.js %]highlight.min.js"></script>
+   <script>hljs.initHighlightingOnLoad();</script>
+   <!-- Navigation -->
+   <script src="[% config.js %]jquery.min.js"></script>
+   <script src="[% config.js %]custom.js"></script>
+   <!--[if lt IE 9]>
+   <script src="[% config.js %]html5shiv.js"></script>
+   <![endif]-->
+   <title>[% config.title %]</title>
+</head>
+<body>
+   [% content %]
+</body>
+</html>

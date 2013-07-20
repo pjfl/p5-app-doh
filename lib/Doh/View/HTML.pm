@@ -1,15 +1,16 @@
-# @(#)Ident: HTML.pm 2013-07-18 18:56 pjf ;
+# @(#)Ident: HTML.pm 2013-07-20 03:28 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
 use Doh::View::HTML::POD;
 use Encode;
 use File::DataClass::Types  qw( Directory Object );
+use File::Spec::Functions   qw( catfile );
 use Moo;
 use Scalar::Util            qw( weaken );
 use Template;
@@ -28,8 +29,8 @@ has 'skin_dir' => is => 'lazy', isa => Directory, coerce => Directory->coercion,
    default     => sub { $_[ 0 ]->config->root->catdir( 'skins' ) };
 
 has 'template' => is => 'lazy', isa => Object,
-   default     => sub {
-      Template->new( $_[ 0 ]->_template_args ) or throw $Template::ERROR };
+   default     => sub { Template->new( $_[ 0 ]->_template_args )
+                           or throw $Template::ERROR };
 
 # Public methods
 sub render {
@@ -37,40 +38,45 @@ sub render {
 
    my $text     = NUL;
    my $skin     = delete $stash->{skin    } || 'default';
-   my $template = delete $stash->{template} || 'layout.tt';
+   my $template = delete $stash->{template} || 'index.tt';
+   my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
-   $template = $self->skin_dir->catdir( $skin )->catfile( $template );
-
-   unless ($template->exists) {
-      my $msg = $self->loc( 'Path [_1] not found', $template );
+   unless ($path->exists) {
+      my $msg = $self->loc( 'Path [_1] not found', $path );
 
       $self->log->error( $msg ); return [ 500, $msg ];
    }
 
-   my $page = $stash->{page};
+   my $page = $stash->{page} ||= {};
 
-   if (defined $page->{format}) {
-      $page->{format} eq 'markdown'
-         and $page->{content} = $self->tm->markdown( $page->{content} )
-         and $page->{format } = 'html';
-      $page->{format} eq 'pod'
-         and $page->{content} = $self->pod->render( $page->{content} )
-         and $page->{format } = 'html';
-   }
+   defined $page->{format} and $self->render_microformat( $page );
 
-   $self->template->process( $template->pathname, $stash, \$text )
+   $self->template->process( catfile( $skin, $template ), $stash, \$text )
       or return [ 500, $self->template->error ];
-   $self->_usul->dumper( $self->config );
+
    return [ 200, encode( 'UTF-8', $text ) ];
+}
+
+sub render_microformat {
+   my ($self, $page) = @_;
+
+   $page->{format} eq 'markdown'
+      and $page->{content} = $self->tm->markdown( $page->{content} )
+      and $page->{format } = 'html';
+   $page->{format} eq 'pod'
+      and $page->{content} = $self->pod->render( $page->{content} )
+      and $page->{format } = 'html';
+   return $page;
 }
 
 # Private methods
 sub _template_args {
-   my $self = shift; weaken( $self ); my $args = { ABSOLUTE => TRUE, };
+   my $self = shift; weaken( $self );
 
-   $args->{VARIABLES}->{loc} = sub { $self->loc( @_ ) };
-
-   return $args;
+   return { RELATIVE     => TRUE,
+            INCLUDE_PATH => [ $self->skin_dir->pathname ],
+            VARIABLES    => { loc => sub { $self->loc( @_ ) } },
+            WRAPPER      => catfile( qw( default wrapper.tt ) ), };
 }
 
 1;
@@ -92,7 +98,7 @@ Doh::View::HTML - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 8 $ of L<Doh::View::HTML>
+This documents version v0.1.$Rev: 9 $ of L<Doh::View::HTML>
 
 =head1 Description
 

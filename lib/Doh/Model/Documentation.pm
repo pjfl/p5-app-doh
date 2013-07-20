@@ -1,14 +1,13 @@
-# @(#)Ident: Documentation.pm 2013-07-18 18:48 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-20 03:14 pjf ;
 
 package Doh::Model::Documentation;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( is_hashref trim );
 use File::DataClass::IO;
-use File::DataClass::Types  qw( HashRef NonEmptySimpleStr Object );
+use File::DataClass::Types  qw( HashRef NonEmptySimpleStr );
 use File::Spec::Functions   qw( curdir );
 use Moo;
 
@@ -20,24 +19,28 @@ has 'docs_tree' => is => 'lazy', isa => HashRef;
 has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
 
 # Public methods
-sub get_stash {
-   my ($self, @args) = @_;
+sub get_format {
+   my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
 
-   my $conf  = $self->config;
-   my $tree  = $self->docs_tree;
-   my $env   = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-   my @parts = split m{ [/] }mx, trim $args[ 0 ] || 'index', '/';
+   $extn =~ m{ \A (?: mkdn | md ) \z }mx and return 'markdown';
+   $extn =~ m{ \A (?: pod       ) \z }mx and return 'pod';
+   return 'text';
+}
+
+sub get_stash {
+   my ($self, $req) = @_; my $conf = $self->config; my $tree = $self->docs_tree;
+
+   my $template = $req->{args}->[ 0 ] ne 'index' ? 'documentation.tt' : undef;
 
    return {
-      colours      => __to_array_of_hash( $conf->colours, qw( key value ) ),
       config       => $conf,
       docs_url     => $self->docs_url,
-      homepage     => $args[ 0 ] ? FALSE : TRUE,
       homepage_url => exists $tree->{index} ? '/' : $self->docs_url,
-      http_host    => $env->{HTTP_HOST},
-      links        => __to_array_of_hash( $conf->links, qw( name url ) ),
-      nav          => __build_nav( $tree, [ @parts ] ),
-      page         => __load_page( $tree, [ @parts ] ),
+      http_host    => $req->{env}->{HTTP_HOST},
+      nav          => __build_nav( $tree, [ @{ $req->{args} } ] ),
+      page         => __load_page( $tree, [ @{ $req->{args} } ] ),
+      template     => $template,
+      theme        => $req->{params}->{ 'theme' } || $conf->theme,
    };
 }
 
@@ -61,6 +64,7 @@ sub _build_docs_tree {
       my $full_title =  $title ? "${title}: ${clean_name}" : $clean_name;
       my $node       =  $tree->{ $clean_sort } = {
          clean       => $clean_sort,
+         format      => $self->get_format( $full_path ),
          name        => $clean_name,
          path        => $full_path,
          title       => $full_title,
@@ -123,9 +127,9 @@ sub __clean_name {
 }
 
 sub __clean_sort {
-   my $text = shift;
+   my $text = shift; $text =~ s{ \A \d+ [_] }{}mx;
 
-   $text =~ s{ \A \d+ [_] }{}mx; $text =~ s{ (?: \.mkdn | \.md ) \z }{}mx;
+   $text =~ s{ (?: \.mkdn | \.md | \.pod ) \z }{}mx;
 
    return $text;
 }
@@ -156,12 +160,14 @@ sub __load_page {
    my ($tree, $path) = @_; my $branch = __find_branch( $tree, $path );
 
    ($branch and exists $branch->{type} and $branch->{type} eq 'file')
-      or return { content => "Oh no. That page doesn't exist" };
+      or return { content => "> Oh no. That page doesn't exist",
+                  format  => 'markdown' };
 
-   my $page = { content => io( $branch->{path} )->utf8->all };
+   my $page = { content => io( $branch->{path} )->utf8->all,
+                format  => $branch->{format}, };
 
    $branch->{name} ne 'index' and $page->{header} = $branch->{title};
-   $page->{format} = 'markdown';
+
    return $page;
 }
 
@@ -176,13 +182,6 @@ sub __sort_pages {
 
    return ( sort { $href->{ $a }->{_order} cmp $href->{ $b }->{_order} }
             grep { $_ ne '_iterator' } keys %{ $href } );
-}
-
-sub __to_array_of_hash {
-   my ($href, $key_key, $val_key) = @_;
-
-   return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
-            sort keys %{ $href } ],
 }
 
 1;
@@ -204,7 +203,7 @@ Doh::Model::Documentation - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 8 $ of L<Doh::Model::Documentation>
+This documents version v0.1.$Rev: 9 $ of L<Doh::Model::Documentation>
 
 =head1 Description
 

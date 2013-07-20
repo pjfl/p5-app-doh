@@ -1,6 +1,7 @@
 Revision history for Daux
 
-0.1.8     2013-07-19 00:06:42
+0.1.9     2013-07-20 04:34:40
+          - Supports POD as second microformat
           - Daemon can start multiple instances
           - Added Daemon
           - Favicon, cfg files and Plack sorted

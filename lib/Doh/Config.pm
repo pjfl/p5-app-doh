@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-07-18 20:27 pjf ;
+# @(#)Ident: Config.pm 2013-07-20 03:04 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
@@ -18,8 +18,7 @@ has 'author'           => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'colours'          => is => 'ro',   isa => HashRef,
-   default             => sub { {} };
+has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/css/';
@@ -48,8 +47,7 @@ has 'js'               => is => 'ro',   isa => NonEmptySimpleStr,
 has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/less/';
 
-has 'links'            => is => 'ro',   isa => HashRef,
-   default             => sub { {} };
+has 'links'            => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
 has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
@@ -71,6 +69,28 @@ has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'twitter'          => is => 'ro',   isa => ArrayRef,  default => sub { [] };
 
+
+has '_colours'         => is => 'ro',   isa => HashRef,
+   default             => sub { {} }, init_arg => 'colours';
+
+has '_links'           => is => 'ro',   isa => HashRef,
+   default             => sub { {} }, init_arg => 'links';
+
+sub _build_colours {
+   return __to_array_of_hash( $_[ 0 ]->_colours, qw( key value ) );
+}
+
+sub _build_links {
+   return __to_array_of_hash( $_[ 0 ]->_links, qw( name url ) );
+}
+
+sub __to_array_of_hash {
+   my ($href, $key_key, $val_key) = @_;
+
+   return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
+            sort keys %{ $href } ],
+}
+
 1;
 
 __END__
@@ -90,7 +110,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 8 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 9 $ of L<Doh::Config>
 
 =head1 Description
 

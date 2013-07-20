@@ -1,9 +1,9 @@
-# @(#)Ident: POD.pm 2013-07-18 18:47 pjf ;
+# @(#)Ident: POD.pm 2013-07-19 23:33 pjf ;
 
 package Doh::View::HTML::POD;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( NonEmptySimpleStr Object Str );
@@ -23,20 +23,20 @@ has '_hacc'     => is => 'lazy', isa => Object,
 
 has '_top_link' => is => 'lazy', isa => Str;
 
-has '_top_para' => is => 'lazy', isa => Str;
-
 sub render {
    my ($self, $args) = @_;
 
    my $hacc        = $self->_hacc;
-   my $heading     = $hacc->a( { id => 'podtop' } ).$hacc->h1( $args->{title} );
+   my $anchor      = $hacc->a( { id => 'podtop' } );
+   my $title       = $hacc->h1( $args->{title} );
+   my $heading     = $anchor.$hacc->div( { class => 'page-header' }, $title );
    my $link_parser = Pod::Hyperlink::BounceURL->new;
       $link_parser->configure( URL => $args->{url} );
    my $parser      = Pod::Xhtml->new( FragmentOnly => TRUE,
                                       LinkParser   => $link_parser,
                                       StringMode   => TRUE,
                                       TopHeading   => 2,
-                                      TopLinks     => $self->_top_para, );
+                                      TopLinks     => $self->_top_link, );
 
    $parser->parse_from_file( $args->{src} );
 
@@ -44,13 +44,12 @@ sub render {
 }
 
 sub _build__top_link {
-   my $self = shift; my $attr = { class => 'toplink', href => '#podtop' };
+   my $self = shift;
+   my $hacc = $self->_hacc;
+   my $attr = { class => 'toplink', href => '#podtop' };
+   my $link = $hacc->a( $attr, $self->loc( $self->link_text ) );
 
-   return $self->_hacc->a( $attr, $self->loc( $self->link_text ) );
-}
-
-sub _build__top_para {
-   return $_[ 0 ]->_hacc->p( { class => 'toplink' }, $_[ 0 ]->_top_link );
+   return $hacc->p( { class => 'toplink' }, $link );
 }
 
 1;
@@ -72,7 +71,7 @@ Doh::View::HTML::POD - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 8 $ of L<Doh::View::HTML::POD>
+This documents version v0.1.$Rev: 9 $ of L<Doh::View::HTML::POD>
 
 =head1 Description
 

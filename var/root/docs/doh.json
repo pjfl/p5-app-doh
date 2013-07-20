@@ -1,9 +1,10 @@
 {
+   "float": "1",
+   "generator_url": "/help",
    "google_analytics": "UA-12653604-10",
    "links": {
       "Download": "https://github.com/pjfl/Doh/archive/master.zip",
       "Github Repo": "https://github.com/pjfl/Doh.git",
-      "Help": "/help",
       "Issues/Wishlist": "http://rt.cpan.org/NoAuth/Bugs.html?Dist=Doh",
       "Made by Roxsoft": "http://www.roxsoft.co.uk"
    },

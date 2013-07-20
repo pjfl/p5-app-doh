@@ -1,10 +1,10 @@
-# @(#)Ident: Doh.pm 2013-07-18 18:55 pjf ;
+# @(#)Ident: Doh.pm 2013-07-20 03:32 pjf ;
 
 package Doh;
 
 use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_arrayref is_hashref );
@@ -49,7 +49,7 @@ Doh - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 8 $ of L<Doh>
+This documents version v0.1.$Rev: 9 $ of L<Doh>
 
 =head1 Description
 

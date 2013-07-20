@@ -9,13 +9,15 @@ Doh - One-line description of the modules purpose
 
 # Version
 
-This documents version v0.1.$Rev: 6 $ of [Doh](https://metacpan.org/module/Doh)
+This documents version v0.1.$Rev: 9 $ of [Doh](https://metacpan.org/module/Doh)
 
 # Description
 
 # Configuration and Environment
 
 Defines the following attributes;
+
+- `language`
 
 # Subroutines/Methods
 
