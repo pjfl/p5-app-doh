@@ -1,44 +1,42 @@
-# @(#)Ident: HTML.pm 2013-07-20 03:28 pjf ;
+# @(#)Ident: HTML.pm 2013-07-20 18:50 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
-use Doh::View::HTML::POD;
 use Encode;
-use File::DataClass::Types  qw( Directory Object );
+use File::DataClass::Types  qw( Directory HashRef Object );
 use File::Spec::Functions   qw( catfile );
+use Module::Pluggable::Object;
 use Moo;
 use Scalar::Util            qw( weaken );
 use Template;
-use Text::Markdown;
 
 extends q(Doh);
 
 # Public attributes
-has 'pod'      => is => 'lazy', isa => Object,
-   default     => sub { Doh::View::HTML::POD->new( builder => $_[ 0 ]->_usul )};
+has 'formatters' => is => 'lazy', isa => HashRef;
 
-has 'tm'       => is => 'lazy', isa => Object,
-   default     => sub { Text::Markdown->new( tab_width => 3 ) };
+has 'skin_dir'   => is => 'lazy', isa => Directory,
+   default       => sub { $_[ 0 ]->config->root->catdir( 'skins' ) },
+   coerce        => Directory->coercion;
 
-has 'skin_dir' => is => 'lazy', isa => Directory, coerce => Directory->coercion,
-   default     => sub { $_[ 0 ]->config->root->catdir( 'skins' ) };
+has 'template'   => is => 'lazy', isa => Object,
+   default       => sub { Template->new( $_[ 0 ]->_template_args )
+                             or throw $Template::ERROR };
 
-has 'template' => is => 'lazy', isa => Object,
-   default     => sub { Template->new( $_[ 0 ]->_template_args )
-                           or throw $Template::ERROR };
+has 'type_map'   => is => 'lazy', isa => HashRef;
 
 # Public methods
 sub render {
    my ($self, $stash) = @_;
 
    my $text     = NUL;
-   my $skin     = delete $stash->{skin    } || 'default';
-   my $template = delete $stash->{template} || 'index.tt';
+   my $skin     =  delete $stash->{skin    } || 'default';
+   my $template = (delete $stash->{template} || 'index').'.tt';
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
    unless ($path->exists) {
@@ -47,9 +45,7 @@ sub render {
       $self->log->error( $msg ); return [ 500, $msg ];
    }
 
-   my $page = $stash->{page} ||= {};
-
-   defined $page->{format} and $self->render_microformat( $page );
+   $self->_render_microformat( $stash->{page} ||= {} );
 
    $self->template->process( catfile( $skin, $template ), $stash, \$text )
       or return [ 500, $self->template->error ];
@@ -57,19 +53,45 @@ sub render {
    return [ 200, encode( 'UTF-8', $text ) ];
 }
 
-sub render_microformat {
-   my ($self, $page) = @_;
+# Private methods
+sub _build_formatters {
+   my $self = shift; my $formatters = {};
 
-   $page->{format} eq 'markdown'
-      and $page->{content} = $self->tm->markdown( $page->{content} )
-      and $page->{format } = 'html';
-   $page->{format} eq 'pod'
-      and $page->{content} = $self->pod->render( $page->{content} )
-      and $page->{format } = 'html';
-   return $page;
+   my $finder = Module::Pluggable::Object->new
+      ( search_path => [ __PACKAGE__ ], require => TRUE, );
+
+   for my $formatter ($finder->plugins) {
+      my $format = lc ((split m{ :: }mx, $formatter)[ -1 ]);
+
+      $formatters->{ $format } = $formatter->new( builder => $self->_usul );
+   }
+
+   return $formatters;
 }
 
-# Private methods
+sub _build_type_map {
+   my $self = shift; my $map = { htm => 'html', html => 'html' };
+
+   for my $format (keys %{ $self->formatters }) {
+      for my $extn (@{ $self->formatters->{ $format }->extensions }) {
+         $map->{ $extn } = $format;
+      }
+   }
+
+   return $map;
+}
+
+sub _render_microformat {
+   my ($self, $page) = @_; defined $page->{format} or return;
+
+   my $formatter = $self->formatters->{ $page->{format} } or return;
+
+   $page->{content} = $formatter->render( $page->{content} )
+      and $page->{format} = 'html';
+
+   return;
+}
+
 sub _template_args {
    my $self = shift; weaken( $self );
 
@@ -82,76 +104,6 @@ sub _template_args {
 1;
 
 __END__
-
-=pod
-
-=encoding utf8
-
-=head1 Name
-
-Doh::View::HTML - One-line description of the modules purpose
-
-=head1 Synopsis
-
-   use Doh::View::HTML;
-   # Brief but working code examples
-
-=head1 Version
-
-This documents version v0.1.$Rev: 9 $ of L<Doh::View::HTML>
-
-=head1 Description
-
-=head1 Configuration and Environment
-
-Defines the following attributes;
-
-=over 3
-
-=back
-
-=head1 Subroutines/Methods
-
-=head1 Diagnostics
-
-=head1 Dependencies
-
-=over 3
-
-=item L<Class::Usul>
-
-=back
-
-=head1 Incompatibilities
-
-There are no known incompatibilities in this module
-
-=head1 Bugs and Limitations
-
-There are no known bugs in this module.
-Please report problems to the address below.
-Patches are welcome
-
-=head1 Acknowledgements
-
-Larry Wall - For the Perl programming language
-
-=head1 Author
-
-Peter Flanigan, C<< <pjfl@cpan.org> >>
-
-=head1 License and Copyright
-
-Copyright (c) 2013 Peter Flanigan. All rights reserved
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself. See L<perlartistic>
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
-
-=cut
 
 # Local Variables:
 # mode: perl

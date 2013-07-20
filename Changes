@@ -1,6 +1,7 @@
 Revision history for Daux
 
-0.1.9     2013-07-20 04:34:40
+0.1.10    2013-07-20 21:45:30
+          - Microformats register their extensions
           - Supports POD as second microformat
           - Daemon can start multiple instances
           - Added Daemon

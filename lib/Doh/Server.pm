@@ -1,16 +1,17 @@
-# @(#)Ident: Server.pm 2013-07-20 01:55 pjf ;
+# @(#)Ident: Server.pm 2013-07-20 20:26 pjf ;
 
 package Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
 use Class::Usul::File;
 use Class::Usul::Functions  qw( app_prefix find_apphome
                                 get_cfgfiles is_hashref trim );
-use Class::Usul::Types      qw( Maybe NonEmptySimpleStr Object SimpleStr );
+use Class::Usul::Types      qw( HashRef Maybe NonEmptySimpleStr
+                                Object SimpleStr );
 use Doh::Model::Documentation;
 use Doh::Model::Help;
 use Doh::View::HTML;
@@ -25,13 +26,16 @@ has 'appclass'     => is => 'ro',   isa => Maybe[SimpleStr];
 has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
    default         => 'Doh::Config';
 
-has 'doc_model'    => is => 'lazy', isa => Object, init_arg => undef;
+has 'doc_model'    => is => 'lazy', isa => Object,  init_arg => undef;
 
-has 'help_model'   => is => 'lazy', isa => Object, init_arg => undef;
+has 'help_model'   => is => 'lazy', isa => Object,  init_arg => undef;
 
-has 'html_view'    => is => 'lazy', isa => Object, init_arg => undef;
+has 'html_view'    => is => 'lazy', isa => Object,  init_arg => undef;
 
-has 'usul'         => is => 'lazy', isa => Object, init_arg => undef;
+has 'type_map'     => is => 'lazy', isa => HashRef, init_arg => undef,
+   default         => sub { $_[ 0 ]->html_view->type_map };
+
+has 'usul'         => is => 'lazy', isa => Object,  init_arg => undef;
 
 # Construction
 around 'to_psgi_app' => sub {
@@ -56,7 +60,7 @@ around 'to_psgi_app' => sub {
 };
 
 sub BUILD {
-   $_[ 0 ]->doc_model->initialize; return;
+   $_[ 0 ]->doc_model; return;
 }
 
 # Public methods
@@ -75,11 +79,13 @@ sub dispatch_request {
 
 # Private methods
 sub _build_doc_model {
-   return Doh::Model::Documentation->new( builder => $_[ 0 ]->usul );
+   return Doh::Model::Documentation->new
+      ( builder => $_[ 0 ]->usul, type_map => $_[ 0 ]->type_map );
 }
 
 sub _build_help_model {
-   return Doh::Model::Help->new( builder => $_[ 0 ]->usul );
+   return Doh::Model::Help->new
+      ( builder => $_[ 0 ]->usul, type_map => $_[ 0 ]->type_map );
 }
 
 sub _build_html_view {
@@ -121,7 +127,7 @@ sub _set_response {
 sub __get_request {
    my $env    = ( $_[ -1 ] && is_hashref $_[ -1 ] ) ? pop @_ : {};
    my $params = ( $_[ -1 ] && is_hashref $_[ -1 ] ) ? pop @_ : {};
-   my $args   = [ split m{ [/] }mx, trim $_[  0 ] || 'index', '/' ];
+   my $args   = [ split m{ [/] }mx, trim $_[  0 ] || NUL, '/' ];
 
    return { args => $args, env => $env, params => $params };
 }
@@ -145,7 +151,7 @@ Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 9 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 10 $ of L<Doh::Server>
 
 =head1 Description
 

@@ -1,9 +1,9 @@
-# @(#)Ident: Documentation.pm 2013-07-20 03:14 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-20 20:34 pjf ;
 
 package Doh::Model::Documentation;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -18,19 +18,16 @@ has 'docs_tree' => is => 'lazy', isa => HashRef;
 
 has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
 
-# Public methods
-sub get_format {
-   my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
-
-   $extn =~ m{ \A (?: mkdn | md ) \z }mx and return 'markdown';
-   $extn =~ m{ \A (?: pod       ) \z }mx and return 'pod';
-   return 'text';
+# Construction
+sub BUILD {
+   $_[ 0 ]->docs_url; return;
 }
 
+# Public methods
 sub get_stash {
    my ($self, $req) = @_; my $conf = $self->config; my $tree = $self->docs_tree;
 
-   my $template = $req->{args}->[ 0 ] ne 'index' ? 'documentation.tt' : undef;
+   my $template = $req->{args}->[ 0 ] ? 'documentation' : 'index';
 
    return {
       config       => $conf,
@@ -42,10 +39,6 @@ sub get_stash {
       template     => $template,
       theme        => $req->{params}->{ 'theme' } || $conf->theme,
    };
-}
-
-sub initialize {
-   $_[ 0 ]->docs_url; return;
 }
 
 # Private methods
@@ -64,7 +57,7 @@ sub _build_docs_tree {
       my $full_title =  $title ? "${title}: ${clean_name}" : $clean_name;
       my $node       =  $tree->{ $clean_sort } = {
          clean       => $clean_sort,
-         format      => $self->get_format( $full_path ),
+         format      => $self->_get_format( $full_path ),
          name        => $clean_name,
          path        => $full_path,
          title       => $full_title,
@@ -93,6 +86,12 @@ sub _build_docs_url {
    $branch = __next( $tree ) or $self->log->fatal( 'Config Error: Unable to find the first page in the /docs folder. Double check you have at least one file in the root of of the /docs folder. Also make sure you do not have any empty folders' );
 
    return $self->_build_docs_url( $tree, $branch );
+}
+
+sub _get_format {
+   my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
+
+   return $self->type_map->{ $extn } || 'text';
 }
 
 # Private functions
@@ -144,7 +143,7 @@ sub __current {
 }
 
 sub __find_branch {
-   my ($tree, $path) = @_;
+   my ($tree, $path) = @_; $path->[ 0 ] or $path->[ 0 ] = 'index';
 
    for my $node (@{ $path }) {
       $node or $node = 'index'; exists $tree->{ $node } or return FALSE;
@@ -187,76 +186,6 @@ sub __sort_pages {
 1;
 
 __END__
-
-=pod
-
-=encoding utf8
-
-=head1 Name
-
-Doh::Model::Documentation - One-line description of the modules purpose
-
-=head1 Synopsis
-
-   use Doh::Model::Documentation;
-   # Brief but working code examples
-
-=head1 Version
-
-This documents version v0.1.$Rev: 9 $ of L<Doh::Model::Documentation>
-
-=head1 Description
-
-=head1 Configuration and Environment
-
-Defines the following attributes;
-
-=over 3
-
-=back
-
-=head1 Subroutines/Methods
-
-=head1 Diagnostics
-
-=head1 Dependencies
-
-=over 3
-
-=item L<Class::Usul>
-
-=back
-
-=head1 Incompatibilities
-
-There are no known incompatibilities in this module
-
-=head1 Bugs and Limitations
-
-There are no known bugs in this module.
-Please report problems to the address below.
-Patches are welcome
-
-=head1 Acknowledgements
-
-Larry Wall - For the Perl programming language
-
-=head1 Author
-
-Peter Flanigan, C<< <pjfl@cpan.org> >>
-
-=head1 License and Copyright
-
-Copyright (c) 2013 Peter Flanigan. All rights reserved
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself. See L<perlartistic>
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
-
-=cut
 
 # Local Variables:
 # mode: perl
