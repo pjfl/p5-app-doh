@@ -1,9 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-07-20 20:34 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-20 22:38 pjf ;
 
 package Doh::Model::Documentation;
 
+use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -18,8 +19,10 @@ has 'docs_tree' => is => 'lazy', isa => HashRef;
 
 has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
 
+has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
+
 # Construction
-sub BUILD {
+sub BUILD { # The docs_tree attribute constructor may take some time to run
    $_[ 0 ]->docs_url; return;
 }
 
@@ -43,11 +46,11 @@ sub get_stash {
 
 # Private methods
 sub _build_docs_tree {
-   my ($self, $path, $clean_path, $title) = @_; my $tree = {};
+   my ($self, $path, $clean_path, $title) = @_; state $index //= 0;
 
    $path //= $self->config->docs_path; $clean_path //= NUL; $title //= NUL;
 
-   my $filter = sub { not m{ (?: doh.json | cgi-bin ) }mx }; my $index = 0;
+   my $filter = sub { not m{ (?: doh.json | cgi-bin ) }mx }; my $tree = {};
 
    for my $file (io( $path )->filter( $filter )->all) {
       my $clean_sort =  __clean_sort( $file->filename );
@@ -126,9 +129,9 @@ sub __clean_name {
 }
 
 sub __clean_sort {
-   my $text = shift; $text =~ s{ \A \d+ [_] }{}mx;
+   my $text = shift;
 
-   $text =~ s{ (?: \.mkdn | \.md | \.pod ) \z }{}mx;
+   $text =~ s{ \A \d+ [_] }{}mx; $text =~ s{ \. [a-zA-Z0-9_\+]+ \z }{}mx;
 
    return $text;
 }

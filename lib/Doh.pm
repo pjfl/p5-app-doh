@@ -1,19 +1,17 @@
-# @(#)Ident: Doh.pm 2013-07-20 19:04 pjf ;
+# @(#)Ident: Doh.pm 2013-07-20 22:12 pjf ;
 
 package Doh;
 
 use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_arrayref is_hashref );
-use Class::Usul::Types      qw( HashRef NonEmptySimpleStr Object );
+use Class::Usul::Types      qw( NonEmptySimpleStr Object );
 use Moo;
 
 has 'language'  => is => 'ro',   isa => NonEmptySimpleStr, default => LANG;
-
-has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
 
 # Private attributes
 has '_usul'     => is => 'ro', isa => Object,
@@ -51,7 +49,7 @@ Doh - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 10 $ of L<Doh>
+This documents version v0.1.$Rev: 11 $ of L<Doh>
 
 =head1 Description
 

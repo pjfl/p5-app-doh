@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-07-20 20:26 pjf ;
+# @(#)Ident: Server.pm 2013-07-20 22:29 pjf ;
 
 package Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
@@ -26,16 +26,13 @@ has 'appclass'     => is => 'ro',   isa => Maybe[SimpleStr];
 has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
    default         => 'Doh::Config';
 
-has 'doc_model'    => is => 'lazy', isa => Object,  init_arg => undef;
+has 'doc_model'    => is => 'lazy', isa => Object, init_arg => undef;
 
-has 'help_model'   => is => 'lazy', isa => Object,  init_arg => undef;
+has 'help_model'   => is => 'lazy', isa => Object, init_arg => undef;
 
-has 'html_view'    => is => 'lazy', isa => Object,  init_arg => undef;
+has 'html_view'    => is => 'lazy', isa => Object, init_arg => undef;
 
-has 'type_map'     => is => 'lazy', isa => HashRef, init_arg => undef,
-   default         => sub { $_[ 0 ]->html_view->type_map };
-
-has 'usul'         => is => 'lazy', isa => Object,  init_arg => undef;
+has 'usul'         => is => 'lazy', isa => Object, init_arg => undef;
 
 # Construction
 around 'to_psgi_app' => sub {
@@ -59,7 +56,7 @@ around 'to_psgi_app' => sub {
    };
 };
 
-sub BUILD {
+sub BUILD { # Take the hit at application startup not on first request
    $_[ 0 ]->doc_model; return;
 }
 
@@ -80,12 +77,11 @@ sub dispatch_request {
 # Private methods
 sub _build_doc_model {
    return Doh::Model::Documentation->new
-      ( builder => $_[ 0 ]->usul, type_map => $_[ 0 ]->type_map );
+      ( builder => $_[ 0 ]->usul, type_map => $_[ 0 ]->html_view->type_map );
 }
 
 sub _build_help_model {
-   return Doh::Model::Help->new
-      ( builder => $_[ 0 ]->usul, type_map => $_[ 0 ]->type_map );
+   return Doh::Model::Help->new( builder => $_[ 0 ]->usul );
 }
 
 sub _build_html_view {
@@ -151,7 +147,7 @@ Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 10 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 11 $ of L<Doh::Server>
 
 =head1 Description
 
