@@ -1,9 +1,9 @@
-# @(#)Ident: Pod.pm 2013-07-20 20:39 pjf ;
+# @(#)Ident: Pod.pm 2013-07-22 15:12 pjf ;
 
 package Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( ArrayRef NonEmptySimpleStr Object Str );
@@ -13,6 +13,8 @@ use Pod::Hyperlink::BounceURL;
 use Pod::Xhtml;
 
 extends q(Doh);
+
+$Pod::Xhtml::COMMANDS{encoding} = TRUE; # STFU
 
 has 'extensions' => is => 'ro', isa => ArrayRef,
    default       => sub { [ qw( pl pm pod ) ] };
@@ -41,6 +43,7 @@ sub render {
                                       TopHeading   => 2,
                                       TopLinks     => $self->_top_link, );
 
+   # TODO: This needs to take input from $args->{content}
    $args->{src} and -f $args->{src} and $parser->parse_from_file( $args->{src});
 
    return $heading.($parser->asString || $self->loc

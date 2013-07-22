@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-07-20 18:50 pjf ;
+# @(#)Ident: HTML.pm 2013-07-22 15:03 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 10 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
@@ -35,22 +35,22 @@ sub render {
    my ($self, $stash) = @_;
 
    my $text     = NUL;
+   my $header   = [ 'Content-Type', 'text/html' ];
    my $skin     =  delete $stash->{skin    } || 'default';
    my $template = (delete $stash->{template} || 'index').'.tt';
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
    unless ($path->exists) {
-      my $msg = $self->loc( 'Path [_1] not found', $path );
-
-      $self->log->error( $msg ); return [ 500, $msg ];
+      $self->log->error( $text = $self->loc( 'Path [_1] not found', $path ) );
+      return [ 500, $header, [ $text ] ];
    }
 
    $self->_render_microformat( $stash->{page} ||= {} );
 
    $self->template->process( catfile( $skin, $template ), $stash, \$text )
-      or return [ 500, $self->template->error ];
+      or return [ 500, $header, [ $self->template->error ] ];
 
-   return [ 200, encode( 'UTF-8', $text ) ];
+   return [ 200, $header, [ encode( 'UTF-8', $text ) ] ];
 }
 
 # Private methods
@@ -83,6 +83,11 @@ sub _build_type_map {
 
 sub _render_microformat {
    my ($self, $page) = @_; defined $page->{format} or return;
+
+   $page->{format} eq 'text'
+      and $page->{content} = '<pre>'.$page->{content}.'</pre>'
+      and $page->{format } = 'html'
+      and return;
 
    my $formatter = $self->formatters->{ $page->{format} } or return;
 

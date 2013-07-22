@@ -1,9 +1,5 @@
 <!doctype html>
-<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en">  <!--<![endif]-->
-<html>
+<html lang="en">
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="description" content="[% config.tagline %]">
@@ -37,9 +33,6 @@
    <!-- Navigation -->
    <script src="[% config.js %]jquery.min.js"></script>
    <script src="[% config.js %]custom.js"></script>
-   <!--[if lt IE 9]>
-   <script src="[% config.js %]html5shiv.js"></script>
-   <![endif]-->
    <title>[% config.title %]</title>
 </head>
 <body>

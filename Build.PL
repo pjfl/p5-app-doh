@@ -1,9 +1,9 @@
-# @(#)$Ident: Build.PL 2013-07-18 00:56 pjf ;
+# @(#)$Ident: Build.PL 2013-07-21 11:18 pjf ;
 
 use strict;
 use warnings;
 use inc::Bob; # Module::Build subclass
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 8 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 Bob->new( {
    module    => 'Doh',
@@ -14,11 +14,13 @@ Bob->new( {
       'Class::Usul'      => q(0.22.0),
       'Daemon::Control'  => q(0.000_009),
       'File::DataClass'  => q(0.21.0),
+      'HTML::Accessors'  => q(0.8.0),
       'Moo'              => 1.002,
       'MooX::Options'    => 3.83,
       'Plack'            => 1.0018,
       'Plack::Middleware::Deflater'  => 0.08,
       'Plack::Middleware::LogErrors' => 0.001,
+      'Pod::Xhtml'       => 1.61,
       'Template'         => 2.22,
       'Text::Markdown'   => 1.000031,
       'Web::Simple'      => 0.020, },

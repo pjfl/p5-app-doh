@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-07-20 22:38 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-21 18:27 pjf ;
 
 package Doh::Model::Documentation;
 
 use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -30,18 +30,62 @@ sub BUILD { # The docs_tree attribute constructor may take some time to run
 sub get_stash {
    my ($self, $req) = @_; my $conf = $self->config; my $tree = $self->docs_tree;
 
-   my $template = $req->{args}->[ 0 ] ? 'documentation' : 'index';
-
    return {
       config       => $conf,
       docs_url     => $self->docs_url,
+      float        => $req->{params}->{ 'float' } // $conf->float,
       homepage_url => exists $tree->{index} ? '/' : $self->docs_url,
       http_host    => $req->{env}->{HTTP_HOST},
-      nav          => __build_nav( $tree, [ @{ $req->{args} } ] ),
-      page         => __load_page( $tree, [ @{ $req->{args} } ] ),
-      template     => $template,
+      nav          => $self->navigation( [ @{ $req->{args} } ] ),
+      page         => $self->load_page ( [ @{ $req->{args} } ] ),
+      template     => $req->{args}->[ 0 ] ? 'documentation' : 'index',
       theme        => $req->{params}->{ 'theme' } || $conf->theme,
    };
+}
+
+sub load_page {
+   my ($self, $parts) = @_;
+
+   my $branch = __find_branch( $self->docs_tree, $parts );
+
+   ($branch and exists $branch->{type} and $branch->{type} eq 'file')
+      or return { content => "> Oh no. That page doesn't exist",
+                  format  => 'markdown' };
+
+   my $page = { content => io( $branch->{path} )->utf8->all,
+                format  => $branch->{format}, };
+
+   $branch->{name} ne 'index' and $page->{header} = $branch->{title};
+
+   return $page;
+}
+
+sub navigation {
+   my ($self, $parts, $tree, $path_url, $level) = @_; my @nav = ();
+
+   $tree     //= $self->docs_tree;
+   $path_url //= join '/', NUL, @{ $parts };
+   $level    //= 0;
+
+   for my $node (map  { $tree->{ $_ } }
+                 grep { $_ ne 'index' } __sort_pages( $tree )) {
+      my $page = { level => $level, name => $node->{name},
+                   type  => $node->{type} };
+
+      if (defined $parts->[ 0 ] and $parts->[ 0 ] eq $node->{clean}) {
+         $page->{class} = $path_url eq $node->{url} ? 'active' : 'open';
+         shift @{ $parts };
+      }
+
+      if ($page->{type} eq 'folder') {
+         $page->{url} = '#';
+         push @nav, $page, @{
+            $self->navigation( $parts, $node->{tree}, $path_url, $level + 1 ) };
+      }
+      else { $page->{url} = $node->{url}; push @nav, $page }
+   }
+
+   return \@nav;
 }
 
 # Private methods
@@ -98,32 +142,6 @@ sub _get_format {
 }
 
 # Private functions
-sub __build_nav {
-   my ($tree, $parts, $path_url, $level) = @_; my @nav = ();
-
-   $path_url //= join '/', NUL, @{ $parts }; $level //= 0;
-
-   for my $node (map  { $tree->{ $_ } }
-                 grep { $_ ne 'index' } __sort_pages( $tree )) {
-      my $page = { level => $level, name => $node->{name},
-                   type  => $node->{type} };
-
-      if (defined $parts->[ 0 ] and $parts->[ 0 ] eq $node->{clean}) {
-         $page->{class} = $path_url eq $node->{url} ? 'active' : 'open';
-         shift @{ $parts };
-      }
-
-      if ($page->{type} eq 'folder') {
-         $page->{url} = '#'; push @nav, $page;
-         push @nav, @{ __build_nav( $node->{tree}, $parts,
-                                    $path_url, $level + 1 ) };
-      }
-      else { $page->{url} = $node->{url}; push @nav, $page }
-   }
-
-   return \@nav;
-}
-
 sub __clean_name {
    my $text = shift; $text =~ s{ [_] }{ }gmx; return $text;
 }
@@ -156,21 +174,6 @@ sub __find_branch {
    }
 
    return $tree;
-}
-
-sub __load_page {
-   my ($tree, $path) = @_; my $branch = __find_branch( $tree, $path );
-
-   ($branch and exists $branch->{type} and $branch->{type} eq 'file')
-      or return { content => "> Oh no. That page doesn't exist",
-                  format  => 'markdown' };
-
-   my $page = { content => io( $branch->{path} )->utf8->all,
-                format  => $branch->{format}, };
-
-   $branch->{name} ne 'index' and $page->{header} = $branch->{title};
-
-   return $page;
 }
 
 sub __next {

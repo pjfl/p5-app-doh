@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-07-20 22:29 pjf ;
+# @(#)Ident: Server.pm 2013-07-22 14:58 pjf ;
 
 package Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
@@ -65,12 +65,12 @@ sub dispatch_request {
    sub (GET + /help | /help/** + ?*) {
       my $self = shift; my $req = __get_request( @_ );
 
-      return $self->_set_response( $self->help_model->get_stash( $req ) );
+      return $self->html_view->render( $self->help_model->get_stash( $req ) );
    },
    sub (GET + / | /** + ?*) {
       my $self = shift; my $req = __get_request( @_ );
 
-      return $self->_set_response( $self->doc_model->get_stash( $req ) );
+      return $self->html_view->render( $self->doc_model->get_stash( $req ) );
    };
 }
 
@@ -113,12 +113,6 @@ sub _build_usul {
    return Class::Usul->new( $attr );
 }
 
-sub _set_response {
-   my ($self, $stash) = @_; my $res = $self->html_view->render( $stash );
-
-   return [ $res->[ 0 ], [ 'Content-Type', 'text/html' ], [ $res->[ 1 ] ] ];
-}
-
 # Private functions
 sub __get_request {
    my $env    = ( $_[ -1 ] && is_hashref $_[ -1 ] ) ? pop @_ : {};
@@ -147,7 +141,7 @@ Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 11 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 12 $ of L<Doh::Server>
 
 =head1 Description
 

@@ -1,13 +1,15 @@
-# @(#)Ident: Daemon.pm 2013-07-19 16:02 pjf ;
+# @(#)Ident: Daemon.pm 2013-07-21 18:57 pjf ;
 
 package Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Types      qw( NonZeroPositiveInt );
+use Class::Usul::Functions  qw( throw );
+use Class::Usul::Types      qw( NonEmptySimpleStr NonZeroPositiveInt Object );
 use Daemon::Control;
+use English                 qw( -no_match_vars );
 use Moo;
 use MooX::Options;
 use Plack::Runner;
@@ -16,18 +18,72 @@ use Scalar::Util            qw( blessed );
 extends q(Class::Usul::Programs);
 with    q(Class::Usul::TraitFor::UntaintedGetopts);
 
+# Override default in base class
 has '+config_class' => default => 'Doh::Config';
 
+# Public attributes
+option 'app'     => is => 'ro', isa => NonEmptySimpleStr,
+   documentation => 'Name of the PSGI file',
+   default       => 'doh-server', format => 's';
+
 option 'port'    => is => 'ro', isa => NonZeroPositiveInt,
-   documentation => 'Port number for the input event listener',
+   documentation => 'Port number for the server to listen on',
    default       => sub { $_[ 0 ]->config->port }, format => 'i', short => 'p';
 
-around 'run_chain' => sub {
-   my ($orig, $self, @args) = @_; @ARGV = @{ $self->extra_argv };
+option 'server'  => is => 'ro', isa => NonEmptySimpleStr,
+   documentation => 'Name of the Plack engine to use',
+   default       => sub { $_[ 0 ]->config->server }, format => 's',
+   short         => 's';
 
-   my $config = $self->config; my $name = $config->name;
+# Private attributes
+has '_daemon_control' => is => 'lazy', isa => Object;
 
-   Daemon::Control->new( {
+# Construction
+around 'run' => sub {
+   my ($orig, $self) = @_; my $daemon = $self->_daemon_control;
+
+   $daemon->name     or throw 'Name must be defined';
+   $daemon->program  or throw 'Program must be defined';
+   $daemon->pid_file or throw 'Pid file must be defined';
+
+   $daemon->uid and not $daemon->gid
+      and $daemon->gid( (getpwuid( $daemon->uid ))[ 3 ] );
+
+   $self->quiet( TRUE );
+
+   return $orig->( $self );
+};
+
+# Public methods
+sub get_init_file : method {
+   $_[ 0 ]->_daemon_control->do_get_init_file; return OK;
+}
+
+sub restart : method {
+   $_[ 0 ]->_daemon_control->do_restart; return OK;
+}
+
+sub show_warnings : method {
+   $_[ 0 ]->_daemon_control->do_show_warnings; return OK;
+}
+
+sub start : method {
+   $_[ 0 ]->_daemon_control->do_start; return OK;
+}
+
+sub status : method {
+   $_[ 0 ]->_daemon_control->do_status; return OK;
+}
+
+sub stop : method {
+   $_[ 0 ]->_daemon_control->do_stop; return OK;
+}
+
+# Private methods
+sub _build__daemon_control {
+   my $self = shift; my $config = $self->config; my $name = $config->name;
+
+   return Daemon::Control->new( {
       name         => blessed $self || $self,
       lsb_start    => '$syslog $remote_fs',
       lsb_stop     => '$syslog',
@@ -36,7 +92,7 @@ around 'run_chain' => sub {
       path         => $config->pathname,
 
       directory    => $config->appldir,
-      program      => sub { shift; $self->daemon( @_ ) },
+      program      => sub { shift; $self->_daemon( @_ ) },
       program_args => [],
 
       pid_file     => $config->rundir->catfile( "${name}_".$self->port.'.pid' ),
@@ -44,13 +100,16 @@ around 'run_chain' => sub {
       stdout_file  => $self->_stdio_file( 'out' ),
 
       fork         => 2,
-   } )->run;
+   } );
+}
 
-   return $orig->( $self, @args ); # Never reached
-};
+sub _daemon {
+   my $self = shift; $PROGRAM_NAME = $self->app;
 
-sub daemon {
-   Plack::Runner->run( $_[ 0 ]->_get_listener_args ); exit OK;
+   $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
+
+   Plack::Runner->run( $self->_get_listener_args );
+   exit OK;
 }
 
 sub _get_listener_args {
@@ -59,9 +118,9 @@ sub _get_listener_args {
    my $port   = $ENV{DOH_SERVER_PORT} = $self->port;
    my $args   = {
       '--port'       => $port,
-      '--server'     => $config->server,
+      '--server'     => $self->server,
       '--access-log' => $config->logsdir->catfile( "access_${port}.log" ),
-      '--app'        => $config->binsdir->catfile( 'doh-server' ), };
+      '--app'        => $config->binsdir->catfile( $self->app ), };
 
    return %{ $args };
 }
@@ -91,7 +150,7 @@ Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 9 $ of L<Doh::Daemon>
+This documents version v0.1.$Rev: 12 $ of L<Doh::Daemon>
 
 =head1 Description
 
@@ -101,9 +160,47 @@ Defines the following attributes;
 
 =over 3
 
+=item C<app>
+
+The name of the PSGI file in the F<bin> directory
+
+=item C<port>
+
+The port number for the server to listen on
+
+=item C<server>
+
+The name of the L<Plack> engine used by the server
+
 =back
 
 =head1 Subroutines/Methods
+
+Defines the following methods
+
+=head2 get_init_file - Dump the SYSV init script to stdout
+
+Dump the SYSV init script to stdout
+
+=head2 restart - Restart the server
+
+Restart the server
+
+=head2 show_warnings - Show server warnings
+
+Show server warnings
+
+=head2 start - Start the server
+
+Start the server
+
+=head2 status - Show the current server status
+
+Show the current server status
+
+=head2 stop - Stop the server
+
+Stop the server
 
 =head1 Diagnostics
 
@@ -112,6 +209,10 @@ Defines the following attributes;
 =over 3
 
 =item L<Class::Usul>
+
+=item L<Daemon::Control>
+
+=item L<Plack>
 
 =back
 

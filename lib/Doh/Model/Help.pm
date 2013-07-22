@@ -1,9 +1,9 @@
-# @(#)Ident: Help.pm 2013-07-20 23:58 pjf ;
+# @(#)Ident: Help.pm 2013-07-21 18:04 pjf ;
 
 package Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 11 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_source );
@@ -19,6 +19,7 @@ sub get_stash {
    my ($self, $req) = @_; my $conf = $self->config;
 
    return { config   => $conf,
+            float    => $req->{params}->{ 'float' } // $conf->float,
             nav      => $self->_nav,
             page     => __get_page( $conf, $req ),
             template => 'documentation',
