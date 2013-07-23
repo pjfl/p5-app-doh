@@ -167,6 +167,21 @@ table tr th:last-child, table tr td:last-child {
 .hero-buttons.container-fluid .btn-hero.btn.btn-primary {
    background-color: #000000; color: #f5f5f6;
 }
+.homepage-content.container-fluid .lead {
+   font-family: 'Roboto Slab', serif; font-weight: 400;
+}
+.homepage-content.container-fluid ul,
+.homepage-content.container-fluid ol { margin: 0 0 18px 0; padding: 18px 0; }
+.homepage-content.container-fluid ul li,
+.homepage-content.container-fluid ol li {
+   list-style: none; padding-bottom: 6px;
+}
+.homepage-content.container-fluid ul li:before,
+.homepage-content.container-fluid ol li:before {
+   border: 3px solid transparent; border-left: 3px solid #8acc37;
+   content: ''; display: block; float: left; height: 0;
+   margin: 6px; width: 0;
+}
 .homepage-content.container-fluid {
    background-color: white; overflow: hidden;
    min-height: 72px; padding: 36px 0;
@@ -175,6 +190,14 @@ table tr th:last-child, table tr td:last-child {
    background-color: #000000; color: light; min-height: 72px; overflow: hidden;
 }
 .homepage-footer.container-fluid .footer-nav { margin: 18px 0; }
+.homepage-footer.container-fluid .footer-nav li { list-style: none; }
+.homepage-footer.container-fluid .footer-nav li a {
+   font-family: 'Roboto Slab', serif; font-weight: 700;
+   font-size: 1.6em; line-height: 2.25em;
+}
+.homepage-footer.container-fluid .footer-nav li a:hover { color: #8acc37; }
+.homepage-footer.container-fluid .twitter { margin-top: 36px; }
+.homepage-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .homepage-hero { background-color: #8acc37; color: #000000; }
 .homepage-hero {
    font-family: 'Roboto Slab', serif; font-weight: 700;
@@ -234,9 +257,20 @@ table tr th:last-child, table tr td:last-child {
 .pod dd p { width: 100% !important; }
 .pod dt { clear: left; }
 .pod dt a, .pod li a {
+   display: block;
    font-size: 1.4em; font-weight: 700; line-height: 1.2857em;
 }
 .pod h3 { font-size: 2.4em; line-height: 1.5em; margin: 0.75em 0; }
+.pod ul ul { width: 100% !important; }
+.pod > ul > li > ul {
+   clear: none !important; float: none !important; height: 0;
+   list-style-position: inside; list-style-type: none;
+   margin: 0 !important;
+}
+.pod > ul > li > ul > li {
+   clear: none !important; float: none !important; margin: 0 !important;
+}
+.pod > ul > li > ul > li > ul { margin-top: -18px !important; }
 .pull-left  { float: left;  text-align: left;  }
 .pull-right { float: right; text-align: right; }
 .responsive-collapse {
@@ -269,55 +303,8 @@ table tr th:last-child, table tr td:last-child {
    border-bottom: none; margin-left: -20px; margin-right: -20px;
 }
 
-/* ===========================================================================================
-Homepage
-============================================================================================== */
-.homepage-content.container-fluid .lead {
-   font-family: 'Roboto Slab', serif; font-weight: 400;
-}
-.homepage-content.container-fluid ul,
-.homepage-content.container-fluid ol {
-   margin: 0 0 18px 0; padding: 18px 0;
-}
-.homepage-content.container-fluid ul li,
-.homepage-content.container-fluid ol li {
-   list-style: none; padding-bottom: 6px;
-}
-.homepage-content.container-fluid ul li:before,
-.homepage-content.container-fluid ol li:before {
-   border: 3px solid transparent; border-left: 3px solid #8acc37;
-   content: ''; display: block; float: left; height: 0;
-   margin: 6px; width: 0;
-}
-.homepage-footer.container-fluid .footer-nav li { list-style: none; }
-.homepage-footer.container-fluid .footer-nav li a {
-   font-family: 'Roboto Slab', serif; font-weight: 700;
-   font-size: 1.6em; line-height: 2.25em;
-}
-.homepage-footer.container-fluid .footer-nav li a:hover {
-   color: #8acc37;
-}
-.homepage-footer.container-fluid .twitter { margin-top: 36px; }
-.homepage-footer.container-fluid .twitter:first-child { margin-top: 36px; }
-
+/* Media queries */
 @media (max-width: 480px) {
-}
-@media (max-width: 767px) {
-   .columns .left-column, .columns .right-column {
-      height: auto; padding-top: 0; width: 100% !important;
-   }
-   .hero-buttons.container-fluid .btn-hero.btn {
-      display: block; margin-bottom: 10px;
-   }
-   .homepage-hero { padding-top: 0 !important; }
-   .homepage-content.container-fluid { padding: 40px 20px; }
-   .homepage-footer.container-fluid { padding: 0 20px; }
-   .navbar.navbar-fixed-top { margin-left: 0; margin-right: 0 };
-   .navbar .navbar-inner { padding: 6px 10px; };
-   .navbar .navbar-inner .navbar-text {
-      line-height: 18px; margin: 12px 6px; font-size: 12px;
-   }
-   .responsive-collapse { display: block; }
 }
 @media only screen and (max-width: 800px) {
    /* Force table to not be like tables anymore */
@@ -339,6 +326,23 @@ Homepage
    td:before { /* Label the data */
       content: attr(data-title);
    }
+}
+@media (max-width: 767px) {
+   .columns .left-column, .columns .right-column {
+      height: auto; padding-top: 0; width: 100% !important;
+   }
+   .hero-buttons.container-fluid .btn-hero.btn {
+      display: block; margin-bottom: 10px;
+   }
+   .homepage-hero { padding-top: 0 !important; }
+   .homepage-content.container-fluid { padding: 40px 20px; }
+   .homepage-footer.container-fluid { padding: 0 20px; }
+   .navbar.navbar-fixed-top { margin-left: 0; margin-right: 0 };
+   .navbar .navbar-inner { padding: 6px 10px; };
+   .navbar .navbar-inner .navbar-text {
+      line-height: 18px; margin: 12px 6px; font-size: 12px;
+   }
+   .responsive-collapse { display: block; }
 }
 @media (min-width: 768px) and (max-width: 979px) {
    .navbar.navbar-fixed-top { position: fixed; }
@@ -482,20 +486,15 @@ Homepage
 @media (min-width: 1200px) {
    .columns .right-column.span9 { width: 76.8866339334%; }
 }
-/* ===========================================================================================
-Code Highlighting
-============================================================================================== */
-pre code {
-  display: block; padding: 0.5em;
-}
+
+/* Code Highlighting */
+pre code { display: block; padding: 0.5em; }
 pre code,
 pre .subst,
 pre .tag .title,
 pre .lisp .title,
 pre .clojure .built_in,
-pre .nginx .title {
-  color: #000000;
-}
+pre .nginx .title { color: #000000; }
 pre .string,
 pre .title,
 pre .constant,
@@ -519,17 +518,13 @@ pre .apache .cbracket,
 pre .tex .command,
 pre .tex .special,
 pre .erlang_repl .function_or_atom,
-pre .markdown .header {
-  color: #e0ff00;
-}
+pre .markdown .header { color: #e0ff00; }
 pre .comment,
 pre .annotation,
 pre .template_comment,
 pre .diff .header,
 pre .chunk,
-pre .markdown .blockquote {
-  color: #c4e598;
-}
+pre .markdown .blockquote { color: #c4e598; }
 pre .number,
 pre .date,
 pre .regexp,
@@ -539,9 +534,7 @@ pre .smalltalk .char,
 pre .go .constant,
 pre .change,
 pre .markdown .bullet,
-pre .markdown .link_url {
-  color: #097c4e;
-}
+pre .markdown .link_url { color: #097c4e; }
 pre .label,
 pre .javadoc,
 pre .ruby .string,
@@ -565,9 +558,7 @@ pre .prompt,
 pre .markdown .link_label,
 pre .vhdl .attribute,
 pre .clojure .attribute,
-pre .coffeescript .property {
-  color: #022e99;
-}
+pre .coffeescript .property { color: #022e99; }
 pre .keyword,
 pre .id,
 pre .phpdoc,
@@ -586,21 +577,13 @@ pre .go .typename,
 pre .tex .command,
 pre .markdown .strong,
 pre .request,
-pre .status {
-  font-weight: bold;
-}
-pre .markdown .emphasis {
-  font-style: italic;
-}
-pre .nginx .built_in {
-  font-weight: normal;
-}
+pre .status { font-weight: bold; }
+pre .markdown .emphasis { font-style: italic; }
+pre .nginx .built_in { font-weight: normal; }
 pre .coffeescript .javascript,
 pre .javascript .xml,
 pre .tex .formula,
 pre .xml .javascript,
 pre .xml .vbscript,
 pre .xml .css,
-pre .xml .cdata {
-  opacity: 0.5;
-}
+pre .xml .cdata { opacity: 0.5; }

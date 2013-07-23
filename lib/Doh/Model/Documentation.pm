@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-07-23 12:26 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-23 15:23 pjf ;
 
 package Doh::Model::Documentation;
 
 use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -78,9 +78,9 @@ sub _build_docs_tree {
 
    $path //= $self->config->docs_path; $clean_path //= NUL; $title //= NUL;
 
-   my $filter = sub { not m{ (?: doh.json | cgi-bin ) }mx }; my $tree = {};
+   my $re  = join '|', @{ $self->config->no_index }; my $tree = {};
 
-   for my $file (io( $path )->filter( $filter )->all) {
+   for my $file (io( $path )->filter( sub { not m{ (?: $re ) }mx } )->all) {
       my $clean_sort =  __clean_sort( $file->filename );
       my $url        =  "${clean_path}/${clean_sort}";
       my $clean_name =  __clean_name( $clean_sort );

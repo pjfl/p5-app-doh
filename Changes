@@ -1,6 +1,7 @@
 Revision history for Daux
 
 0.1.11    2013-07-21 01:09:56
+          - Fixed Pod css for index
           - Going to rewrite float view
           - Own CSS starting to work
           - Started remove Bootstrap and lessc

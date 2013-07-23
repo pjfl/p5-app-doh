@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-07-23 12:52 pjf ;
+# @(#)Ident: Daemon.pm 2013-07-23 17:10 pjf ;
 
 package Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( throw );
@@ -150,7 +150,7 @@ Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 13 $ of L<Doh::Daemon>
+This documents version v0.1.$Rev: 14 $ of L<Doh::Daemon>
 
 =head1 Description
 

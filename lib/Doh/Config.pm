@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-07-20 03:04 pjf ;
+# @(#)Ident: Config.pm 2013-07-23 15:25 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
@@ -48,6 +48,9 @@ has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/less/';
 
 has 'links'            => is => 'lazy', isa => ArrayRef, init_arg => undef;
+
+has 'no_index'         => is => 'ro',   isa => ArrayRef,
+   default             => sub { [ qw( .git .svn cgi-bin doh.json ) ] };
 
 has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
@@ -110,7 +113,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 9 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 14 $ of L<Doh::Config>
 
 =head1 Description
 

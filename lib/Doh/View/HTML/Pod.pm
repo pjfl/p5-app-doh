@@ -1,9 +1,9 @@
-# @(#)Ident: Pod.pm 2013-07-22 23:55 pjf ;
+# @(#)Ident: Pod.pm 2013-07-23 17:17 pjf ;
 
 package Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( ArrayRef NonEmptySimpleStr Object Str );
