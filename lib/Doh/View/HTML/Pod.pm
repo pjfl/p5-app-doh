@@ -1,9 +1,9 @@
-# @(#)Ident: Pod.pm 2013-07-22 15:12 pjf ;
+# @(#)Ident: Pod.pm 2013-07-22 23:55 pjf ;
 
 package Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( ArrayRef NonEmptySimpleStr Object Str );
@@ -29,25 +29,25 @@ has '_hacc'      => is => 'lazy', isa => Object,
 has '_top_link'  => is => 'lazy', isa => Str;
 
 sub render {
-   my ($self, $args) = @_;
+   my ($self, $page) = @_;
 
    my $hacc        = $self->_hacc;
+   my $content     = $page->{content};
    my $anchor      = $hacc->a( { id => 'podtop' } );
-   my $title       = $hacc->h1( $args->{title} );
+   my $title       = $hacc->h1( $page->{title} );
    my $heading     = $anchor.$hacc->div( { class => 'page-header' }, $title );
    my $link_parser = Pod::Hyperlink::BounceURL->new;
-      $link_parser->configure( URL => $args->{url} );
+      $link_parser->configure( URL => $page->{url} );
    my $parser      = Pod::Xhtml->new( FragmentOnly => TRUE,
                                       LinkParser   => $link_parser,
                                       StringMode   => TRUE,
                                       TopHeading   => 2,
                                       TopLinks     => $self->_top_link, );
 
-   # TODO: This needs to take input from $args->{content}
-   $args->{src} and -f $args->{src} and $parser->parse_from_file( $args->{src});
+   $content and $content->exists
+      and $parser->parse_from_file( $content->pathname );
 
-   return $heading.($parser->asString || $self->loc
-                    ( 'Class [_1] has no source', $args->{src} || '[null]' ));
+   return $heading.( $parser->asString || $self->_error( $content ) );
 }
 
 sub _build__top_link {
@@ -57,6 +57,14 @@ sub _build__top_link {
    my $link = $hacc->a( $attr, $self->loc( $self->link_text ) );
 
    return $hacc->p( { class => 'toplink' }, $link );
+}
+
+sub _error {
+   my ($self, $path) = @_;
+
+   my $error = $self->loc( 'Class [_1] has no POD', $path->filename || '[]' );
+
+   return $self->_hacc->pre( $error );
 }
 
 1;

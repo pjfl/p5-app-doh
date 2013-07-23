@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-07-21 18:27 pjf ;
+# @(#)Ident: Documentation.pm 2013-07-23 12:26 pjf ;
 
 package Doh::Model::Documentation;
 
 use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -28,64 +28,48 @@ sub BUILD { # The docs_tree attribute constructor may take some time to run
 
 # Public methods
 sub get_stash {
-   my ($self, $req) = @_; my $conf = $self->config; my $tree = $self->docs_tree;
+   my ($self, $req) = @_;
 
-   return {
-      config       => $conf,
-      docs_url     => $self->docs_url,
-      float        => $req->{params}->{ 'float' } // $conf->float,
-      homepage_url => exists $tree->{index} ? '/' : $self->docs_url,
-      http_host    => $req->{env}->{HTTP_HOST},
-      nav          => $self->navigation( [ @{ $req->{args} } ] ),
-      page         => $self->load_page ( [ @{ $req->{args} } ] ),
-      template     => $req->{args}->[ 0 ] ? 'documentation' : 'index',
-      theme        => $req->{params}->{ 'theme' } || $conf->theme,
-   };
+   return { config   => $self->config,
+            env      => $req->{env},
+            nav      => $self->navigation ( $req ),
+            page     => $self->load_page  ( $req ),
+            prefs    => $self->preferences( $req ),
+            template => $req->{args}->[ 0 ] ? 'documentation' : 'index', };
 }
 
 sub load_page {
-   my ($self, $parts) = @_;
+   my ($self, $req) = @_; my $doc_path = [ @{ $req->{args} || [] } ]; my $tree;
 
-   my $branch = __find_branch( $self->docs_tree, $parts );
+   my $node = __find_node( $tree = $self->docs_tree, $doc_path );
 
-   ($branch and exists $branch->{type} and $branch->{type} eq 'file')
+   ($node and exists $node->{type} and $node->{type} eq 'file')
       or return { content => "> Oh no. That page doesn't exist",
                   format  => 'markdown' };
 
-   my $page = { content => io( $branch->{path} )->utf8->all,
-                format  => $branch->{format}, };
+   my $page = { content      => io( $node->{path} ),
+                docs_url     => $self->docs_url,
+                format       => $node->{format},
+                homepage_url => exists $tree->{index} ? '/' : $self->docs_url,
+   };
 
-   $branch->{name} ne 'index' and $page->{header} = $branch->{title};
+   $node->{name} ne 'index' and $page->{header} = $node->{title};
 
    return $page;
 }
 
 sub navigation {
-   my ($self, $parts, $tree, $path_url, $level) = @_; my @nav = ();
+   my ($self, $req) = @_; my $parts = [ @{ $req->{args} || [] } ];
 
-   $tree     //= $self->docs_tree;
-   $path_url //= join '/', NUL, @{ $parts };
-   $level    //= 0;
+   return __build_navigation_list( $self->docs_tree, $parts,
+                                   (join '/', NUL, @{ $parts }), 0 );
+}
 
-   for my $node (map  { $tree->{ $_ } }
-                 grep { $_ ne 'index' } __sort_pages( $tree )) {
-      my $page = { level => $level, name => $node->{name},
-                   type  => $node->{type} };
+sub preferences {
+   my ($self, $req) = @_; my $conf = $self->config;
 
-      if (defined $parts->[ 0 ] and $parts->[ 0 ] eq $node->{clean}) {
-         $page->{class} = $path_url eq $node->{url} ? 'active' : 'open';
-         shift @{ $parts };
-      }
-
-      if ($page->{type} eq 'folder') {
-         $page->{url} = '#';
-         push @nav, $page, @{
-            $self->navigation( $parts, $node->{tree}, $path_url, $level + 1 ) };
-      }
-      else { $page->{url} = $node->{url}; push @nav, $page }
-   }
-
-   return \@nav;
+   return { float => $req->{params}->{ 'float' } // $conf->float,
+            theme => $req->{params}->{ 'theme' } // $conf->theme, };
 }
 
 # Private methods
@@ -121,18 +105,18 @@ sub _build_docs_tree {
 }
 
 sub _build_docs_url {
-   my ($self, $tree, $branch) = @_;
+   my ($self, $tree, $node) = @_;
 
-   $tree //= $self->docs_tree; $branch //= __current( $tree );
+   $tree //= $self->docs_tree; $node //= __current( $tree );
 
-   if ($branch->{type} eq 'file') { return $branch->{url} }
-   elsif (exists $branch->{tree}) {
-      return $self->_build_docs_url( $branch->{tree} );
+   if ($node->{type} eq 'file') { return $node->{url} }
+   elsif (exists $node->{tree}) {
+      return $self->_build_docs_url( $node->{tree} );
    }
 
-   $branch = __next( $tree ) or $self->log->fatal( 'Config Error: Unable to find the first page in the /docs folder. Double check you have at least one file in the root of of the /docs folder. Also make sure you do not have any empty folders' );
+   $node = __next( $tree ) or $self->log->fatal( 'Config Error: Unable to find the first page in the /docs folder. Double check you have at least one file in the root of of the /docs folder. Also make sure you do not have any empty folders' );
 
-   return $self->_build_docs_url( $tree, $branch );
+   return $self->_build_docs_url( $tree, $node );
 }
 
 sub _get_format {
@@ -142,6 +126,31 @@ sub _get_format {
 }
 
 # Private functions
+sub __build_navigation_list {
+   my ($tree, $parts, $path_url, $level) = @_; my @nav = ();
+
+   for my $node (map  { $tree->{ $_ } }
+                 grep { $_ ne 'index' } __sort_pages( $tree )) {
+      my $page = { level => $level, name => $node->{name},
+                   type  => $node->{type} };
+
+      if (defined $parts->[ 0 ] and $parts->[ 0 ] eq $node->{clean}) {
+         $page->{class} = $path_url eq $node->{url} ? 'active' : 'open';
+         shift @{ $parts };
+      }
+
+      if ($page->{type} eq 'folder') {
+         $page->{url} = '#';
+         push @nav, $page, @{ __build_navigation_list
+                                 ( $node->{tree}, $parts,
+                                   $path_url, $level + 1 ) };
+      }
+      else { $page->{url} = $node->{url}; push @nav, $page }
+   }
+
+   return \@nav;
+}
+
 sub __clean_name {
    my $text = shift; $text =~ s{ [_] }{ }gmx; return $text;
 }
@@ -163,7 +172,7 @@ sub __current {
    return $href->{ $href->{_iterator}->[ $href->{_iterator}->[ 0 ] + 1 ] };
 }
 
-sub __find_branch {
+sub __find_node {
    my ($tree, $path) = @_; $path->[ 0 ] or $path->[ 0 ] = 'index';
 
    for my $node (@{ $path }) {

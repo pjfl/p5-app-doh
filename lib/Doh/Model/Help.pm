@@ -1,9 +1,9 @@
-# @(#)Ident: Help.pm 2013-07-21 18:04 pjf ;
+# @(#)Ident: Help.pm 2013-07-23 13:28 pjf ;
 
 package Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_source );
@@ -13,20 +13,39 @@ use Moo;
 
 extends q(Doh);
 
-has '_nav' => is => 'lazy', isa => ArrayRef;
+has 'navigation' => is => 'lazy', isa => ArrayRef;
 
 sub get_stash {
-   my ($self, $req) = @_; my $conf = $self->config;
+   my ($self, $req) = @_;
 
-   return { config   => $conf,
-            float    => $req->{params}->{ 'float' } // $conf->float,
-            nav      => $self->_nav,
-            page     => __get_page( $conf, $req ),
-            template => 'documentation',
-            theme    => $req->{params}->{ 'theme' } || $conf->theme, };
+   return { config   => $self->config,
+            env      => $req->{env},
+            nav      => $self->navigation,
+            page     => $self->load_page  ( $req ),
+            prefs    => $self->preferences( $req ),
+            template => 'documentation', };
 }
 
-sub _build__nav {
+sub load_page {
+   my ($self, $req) = @_;
+
+   my $want = $req->{args}->[ 0 ] || $self->config->appclass;
+
+   return { content => io( find_source( $want ) || $req->{args}->[ 0 ] ),
+            format  => 'pod',
+            title   => "${want} Help",
+            url     => 'https://metacpan.org/module/%s', };
+}
+
+sub preferences {
+   my ($self, $req) = @_; my $conf = $self->config;
+
+   return { float => $req->{params}->{ 'float' } // $conf->float,
+            theme => $req->{params}->{ 'theme' } // $conf->theme, };
+}
+
+# Private methods
+sub _build_navigation {
    my $self     = shift;
    my $appclass = $self->config->appclass;
   (my $path     = find_source( $appclass )) =~ s{ \.pm }{}mx;
@@ -43,16 +62,6 @@ sub _build__nav {
    }
 
    return \@nav;
-}
-
-sub __get_page {
-   my ($conf, $req) = @_; my $want = $req->{args}->[ 0 ] || $conf->appclass;
-
-   return { content  => {
-               src   => find_source( $want ) || $req->{args}->[ 0 ],
-               title => "${want} Help",
-               url   => 'https://metacpan.org/module/%s', },
-            format   => 'pod', };
 }
 
 1;

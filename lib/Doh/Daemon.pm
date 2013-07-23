@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-07-21 18:57 pjf ;
+# @(#)Ident: Daemon.pm 2013-07-23 12:52 pjf ;
 
 package Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( throw );
@@ -150,9 +150,12 @@ Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 12 $ of L<Doh::Daemon>
+This documents version v0.1.$Rev: 13 $ of L<Doh::Daemon>
 
 =head1 Description
+
+Manages the documentation web server process. The command line wrapper for this
+class provides a SYSV init script
 
 =head1 Configuration and Environment
 
@@ -178,7 +181,7 @@ The name of the L<Plack> engine used by the server
 
 Defines the following methods
 
-=head2 get_init_file - Dump the SYSV init script to stdout
+=head2 get_init_file - Dump SYSV init script to stdout
 
 Dump the SYSV init script to stdout
 

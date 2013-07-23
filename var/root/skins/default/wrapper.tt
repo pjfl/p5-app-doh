@@ -10,7 +10,7 @@
 [% IF config.colours.0 -%]
    <link rel="icon" href="[% config.images %]favicon.png" type="image/png">
 [% ELSE -%]
-   <link rel="icon" href="[% config.images %]favicon-[% theme %].png"
+   <link rel="icon" href="[% config.images %]favicon-[% prefs.theme %].png"
       type="image/png">
 [% END -%]
    <!-- Font -->
@@ -25,7 +25,7 @@
    </style>
    <script src="[% config.js %]less.min.js"></script>
 [% ELSE -%]
-   <link rel="stylesheet" href="[% config.css %]theme-[% theme %].css">
+   <link rel="stylesheet" href="[% config.css %]theme-[% prefs.theme %].css">
 [% END -%]
    <!-- Code Highlighter -->
    <script src="[% config.js %]highlight.min.js"></script>

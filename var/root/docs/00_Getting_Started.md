@@ -85,11 +85,11 @@ We have 4 built-in Bootstrap themes. To use one of the themes, just set the `the
 * navy
 * red
 
-```
-{
-	"theme": "blue"
-}
-```
+_&nbsp;_
+
+	{
+		"theme": "blue"
+	}
 
 ###Custom Theme:
 To create a custom color scheme, set the `theme` property to `custom` and then define the required colors. Copy the following configuration to get started:

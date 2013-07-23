@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-07-22 15:03 pjf ;
+# @(#)Ident: HTML.pm 2013-07-22 23:33 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( merge_attributes throw );
@@ -91,8 +91,7 @@ sub _render_microformat {
 
    my $formatter = $self->formatters->{ $page->{format} } or return;
 
-   $page->{content} = $formatter->render( $page->{content} )
-      and $page->{format} = 'html';
+   $page->{content} = $formatter->render( $page ) and $page->{format} = 'html';
 
    return;
 }
