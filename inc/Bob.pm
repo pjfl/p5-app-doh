@@ -1,4 +1,4 @@
-# @(#)Ident: Bob.pm 2013-05-05 22:54 pjf ;
+# @(#)Ident: Bob.pm 2013-08-07 12:52 pjf ;
 
 package Bob;
 
@@ -10,21 +10,17 @@ sub whimper { print {*STDOUT} $_[ 0 ]."\n"; exit 0 }
 
 BEGIN { my $reason; $reason = CPANTesting::should_abort and whimper $reason; }
 
-use version; our $VERSION = qv( '1.14' );
+use version; our $VERSION = qv( '1.20' );
 
-use File::Spec::Functions qw(catfile);
+use File::Spec::Functions qw( catfile );
 use Module::Build;
 
 sub new {
-   my ($class, $p) = @_; $p ||= {}; $p->{requires} ||= {};
-
-   my $perl_ver    = $p->{requires}->{perl} || 5.008_008;
-
-   $] < $perl_ver and whimper "Perl minimum ${perl_ver}";
+   my ($class, $p) = @_; $p ||= {}; $p->{requires} ||= {}; __is_above_min( $p );
 
    my $module      = $p->{module} or whimper 'No module name';
    my $distname    = $module; $distname =~ s{ :: }{-}gmx;
-   my $class_path  = catfile( q(lib), split m{ :: }mx, $module.q(.pm) );
+   my $class_path  = catfile( 'lib', split m{ :: }mx, "${module}.pm" );
 
    return __get_build_class( $p )->new
       ( add_to_cleanup     => __get_cleanup_list( $p, $distname ),
@@ -34,7 +30,7 @@ sub new {
         create_packlist    => 0,
         create_readme      => 1,
         dist_version_from  => $class_path,
-        license            => $p->{license} || q(perl),
+        license            => $p->{license} || 'perl',
         meta_merge         => __get_resources( $p, $distname ),
         module_name        => $module,
         no_index           => __get_no_index( $p ),
@@ -46,14 +42,23 @@ sub new {
 }
 
 # Private functions
+sub __is_above_min {
+   my $p        = shift;
+   my $perl_ver = $p->{_min_perl_ver} = $p->{requires}->{perl} || 5.008;
+
+   $] < $perl_ver and whimper "Minimum required Perl version is ${perl_ver}";
+
+   return;
+}
+
 sub __is_src { # Is this the developer authoring a module?
-   return -f q(MANIFEST.SKIP);
+   return -f 'MANIFEST.SKIP';
 }
 
 sub __get_build_class { # Which subclass of M::B should we create?
    my $p = shift; exists $p->{build_class} and return $p->{build_class};
 
-   my $path = catfile( qw(inc SubClass.pm) );
+   my $path = catfile( qw( inc SubClass.pm ) );
 
    -f $path or return 'Module::Build';
 
@@ -67,8 +72,8 @@ sub __get_build_class { # Which subclass of M::B should we create?
 sub __get_cleanup_list {
    my $p = shift; my $distname = shift;
 
-   return [ q(Debian_CPANTS.txt), q(MANIFEST.bak), "${distname}-*",
-            map { ( q(*/) x $_ ).q(*~) } 0..5 ];
+   return [ 'Debian_CPANTS.txt', 'MANIFEST.bak', "${distname}-*",
+            map { ( '*/' x $_ ).'*~' } 0 .. 5 ];
 }
 
 sub __get_git_repository {
@@ -76,13 +81,13 @@ sub __get_git_repository {
            grep { m{ \A git }mx }
            map  { s{ \s+ }{ }gmx; (split ' ', $_)[ 1 ] }
            grep { m{ \A origin }mx }
-           qx{ git remote -v 2>/dev/null })[ 0 ];
+              qx{ git remote -v 2>/dev/null })[ 0 ];
 }
 
 sub __get_no_index {
    my $p = shift;
 
-   return { directory => $p->{no_index_dir} || [ qw(examples inc share t) ] };
+   return { directory => $p->{no_index_dir} || [ qw( examples inc share t ) ] };
 }
 
 sub __get_notes {
@@ -96,7 +101,7 @@ sub __get_notes {
    # Add a note to stop CPAN testing if requested in Build.PL
    $notes->{stop_tests       } = CPANTesting::test_exceptions( $p );
    $notes->{url_prefix       } = defined $p->{url_prefix} ? $p->{url_prefix}
-                               : q(https://metacpan.org/module/);
+                               : 'https://metacpan.org/module/';
    $notes->{version          } = $VERSION;
    return $notes;
 }
@@ -115,12 +120,12 @@ sub __get_resources {
    my $distname  = shift;
    my $tracker   = defined $p->{bugtracker}
                  ? $p->{bugtracker}
-                 : q(http://rt.cpan.org/NoAuth/Bugs.html?Dist=);
+                 : 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=';
    my $resources = $p->{resources} || {};
 
    $tracker and $resources->{bugtracker} = $tracker.$distname;
    $p->{home_page} and $resources->{homepage} = $p->{home_page};
-   $resources->{license} ||= q(http://dev.perl.org/licenses/);
+   $resources->{license} ||= 'http://dev.perl.org/licenses/';
 
    # Only get repository info when authoring a distribution
    my $repo; __is_src and $repo = __get_repository
@@ -132,7 +137,7 @@ sub __get_resources {
 sub __get_share_dir {
    my $p = shift; defined $p->{share_dir} and return $p->{share_dir};
 
-   return -d q(share) ? q(share) : undef;
+   return -d 'share' ? 'share' : undef;
 }
 
 sub __get_svn_repository {

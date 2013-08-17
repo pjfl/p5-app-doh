@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-07-23 15:25 pjf ;
+# @(#)Ident: Config.pm 2013-08-07 15:04 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
@@ -23,12 +23,14 @@ has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/css/';
 
+has 'description'      => is => 'ro',   isa => SimpleStr, default => NUL;
+
 has 'docs_path'        => is => 'lazy', isa => Directory,
    coerce              => Directory->coercion,
    default             => sub { $_[ 0 ]->root->catdir( 'docs' ) };
 
 has 'float'            => is => 'ro',   isa => NonNumericSimpleStr,
-   coerce              => sub { $_[ 0 ] ? 'float-view' : q() }, default => TRUE;
+   coerce              => sub { $_[ 0 ] ? 'float-view' : NUL }, default => TRUE;
 
 has 'font'             => is => 'ro',   isa => SimpleStr,
    default             => sub {
@@ -44,10 +46,15 @@ has 'images'           => is => 'ro',   isa => NonEmptySimpleStr,
 has 'js'               => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/js/';
 
+has 'keywords'         => is => 'ro',   isa => SimpleStr, default => NUL;
+
 has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/less/';
 
 has 'links'            => is => 'lazy', isa => ArrayRef, init_arg => undef;
+
+has 'mount_point'      => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => '/';
 
 has 'no_index'         => is => 'ro',   isa => ArrayRef,
    default             => sub { [ qw( .git .svn cgi-bin doh.json ) ] };
@@ -55,14 +62,15 @@ has 'no_index'         => is => 'ro',   isa => ArrayRef,
 has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
 
+has 'preferences'      => is => 'ro',   isa => ArrayRef,
+   default             => sub { [ qw( float theme ) ] };
+
 has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
 
 has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'server'           => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Twiggy';
-
-has 'tagline'          => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'theme'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'green';
@@ -113,7 +121,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 14 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 15 $ of L<Doh::Config>
 
 =head1 Description
 

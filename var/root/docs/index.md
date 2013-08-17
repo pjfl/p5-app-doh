@@ -6,7 +6,8 @@
 <h3>Features</h3>
 <hr/>
 
-<img src="/img/app-thumbs.png" alt="[application thumbnail]" class="pull-right" style="margin-bottom:20px;">
+<img alt="[application thumbnail]" class="pull-right app-thumbnail"
+     src="[% uri_for( config.images ) %]app-thumbs.png">
 
 * 100% Mobile Responsive
 * Supports GitHub Flavored Markdown

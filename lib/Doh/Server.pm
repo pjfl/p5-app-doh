@@ -1,21 +1,20 @@
-# @(#)Ident: Server.pm 2013-07-22 14:58 pjf ;
+# @(#)Ident: Server.pm 2013-08-08 21:34 pjf ;
 
 package Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 12 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
 
+use CGI::Simple::Cookie;
 use Class::Usul;
 use Class::Usul::Constants;
 use Class::Usul::File;
 use Class::Usul::Functions  qw( app_prefix find_apphome
                                 get_cfgfiles is_hashref trim );
-use Class::Usul::Types      qw( HashRef Maybe NonEmptySimpleStr
-                                Object SimpleStr );
+use Class::Usul::Types      qw( Maybe NonEmptySimpleStr Object SimpleStr );
 use Doh::Model::Documentation;
 use Doh::Model::Help;
 use Doh::View::HTML;
-use File::Spec::Functions   qw( catfile updir );
 use Plack::Builder;
 use Scalar::Util            qw( blessed );
 use Web::Simple;
@@ -40,19 +39,23 @@ around 'to_psgi_app' => sub {
 
    my $debug  = $ENV{PLACK_ENV} eq 'development' ? TRUE : FALSE;
    my $conf   = $self->usul->config;
+   my $point  = $conf->mount_point;
    my $logger = $self->usul->log;
 
    builder {
-      enable 'LogErrors', logger => sub {
-         my $p = shift; my $lvl = $p->{level}; $logger->$lvl( $p->{message} ) };
-      enable 'Deflater',
-         content_type =>
-            [ qw( text/css text/html text/javascript application/javascript ) ],
-         vary_user_agent => TRUE;
-      enable 'Static',
-         path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
-      enable_if { $debug } 'Debug';
-      $app;
+      mount "${point}" => builder {
+         enable 'LogErrors', logger => sub {
+            my $p = shift; my $lvl = $p->{level};
+            $logger->$lvl( $p->{message} ) };
+         enable 'Deflater',
+            content_type    => [ qw( text/css text/html text/javascript
+                                     application/javascript ) ],
+            vary_user_agent => TRUE;
+         enable 'Static',
+            path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
+         enable_if { $debug } 'Debug';
+         $app;
+      };
    };
 };
 
@@ -63,14 +66,18 @@ sub BUILD { # Take the hit at application startup not on first request
 # Public methods
 sub dispatch_request {
    sub (GET + /help | /help/** + ?*) {
-      my $self = shift; my $req = __get_request( @_ );
+      my $self  = shift; my $req = __get_request( @_ );
 
-      return $self->html_view->render( $self->help_model->get_stash( $req ) );
+      my $stash = $self->help_model->get_stash( $req );
+
+      return $self->html_view->render( $req, $stash );
    },
    sub (GET + / | /** + ?*) {
-      my $self = shift; my $req = __get_request( @_ );
+      my $self  = shift; my $req = __get_request( @_ );
 
-      return $self->html_view->render( $self->doc_model->get_stash( $req ) );
+      my $stash = $self->doc_model->get_stash( $req );
+
+      return $self->html_view->render( $req, $stash );
    };
 }
 
@@ -118,8 +125,12 @@ sub __get_request {
    my $env    = ( $_[ -1 ] && is_hashref $_[ -1 ] ) ? pop @_ : {};
    my $params = ( $_[ -1 ] && is_hashref $_[ -1 ] ) ? pop @_ : {};
    my $args   = [ split m{ [/] }mx, trim $_[  0 ] || NUL, '/' ];
+   my $cookie = { CGI::Simple::Cookie->parse( $env->{HTTP_COOKIE} ) };
+   my $domain = (split m{ [:] }mx, $env->{HTTP_HOST})[ 0 ];
+   my $base   = $env->{SCRIPT_NAME} || '/';
 
-   return { args => $args, env => $env, params => $params };
+   return { args   => $args,   base => $base, cookie => $cookie,
+            domain => $domain, env  => $env,  params => $params };
 }
 
 1;
@@ -141,7 +152,7 @@ Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 12 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 15 $ of L<Doh::Server>
 
 =head1 Description
 

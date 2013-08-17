@@ -1,18 +1,19 @@
-# @(#)Ident: HTML.pm 2013-07-22 23:33 pjf ;
+# @(#)Ident: HTML.pm 2013-08-06 23:25 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( merge_attributes throw );
+use Class::Usul::Functions  qw( base64_encode_ns merge_attributes throw );
 use Encode;
 use File::DataClass::Types  qw( Directory HashRef Object );
 use File::Spec::Functions   qw( catfile );
 use Module::Pluggable::Object;
 use Moo;
 use Scalar::Util            qw( weaken );
+use Storable                qw( nfreeze );
 use Template;
 
 extends q(Doh);
@@ -32,10 +33,11 @@ has 'type_map'   => is => 'lazy', isa => HashRef;
 
 # Public methods
 sub render {
-   my ($self, $stash) = @_;
+   my ($self, $req, $stash) = @_; weaken( $req );
 
    my $text     = NUL;
-   my $header   = [ 'Content-Type', 'text/html' ];
+   my $prefs    = $self->_serialize_preferences( $req, $stash->{prefs} || {} );
+   my $header   = [ 'Set-Cookie', $prefs, 'Content-Type', 'text/html' ];
    my $skin     =  delete $stash->{skin    } || 'default';
    my $template = (delete $stash->{template} || 'index').'.tt';
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
@@ -46,6 +48,7 @@ sub render {
    }
 
    $self->_render_microformat( $stash->{page} ||= {} );
+   $stash->{uri_for} = sub { $self->uri_for( $req, @_ ) };
 
    $self->template->process( catfile( $skin, $template ), $stash, \$text )
       or return [ 500, $header, [ $self->template->error ] ];
@@ -94,6 +97,16 @@ sub _render_microformat {
    $page->{content} = $formatter->render( $page ) and $page->{format} = 'html';
 
    return;
+}
+
+sub _serialize_preferences {
+   my ($self, $req, $prefs) = @_; my $value = base64_encode_ns nfreeze $prefs;
+
+   return CGI::Simple::Cookie->new( -domain  => $req->{domain},
+                                    -expires => '+3M',
+                                    -name    => $self->config->name.'_prefs',
+                                    -path    => $req->{base},
+                                    -value   => $value, );
 }
 
 sub _template_args {

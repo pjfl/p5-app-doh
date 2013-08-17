@@ -1,4 +1,5 @@
 {
+   "description": "The Easiest Way To Document Your Project",
    "float": "1",
    "generator_url": "/help",
    "google_analytics": "UA-12653604-10",
@@ -9,7 +10,6 @@
       "Made by Roxsoft": "http://www.roxsoft.co.uk"
    },
    "repo_url": "https://github.com/pjfl/Doh.git",
-   "tagline": "The Easiest Way To Document Your Project",
    "title": "Doh!",
    "twitter": [ "peter_flanigan", "web-simple" ]
 }

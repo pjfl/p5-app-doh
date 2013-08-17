@@ -1,39 +1,29 @@
-# @(#)Ident: Doh.pm 2013-08-06 21:02 pjf ;
+# @(#)Ident: Preferences.pm 2013-08-06 22:36 pjf ;
 
-package Doh;
+package Doh::TraitFor::Preferences;
 
-use 5.01;
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( is_arrayref is_hashref );
-use Class::Usul::Types      qw( NonEmptySimpleStr Object );
-use Moo;
+use Class::Usul::Functions  qw( base64_decode_ns );
+use Storable                qw( thaw );
+use Moo::Role;
 
-has 'language'  => is => 'ro',   isa => NonEmptySimpleStr, default => LANG;
+requires qw( config );
 
-# Private attributes
-has '_usul'     => is => 'ro', isa => Object,
-   handles      => [ qw( config localize log ) ],
-   init_arg     => 'builder', required => TRUE, weak_ref => TRUE;
+sub preferences {
+   my ($self, $req) = @_; my $conf = $self->config; my $r = {};
 
-sub loc {
-   my ($self, $key, @args) = @_; my $car = $args[ 0 ];
+   my $cookie = $req->{cookie}->{ $conf->name.'_prefs' };
+   my $frozen = base64_decode_ns( $cookie ? $cookie->value : FALSE );
+   my $prefs  = $frozen ? thaw $frozen : {};
 
-   my $args = (is_hashref $car) ? { %{ $car } }
-            : { params => (is_arrayref $car) ? $car : [ @args ] };
+   for my $k (@{ $conf->preferences }) {
+      $r->{ $k } = $req->{params}->{ $k } // $prefs->{ $k } // $conf->$k();
+   }
 
-   $args->{domain_names} ||= [ DEFAULT_L10N_DOMAIN, $self->config->name ];
-   $args->{locale      } ||= $self->language;
-
-   return $self->localize( $key, $args );
-}
-
-sub uri_for {
-   my ($self, $req, $path) = @_;
-
-   return $req->{base}.$path;
+   return $r;
 }
 
 1;
@@ -46,16 +36,16 @@ __END__
 
 =head1 Name
 
-Doh - One-line description of the modules purpose
+Doh::TraitFor::Preferences - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Doh;
+   use Doh::TraitFor::Preferences;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 15 $ of L<Doh>
+This documents version v0.1.$Rev: 15 $ of L<Doh::TraitFor::Preferences>
 
 =head1 Description
 
@@ -64,8 +54,6 @@ This documents version v0.1.$Rev: 15 $ of L<Doh>
 Defines the following attributes;
 
 =over 3
-
-=item C<language>
 
 =back
 
@@ -87,8 +75,8 @@ There are no known incompatibilities in this module
 
 =head1 Bugs and Limitations
 
-There are no known bugs in this module.
-Please report problems to the address below.
+There are no known bugs in this module. Please report problems to
+http://rt.cpan.org/NoAuth/Bugs.html?Dist=Doh.
 Patches are welcome
 
 =head1 Acknowledgements

@@ -1,9 +1,9 @@
-# @(#)Ident: Help.pm 2013-07-23 13:28 pjf ;
+# @(#)Ident: Help.pm 2013-08-06 22:36 pjf ;
 
 package Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_source );
@@ -12,6 +12,7 @@ use File::DataClass::IO;
 use Moo;
 
 extends q(Doh);
+with    q(Doh::TraitFor::Preferences);
 
 has 'navigation' => is => 'lazy', isa => ArrayRef;
 
@@ -19,7 +20,6 @@ sub get_stash {
    my ($self, $req) = @_;
 
    return { config   => $self->config,
-            env      => $req->{env},
             nav      => $self->navigation,
             page     => $self->load_page  ( $req ),
             prefs    => $self->preferences( $req ),
@@ -35,13 +35,6 @@ sub load_page {
             format  => 'pod',
             title   => "${want} Help",
             url     => 'https://metacpan.org/module/%s', };
-}
-
-sub preferences {
-   my ($self, $req) = @_; my $conf = $self->config;
-
-   return { float => $req->{params}->{ 'float' } // $conf->float,
-            theme => $req->{params}->{ 'theme' } // $conf->theme, };
 }
 
 # Private methods

@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-07-23 15:23 pjf ;
+# @(#)Ident: Documentation.pm 2013-08-06 23:32 pjf ;
 
 package Doh::Model::Documentation;
 
 use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -13,6 +13,7 @@ use File::Spec::Functions   qw( curdir );
 use Moo;
 
 extends q(Doh);
+with    q(Doh::TraitFor::Preferences);
 
 # Public attributes
 has 'docs_tree' => is => 'lazy', isa => HashRef;
@@ -31,7 +32,6 @@ sub get_stash {
    my ($self, $req) = @_;
 
    return { config   => $self->config,
-            env      => $req->{env},
             nav      => $self->navigation ( $req ),
             page     => $self->load_page  ( $req ),
             prefs    => $self->preferences( $req ),
@@ -47,10 +47,11 @@ sub load_page {
       or return { content => "> Oh no. That page doesn't exist",
                   format  => 'markdown' };
 
+   my $home = exists $tree->{index} ? '/' : $self->docs_url;
    my $page = { content      => io( $node->{path} ),
-                docs_url     => $self->docs_url,
+                docs_url     => $self->uri_for( $req, $self->docs_url ),
                 format       => $node->{format},
-                homepage_url => exists $tree->{index} ? '/' : $self->docs_url,
+                homepage_url => $self->uri_for( $req, $home ),
    };
 
    $node->{name} ne 'index' and $page->{header} = $node->{title};
@@ -63,13 +64,6 @@ sub navigation {
 
    return __build_navigation_list( $self->docs_tree, $parts,
                                    (join '/', NUL, @{ $parts }), 0 );
-}
-
-sub preferences {
-   my ($self, $req) = @_; my $conf = $self->config;
-
-   return { float => $req->{params}->{ 'float' } // $conf->float,
-            theme => $req->{params}->{ 'theme' } // $conf->theme, };
 }
 
 # Private methods

@@ -1,3 +1,4 @@
 {
-   "brand": "app.png"
+   "brand": "app.png",
+   "mount_point": "/dockiwoki"
 }
