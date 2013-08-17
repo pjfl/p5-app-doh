@@ -1,6 +1,6 @@
 # Name
 
-Doh - One-line description of the modules purpose
+Doh - An easy way to document a project using Markdown
 
 # Synopsis
 
@@ -9,7 +9,7 @@ Doh - One-line description of the modules purpose
 
 # Version
 
-This documents version v0.1.$Rev: 11 $ of [Doh](https://metacpan.org/module/Doh)
+This documents version v0.1.$Rev: 16 $ of [Doh](https://metacpan.org/module/Doh)
 
 # Description
 

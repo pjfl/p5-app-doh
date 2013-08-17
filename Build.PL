@@ -1,43 +1,29 @@
-# @(#)$Ident: Build.PL 2013-07-21 11:18 pjf ;
+# @(#)$Ident: DZ_Build.PL 2013-08-15 13:04 pjf ;
 
 use strict;
 use warnings;
-use inc::Bob; # Module::Build subclass
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
 
-Bob->new( {
-   module    => 'Doh',
-   home_page => 'http://www.roxsoft.co.uk',
-   requires  => {
-      'perl'              => 5.01,
-      'namespace::sweep'  => 0.006,
-      'Class::Usul'       => q(0.22.0),
-      'Daemon::Control'   => q(0.000_009),
-      'File::DataClass'   => q(0.22.0),
-      'HTML::Accessors'   => q(0.8.0),
-      'Module::Pluggable' => 4.8,
-      'Moo'               => 1.003,
-      'MooX::Options'     => 3.83,
-      'Plack'             => 1.0018,
-      'Plack::Middleware::Deflater'  => 0.08,
-      'Plack::Middleware::LogErrors' => 0.001,
-      'Pod::Xhtml'        => 1.61,
-      'Template'          => 2.22,
-      'Text::Markdown'    => 1.000031,
-      'Web::Simple'       => 0.020, },
-   recommends             => {
-      'App::cpanminus'    => 1.6005, },
-   configure_requires     => {
-      'version'           => 0.88,
-      'Module::Build'     => 0.4004, },
-   build_requires         => {
-      'version'           => 0.88,
-      'Module::Build'     => 0.4004, },
-} )->create_build_script; # Goal!
+use Module::Build;
 
-# Local Variables:
-# mode: perl
-# eval: (load-project-state "doh")
-# tab-title: Doh
-# tab-width: 3
-# End:
+sub whimper { print {*STDOUT} $_[ 0 ]."\n"; exit 0 }
+
+my $perl_ver = ##{ $meta2{prereqs}->{runtime}->{requires}->{perl} ##};
+my $name     = '##{ $zilla->name ##}'; $name =~ s{ - }{::}gmx;
+
+$] >= $perl_ver or $ENV{PERL5_CPANPLUS_IS_VERSION}
+   or whimper "Minimum required Perl version is ${perl_ver}";
+
+Module::Build->subclass( code => do { local $/; <DATA> } )->new(
+  'module_name' => $name,
+  'notes'       => { min_perl_version => $perl_ver },
+##{ $plugin->get_prereqs( 1 ) ##}
+##{ $plugin->get_default('share_dir') ##}
+)->create_build_script;
+
+exit 0;
+
+__DATA__
+
+sub _normalize_prereqs { # Dynamic config
+   my $self = shift; my $p = $self->SUPER::_normalize_prereqs; return $p;
+}

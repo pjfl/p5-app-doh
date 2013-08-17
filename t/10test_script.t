@@ -1,8 +1,8 @@
-# @(#)Ident: 10test_script.t 2013-07-14 23:41 pjf ;
+# @(#)Ident: 10test_script.t 2013-08-17 17:13 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 5 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 16 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, q(lib) );
@@ -10,13 +10,11 @@ use lib                 catdir( $Bin, updir, q(lib) );
 use Module::Build;
 use Test::More;
 
-my $reason;
+my $notes = {};
 
 BEGIN {
    my $builder = eval { Module::Build->current };
-
-   $builder and $reason = $builder->notes->{stop_tests};
-   $reason  and $reason =~ m{ \A TESTS: }mx and plan skip_all => $reason;
+      $builder and $notes = $builder->notes;
 }
 
 use_ok 'Doh';

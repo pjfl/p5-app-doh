@@ -1,10 +1,10 @@
-# @(#)Ident: Doh.pm 2013-08-06 21:02 pjf ;
+# @(#)Ident: Doh.pm 2013-08-17 17:15 pjf ;
 
 package Doh;
 
 use 5.01;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 16 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_arrayref is_hashref );
@@ -46,7 +46,7 @@ __END__
 
 =head1 Name
 
-Doh - One-line description of the modules purpose
+Doh - An easy way to document a project using Markdown
 
 =head1 Synopsis
 
@@ -55,7 +55,7 @@ Doh - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 15 $ of L<Doh>
+This documents version v0.1.$Rev: 16 $ of L<Doh>
 
 =head1 Description
 

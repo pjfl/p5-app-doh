@@ -1,6 +1,7 @@
 Revision history for Daux
 
-0.1.15    2013-08-17 18:08:56
+0.1.16    2013-08-17 18:20:59
+          - Switched to Dist::Zilla
           - Fixed Pod css for index
           - Going to rewrite float view
           - Own CSS starting to work
