@@ -25,6 +25,8 @@ t/ipc_srlock*
 var/logs
 var/run
 var/tmp
-var/root/css
+var/root/css/theme-blue.css
+var/root/css/theme-navy.css
+var/root/css/theme-red.css
 var/root/docs/Projects
 Doh-*

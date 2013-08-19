@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-08-06 23:32 pjf ;
+# @(#)Ident: Documentation.pm 2013-08-19 10:58 pjf ;
 
 package Doh::Model::Documentation;
 
-use 5.01;
+use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -13,6 +13,7 @@ use File::Spec::Functions   qw( curdir );
 use Moo;
 
 extends q(Doh);
+with    q(Doh::TraitFor::CommonLinks);
 with    q(Doh::TraitFor::Preferences);
 
 # Public attributes
@@ -32,14 +33,13 @@ sub get_stash {
    my ($self, $req) = @_;
 
    return { config   => $self->config,
-            nav      => $self->navigation ( $req ),
-            page     => $self->load_page  ( $req ),
-            prefs    => $self->preferences( $req ),
+            nav      => $self->navigation( $req ),
+            page     => $self->load_page ( $req ),
             template => $req->{args}->[ 0 ] ? 'documentation' : 'index', };
 }
 
 sub load_page {
-   my ($self, $req) = @_; my $doc_path = [ @{ $req->{args} || [] } ]; my $tree;
+   my ($self, $req) = @_; my $doc_path = [ @{ $req->args } ]; my $tree;
 
    my $node = __find_node( $tree = $self->docs_tree, $doc_path );
 
@@ -60,7 +60,7 @@ sub load_page {
 }
 
 sub navigation {
-   my ($self, $req) = @_; my $parts = [ @{ $req->{args} || [] } ];
+   my ($self, $req) = @_; my $parts = [ @{ $req->args } ];
 
    return __build_navigation_list( $self->docs_tree, $parts,
                                    (join '/', NUL, @{ $parts }), 0 );

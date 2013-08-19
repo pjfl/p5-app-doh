@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-08-07 15:04 pjf ;
+# @(#)Ident: Config.pm 2013-08-18 23:25 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
@@ -36,7 +36,7 @@ has 'font'             => is => 'ro',   isa => SimpleStr,
    default             => sub {
       'http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' };
 
-has 'generator_url'    => is => 'ro',   isa => SimpleStr, default => '#';
+has 'generator_url'    => is => 'ro',   isa => SimpleStr, default => '/help';
 
 has 'google_analytics' => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -121,7 +121,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 15 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 17 $ of L<Doh::Config>
 
 =head1 Description
 

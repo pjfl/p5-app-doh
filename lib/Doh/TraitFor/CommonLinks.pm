@@ -1,13 +1,12 @@
-# @(#)Ident: Preferences.pm 2013-08-19 11:11 pjf ;
+# @(#)Ident: CommonLinks.pm 2013-08-19 11:33 pjf ;
 
-package Doh::TraitFor::Preferences;
+package Doh::TraitFor::CommonLinks;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( base64_decode_ns );
-use Storable                qw( thaw );
+use Class::Usul::Functions  qw( throw );
 use Moo::Role;
 
 requires qw( config );
@@ -15,22 +14,18 @@ requires qw( config );
 around 'get_stash' => sub {
    my ($orig, $self, $req) = @_; my $stash = $orig->( $self, $req );
 
-   $stash->{prefs} = $self->_get_preferences( $req );
+   $stash->{links} = $self->_get_links( $req );
    return $stash;
 };
 
-sub _get_preferences {
-   my ($self, $req) = @_; my $conf = $self->config; my $r = {};
+sub _get_links {
+   my ($self, $req) = @_; my $conf = $self->config; my $links = {};
 
-   my $cookie = $req->cookie->{ $conf->name.'_prefs' };
-   my $frozen = base64_decode_ns( $cookie ? $cookie->value : FALSE );
-   my $prefs  = $frozen ? thaw $frozen : {};
-
-   for my $k (@{ $conf->preferences }) {
-      $r->{ $k } = $req->params->{ $k } // $prefs->{ $k } // $conf->$k();
-   }
-
-   return $r;
+   $links->{css      } = $self->uri_for( $req, $conf->css           );
+   $links->{generator} = $self->uri_for( $req, $conf->generator_url );
+   $links->{images   } = $self->uri_for( $req, $conf->images        );
+   $links->{js       } = $self->uri_for( $req, $conf->js            );
+   return $links;
 }
 
 1;
@@ -43,16 +38,16 @@ __END__
 
 =head1 Name
 
-Doh::TraitFor::Preferences - One-line description of the modules purpose
+Doh::TraitFor::CommonLinks - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Doh::TraitFor::Preferences;
+   use Doh::TraitFor::CommonLinks;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 17 $ of L<Doh::TraitFor::Preferences>
+This documents version v0.1.$Rev: 17 $ of L<Doh::TraitFor::CommonLinks>
 
 =head1 Description
 

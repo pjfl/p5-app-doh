@@ -1,13 +1,12 @@
 {
-   "description": "The Easiest Way To Document Your Project",
+   "description": "An Easy Way To Document A Project Using Markdown",
    "float": "1",
-   "generator_url": "/help",
-   "google_analytics": "UA-12653604-10",
+   "google_analytics": "UA-12345678-00",
    "links": {
       "Download": "https://github.com/pjfl/Doh/archive/master.zip",
       "Github Repo": "https://github.com/pjfl/Doh.git",
       "Issues/Wishlist": "http://rt.cpan.org/NoAuth/Bugs.html?Dist=Doh",
-      "Made by Roxsoft": "http://www.roxsoft.co.uk"
+      "Built Using Perl": "https://metacpan.org/author/PJFL"
    },
    "repo_url": "https://github.com/pjfl/Doh.git",
    "title": "Doh!",

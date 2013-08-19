@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-08-06 23:25 pjf ;
+# @(#)Ident: HTML.pm 2013-08-19 10:54 pjf ;
 
 package Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( base64_encode_ns merge_attributes throw );
@@ -102,10 +102,10 @@ sub _render_microformat {
 sub _serialize_preferences {
    my ($self, $req, $prefs) = @_; my $value = base64_encode_ns nfreeze $prefs;
 
-   return CGI::Simple::Cookie->new( -domain  => $req->{domain},
+   return CGI::Simple::Cookie->new( -domain  => $req->domain,
                                     -expires => '+3M',
                                     -name    => $self->config->name.'_prefs',
-                                    -path    => $req->{base},
+                                    -path    => $req->base,
                                     -value   => $value, );
 }
 

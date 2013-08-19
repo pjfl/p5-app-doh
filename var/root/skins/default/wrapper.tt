@@ -9,10 +9,10 @@
    <meta name="apple-mobile-web-app-capable" content="yes">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 [% IF config.colours.0 -%]
-   <link href="[% uri_for( config.images ) %]favicon.png"
+   <link href="[% links.images %]favicon.png"
           rel="icon" type="image/png" >
 [% ELSE -%]
-   <link href="[% uri_for( config.images ) %]favicon-[% prefs.theme %].png"
+   <link href="[% links.images %]favicon-[% prefs.theme %].png"
           rel="icon" type="image/png">
 [% END -%]
 [% IF config.font -%]
@@ -27,17 +27,17 @@
    [% END -%]
       @import "[% uri_for( config.less ) %]import/theme-base.less";
    </style>
-   <script src="[% uri_for( config.js ) %]less.min.js"></script>
+   <script src="[% links.js %]less.min.js"></script>
 [% ELSE -%]
-   <link href="[% uri_for( config.css ) %]theme-[% prefs.theme %].css"
+   <link href="[% links.css %]theme-[% prefs.theme %].css"
           rel="stylesheet" type="text/css">
 [% END -%]
    <!-- Code Highlighter -->
-   <script src="[% uri_for( config.js ) %]highlight.min.js"></script>
+   <script src="[% links.js %]highlight.min.js"></script>
    <script>hljs.initHighlightingOnLoad();</script>
    <!-- Navigation -->
-   <script src="[% uri_for( config.js ) %]jquery.min.js"></script>
-   <script src="[% uri_for( config.js ) %]custom.js"></script>
+   <script src="[% links.js %]jquery.min.js"></script>
+   <script src="[% links.js %]custom.js"></script>
    <title>[% config.title %]</title>
 </head>
 <body>
