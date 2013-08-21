@@ -1,6 +1,7 @@
 Revision history for Daux
 
 0.1.17    2013-08-19 12:52:06
+          - Help model doesn't hard code the url
           - Switched to Dist::Zilla
           - Fixed Pod css for index
           - Going to rewrite float view

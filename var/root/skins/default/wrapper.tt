@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+   <title>[% config.title %]</title>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="description" content="[% config.description %]">
    <meta name="keywords" content="[% config.keywords %]">
@@ -38,7 +39,6 @@
    <!-- Navigation -->
    <script src="[% links.js %]jquery.min.js"></script>
    <script src="[% links.js %]custom.js"></script>
-   <title>[% config.title %]</title>
 </head>
 <body>
    [% content %]

@@ -1,9 +1,9 @@
-# @(#)Ident: CommonLinks.pm 2013-08-19 11:33 pjf ;
+# @(#)Ident: CommonLinks.pm 2013-08-19 12:28 pjf ;
 
 package Doh::TraitFor::CommonLinks;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 18 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( throw );
@@ -47,17 +47,11 @@ Doh::TraitFor::CommonLinks - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 17 $ of L<Doh::TraitFor::CommonLinks>
+This documents version v0.1.$Rev: 18 $ of L<Doh::TraitFor::CommonLinks>
 
 =head1 Description
 
 =head1 Configuration and Environment
-
-Defines the following attributes;
-
-=over 3
-
-=back
 
 =head1 Subroutines/Methods
 
