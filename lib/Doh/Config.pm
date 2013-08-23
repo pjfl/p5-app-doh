@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-08-18 23:25 pjf ;
+# @(#)Ident: Config.pm 2013-08-22 19:55 pjf ;
 
 package Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
@@ -63,7 +63,7 @@ has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
 
 has 'preferences'      => is => 'ro',   isa => ArrayRef,
-   default             => sub { [ qw( float theme ) ] };
+   default             => sub { [ qw( float skin theme ) ] };
 
 has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
 
@@ -71,6 +71,12 @@ has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'server'           => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Twiggy';
+
+has 'skin'             => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => 'default';
+
+has 'template'         => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => 'index';
 
 has 'theme'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'green';
@@ -121,7 +127,7 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 17 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 19 $ of L<Doh::Config>
 
 =head1 Description
 

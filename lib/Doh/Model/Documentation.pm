@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-08-19 10:58 pjf ;
+# @(#)Ident: Documentation.pm 2013-08-22 20:53 pjf ;
 
 package Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use File::DataClass::IO;
@@ -32,10 +32,9 @@ sub BUILD { # The docs_tree attribute constructor may take some time to run
 sub get_stash {
    my ($self, $req) = @_;
 
-   return { config   => $self->config,
-            nav      => $self->navigation( $req ),
+   return { nav      => $self->navigation( $req ),
             page     => $self->load_page ( $req ),
-            template => $req->{args}->[ 0 ] ? 'documentation' : 'index', };
+            template => $req->{args}->[ 0 ] ? 'documentation' : undef, };
 }
 
 sub load_page {

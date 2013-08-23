@@ -1,9 +1,9 @@
-# @(#)Ident: Request.pm 2013-08-19 11:12 pjf ;
+# @(#)Ident: Request.pm 2013-08-22 23:42 pjf ;
 
 package Doh::Request;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 
 use CGI::Simple::Cookie;
 use Class::Usul::Constants;
@@ -47,7 +47,7 @@ __END__
 
 =head1 Name
 
-Doh::Request - One-line description of the modules purpose
+Doh::Request - Represents the request sent from the client to the server
 
 =head1 Synopsis
 
@@ -56,7 +56,7 @@ Doh::Request - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 17 $ of L<Doh::Request>
+This documents version v0.1.$Rev: 19 $ of L<Doh::Request>
 
 =head1 Description
 
@@ -66,17 +66,49 @@ Defines the following attributes;
 
 =over 3
 
+=item C<args>
+
+An array ref of the args supplied with the URI
+
+=item C<base>
+
+A non empty simple string which is the base of the requested URI
+
+=item C<cookie>
+
+A hash ref of cookies supplied with the request
+
+=item C<domain>
+
+A non empty simple string which is the domain of the request
+
+=item C<env>
+
+A hash ref, the L<Plack> request env
+
+=item C<params>
+
+A hash ref of parameters supplied with the request
+
 =back
 
 =head1 Subroutines/Methods
 
+None
+
 =head1 Diagnostics
+
+None
 
 =head1 Dependencies
 
 =over 3
 
+=item L<CGI::Simple::Cookie>
+
 =item L<Class::Usul>
+
+=item L<Moo>
 
 =back
 

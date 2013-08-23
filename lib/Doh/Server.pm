@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-08-19 10:48 pjf ;
+# @(#)Ident: Server.pm 2013-08-22 20:21 pjf ;
 
 package Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 
 use Class::Usul;
 use Class::Usul::Constants;
@@ -65,18 +65,10 @@ sub BUILD { # Take the hit at application startup not on first request
 # Public methods
 sub dispatch_request {
    sub (GET + /help | /help/** + ?*) {
-      my $self  = shift; my $req = Doh::Request->new( @_ );
-
-      my $stash = $self->help_model->get_stash( $req );
-
-      return $self->html_view->render( $req, $stash );
+      return shift->_get_html_response( 'help_model', @_ );
    },
    sub (GET + / | /** + ?*) {
-      my $self  = shift; my $req = Doh::Request->new( @_ );
-
-      my $stash = $self->doc_model->get_stash( $req );
-
-      return $self->html_view->render( $req, $stash );
+      return shift->_get_html_response( 'doc_model', @_ );
    };
 }
 
@@ -119,6 +111,12 @@ sub _build_usul {
    return Class::Usul->new( $attr );
 }
 
+sub _get_html_response {
+   my $self = shift; my $model = shift; my $req = Doh::Request->new( @_ );
+
+   return $self->html_view->render( $req, $self->$model->get_stash( $req ) );
+}
+
 1;
 
 __END__
@@ -138,7 +136,7 @@ Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 17 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 19 $ of L<Doh::Server>
 
 =head1 Description
 

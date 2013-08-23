@@ -1,5 +1,35 @@
 Highlight.js highlights syntax in code examples on blogs, forums and in fact on any web pages. It's very easy to use because it works automatically: finds blocks of code, detects a language, highlights it. [Learn more.](http://softwaremaniacs.org/soft/highlight/en/)
 
+**Perl**
+
+	# loads object
+	sub load
+	{
+	  my $flds = $c->db_load($id,@_) || do {
+	    Carp::carp "Can`t load (class: $c, id: $id): '$!'"; return undef
+	  };
+	  my $o = $c->_perl_new();
+	  $id12 = $id / 24 / 3600;
+	  $o->{'ID'} = $id12 + 123;
+	  #$o->{'SHCUT'} = $flds->{'SHCUT'};
+	  my $p = $o->props;
+	  my $vt;
+	  $string =~ m/^sought_text$/;
+	  $items = split //, 'abc';
+	  for my $key (keys %$p)
+	  {
+	    if(${$vt.'::property'}) {
+	      $o->{$key . '_real'} = $flds->{$key};
+	      tie $o->{$key}, 'CMSBuilder::Property', $o, $key;
+	    }
+	  }
+	  $o->save if delete $o->{'_save_after_load'};
+	  return $o;
+	}
+
+	=head1 NAME
+	POD till the end of file
+
 **Python**
 
 	@requires_authorization
@@ -67,36 +97,6 @@ Highlight.js highlights syntax in code examples on blogs, forums and in fact on 
 	    ~ variable3
 	    ~variable4
 	    The current year is #{DataTime.now.year}.
-
-**Perl**
-
-	# loads object
-	sub load
-	{
-	  my $flds = $c->db_load($id,@_) || do {
-	    Carp::carp "Can`t load (class: $c, id: $id): '$!'"; return undef
-	  };
-	  my $o = $c->_perl_new();
-	  $id12 = $id / 24 / 3600;
-	  $o->{'ID'} = $id12 + 123;
-	  #$o->{'SHCUT'} = $flds->{'SHCUT'};
-	  my $p = $o->props;
-	  my $vt;
-	  $string =~ m/^sought_text$/;
-	  $items = split //, 'abc';
-	  for my $key (keys %$p)
-	  {
-	    if(${$vt.'::property'}) {
-	      $o->{$key . '_real'} = $flds->{$key};
-	      tie $o->{$key}, 'CMSBuilder::Property', $o, $key;
-	    }
-	  }
-	  $o->save if delete $o->{'_save_after_load'};
-	  return $o;
-	}
-
-	=head1 NAME
-	POD till the end of file
 
 **PHP**
 

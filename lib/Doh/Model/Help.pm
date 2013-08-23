@@ -1,9 +1,9 @@
-# @(#)Ident: Help.pm 2013-08-20 17:12 pjf ;
+# @(#)Ident: Help.pm 2013-08-22 23:46 pjf ;
 
 package Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 18 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_source );
@@ -20,8 +20,7 @@ has 'navigation' => is => 'lazy', isa => ArrayRef;
 sub get_stash {
    my ($self, $req) = @_;
 
-   return { config   => $self->config,
-            nav      => $self->navigation,
+   return { nav      => $self->navigation,
             page     => $self->load_page( $req ),
             template => 'documentation', };
 }
@@ -44,7 +43,7 @@ sub _build_navigation {
    my $url      = $self->config->generator_url;
   (my $path     = find_source( $appclass )) =~ s{ \.pm }{}mx;
    my $io       = io( $path )->filter( sub { m{ (?: \.pm | \.pod ) \z }mx } );
-   my $paths    = [ NUL, grep { not m{ \A (?: Model | View ) }mx }
+   my $paths    = [ NUL, grep { not m{ \A (?: Model | TraitFor | View ) }mx }
                          map  { $_->abs2rel( $path ) } $io->deep->all_files ];
    my $classes  = [ map { s{ (?: :: | \.pm ) \z }{}mx; $_ }
                     map { s{ [/] }{::}gmx; "${appclass}::${_}" } @{ $paths } ];

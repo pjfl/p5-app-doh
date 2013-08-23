@@ -1,10 +1,10 @@
-# @(#)Ident: Doh.pm 2013-08-19 10:56 pjf ;
+# @(#)Ident: Doh.pm 2013-08-22 23:21 pjf ;
 
 package Doh;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 17 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( is_arrayref is_hashref );
@@ -55,7 +55,7 @@ Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.1.$Rev: 17 $ of L<Doh>
+This documents version v0.1.$Rev: 19 $ of L<Doh>
 
 =head1 Description
 
@@ -70,6 +70,8 @@ Defines the following attributes;
 =back
 
 =head1 Subroutines/Methods
+
+=head2 loc
 
 =head1 Diagnostics
 

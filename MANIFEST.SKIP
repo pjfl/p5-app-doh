@@ -22,8 +22,9 @@
 ^MYMETA\.json$
 ^MYMETA\.yml$
 ^README\.md$
+^README\.mkdn$
 ^README\.textile$
-^SIGNATURE$
+#^SIGNATURE$
 ^Debian_CPANTS.txt$
 ^nytprof/
 ^nytprof.out$
@@ -34,6 +35,7 @@
 \b_build
 
 # Avoid Dist::Zilla config file
+\bcpanfile$
 \bdist.ini$
 
 # Avoid Devel::Cover generated files
