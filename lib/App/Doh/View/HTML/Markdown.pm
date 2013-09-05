@@ -1,6 +1,6 @@
-# @(#)Ident: Markdown.pm 2013-07-22 23:33 pjf ;
+# @(#)Ident: Markdown.pm 2013-09-05 11:15 pjf ;
 
-package Doh::View::HTML::Markdown;
+package App::Doh::View::HTML::Markdown;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );

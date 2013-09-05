@@ -1,6 +1,6 @@
-# @(#)Ident: Doh.pm 2013-08-27 17:25 pjf ;
+# @(#)Ident: Doh.pm 2013-09-05 11:09 pjf ;
 
-package Doh;
+package App::Doh;
 
 use 5.010001;
 use namespace::sweep;
@@ -41,16 +41,16 @@ __END__
 
 =head1 Name
 
-Doh - An easy way to document a project using Markdown
+App::Doh - An easy way to document a project using Markdown
 
 =head1 Synopsis
 
-   use Doh;
+   use App::Doh;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 19 $ of L<Doh>
+This documents version v0.1.$Rev: 19 $ of L<App::Doh>
 
 =head1 Description
 

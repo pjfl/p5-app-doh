@@ -1,6 +1,6 @@
-# @(#)Ident: CommonLinks.pm 2013-08-23 15:08 pjf ;
+# @(#)Ident: CommonLinks.pm 2013-09-05 11:09 pjf ;
 
-package Doh::TraitFor::CommonLinks;
+package App::Doh::TraitFor::CommonLinks;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );

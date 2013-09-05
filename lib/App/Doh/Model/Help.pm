@@ -1,6 +1,6 @@
-# @(#)Ident: Help.pm 2013-08-23 14:58 pjf ;
+# @(#)Ident: Help.pm 2013-09-05 11:15 pjf ;
 
-package Doh::Model::Help;
+package App::Doh::Model::Help;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
@@ -11,9 +11,9 @@ use Class::Usul::Types      qw( ArrayRef );
 use File::DataClass::IO;
 use Moo;
 
-extends q(Doh);
-with    q(Doh::TraitFor::CommonLinks);
-with    q(Doh::TraitFor::Preferences);
+extends q(App::Doh);
+with    q(App::Doh::TraitFor::CommonLinks);
+with    q(App::Doh::TraitFor::Preferences);
 
 has 'navigation' => is => 'lazy', isa => ArrayRef;
 

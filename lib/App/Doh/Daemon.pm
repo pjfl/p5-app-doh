@@ -1,6 +1,6 @@
-# @(#)Ident: Daemon.pm 2013-07-24 03:06 pjf ;
+# @(#)Ident: Daemon.pm 2013-09-05 11:11 pjf ;
 
-package Doh::Daemon;
+package App::Doh::Daemon;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
@@ -19,7 +19,7 @@ extends q(Class::Usul::Programs);
 with    q(Class::Usul::TraitFor::UntaintedGetopts);
 
 # Override default in base class
-has '+config_class' => default => 'Doh::Config';
+has '+config_class' => default => 'App::Doh::Config';
 
 # Public attributes
 option 'app'     => is => 'ro', isa => NonEmptySimpleStr,
@@ -141,17 +141,17 @@ __END__
 
 =head1 Name
 
-Doh::Daemon - One-line description of the modules purpose
+App::Doh::Daemon - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Doh::Daemon;
+   use App::Doh::Daemon;
 
-   exit Doh::Daemon->new_with_options( appclass => 'Doh' )->run;
+   exit App::Doh::Daemon->new_with_options( appclass => 'App::Doh' )->run;
 
 =head1 Version
 
-This documents version v0.1.$Rev: 15 $ of L<Doh::Daemon>
+This documents version v0.1.$Rev: 15 $ of L<App::Doh::Daemon>
 
 =head1 Description
 

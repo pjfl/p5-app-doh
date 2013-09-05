@@ -1,15 +1,15 @@
 # Name
 
-Doh - An easy way to document a project using Markdown
+App::Doh - An easy way to document a project using Markdown
 
 # Synopsis
 
-    use Doh;
+    use App::Doh;
     # Brief but working code examples
 
 # Version
 
-This documents version v0.1.$Rev: 17 $ of [Doh](https://metacpan.org/module/Doh)
+This documents version v0.1.$Rev: 19 $ of [App::Doh](https://metacpan.org/module/App::Doh)
 
 # Description
 
@@ -17,7 +17,9 @@ This documents version v0.1.$Rev: 17 $ of [Doh](https://metacpan.org/module/Doh)
 
 Defines the following attributes;
 
-- `language`
+- `locale`
+
+    Defaults to the `LANG` constant (en)
 
 # Subroutines/Methods
 

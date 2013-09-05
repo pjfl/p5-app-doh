@@ -1,6 +1,6 @@
-# @(#)Ident: Server.pm 2013-08-22 20:21 pjf ;
+# @(#)Ident: Server.pm 2013-09-05 11:23 pjf ;
 
-package Doh::Server;
+package App::Doh::Server;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
@@ -10,10 +10,10 @@ use Class::Usul::Constants;
 use Class::Usul::File;
 use Class::Usul::Functions  qw( app_prefix find_apphome get_cfgfiles );
 use Class::Usul::Types      qw( Maybe NonEmptySimpleStr Object SimpleStr );
-use Doh::Model::Documentation;
-use Doh::Model::Help;
-use Doh::Request;
-use Doh::View::HTML;
+use App::Doh::Model::Documentation;
+use App::Doh::Model::Help;
+use App::Doh::Request;
+use App::Doh::View::HTML;
 use Plack::Builder;
 use Scalar::Util            qw( blessed );
 use Web::Simple;
@@ -22,7 +22,7 @@ use Web::Simple;
 has 'appclass'     => is => 'ro',   isa => Maybe[SimpleStr];
 
 has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
-   default         => 'Doh::Config';
+   default         => 'App::Doh::Config';
 
 has 'doc_model'    => is => 'lazy', isa => Object, init_arg => undef;
 
@@ -74,16 +74,16 @@ sub dispatch_request {
 
 # Private methods
 sub _build_doc_model {
-   return Doh::Model::Documentation->new
+   return App::Doh::Model::Documentation->new
       ( builder => $_[ 0 ]->usul, type_map => $_[ 0 ]->html_view->type_map );
 }
 
 sub _build_help_model {
-   return Doh::Model::Help->new( builder => $_[ 0 ]->usul );
+   return App::Doh::Model::Help->new( builder => $_[ 0 ]->usul );
 }
 
 sub _build_html_view {
-   return Doh::View::HTML->new( builder => $_[ 0 ]->usul );
+   return App::Doh::View::HTML->new( builder => $_[ 0 ]->usul );
 }
 
 sub _build_usul {
@@ -112,7 +112,7 @@ sub _build_usul {
 }
 
 sub _get_html_response {
-   my $self = shift; my $model = shift; my $req = Doh::Request->new( @_ );
+   my $self = shift; my $model = shift; my $req = App::Doh::Request->new( @_ );
 
    return $self->html_view->render( $req, $self->$model->get_stash( $req ) );
 }
@@ -127,16 +127,16 @@ __END__
 
 =head1 Name
 
-Doh::Server - One-line description of the modules purpose
+App::Doh::Server - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Doh::Server;
+   use App::Doh::Server;
    # Brief but working code examples
 
 =head1 Version
 
-This documents version v0.1.$Rev: 19 $ of L<Doh::Server>
+This documents version v0.1.$Rev: 19 $ of L<App::Doh::Server>
 
 =head1 Description
 

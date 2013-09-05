@@ -1,0 +1,14 @@
+{
+   "description": "An Easy Way To Document A Project Using Markdown",
+   "float": true,
+   "google_analytics": "UA-XXXXXXXX-XX",
+   "links": {
+      "Built Using Perl": "https://metacpan.org/author/PJFL",
+      "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
+      "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
+      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues"
+   },
+   "repo_url": "https://github.com/pjfl/p5-app-doh.git",
+   "title": "Doh!",
+   "twitter": [ "perl", "web-simple" ]
+}

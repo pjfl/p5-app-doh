@@ -1,21 +1,17 @@
-# @(#)$Ident: DZ_Build.PL 2013-08-25 12:52 pjf ;
+# @(#)$Ident: DZ_Build.PL 2013-09-03 12:35 pjf ;
 
 use strict;
 use warnings;
 
-use Module::Build;
+use Module::Build ##{ $meta2{prereqs}->{configure}->{requires}->{'Module::Build'} ##};
 
 sub whimper { print {*STDOUT} $_[ 0 ]."\n"; exit 0 }
 
-my $mb_ver   = ##{ $meta2{prereqs}->{configure}->{requires}->{'Module::Build'} ##};
 my $perl_ver = ##{ $meta2{prereqs}->{runtime}->{requires}->{perl} ##};
 my $name     = '##{ $zilla->name ##}'; $name =~ s{ - }{::}gmx;
 
 $] >= $perl_ver or $ENV{PERL5_CPANPLUS_IS_VERSION}
    or whimper "Minimum required Perl version is ${perl_ver}";
-
-eval { Module::Build->VERSION( $mb_ver ) }
-   or whimper "Minimum required Module::Build version is ${mb_ver}";
 
 Module::Build->subclass( code => do { local $/; <DATA> } )->new(
   'module_name' => $name,

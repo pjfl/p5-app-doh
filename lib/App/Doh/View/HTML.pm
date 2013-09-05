@@ -1,6 +1,6 @@
-# @(#)Ident: HTML.pm 2013-09-05 00:58 pjf ;
+# @(#)Ident: HTML.pm 2013-09-05 11:14 pjf ;
 
-package Doh::View::HTML;
+package App::Doh::View::HTML;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
@@ -16,7 +16,7 @@ use Scalar::Util            qw( weaken );
 use Storable                qw( nfreeze );
 use Template;
 
-extends q(Doh);
+extends q(App::Doh);
 
 # Public attributes
 has 'formatters' => is => 'lazy', isa => HashRef;

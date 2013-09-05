@@ -1,6 +1,6 @@
-# @(#)Ident: Preferences.pm 2013-09-05 01:03 pjf ;
+# @(#)Ident: Preferences.pm 2013-09-05 11:16 pjf ;
 
-package Doh::TraitFor::Preferences;
+package App::Doh::TraitFor::Preferences;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );

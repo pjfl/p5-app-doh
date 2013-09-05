@@ -27,4 +27,4 @@ var/run
 var/tmp
 var/root/css
 var/root/docs/Projects
-Doh-*
+App-Doh-*

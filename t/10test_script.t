@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 18 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 20 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
@@ -20,9 +20,9 @@ BEGIN {
 
 use Test::Requires "${perl_ver}";
 
-use_ok 'Doh';
+use_ok 'App::Doh';
 
-my $self  = Doh->new;
+my $self  = App::Doh->new;
 my $model = $self->model;
 my $tree  = $model->docs_tree;
 my $stash = $model->get_stash( 'Getting_Started' );

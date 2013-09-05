@@ -1,6 +1,6 @@
-# @(#)Ident: Config.pm 2013-08-23 20:05 pjf ;
+# @(#)Ident: Config.pm 2013-09-05 11:12 pjf ;
 
-package Doh::Config;
+package App::Doh::Config;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
@@ -60,7 +60,7 @@ has 'mount_point'      => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/';
 
 has 'no_index'         => is => 'ro',   isa => ArrayRef,
-   default             => sub { [ qw( .git .svn cgi-bin doh.json ) ] };
+   default             => sub { [ qw( .git .svn cgi-bin app-doh.json ) ] };
 
 has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
@@ -121,17 +121,17 @@ __END__
 
 =head1 Name
 
-Doh::Config - One-line description of the modules purpose
+App::Doh::Config - One-line description of the modules purpose
 
 =head1 Synopsis
 
    use Class::Usul;
 
-   Class::Usul->new( config_class => 'Doh::Config' );
+   Class::Usul->new( config_class => 'App::Doh::Config' );
 
 =head1 Version
 
-This documents version v0.1.$Rev: 19 $ of L<Doh::Config>
+This documents version v0.1.$Rev: 19 $ of L<App::Doh::Config>
 
 =head1 Description
 

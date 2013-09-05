@@ -1,16 +1,17 @@
 #!/usr/bin/env perl
-# @(#)Ident: doh-daemon 2013-07-23 10:32 pjf ;
+# @(#)Ident: doh-daemon 2013-09-05 11:22 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 13 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 20 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
 
-use Doh::Daemon;
+use App::Doh::Daemon;
 
-exit Doh::Daemon->new_with_options( appclass => 'Doh', nodebug => 1 )->run;
+exit App::Doh::Daemon->new_with_options
+   ( appclass => 'App::Doh', nodebug => 1 )->run;
 
 __END__
 
@@ -20,7 +21,7 @@ __END__
 
 =head1 NAME
 
-doh-daemon - I<Control the Documentation Server daemon>
+doh-daemon - Control the Documentation Server daemon
 
 =head1 SYNOPSIS
 
@@ -46,7 +47,7 @@ Lists the methods available in this program
 
 =head1 VERSION
 
-This documents version v0.1.$Rev: 13 $ of C<doh-daemon>
+This documents version v0.1.$Rev: 20 $ of C<doh-daemon>
 
 =head1 DESCRIPTION
 
@@ -94,7 +95,7 @@ Uses the constructor's C<appclass> attribute to locate a configuration file
 
 =over 3
 
-=item L<Doh::Daemon>
+=item L<App::Doh::Daemon>
 
 =back
 

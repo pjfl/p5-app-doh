@@ -1,6 +1,6 @@
-# @(#)Ident: Pod.pm 2013-07-23 17:17 pjf ;
+# @(#)Ident: Pod.pm 2013-09-05 11:16 pjf ;
 
-package Doh::View::HTML::Pod;
+package App::Doh::View::HTML::Pod;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
@@ -12,7 +12,7 @@ use Moo;
 use Pod::Hyperlink::BounceURL;
 use Pod::Xhtml;
 
-extends q(Doh);
+extends q(App::Doh);
 
 $Pod::Xhtml::COMMANDS{encoding} = TRUE; # STFU
 

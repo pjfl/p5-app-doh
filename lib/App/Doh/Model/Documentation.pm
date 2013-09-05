@@ -1,6 +1,6 @@
-# @(#)Ident: Documentation.pm 2013-08-27 20:55 pjf ;
+# @(#)Ident: Documentation.pm 2013-09-05 11:13 pjf ;
 
-package Doh::Model::Documentation;
+package App::Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
@@ -12,9 +12,9 @@ use File::DataClass::Types  qw( HashRef NonEmptySimpleStr );
 use File::Spec::Functions   qw( curdir );
 use Moo;
 
-extends q(Doh);
-with    q(Doh::TraitFor::CommonLinks);
-with    q(Doh::TraitFor::Preferences);
+extends q(App::Doh);
+with    q(App::Doh::TraitFor::CommonLinks);
+with    q(App::Doh::TraitFor::Preferences);
 
 # Public attributes
 has 'docs_tree' => is => 'lazy', isa => HashRef;
