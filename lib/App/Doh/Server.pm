@@ -1,25 +1,26 @@
-# @(#)Ident: Server.pm 2013-09-05 11:23 pjf ;
+# @(#)Ident: Server.pm 2013-09-05 12:16 pjf ;
 
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 21 $ =~ /\d+/gmx );
 
-use Class::Usul;
-use Class::Usul::Constants;
-use Class::Usul::File;
-use Class::Usul::Functions  qw( app_prefix find_apphome get_cfgfiles );
-use Class::Usul::Types      qw( Maybe NonEmptySimpleStr Object SimpleStr );
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
 use App::Doh::Request;
 use App::Doh::View::HTML;
+use Class::Usul;
+use Class::Usul::Constants;
+use Class::Usul::File;
+use Class::Usul::Functions  qw( app_prefix find_apphome get_cfgfiles );
+use Class::Usul::Types      qw( NonEmptySimpleStr Object );
 use Plack::Builder;
 use Scalar::Util            qw( blessed );
 use Web::Simple;
 
 # Public attributes
-has 'appclass'     => is => 'ro',   isa => Maybe[SimpleStr];
+has 'appclass'     => is => 'ro',   isa => NonEmptySimpleStr,
+   default         => 'App::Doh';
 
 has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
    default         => 'App::Doh::Config';
@@ -136,7 +137,7 @@ App::Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 19 $ of L<App::Doh::Server>
+This documents version v0.1.$Rev: 21 $ of L<App::Doh::Server>
 
 =head1 Description
 

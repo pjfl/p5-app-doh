@@ -1,16 +1,16 @@
 #!/usr/bin/env perl
-# @(#)Ident: doh-server 2013-09-05 11:21 pjf ;
+# @(#)Ident: doh-server 2013-09-05 12:17 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 20 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 21 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
 
 use App::Doh::Server;
 
-App::Doh::Server->new( appclass => 'App::Doh' )->run_if_script;
+App::Doh::Server->new->run_if_script;
 
 __END__
 
@@ -34,7 +34,7 @@ Command line access to the web application
 
 =head1 VERSION
 
-This documents version v0.1.$Rev: 20 $ of C<doh-server>
+This documents version v0.1.$Rev: 21 $ of C<doh-server>
 
 =head1 DESCRIPTION
 

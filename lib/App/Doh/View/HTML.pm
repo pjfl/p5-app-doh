@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-09-05 11:14 pjf ;
+# @(#)Ident: HTML.pm 2013-09-05 16:07 pjf ;
 
 package App::Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 21 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( base64_encode_ns merge_attributes throw );
@@ -39,7 +39,7 @@ sub render {
    my $prefs    = $stash->{prefs} || {};
    my $cookie   = $self->_serialize_preferences( $req, $prefs );
    my $header   = [ 'Content-Type', 'text/html', 'Set-Cookie', $cookie ];
-   my $skin     = $prefs->{skin} ||= $self->config->skin;
+   my $skin     = $stash->{skin} = $prefs->{skin} || $self->config->skin;
    my $template = ($stash->{template} ||= $self->config->template).'.tt';
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 

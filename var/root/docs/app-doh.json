@@ -3,7 +3,7 @@
    "float": true,
    "google_analytics": "UA-XXXXXXXX-XX",
    "links": {
-      "Built Using Perl": "https://metacpan.org/author/PJFL",
+      "Built Using Perl": "http://www.perl.org",
       "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
       "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
       "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues"

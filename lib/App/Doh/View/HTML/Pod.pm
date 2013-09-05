@@ -1,9 +1,9 @@
-# @(#)Ident: Pod.pm 2013-09-05 11:16 pjf ;
+# @(#)Ident: Pod.pm 2013-09-05 16:16 pjf ;
 
 package App::Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 14 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 21 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( ArrayRef NonEmptySimpleStr Object Str );
@@ -62,7 +62,7 @@ sub _build__top_link {
 sub _error {
    my ($self, $path) = @_;
 
-   my $error = $self->loc( 'Class [_1] has no POD', $path->filename || '[]' );
+   my $error = $self->loc( 'Class [_1] has no POD', $path->filename );
 
    return $self->_hacc->pre( $error );
 }
