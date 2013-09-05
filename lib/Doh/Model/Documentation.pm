@@ -1,4 +1,4 @@
-# @(#)Ident: Documentation.pm 2013-08-22 20:53 pjf ;
+# @(#)Ident: Documentation.pm 2013-08-27 20:55 pjf ;
 
 package Doh::Model::Documentation;
 
@@ -46,12 +46,11 @@ sub load_page {
       or return { content => "> Oh no. That page doesn't exist",
                   format  => 'markdown' };
 
-   my $home = exists $tree->{index} ? '/' : $self->docs_url;
+   my $home = exists $tree->{index} ? NUL : $self->docs_url;
    my $page = { content      => io( $node->{path} ),
-                docs_url     => $self->uri_for( $req, $self->docs_url ),
+                docs_url     => $req->uri_for( $self->docs_url ),
                 format       => $node->{format},
-                homepage_url => $self->uri_for( $req, $home ),
-   };
+                homepage_url => $req->uri_for( $home ), };
 
    $node->{name} ne 'index' and $page->{header} = $node->{title};
 
@@ -61,8 +60,8 @@ sub load_page {
 sub navigation {
    my ($self, $req) = @_; my $parts = [ @{ $req->args } ];
 
-   return __build_navigation_list( $self->docs_tree, $parts,
-                                   (join '/', NUL, @{ $parts }), 0 );
+   return __build_navigation_list
+      ( $self->docs_tree, $parts, (join '/', @{ $parts }), 0 );
 }
 
 # Private methods
@@ -75,7 +74,7 @@ sub _build_docs_tree {
 
    for my $file (io( $path )->filter( sub { not m{ (?: $re ) }mx } )->all) {
       my $clean_sort =  __clean_sort( $file->filename );
-      my $url        =  "${clean_path}/${clean_sort}";
+      my $url        =  ($clean_path ? "${clean_path}/" : NUL).$clean_sort;
       my $clean_name =  __clean_name( $clean_sort );
       my $full_path  =  $file->pathname;
       my $full_title =  $title ? "${title}: ${clean_name}" : $clean_name;

@@ -20,13 +20,13 @@
    <!-- Font -->
    <link href="[% config.font %]" rel="stylesheet" type="text/css">
 [% END -%]
-   <!-- Less -->
+   <!-- CSS -->
 [% IF config.colours.0 -%]
    <style type="text/less">
    [% FOREACH colour = config.colours -%]
       @[% colour.key %]: [% colour.value %];
    [% END -%]
-      @import "[% uri_for( config.less ) %]import/theme-base.less";
+      @import "[% links.less %]import/theme-base.less";
    </style>
    <script src="[% links.js %]less.min.js"></script>
 [% ELSE -%]

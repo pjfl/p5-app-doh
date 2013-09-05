@@ -1,4 +1,4 @@
-# @(#)Ident: Doh.pm 2013-08-22 23:21 pjf ;
+# @(#)Ident: Doh.pm 2013-08-27 17:25 pjf ;
 
 package Doh;
 
@@ -11,12 +11,13 @@ use Class::Usul::Functions  qw( is_arrayref is_hashref );
 use Class::Usul::Types      qw( NonEmptySimpleStr Object );
 use Moo;
 
-has 'language'  => is => 'ro',   isa => NonEmptySimpleStr, default => LANG;
+has 'locale' => is => 'ro', isa => NonEmptySimpleStr,
+   default   => sub { $_[ 0 ]->config->locale };
 
 # Private attributes
-has '_usul'     => is => 'ro', isa => Object,
-   handles      => [ qw( config localize log ) ],
-   init_arg     => 'builder', required => TRUE, weak_ref => TRUE;
+has '_usul'  => is => 'ro', isa => Object,
+   handles   => [ qw( config localize log ) ],
+   init_arg  => 'builder', required => TRUE, weak_ref => TRUE;
 
 sub loc {
    my ($self, $key, @args) = @_; my $car = $args[ 0 ];
@@ -25,15 +26,9 @@ sub loc {
             : { params => (is_arrayref $car) ? $car : [ @args ] };
 
    $args->{domain_names} ||= [ DEFAULT_L10N_DOMAIN, $self->config->name ];
-   $args->{locale      } ||= $self->language;
+   $args->{locale      } ||= $self->locale;
 
    return $self->localize( $key, $args );
-}
-
-sub uri_for {
-   my ($self, $req, $path) = @_;
-
-   return $req->base.$path;
 }
 
 1;
@@ -65,7 +60,9 @@ Defines the following attributes;
 
 =over 3
 
-=item C<language>
+=item C<locale>
+
+Defaults to the C<LANG> constant (en)
 
 =back
 

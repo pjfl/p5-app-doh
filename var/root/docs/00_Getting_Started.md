@@ -22,13 +22,33 @@
 ## Acknowledgements
 
 I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it
-said "Fork Me" so I did. I also exchanged the PHP for Perl.
+said "Fork Me" so I did. I also exchanged the PHP for Perl. Not a fan of
+Bootstrap so that went to.
 
-## Download
+## Installation
 
-Download this repository as a zip, and unpack. Copy the files to a web
-server that can run PHP. You can also run the documentation locally
-using Grunt.js, which is covered at the end of this readme.
+The App-Doh repository contains meta data that lists the CPAN modules
+used by the application. Modern Perl CPAN distribution installers
+(like App::cpanminus) use this information to install the required
+dependencies when this application is installed.
+
+**Requirements:**
+
+* Perl 5.10.1 or above
+
+If you don't already have it, bootstrap
+[App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
+
+   curl -L http://cpanmin.us | perl - --sudo App::cpanminus
+
+Install **App-Doh** with:
+
+   cpanm git://github.com/pjfl/p5-app-doh.git
+
+By default the server will run at: <a href="http://localhost:5000"
+target="_blank">http://localhost:5000</a> and can be started with:
+
+   plackup bin/doh-server
 
 ## Folders
 
@@ -42,12 +62,12 @@ navigation.
 
 ## Files
 
-The generator will look for Markdown `*.md` files inside the `/docs`
-folder and any of the subfolders within /docs.
+The generator will look for Markdown `*.md` or `*.mkdn` files inside
+the `/docs` folder and any of the subfolders within `/docs`.
 
-You must use the `.md` file extension for your files. Also, you must
-use underscores instead of spaces. Here are some example file names
-and what they will be converted to:
+You must use either the `.md` or the `.mkdn` file extension for your
+files. Also, you must use underscores instead of spaces. Here are some
+example file names and what they will be converted to:
 
 **Good:**
 
@@ -58,6 +78,11 @@ and what they will be converted to:
 **Bad:**
 
 * File Name With Space.md = FAIL
+
+The generator will also look for files with the extensions; `.pl`, `.pm`, and
+`.pod`. It will create markup from Perl's POD contained in these files.
+
+Text files with `.txt` extension will be rendered wrapped in 'pre' tags.
 
 ## Sorting
 
@@ -75,27 +100,25 @@ folder. This file will then be used to create a landing page. You can
 also add a tagline and image to this page using the config file like
 this:
 
-	{
-		"title": "Daux.io",
-		"tagline": "The Easiest Way To Document Your Project",
-		"image": "/img/app.png"
-	}
-
-Note: The image can be a local or remote image.
+   {
+      "title": "Doh!",
+      "description": "An Easiest Way To Document Your Project",
+      "brand": "app.png"
+   }
 
 ## Configuration
 
 To customize the look and feel of your documentation, you can create a
-`config.json` file in the of the `/docs` folder. The `config.json`
+`doh.json` file in the of the `/docs` folder. The `doh.json`
 file is a simple JSON object that you can use to change some of the
 basic settings of the documentation.
 
 ###Title:
 Change the title bar in the docs
 
-	{
-		"title": "Daux.io"
-	}
+   {
+      "title": "Doh!"
+   }
 
 ###Themes:
 We have 4 built-in Bootstrap themes. To use one of the themes, just
@@ -106,102 +129,78 @@ set the `theme` option to one of the following:
 * navy
 * red
 
-_&nbsp;_
+You can set the theme option by appending '?theme=&lt;colour&gt;' to any URI.
+The value will persist once it has been set.
 
-	{
-		"theme": "blue"
-	}
+   {
+      "theme": "blue"
+   }
 
 ###Custom Theme:
 To create a custom color scheme, set the `theme` property to `custom`
 and then define the required colors. Copy the following configuration
 to get started:
 
-	{
-		"theme": "custom",
-		"colors": {
-			"sidebar-background": "#f7f7f7",
-			"sidebar-hover": "#c5c5cb",
-			"lines": "#e7e7e9",
-			"dark": "#3f4657",
-			"light": "#82becd",
-			"text": "#2d2d2d",
-			"syntax-string": "#022e99",
-			"syntax-comment": "#84989b",
-			"syntax-number": "#2f9b92",
-			"syntax-label": "#840d7a"
-		}
-	}
+   {
+      "theme": "custom",
+      "colors": {
+         "sidebar-background": "#f7f7f7",
+         "sidebar-hover": "#c5c5cb",
+         "lines": "#e7e7e9",
+         "dark": "#3f4657",
+         "light": "#82becd",
+         "text": "#2d2d2d",
+         "syntax-string": "#022e99",
+         "syntax-comment": "#84989b",
+         "syntax-number": "#2f9b92",
+         "syntax-label": "#840d7a"
+      }
+   }
 
 ###Code Floating:
 By deafult your code blocks will be floated to a column on the right
 side of your content. To disable this feature, set the `float`
 property to `false`.
 
-	{
-		"float": false
-	}
+   {
+      "float": false
+   }
 
 
 ###Github Repo:
 Add a 'Fork me on Github' ribbon.
 
-	{
-		"repo": "justinwalsh/daux.io"
-	}
+   {
+      "repo_url": "https://github.com/pjfl/p5-app-doh.git"
+   }
 
 ###Twitter:
 Include twitter follow buttons in the sidebar.
 
-	{
-		"twitter": ["justin_walsh", "todaymade"]
-	}
+   {
+      "twitter": ["perl", "web-simple"]
+   }
 
 ###Links:
 Include custom links in the sidebar.
 
-	{
-		"links": {
-			"Github Repo": "https://github.com/justinwalsh/daux.io",
-			"Help/Support/Bugs": "https://github.com/justinwalsh/daux.io/issues",
-			"Made by Todaymade": "http://todaymade.com"
-		}
-	}
+   {
+      "links": {
+      "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
+      "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
+      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues"
+      }
+   }
 
 ###Google Analytics:
 This will embed the google analytics tracking code.
 
-	{
-		"google_analytics": "UA-XXXXXXXXX-XX"
-	}
-
-## Running Locally
-
-You can run the docs locally using <a href="http://gruntjs.com/"
-target="_blank">Grunt.js</a> I assume you are familiar with how to use
-Grunt and have the latest version of PHP 5.4 installed which is able
-to run a webserver.
-
-**Requirements:**
-
-* Perl 5.10.1 or above
-
-If you don't already have it, bootstrap
-[App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
-
-   curl -L http://cpanmin.us | perl - --sudo App::cpanminus
-
-Install **Doh** with:
-
-   cpanm git://github.com/pjfl/p5-doh.git
-
-By default the server will run at: <a href="http://localhost:5000"
-target="_blank">http://localhost:5000</a> and can be started with:
-
-   plackup bin/doh-server
+   {
+      "google_analytics": "UA-XXXXXXXXX-XX"
+   }
 
 ## Support
 
 If you need help using Doh, or have found a bug, please create an
-issue on the <a href="https://github.com/pjfl/p5-doh/issues"
+issue on the <a href="https://github.com/pjfl/p5-app-doh/issues"
 target="_blank">Github repo</a>.

@@ -1,4 +1,4 @@
-# @(#)Ident: Config.pm 2013-08-22 19:55 pjf ;
+# @(#)Ident: Config.pm 2013-08-23 20:05 pjf ;
 
 package Doh::Config;
 
@@ -20,8 +20,11 @@ has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
+has 'common_links'     => is => 'ro',   isa => ArrayRef,
+   default             => sub { [ qw( css help_url images less js ) ] };
+
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => '/css/';
+   default             => 'css/';
 
 has 'description'      => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -36,20 +39,20 @@ has 'font'             => is => 'ro',   isa => SimpleStr,
    default             => sub {
       'http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' };
 
-has 'generator_url'    => is => 'ro',   isa => SimpleStr, default => '/help';
-
 has 'google_analytics' => is => 'ro',   isa => SimpleStr, default => NUL;
 
+has 'help_url'         => is => 'ro',   isa => SimpleStr, default => 'help';
+
 has 'images'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => '/img/';
+   default             => 'img/';
 
 has 'js'               => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => '/js/';
+   default             => 'js/';
 
 has 'keywords'         => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => '/less/';
+   default             => 'less/';
 
 has 'links'            => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
@@ -122,8 +125,9 @@ Doh::Config - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use Doh::Config;
-   # Brief but working code examples
+   use Class::Usul;
+
+   Class::Usul->new( config_class => 'Doh::Config' );
 
 =head1 Version
 
@@ -137,17 +141,138 @@ Defines the following attributes;
 
 =over 3
 
+=item C<author>
+
+A non empty simple string that defaults to 'Dave'
+
+=item C<brand>
+
+A simple string that defaults to null
+
+=item C<colours>
+
+A lazily evaluated array ref
+
+=item C<common_links>
+
+An array ref that defaults to '[ qw( css help_url images less js ) ]'
+
+=item C<css>
+
+A non empty simple string that defaults to 'css/'
+
+=item C<description>
+
+A simple string that defaults to null
+
+=item C<docs_path>
+
+A lazily evaluated directory that defaults to 'var/root/docs'
+
+=item C<float>
+
+A non numeric simple string which defaults to 'float-view'
+
+=item C<font>
+
+A simple string that defaults to
+'http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100'
+
+=item C<google_analytics>
+
+A simple string that defaults to null
+
+=item C<help_url>
+
+A simple string that defaults to 'help'
+
+=item C<images>
+
+A non empty simple string that defaults to 'img/'
+
+=item C<js>
+
+A non empty simple string that defaults to 'js/'
+
+=item C<keywords>
+
+A simple string that defaults to null
+
+=item C<less>
+
+A non empty simple string that defaults to 'less/'
+
+=item C<links>
+
+A lazily evaluated array ref
+
+=item C<mount_point>
+
+A non empty simple string that defaults to '/'
+
+=item C<no_index>
+
+An array ref that defaults to '[ qw( .git .svn cgi-bin doh.json ) ]'
+
+=item C<port>
+
+A lazily evaluated non zero positive integer that defaults to 8085
+
+=item C<preferences>
+
+An array ref that defaults to '[ qw( float skin theme ) ]'
+
+=item C<projects>
+
+A hash ref that defaults to an empty hash ref
+
+=item C<repo_url>
+
+A simple string that defaults to null
+
+=item C<server>
+
+A non empty simple string that defaults to 'Twiggy'
+
+=item C<skin>
+
+A non empty simple string that defaults to 'default'
+
+=item C<template>
+
+A non empty simple string that defaults to 'index'
+
+=item C<theme>
+
+A non empty simple string that defaults to 'green'
+
+=item C<title>
+
+A non empty simple string that defaults to 'Documentation'
+
+=item C<twitter>
+
+An array ref that defaults to an empty array ref
+
 =back
 
 =head1 Subroutines/Methods
 
+None
+
 =head1 Diagnostics
+
+None
 
 =head1 Dependencies
 
 =over 3
 
 =item L<Class::Usul>
+
+=item L<File::DataClass>
+
+=item L<Moo>
 
 =back
 

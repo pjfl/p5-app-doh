@@ -1,4 +1,4 @@
-# @(#)Ident: Preferences.pm 2013-08-22 23:19 pjf ;
+# @(#)Ident: Preferences.pm 2013-09-05 01:03 pjf ;
 
 package Doh::TraitFor::Preferences;
 
@@ -23,7 +23,7 @@ sub _get_preferences {
    my ($self, $req) = @_; my $conf = $self->config; my $r = {};
 
    my $cookie = $req->cookie->{ $conf->name.'_prefs' };
-   my $frozen = base64_decode_ns( $cookie ? $cookie->value : FALSE );
+   my $frozen = $cookie ? base64_decode_ns( $cookie->value ) : FALSE;
    my $prefs  = $frozen ? thaw $frozen : {};
 
    for my $k (@{ $conf->preferences }) {

@@ -1,4 +1,4 @@
-# @(#)Ident: CommonLinks.pm 2013-08-22 23:20 pjf ;
+# @(#)Ident: CommonLinks.pm 2013-08-23 15:08 pjf ;
 
 package Doh::TraitFor::CommonLinks;
 
@@ -21,10 +21,10 @@ around 'get_stash' => sub {
 sub _get_links {
    my ($self, $req) = @_; my $conf = $self->config; my $links = {};
 
-   $links->{css      } = $self->uri_for( $req, $conf->css           );
-   $links->{generator} = $self->uri_for( $req, $conf->generator_url );
-   $links->{images   } = $self->uri_for( $req, $conf->images        );
-   $links->{js       } = $self->uri_for( $req, $conf->js            );
+   for (@{ $conf->common_links }) {
+      $links->{ $_ } = $req->uri_for( $conf->$_() );
+   }
+
    return $links;
 }
 

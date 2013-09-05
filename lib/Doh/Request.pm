@@ -1,4 +1,4 @@
-# @(#)Ident: Request.pm 2013-08-22 23:42 pjf ;
+# @(#)Ident: Request.pm 2013-08-23 20:14 pjf ;
 
 package Doh::Request;
 
@@ -8,7 +8,7 @@ use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 use CGI::Simple::Cookie;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( is_hashref trim );
-use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr );
+use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr SimpleStr );
 use Moo;
 
 has 'args'   => is => 'ro', isa => ArrayRef, default => sub { [] };
@@ -23,19 +23,29 @@ has 'env'    => is => 'ro', isa => HashRef, default => sub { {} };
 
 has 'params' => is => 'ro', isa => HashRef, default => sub { {} };
 
-around 'BUILDARGS' => sub {
-   my $orig = shift; my $self = shift; my $attr = {};
+has 'path'   => is => 'ro', isa => SimpleStr, default => NUL;
 
-   my $env = ( $_[ -1 ] && is_hashref $_[ -1 ] ) ? pop @_ : {};
+around 'BUILDARGS' => sub {
+   my ($orig, $self, @args) = @_; my $attr = {};
+
+   my $env  = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
+   my $prot = lc( (split m{ / }mx, $env->{SERVER_PROTOCOL} || 'HTTP')[ 0 ] );
+   my $path = $env->{SCRIPT_NAME} || '/'; $path =~ s{ / \z }{}gmx;
+   my $host = $env->{HTTP_HOST} || 'localhost';
 
    $attr->{env   } = $env;
-   $attr->{params} = ( $_[ -1 ] && is_hashref $_[ -1 ] ) ? pop @_ : {};
-   $attr->{args  } = [ split m{ [/] }mx, trim $_[  0 ] || NUL, '/' ];
-   $attr->{base  } = $env->{SCRIPT_NAME} || '/';
+   $attr->{params} = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
+   $attr->{args  } = [ split m{ / }mx, trim $args[ 0 ] || NUL ];
+   $attr->{base  } = $prot.'://'.$host.$path.'/';
    $attr->{cookie} = { CGI::Simple::Cookie->parse( $env->{HTTP_COOKIE} ) };
-   $attr->{domain} = (split m{ [:] }mx, $env->{HTTP_HOST})[ 0 ];
+   $attr->{domain} = (split m{ : }mx, $host)[ 0 ];
+   $attr->{path  } = $path;
    return $attr;
 };
+
+sub uri_for {
+   my ($self, $args) = @_; return $self->base.$args;
+}
 
 1;
 
@@ -89,6 +99,11 @@ A hash ref, the L<Plack> request env
 =item C<params>
 
 A hash ref of parameters supplied with the request
+
+=item C<path>
+
+Taken from the request path, this should be the same as the
+C<mount_point> configuration attribute
 
 =back
 

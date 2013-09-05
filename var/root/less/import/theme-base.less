@@ -169,7 +169,7 @@ table tr th:last-child, table tr td:last-child {
 .content-page pre { font-weight: 700; }
 .content-page ul { margin-bottom: 18px; }
 .footer { bottom: 0; left: 0; padding: 18px; position: fixed; }
-.github-ribbon { position: absolute; right: 0; top: 54px; z-index: 10; }
+.github-ribbon { position: absolute; right: 18px; top: 54px; z-index: 10; }
 .hero-buttons.container-fluid {
    background-color: @sidebar-hover; overflow: hidden;
    min-height: 18px; padding: 18px 0;
@@ -606,3 +606,8 @@ pre .xml .javascript,
 pre .xml .vbscript,
 pre .xml .css,
 pre .xml .cdata { .opacity(); }
+
+/* Plack debug */
+#plDebug #plDebugToolbarHandle {
+   right: 18px !important; top: 54px !important;
+}

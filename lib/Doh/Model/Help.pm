@@ -1,4 +1,4 @@
-# @(#)Ident: Help.pm 2013-08-22 23:46 pjf ;
+# @(#)Ident: Help.pm 2013-08-23 14:58 pjf ;
 
 package Doh::Model::Help;
 
@@ -40,18 +40,18 @@ sub load_page {
 sub _build_navigation {
    my $self     = shift;
    my $appclass = $self->config->appclass;
-   my $url      = $self->config->generator_url;
+   my $help_url = $self->config->help_url;
   (my $path     = find_source( $appclass )) =~ s{ \.pm }{}mx;
    my $io       = io( $path )->filter( sub { m{ (?: \.pm | \.pod ) \z }mx } );
    my $paths    = [ NUL, grep { not m{ \A (?: Model | TraitFor | View ) }mx }
                          map  { $_->abs2rel( $path ) } $io->deep->all_files ];
    my $classes  = [ map { s{ (?: :: | \.pm ) \z }{}mx; $_ }
                     map { s{ [/] }{::}gmx; "${appclass}::${_}" } @{ $paths } ];
-   my @nav      = ( { level => 0, name => 'Home', type => 'file', url => '/' });
+   my @nav      = ( { level => 0, name => 'Home', type => 'file', url => NUL });
 
    for my $class (@{ $classes }) {
       push @nav, { level => 0, name => $class, type => 'file',
-                   url   => "${url}/${class}" };
+                   url   => "${help_url}/${class}" };
    }
 
    return \@nav;

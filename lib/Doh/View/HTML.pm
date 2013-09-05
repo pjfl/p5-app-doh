@@ -1,4 +1,4 @@
-# @(#)Ident: HTML.pm 2013-08-22 20:53 pjf ;
+# @(#)Ident: HTML.pm 2013-09-05 00:58 pjf ;
 
 package Doh::View::HTML;
 
@@ -39,8 +39,8 @@ sub render {
    my $prefs    = $stash->{prefs} || {};
    my $cookie   = $self->_serialize_preferences( $req, $prefs );
    my $header   = [ 'Content-Type', 'text/html', 'Set-Cookie', $cookie ];
-   my $skin     = $prefs->{skin} || $self->config->skin;
-   my $template = ($stash->{template} || $self->config->template).'.tt';
+   my $skin     = $prefs->{skin} ||= $self->config->skin;
+   my $template = ($stash->{template} ||= $self->config->template).'.tt';
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
    unless ($path->exists) {
@@ -50,7 +50,8 @@ sub render {
 
    $self->_render_microformat( $stash->{page} ||= {} );
    $stash->{config } = $self->config;
-   $stash->{uri_for} = sub { $self->uri_for( $req, @_ ) };
+   $stash->{env    } = $req->env;
+   $stash->{uri_for} = sub { $req->uri_for( @_ ) };
 
    $self->template->process( catfile( $skin, $template ), $stash, \$text )
       or return [ 500, $header, [ $self->template->error ] ];
@@ -107,7 +108,7 @@ sub _serialize_preferences {
    return CGI::Simple::Cookie->new( -domain  => $req->domain,
                                     -expires => '+3M',
                                     -name    => $self->config->name.'_prefs',
-                                    -path    => $req->base,
+                                    -path    => $req->path,
                                     -value   => $value, );
 }
 

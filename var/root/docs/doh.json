@@ -1,14 +1,14 @@
 {
    "description": "An Easy Way To Document A Project Using Markdown",
-   "float": "1",
+   "float": false,
    "google_analytics": "UA-XXXXXXXX-XX",
    "links": {
       "Built Using Perl": "https://metacpan.org/author/PJFL",
-      "Download": "https://github.com/pjfl/Doh/archive/master.zip",
-      "Github Repo": "https://github.com/pjfl/Doh.git",
-      "Issues/Wishlist": "http://rt.cpan.org/NoAuth/Bugs.html?Dist=Doh"
+      "Download": "https://github.com/pjfl/p5-doh/archive/master.zip",
+      "Github Repo": "https://github.com/pjfl/p5-doh.git",
+      "Issues/Wishlist": "http://github.com/pjfl/p5-doh/issues"
    },
-   "repo_url": "https://github.com/pjfl/Doh.git",
+   "repo_url": "https://github.com/pjfl/p5-doh.git",
    "title": "Doh!",
    "twitter": [ "peter_flanigan", "web-simple" ]
 }
