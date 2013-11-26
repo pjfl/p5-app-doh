@@ -1,17 +1,17 @@
-# @(#)Ident: HTML.pm 2013-09-05 16:07 pjf ;
+# @(#)Ident: HTML.pm 2013-11-23 14:30 pjf ;
 
 package App::Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 21 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
+use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( base64_encode_ns merge_attributes throw );
 use Encode;
 use File::DataClass::Types  qw( Directory HashRef Object );
 use File::Spec::Functions   qw( catfile );
 use Module::Pluggable::Object;
-use Moo;
 use Scalar::Util            qw( weaken );
 use Storable                qw( nfreeze );
 use Template;
@@ -44,13 +44,14 @@ sub render {
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
    unless ($path->exists) {
-      $self->log->error( $text = $self->loc( 'Path [_1] not found', $path ) );
+      $self->log->error( $text = $req->loc( 'Path [_1] not found', $path ) );
       return [ 500, $header, [ $text ] ];
    }
 
-   $self->_render_microformat( $stash->{page} ||= {} );
+   $self->_render_microformat( $req, $stash->{page} ||= {} );
    $stash->{config } = $self->config;
    $stash->{env    } = $req->env;
+   $stash->{loc    } = sub { $req->loc( @_ ) };
    $stash->{uri_for} = sub { $req->uri_for( @_ ) };
 
    $self->template->process( catfile( $skin, $template ), $stash, \$text )
@@ -88,7 +89,7 @@ sub _build_type_map {
 }
 
 sub _render_microformat {
-   my ($self, $page) = @_; defined $page->{format} or return;
+   my ($self, $req, $page) = @_; defined $page->{format} or return;
 
    $page->{format} eq 'text'
       and $page->{content} = '<pre>'.$page->{content}.'</pre>'
@@ -97,7 +98,8 @@ sub _render_microformat {
 
    my $formatter = $self->formatters->{ $page->{format} } or return;
 
-   $page->{content} = $formatter->render( $page ) and $page->{format} = 'html';
+   $page->{content} = $formatter->render( $req, $page )
+      and $page->{format} = 'html';
 
    return;
 }
@@ -117,7 +119,6 @@ sub _template_args {
 
    return { RELATIVE     => TRUE,
             INCLUDE_PATH => [ $self->skin_dir->pathname ],
-            VARIABLES    => { loc => sub { $self->loc( @_ ) } },
             WRAPPER      => catfile( qw( default wrapper.tt ) ), };
 }
 

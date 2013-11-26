@@ -1,15 +1,15 @@
-# @(#)Ident: Help.pm 2013-09-05 11:15 pjf ;
+# @(#)Ident: Help.pm 2013-11-23 14:31 pjf ;
 
 package App::Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
+use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions  qw( find_source );
 use Class::Usul::Types      qw( ArrayRef );
 use File::DataClass::IO;
-use Moo;
 
 extends q(App::Doh);
 with    q(App::Doh::TraitFor::CommonLinks);

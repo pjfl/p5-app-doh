@@ -9,21 +9,15 @@ App::Doh - An easy way to document a project using Markdown
 
 # Version
 
-This documents version v0.1.$Rev: 19 $ of [App::Doh](https://metacpan.org/module/App::Doh)
+This documents version v0.1.$Rev: 22 $ of [App::Doh](https://metacpan.org/module/App::Doh)
 
 # Description
 
 # Configuration and Environment
 
-Defines the following attributes;
-
-- `locale`
-
-    Defaults to the `LANG` constant (en)
+Defines no attributes
 
 # Subroutines/Methods
-
-## loc
 
 # Diagnostics
 

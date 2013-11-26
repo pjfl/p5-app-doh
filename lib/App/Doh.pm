@@ -1,35 +1,19 @@
-# @(#)Ident: Doh.pm 2013-09-05 11:09 pjf ;
+# @(#)Ident: Doh.pm 2013-11-23 22:17 pjf ;
 
 package App::Doh;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
-use Class::Usul::Constants;
-use Class::Usul::Functions  qw( is_arrayref is_hashref );
-use Class::Usul::Types      qw( NonEmptySimpleStr Object );
 use Moo;
-
-has 'locale' => is => 'ro', isa => NonEmptySimpleStr,
-   default   => sub { $_[ 0 ]->config->locale };
+use Class::Usul::Constants;
+use Class::Usul::Types      qw( BaseType );
 
 # Private attributes
-has '_usul'  => is => 'ro', isa => Object,
-   handles   => [ qw( config localize log ) ],
-   init_arg  => 'builder', required => TRUE, weak_ref => TRUE;
-
-sub loc {
-   my ($self, $key, @args) = @_; my $car = $args[ 0 ];
-
-   my $args = (is_hashref $car) ? { %{ $car } }
-            : { params => (is_arrayref $car) ? $car : [ @args ] };
-
-   $args->{domain_names} ||= [ DEFAULT_L10N_DOMAIN, $self->config->name ];
-   $args->{locale      } ||= $self->locale;
-
-   return $self->localize( $key, $args );
-}
+has '_usul' => is => 'ro', isa => BaseType,
+   handles  => [ qw( config localize lock log ) ],
+   init_arg => 'builder', required => TRUE, weak_ref => TRUE;
 
 1;
 
@@ -50,25 +34,15 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.1.$Rev: 19 $ of L<App::Doh>
+This documents version v0.1.$Rev: 22 $ of L<App::Doh>
 
 =head1 Description
 
 =head1 Configuration and Environment
 
-Defines the following attributes;
-
-=over 3
-
-=item C<locale>
-
-Defaults to the C<LANG> constant (en)
-
-=back
+Defines no attributes
 
 =head1 Subroutines/Methods
-
-=head2 loc
 
 =head1 Diagnostics
 

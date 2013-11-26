@@ -1,12 +1,10 @@
-# @(#)Ident: CommonLinks.pm 2013-09-05 11:09 pjf ;
+# @(#)Ident: CommonLinks.pm 2013-09-14 12:41 pjf ;
 
 package App::Doh::TraitFor::CommonLinks;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
-use Class::Usul::Constants;
-use Class::Usul::Functions  qw( throw );
 use Moo::Role;
 
 requires qw( config );

@@ -1,16 +1,16 @@
-# @(#)Ident: Documentation.pm 2013-09-05 11:13 pjf ;
+# @(#)Ident: Documentation.pm 2013-11-23 14:29 pjf ;
 
 package App::Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
+use Moo;
 use Class::Usul::Constants;
 use File::DataClass::IO;
 use File::DataClass::Types  qw( HashRef NonEmptySimpleStr );
 use File::Spec::Functions   qw( curdir );
-use Moo;
 
 extends q(App::Doh);
 with    q(App::Doh::TraitFor::CommonLinks);

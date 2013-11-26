@@ -1,15 +1,15 @@
-# @(#)Ident: Config.pm 2013-09-05 11:12 pjf ;
+# @(#)Ident: Config.pm 2013-11-23 14:30 pjf ;
 
 package App::Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
+use Moo;
 use Class::Usul::Constants;
 use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
                                 NonNumericSimpleStr NonZeroPositiveInt
                                 SimpleStr );
-use Moo;
 
 extends q(Class::Usul::Config::Programs);
 
@@ -131,7 +131,7 @@ App::Doh::Config - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 19 $ of L<App::Doh::Config>
+This documents version v0.1.$Rev: 22 $ of L<App::Doh::Config>
 
 =head1 Description
 

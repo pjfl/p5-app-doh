@@ -1,14 +1,14 @@
-# @(#)Ident: Pod.pm 2013-09-05 16:16 pjf ;
+# @(#)Ident: Pod.pm 2013-11-23 14:31 pjf ;
 
 package App::Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 21 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
+use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Types      qw( ArrayRef NonEmptySimpleStr Object Str );
 use HTML::Accessors;
-use Moo;
 use Pod::Hyperlink::BounceURL;
 use Pod::Xhtml;
 
@@ -26,10 +26,8 @@ has 'link_text'  => is => 'ro',   isa => NonEmptySimpleStr,
 has '_hacc'      => is => 'lazy', isa => Object,
    default       => sub { HTML::Accessors->new( content_type => 'text/html' ) };
 
-has '_top_link'  => is => 'lazy', isa => Str;
-
 sub render {
-   my ($self, $page) = @_;
+   my ($self, $req, $page) = @_;
 
    my $hacc        = $self->_hacc;
    my $content     = $page->{content};
@@ -38,33 +36,34 @@ sub render {
    my $heading     = $anchor.$hacc->div( { class => 'page-header' }, $title );
    my $link_parser = Pod::Hyperlink::BounceURL->new;
       $link_parser->configure( URL => $page->{url} );
-   my $parser      = Pod::Xhtml->new( FragmentOnly => TRUE,
-                                      LinkParser   => $link_parser,
-                                      StringMode   => TRUE,
-                                      TopHeading   => 2,
-                                      TopLinks     => $self->_top_link, );
+   my $parser      = Pod::Xhtml->new
+      (  FragmentOnly => TRUE,
+         LinkParser   => $link_parser,
+         StringMode   => TRUE,
+         TopHeading   => 2,
+         TopLinks     => $self->_top_link( $req ), );
 
    $content and $content->exists
       and $parser->parse_from_file( $content->pathname );
 
-   return $heading.( $parser->asString || $self->_error( $content ) );
-}
-
-sub _build__top_link {
-   my $self = shift;
-   my $hacc = $self->_hacc;
-   my $attr = { class => 'toplink', href => '#podtop' };
-   my $link = $hacc->a( $attr, $self->loc( $self->link_text ) );
-
-   return $hacc->p( { class => 'toplink' }, $link );
+   return $heading.( $parser->asString || $self->_error( $req, $content ) );
 }
 
 sub _error {
-   my ($self, $path) = @_;
+   my ($self, $req, $path) = @_;
 
-   my $error = $self->loc( 'Class [_1] has no POD', $path->filename );
+   my $error = $req->loc( 'Class [_1] has no POD', $path->filename );
 
    return $self->_hacc->pre( $error );
+}
+
+sub _top_link {
+   my ($self, $req) = @_; my $hacc = $self->_hacc;
+
+   my $attr = { class => 'toplink', href => '#podtop' };
+   my $link = $hacc->a( $attr, $req->loc( $self->link_text ) );
+
+   return $hacc->p( { class => 'toplink' }, $link );
 }
 
 1;

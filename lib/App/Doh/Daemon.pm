@@ -1,22 +1,21 @@
-# @(#)Ident: Daemon.pm 2013-09-05 11:11 pjf ;
+# @(#)Ident: Daemon.pm 2013-11-23 14:29 pjf ;
 
 package App::Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 15 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
+use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( throw );
+use Class::Usul::Functions  qw( get_user throw );
+use Class::Usul::Options;
 use Class::Usul::Types      qw( NonEmptySimpleStr NonZeroPositiveInt Object );
 use Daemon::Control;
 use English                 qw( -no_match_vars );
-use Moo;
-use MooX::Options;
 use Plack::Runner;
 use Scalar::Util            qw( blessed );
 
 extends q(Class::Usul::Programs);
-with    q(Class::Usul::TraitFor::UntaintedGetopts);
 
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';
@@ -47,7 +46,7 @@ around 'run' => sub {
    $daemon->pid_file or throw 'Pid file must be defined';
 
    $daemon->uid and not $daemon->gid
-      and $daemon->gid( (getpwuid( $daemon->uid ))[ 3 ] );
+      and $daemon->gid( get_user( $daemon->uid )->gid );
 
    $self->quiet( TRUE );
 
@@ -151,7 +150,7 @@ App::Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 15 $ of L<App::Doh::Daemon>
+This documents version v0.1.$Rev: 22 $ of L<App::Doh::Daemon>
 
 =head1 Description
 

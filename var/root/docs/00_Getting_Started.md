@@ -5,25 +5,25 @@
 
 ## Features
 
-* 100% Mobile Responsive
-* Supports GitHub Flavored Markdown
-* Auto created homepage/landing page
-* Auto Syntax Highlighting
-* Auto Generated Navigation
-* 4 Built-In Colour themes or roll your own
-* Functional, Flat Design Style
-* Shareable/Linkable SEO Friendly URLs
+* 100% Mobile responsive
+* Supports GitHub flavored narkdown
+* Automatically created home / landing page
+* Automatic syntax highlighting
+* Automatically generated navigation
+* 4 Built-in colour themes or roll your own
+* Functional, flat design style
+* Shareable / linkable SEO friendly URLs
 * Bootstrap classes on the markup
-* No Build Step
-* Git/SVN Friendly
-* Google Analytics
+* No build step
+* Git / SVN friendly
+* Google analytics
 * Optional code float layout
 
 ## Acknowledgements
 
 I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it
 said "Fork Me" so I did. I also exchanged the PHP for Perl. Not a fan of
-Bootstrap so that went to.
+Bootstrap so that went also.
 
 ## Installation
 
@@ -46,9 +46,20 @@ Install **App-Doh** with:
    cpanm git://github.com/pjfl/p5-app-doh.git
 
 By default the server will run at: <a href="http://localhost:5000"
-target="_blank">http://localhost:5000</a> and can be started with:
+target="_blank">http://localhost:5000</a> and can be started
+in the foreground with:
 
    plackup bin/doh-server
+
+To start in the background listening by default on port 8085 use:
+
+   bin/doh-daemon start
+
+The doh-daemon program provides normal SysV init script semantics. Additionally
+the daemon program will write an init script to standard output in response
+to the command:
+
+   bin/doh-daemon get_init_file
 
 ## Folders
 
@@ -121,7 +132,7 @@ Change the title bar in the docs
    }
 
 ###Themes:
-We have 4 built-in Bootstrap themes. To use one of the themes, just
+We have 4 built-in colour themes. To use one of the themes, just
 set the `theme` option to one of the following:
 
 * blue

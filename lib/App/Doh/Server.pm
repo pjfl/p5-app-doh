@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-09-05 12:16 pjf ;
+# @(#)Ident: Server.pm 2013-11-23 22:05 pjf ;
 
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 21 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
@@ -13,7 +13,7 @@ use Class::Usul;
 use Class::Usul::Constants;
 use Class::Usul::File;
 use Class::Usul::Functions  qw( app_prefix find_apphome get_cfgfiles );
-use Class::Usul::Types      qw( NonEmptySimpleStr Object );
+use Class::Usul::Types      qw( BaseType NonEmptySimpleStr Object );
 use Plack::Builder;
 use Scalar::Util            qw( blessed );
 use Web::Simple;
@@ -25,13 +25,20 @@ has 'appclass'     => is => 'ro',   isa => NonEmptySimpleStr,
 has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
    default         => 'App::Doh::Config';
 
-has 'doc_model'    => is => 'lazy', isa => Object, init_arg => undef;
+has 'doc_model'    => is => 'lazy', isa => Object, init_arg => undef,
+   builder         => sub { App::Doh::Model::Documentation->new
+      ( builder    => $_[ 0 ]->usul,
+        type_map   => $_[ 0 ]->html_view->type_map ) };
 
-has 'help_model'   => is => 'lazy', isa => Object, init_arg => undef;
+has 'help_model'   => is => 'lazy', isa => Object, init_arg => undef,
+   builder         => sub { App::Doh::Model::Help->new
+      ( builder    => $_[ 0 ]->usul ) };
 
-has 'html_view'    => is => 'lazy', isa => Object, init_arg => undef;
+has 'html_view'    => is => 'lazy', isa => Object, init_arg => undef,
+   builder         => sub { App::Doh::View::HTML->new
+      ( builder    => $_[ 0 ]->usul ) };
 
-has 'usul'         => is => 'lazy', isa => Object, init_arg => undef;
+has 'usul'         => is => 'lazy', isa => BaseType, init_arg => undef;
 
 # Construction
 around 'to_psgi_app' => sub {
@@ -74,19 +81,6 @@ sub dispatch_request {
 }
 
 # Private methods
-sub _build_doc_model {
-   return App::Doh::Model::Documentation->new
-      ( builder => $_[ 0 ]->usul, type_map => $_[ 0 ]->html_view->type_map );
-}
-
-sub _build_help_model {
-   return App::Doh::Model::Help->new( builder => $_[ 0 ]->usul );
-}
-
-sub _build_html_view {
-   return App::Doh::View::HTML->new( builder => $_[ 0 ]->usul );
-}
-
 sub _build_usul {
    my $self   = shift;
    my $myconf = $self->config;
@@ -113,7 +107,9 @@ sub _build_usul {
 }
 
 sub _get_html_response {
-   my $self = shift; my $model = shift; my $req = App::Doh::Request->new( @_ );
+   my ($self, $model, @args) = @_;
+
+   my $req = App::Doh::Request->new( $self->usul, @args );
 
    return $self->html_view->render( $req, $self->$model->get_stash( $req ) );
 }
@@ -137,7 +133,7 @@ App::Doh::Server - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 21 $ of L<App::Doh::Server>
+This documents version v0.1.$Rev: 22 $ of L<App::Doh::Server>
 
 =head1 Description
 
