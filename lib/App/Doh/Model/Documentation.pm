@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-11-23 14:29 pjf ;
+# @(#)Ident: Documentation.pm 2013-11-28 18:27 pjf ;
 
 package App::Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -47,7 +47,7 @@ sub load_page {
                   format  => 'markdown' };
 
    my $home = exists $tree->{index} ? NUL : $self->docs_url;
-   my $page = { content      => io( $node->{path} ),
+   my $page = { content      => io( $node->{path} )->utf8,
                 docs_url     => $req->uri_for( $self->docs_url ),
                 format       => $node->{format},
                 homepage_url => $req->uri_for( $home ), };

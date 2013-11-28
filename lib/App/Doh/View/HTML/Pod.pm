@@ -1,9 +1,9 @@
-# @(#)Ident: Pod.pm 2013-11-23 14:31 pjf ;
+# @(#)Ident: Pod.pm 2013-11-28 18:08 pjf ;
 
 package App::Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -16,16 +16,18 @@ extends q(App::Doh);
 
 $Pod::Xhtml::COMMANDS{encoding} = TRUE; # STFU
 
-has 'extensions' => is => 'ro', isa => ArrayRef,
-   default       => sub { [ qw( pl pm pod ) ] };
+# Public attributes
+has 'extensions' => is => 'lazy', isa => ArrayRef,
+   builder       => sub { $_[ 0 ]->config->extensions->{pod} };
 
 has 'link_text'  => is => 'ro',   isa => NonEmptySimpleStr,
    default       => 'Back to Top';
 
-
+# Private attributes
 has '_hacc'      => is => 'lazy', isa => Object,
-   default       => sub { HTML::Accessors->new( content_type => 'text/html' ) };
+   builder       => sub { HTML::Accessors->new( content_type => 'text/html' ) };
 
+# Public methods
 sub render {
    my ($self, $req, $page) = @_;
 
@@ -49,6 +51,7 @@ sub render {
    return $heading.( $parser->asString || $self->_error( $req, $content ) );
 }
 
+# Private methods
 sub _error {
    my ($self, $req, $path) = @_;
 

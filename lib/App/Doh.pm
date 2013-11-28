@@ -1,10 +1,10 @@
-# @(#)Ident: Doh.pm 2013-11-23 22:17 pjf ;
+# @(#)Ident: Doh.pm 2013-11-28 17:29 pjf ;
 
 package App::Doh;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -29,28 +29,45 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Synopsis
 
-   use App::Doh;
-   # Brief but working code examples
+   # Start the server in the background
+   bin/doh-daemon start
+
+   # Stop the background server
+   bin/doh-daemon stop
+
+   # Options help
+   bin/doh-daemon -?
 
 =head1 Version
 
-This documents version v0.1.$Rev: 22 $ of L<App::Doh>
+This documents version v0.1.$Rev: 23 $ of L<App::Doh>
 
 =head1 Description
 
+A simple microformat document server written in Perl utilising L<Plack>
+and L<Web::Simple>
+
 =head1 Configuration and Environment
 
-Defines no attributes
+The configuration file attributes are documented in the L<App::Doh::Config>
+package
 
 =head1 Subroutines/Methods
 
+None
+
 =head1 Diagnostics
+
+Starting the daemon with the C<-D> option will cause it to pring debug
+information to the log file F<var/logs/daemon.log>
 
 =head1 Dependencies
 
 =over 3
 
 =item L<Class::Usul>
+
+=item L<Moo>
 
 =back
 

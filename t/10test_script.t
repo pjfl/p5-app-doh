@@ -1,8 +1,8 @@
-# @(#)Ident: 10test_script.t 2013-08-21 23:47 pjf ;
+# @(#)Ident: 10test_script.t 2013-11-28 17:48 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 20 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
@@ -20,18 +20,23 @@ BEGIN {
 
 use Test::Requires "${perl_ver}";
 
-use_ok 'App::Doh';
+use_ok 'App::Doh::Server';
 
-my $self  = App::Doh->new;
-my $model = $self->model;
+my $self  = App::Doh::Server->new;
+my $model = $self->doc_model;
 my $tree  = $model->docs_tree;
-my $stash = $model->get_stash( 'Getting_Started' );
-my $res   = $self->html_view->render( $stash );
 
 ok exists $tree->{Getting_Started}, 'Creates docs tree';
-is $model->docs_url, '/Getting_Started', 'Docs url';
 
+my $req   = App::Doh::Request->new( $self->usul, 'Getting_Started' );
+my $stash = $model->get_stash( $req );
+my $res   = $self->html_view->render( $req, $stash );
+
+is $model->docs_url, 'Getting_Started', 'Docs url';
+
+#$self->usul->dumper( $req );
 #$self->usul->dumper( $stash );
+#$self->usul->dumper( $res );
 
 done_testing;
 

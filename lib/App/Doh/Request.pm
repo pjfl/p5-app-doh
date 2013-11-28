@@ -1,9 +1,9 @@
-# @(#)Ident: Request.pm 2013-11-25 16:58 pjf ;
+# @(#)Ident: Request.pm 2013-11-28 17:15 pjf ;
 
 package App::Doh::Request;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use Moo;
 use CGI::Simple::Cookie;
@@ -82,13 +82,18 @@ Doh::Request - Represents the request sent from the client to the server
 =head1 Synopsis
 
    use Doh::Request;
-   # Brief but working code examples
+
+   my $req = App::Doh::Request->new( $class_usul_object_ref, @args );
 
 =head1 Version
 
-This documents version v0.1.$Rev: 22 $ of L<Doh::Request>
+This documents version v0.1.$Rev: 23 $ of L<Doh::Request>
 
 =head1 Description
+
+Creates an object that combines the request parameters and the L<Plack>
+environment. Supplies all information about the current request to the
+rest of the application (that would be the model and the view)
 
 =head1 Configuration and Environment
 
@@ -98,7 +103,7 @@ Defines the following attributes;
 
 =item C<args>
 
-An array ref of the args supplied with the URI
+An array reference of the arguments supplied with the URI
 
 =item C<base>
 
@@ -106,7 +111,7 @@ A non empty simple string which is the base of the requested URI
 
 =item C<cookie>
 
-A hash ref of cookies supplied with the request
+A hash reference of cookies supplied with the request
 
 =item C<domain>
 
@@ -114,15 +119,15 @@ A non empty simple string which is the domain of the request
 
 =item C<env>
 
-A hash ref, the L<Plack> request env
+A hash reference, the L<Plack> request environment
 
 =item C<locale>
 
-Defaults to the C<LANG> constant (en)
+Defaults to the C<LANG> constant C<en> (for english)
 
 =item C<params>
 
-A hash ref of parameters supplied with the request
+A hash reference of query parameters supplied with the request URI
 
 =item C<path>
 
@@ -135,7 +140,18 @@ C<mount_point> configuration attribute
 
 =head2 loc
 
+   $localised_string = $self->loc( $key, @args );
+
+Translates C<$key> into the required language and substitutes the bind values.
+The C<locale> is currently set in configuration but will be extracted from
+the request in a future release
+
 =head2 uri_for
+
+   $uri_obj = $self->uri_for( $partial_uri_path );
+
+Prefixes C<$partial_uri_path> with the base of the current request. Returns
+an absolute URI
 
 =head1 Diagnostics
 

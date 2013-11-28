@@ -29,8 +29,9 @@ Bootstrap so that went also.
 
 The App-Doh repository contains meta data that lists the CPAN modules
 used by the application. Modern Perl CPAN distribution installers
-(like App::cpanminus) use this information to install the required
-dependencies when this application is installed.
+(like [App::cpanminus](https://metacpan.org/module/App::cpanminus))
+use this information to install the required dependencies when this
+application is installed.
 
 **Requirements:**
 
@@ -108,7 +109,7 @@ stripped out of the navigation and urls.
 If you want to create a beautiful landing page for your project,
 simply create a `index.md` file in the root of the `/docs`
 folder. This file will then be used to create a landing page. You can
-also add a tagline and image to this page using the config file like
+also add a description and image to this page using the config file like
 this:
 
    {
@@ -171,7 +172,9 @@ to get started:
 ###Code Floating:
 By deafult your code blocks will be floated to a column on the right
 side of your content. To disable this feature, set the `float`
-property to `false`.
+property to `false`, or add `?float=0` to any URI to store the choice
+in the preferences. Add `?float=float-view` to any URI to re-enable the
+feature
 
    {
       "float": false
@@ -189,7 +192,7 @@ Add a 'Fork me on Github' ribbon.
 Include twitter follow buttons in the sidebar.
 
    {
-      "twitter": ["perl", "web-simple"]
+      "twitter": [ "perl", "web-simple" ]
    }
 
 ###Links:
@@ -197,9 +200,9 @@ Include custom links in the sidebar.
 
    {
       "links": {
-      "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
-      "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
-      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues"
+         "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
+         "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
+         "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues"
       }
    }
 

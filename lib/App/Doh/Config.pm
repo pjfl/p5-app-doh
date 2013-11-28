@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-11-23 14:30 pjf ;
+# @(#)Ident: Config.pm 2013-11-28 18:19 pjf ;
 
 package App::Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -21,7 +21,7 @@ has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
 has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
 has 'common_links'     => is => 'ro',   isa => ArrayRef,
-   default             => sub { [ qw( css help_url images less js ) ] };
+   builder             => sub { [ qw( css help_url images less js ) ] };
 
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'css/';
@@ -29,8 +29,12 @@ has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
 has 'description'      => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'docs_path'        => is => 'lazy', isa => Directory,
-   coerce              => Directory->coercion,
-   default             => sub { $_[ 0 ]->root->catdir( 'docs' ) };
+   builder             => sub { $_[ 0 ]->root->catdir( 'docs' ) },
+   coerce              => Directory->coercion;
+
+has 'extensions'       => is => 'ro',   isa => HashRef,
+   builder             => sub { { markdown => [ qw( md mkdn )   ],
+                                  pod      => [ qw( pl pm pod ) ], } };
 
 has 'float'            => is => 'ro',   isa => NonNumericSimpleStr,
    coerce              => sub { $_[ 0 ] ? 'float-view' : NUL }, default => TRUE;
@@ -60,13 +64,13 @@ has 'mount_point'      => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/';
 
 has 'no_index'         => is => 'ro',   isa => ArrayRef,
-   default             => sub { [ qw( .git .svn cgi-bin app-doh.json ) ] };
+   builder             => sub { [ qw( .git .svn cgi-bin app-doh.json ) ] };
 
 has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
 
 has 'preferences'      => is => 'ro',   isa => ArrayRef,
-   default             => sub { [ qw( float skin theme ) ] };
+   builder             => sub { [ qw( float skin theme ) ] };
 
 has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
 
@@ -87,15 +91,16 @@ has 'theme'            => is => 'ro',   isa => NonEmptySimpleStr,
 has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Documentation';
 
-has 'twitter'          => is => 'ro',   isa => ArrayRef,  default => sub { [] };
+has 'twitter'          => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
 
 has '_colours'         => is => 'ro',   isa => HashRef,
-   default             => sub { {} }, init_arg => 'colours';
+   builder             => sub { {} }, init_arg => 'colours';
 
 has '_links'           => is => 'ro',   isa => HashRef,
-   default             => sub { {} }, init_arg => 'links';
+   builder             => sub { {} }, init_arg => 'links';
 
+# Private methods
 sub _build_colours {
    return __to_array_of_hash( $_[ 0 ]->_colours, qw( key value ) );
 }
@@ -104,6 +109,7 @@ sub _build_links {
    return __to_array_of_hash( $_[ 0 ]->_links, qw( name url ) );
 }
 
+# Private functions
 sub __to_array_of_hash {
    my ($href, $key_key, $val_key) = @_;
 
@@ -121,17 +127,19 @@ __END__
 
 =head1 Name
 
-App::Doh::Config - One-line description of the modules purpose
+App::Doh::Config - Defines the configuration file options and their defaults
 
 =head1 Synopsis
 
    use Class::Usul;
 
-   Class::Usul->new( config_class => 'App::Doh::Config' );
+   my $usul = Class::Usul->new( config_class => 'App::Doh::Config' );
+
+   my $author = $usul->config->author;
 
 =head1 Version
 
-This documents version v0.1.$Rev: 22 $ of L<App::Doh::Config>
+This documents version v0.1.$Rev: 23 $ of L<App::Doh::Config>
 
 =head1 Description
 
@@ -143,116 +151,160 @@ Defines the following attributes;
 
 =item C<author>
 
-A non empty simple string that defaults to 'Dave'
+A non empty simple string that defaults to C<Dave>. The HTML meta attributes
+author value
 
 =item C<brand>
 
-A simple string that defaults to null
+A simple string that defaults to null. The name of the image file used
+on the splash screen to represent the application
 
 =item C<colours>
 
-A lazily evaluated array ref
+A lazily evaluated array reference of hashes created automatically from the
+hash reference in the configuration file. Each hash has a single
+key / value pair, the colour name and it's hash value. If specified
+creates a custom colour scheme for the project
 
 =item C<common_links>
 
-An array ref that defaults to '[ qw( css help_url images less js ) ]'
+An array reference that defaults to C<[ css help_url images less js ]>.
+The application precalculates URIs for these static directories for use
+in the HTML templates
 
 =item C<css>
 
-A non empty simple string that defaults to 'css/'
+A non empty simple string that defaults to F<css/>. Relative URI path
+that locates the static CSS files
 
 =item C<description>
 
-A simple string that defaults to null
+A simple string that defaults to null. The HTML meta attributes description
+value
 
 =item C<docs_path>
 
-A lazily evaluated directory that defaults to 'var/root/docs'
+A lazily evaluated directory that defaults to F<var/root/docs>. The document
+root for the microformat content pages
+
+=item C<extensions>
+
+A hash reference. The keys are microformat names and the values are an
+array reference of filename extensions that the coresponding view can
+render
 
 =item C<float>
 
-A non numeric simple string which defaults to 'float-view'
+A non numeric simple string which defaults to C<float-view>. The default
+view mode
 
 =item C<font>
 
 A simple string that defaults to
-'http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100'
+C<http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100>. The
+default font used to display text
 
 =item C<google_analytics>
 
-A simple string that defaults to null
+A simple string that defaults to null. Unique Google Analytics registration
+code
 
 =item C<help_url>
 
-A simple string that defaults to 'help'
+A simple string that defaults to C<help>. The partion URI path which locates
+this POD when rendered as HTML and served by this application
 
 =item C<images>
 
-A non empty simple string that defaults to 'img/'
+A non empty simple string that defaults to F<img/>. Relative URI path that
+locates the static image files
 
 =item C<js>
 
-A non empty simple string that defaults to 'js/'
+A non empty simple string that defaults to F<js/>. Relative URI path that
+locates the static JavaScript files
 
 =item C<keywords>
 
-A simple string that defaults to null
+A simple string that defaults to null. The HTML meta attribures keyword
+list value
 
 =item C<less>
 
-A non empty simple string that defaults to 'less/'
+A non empty simple string that defaults to F<less/>. Relative URI path that
+locates the static Less files
 
 =item C<links>
 
-A lazily evaluated array ref
+A lazily evaluated array reference of hashes created automatically from the
+hash reference in the configuration file. Each hash has a single
+key / value pair, the link name and it's URI. The links are displayed in
+the navigation panel and the footer in the default templates
 
 =item C<mount_point>
 
-A non empty simple string that defaults to '/'
+A non empty simple string that defaults to F</>. The root of the URI on
+which the application is mounted
 
 =item C<no_index>
 
-An array ref that defaults to '[ qw( .git .svn cgi-bin doh.json ) ]'
+An array reference that defaults to C<[ .git .svn cgi-bin doh.json ]>. List of
+files and directories under the document root to ignore
 
 =item C<port>
 
-A lazily evaluated non zero positive integer that defaults to 8085
+A lazily evaluated non zero positive integer that defaults to 8085. This
+is the port number that the documentation server will listen on by default
+when started by the control daemon
 
 =item C<preferences>
 
-An array ref that defaults to '[ qw( float skin theme ) ]'
+An array reference that defaults to C<[ float skin theme ]>. List of
+attributes that can be specified as query parameters in URIs.  Their
+values are persisted between requests stored in cookie
 
 =item C<projects>
 
-A hash ref that defaults to an empty hash ref
+A hash reference that defaults to an empty hash reference. The keys are
+port numbers and the values are paths to the document roots of different
+projects. Multiple servers can be started on different port numbers each
+with their document root and local configuration file in that document root
+directory
 
 =item C<repo_url>
 
-A simple string that defaults to null
+A simple string that defaults to null. The URI of the source code repository
+for this project
 
 =item C<server>
 
-A non empty simple string that defaults to 'Twiggy'
+A non empty simple string that defaults to C<Twiggy>. The L<Plack> engine
+name to load when the documentation server is started
 
 =item C<skin>
 
-A non empty simple string that defaults to 'default'
+A non empty simple string that defaults to C<default>. The name of the default
+skin used to theme the appearence of the application
 
 =item C<template>
 
-A non empty simple string that defaults to 'index'
+A non empty simple string that defaults to C<index>. The name of the
+L<Template::Toolkit> template used to render the HTML response page
 
 =item C<theme>
 
-A non empty simple string that defaults to 'green'
+A non empty simple string that defaults to C<green>. The name of the
+default colour scheme
 
 =item C<title>
 
-A non empty simple string that defaults to 'Documentation'
+A non empty simple string that defaults to C<Documentation>. The documentation
+project's title as displayed in the title bar of all pages
 
 =item C<twitter>
 
-An array ref that defaults to an empty array ref
+An array reference that defaults to an empty array reference. List of
+Twitter follow buttons
 
 =back
 

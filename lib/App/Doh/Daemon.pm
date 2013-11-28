@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-11-23 14:29 pjf ;
+# @(#)Ident: Daemon.pm 2013-11-28 17:18 pjf ;
 
 package App::Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -140,7 +140,7 @@ __END__
 
 =head1 Name
 
-App::Doh::Daemon - One-line description of the modules purpose
+App::Doh::Daemon - Background process control for the documentation server
 
 =head1 Synopsis
 
@@ -150,7 +150,7 @@ App::Doh::Daemon - One-line description of the modules purpose
 
 =head1 Version
 
-This documents version v0.1.$Rev: 22 $ of L<App::Doh::Daemon>
+This documents version v0.1.$Rev: 23 $ of L<App::Doh::Daemon>
 
 =head1 Description
 
@@ -206,6 +206,8 @@ Show the current server status
 Stop the server
 
 =head1 Diagnostics
+
+None
 
 =head1 Dependencies
 

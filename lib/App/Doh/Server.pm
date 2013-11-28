@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-11-23 22:05 pjf ;
+# @(#)Ident: Server.pm 2013-11-28 17:01 pjf ;
 
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
@@ -25,20 +25,21 @@ has 'appclass'     => is => 'ro',   isa => NonEmptySimpleStr,
 has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
    default         => 'App::Doh::Config';
 
-has 'doc_model'    => is => 'lazy', isa => Object, init_arg => undef,
+# Private attributes
+has '_doc_model'   => is => 'lazy', isa => Object,   reader => 'doc_model',
    builder         => sub { App::Doh::Model::Documentation->new
       ( builder    => $_[ 0 ]->usul,
         type_map   => $_[ 0 ]->html_view->type_map ) };
 
-has 'help_model'   => is => 'lazy', isa => Object, init_arg => undef,
+has '_help_model'  => is => 'lazy', isa => Object,   reader => 'help_model',
    builder         => sub { App::Doh::Model::Help->new
       ( builder    => $_[ 0 ]->usul ) };
 
-has 'html_view'    => is => 'lazy', isa => Object, init_arg => undef,
+has '_html_view'   => is => 'lazy', isa => Object,   reader => 'html_view',
    builder         => sub { App::Doh::View::HTML->new
       ( builder    => $_[ 0 ]->usul ) };
 
-has 'usul'         => is => 'lazy', isa => BaseType, init_arg => undef;
+has '_usul'        => is => 'lazy', isa => BaseType, reader => 'usul';
 
 # Construction
 around 'to_psgi_app' => sub {
@@ -81,7 +82,7 @@ sub dispatch_request {
 }
 
 # Private methods
-sub _build_usul {
+sub _build__usul {
    my $self   = shift;
    my $myconf = $self->config;
    my $extns  = [ keys %{ Class::Usul::File->extensions } ];
@@ -124,18 +125,23 @@ __END__
 
 =head1 Name
 
-App::Doh::Server - One-line description of the modules purpose
+App::Doh::Server - An Plack HTML application server
 
 =head1 Synopsis
 
+   #!/usr/bin/env perl
+
    use App::Doh::Server;
-   # Brief but working code examples
+
+   App::Doh::Server->new->run_if_script;
 
 =head1 Version
 
-This documents version v0.1.$Rev: 22 $ of L<App::Doh::Server>
+This documents version v0.1.$Rev: 23 $ of L<App::Doh::Server>
 
 =head1 Description
+
+Serves HTML pages generated from microformats like Markdown and POD
 
 =head1 Configuration and Environment
 
@@ -143,17 +149,57 @@ Defines the following attributes;
 
 =over 3
 
+=item C<appclass>
+
+A non empty simple string the defaults to C<App::Doh>
+
+=item C<config_class>
+
+A non empty simple string the defaults to C<App::Doh::Config>
+
+=item C<_doc_model>
+
+A lazily evaluated object reference to the documentation model
+
+=item C<_help_model>
+
+A lazily evaluated object reference to the help model
+
+=item C<_html_view>
+
+A lazily evaluated object reference to the HTML view
+
+=item C<_usul>
+
+A lazily evaluated object reference to an instance of L<Class::Usul>
+
 =back
 
 =head1 Subroutines/Methods
 
+=head2 BUILD
+
+Calls the documentation model at application start time. Means that the
+startup time is longer but the response time for the first request is
+shorter
+
+=head2 dispatch_request
+
+The L<Web::Simple> API method used to dispatch requests
+
 =head1 Diagnostics
+
+None
 
 =head1 Dependencies
 
 =over 3
 
 =item L<Class::Usul>
+
+=item L<Plack::Builder>
+
+=item L<Web::Simple>
 
 =back
 

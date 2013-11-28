@@ -1,24 +1,26 @@
-# @(#)Ident: Markdown.pm 2013-11-23 14:31 pjf ;
+# @(#)Ident: Markdown.pm 2013-11-28 18:28 pjf ;
 
 package App::Doh::View::HTML::Markdown;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Types      qw( ArrayRef Object );
 use Text::Markdown;
 
-has 'extensions' => is => 'ro', isa => ArrayRef,
-   default       => sub { [ qw( md mkdn ) ] };
+extends q(App::Doh);
+
+has 'extensions' => is => 'lazy', isa => ArrayRef,
+   builder       => sub { $_[ 0 ]->config->extensions->{markdown} };
 
 has 'tm'         => is => 'lazy', isa => Object,
-   default       => sub { Text::Markdown->new( tab_width => 3 ) };
+   builder       => sub { Text::Markdown->new( tab_width => 3 ) };
 
 sub render {
    my ($self, $req, $page) = @_;
 
-   return $self->tm->markdown( $page->{content}->utf8->all );
+   return $self->tm->markdown( $page->{content}->all );
 }
 
 1;
