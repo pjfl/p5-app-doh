@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-11-29 02:25 pjf ;
+# @(#)Ident: Daemon.pm 2013-11-29 02:44 pjf ;
 
 package App::Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -150,7 +150,7 @@ App::Doh::Daemon - Background process control for the documentation server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 24 $ of L<App::Doh::Daemon>
+This documents version v0.1.$Rev: 25 $ of L<App::Doh::Daemon>
 
 =head1 Description
 
@@ -194,11 +194,11 @@ Dump the SYSV initialisation script to stdout
 
 Restart the server
 
-=head2 run
+=head2 run - Call the requested method
 
 Validates some L<Daemon::Control> attribute values and then calls the
-same method in the parent class which calls the requested method in
-a try / catch block
+same method in the parent class which, in turn, calls the requested
+method in a try / catch block
 
 =head2 show_warnings - Show server warnings
 

@@ -1,9 +1,9 @@
-# @(#)Ident: Request.pm 2013-11-29 02:18 pjf ;
+# @(#)Ident: Request.pm 2013-11-29 02:39 pjf ;
 
 package App::Doh::Request;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 
 use Moo;
 use CGI::Simple::Cookie;
@@ -87,7 +87,7 @@ Doh::Request - Represents the request sent from the client to the server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 24 $ of L<Doh::Request>
+This documents version v0.1.$Rev: 25 $ of L<Doh::Request>
 
 =head1 Description
 
@@ -138,12 +138,12 @@ C<mount_point> configuration attribute
 
 =head1 Subroutines/Methods
 
-=head2 C<BUILDARGS>
+=head2 BUILDARGS
 
 Picks the request parameters and environment apart. Returns the hash reference
 used to instantiate the request object
 
-=head2 C<loc>
+=head2 loc
 
    $localised_string = $self->loc( $key, @args );
 
@@ -151,7 +151,7 @@ Translates C<$key> into the required language and substitutes the bind values.
 The C<locale> is currently set in configuration but will be extracted from
 the request in a future release
 
-=head2 C<uri_for>
+=head2 uri_for
 
    $uri_obj = $self->uri_for( $partial_uri_path );
 

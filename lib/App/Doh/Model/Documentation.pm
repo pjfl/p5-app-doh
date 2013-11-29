@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-11-28 23:13 pjf ;
+# @(#)Ident: Documentation.pm 2013-11-29 12:26 pjf ;
 
 package App::Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -25,30 +25,30 @@ has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
 
 # Construction
 sub _build_docs_tree {
-   my ($self, $path, $clean_path, $title) = @_; state $index //= 0;
+   my ($self, $path, $url_base, $title) = @_; state $index //= 0;
 
-   $path //= $self->config->docs_path; $clean_path //= NUL; $title //= NUL;
+   $path //= $self->config->docs_path; $url_base //= NUL; $title //= NUL;
 
    my $re  = join '|', @{ $self->config->no_index }; my $tree = {};
 
    for my $file (io( $path )->filter( sub { not m{ (?: $re ) }mx } )->all) {
-      my $clean_sort =  __clean_sort( $file->filename );
-      my $url        =  ($clean_path ? "${clean_path}/" : NUL).$clean_sort;
-      my $clean_name =  __clean_name( $clean_sort );
-      my $full_path  =  $file->pathname;
-      my $full_title =  $title ? "${title}: ${clean_name}" : $clean_name;
-      my $node       =  $tree->{ $clean_sort } = {
-         clean       => $clean_sort,
-         format      => $self->_get_format( $full_path ),
-         name        => $clean_name,
-         path        => $full_path,
+      my $id         =  __make_id_from  ( $file->filename );
+      my $name       =  __make_name_from( $id );
+      my $path_name  =  $file->pathname;
+      my $full_title =  $title ? "${title} - ${name}" : $name;
+      my $url        =  ($url_base ? "${url_base}/" : NUL).$id;
+      my $node       =  $tree->{ $id } = {
+         clean       => $id,
+         format      => $self->_get_format( $path_name ),
+         name        => $name,
+         path        => $path_name,
          title       => $full_title,
          type        => 'file',
          url         => $url,
          _order      => $index++, };
 
       $file->is_dir or next;
-      $node->{tree} = $self->_build_docs_tree( $full_path, $url, $full_title );
+      $node->{tree} = $self->_build_docs_tree( $path_name, $url, $name );
       $node->{type} = 'folder';
    }
 
@@ -93,14 +93,13 @@ sub load_page {
                   format  => 'markdown' };
 
    my $home = exists $tree->{index} ? NUL : $self->docs_url;
-   my $page = { content      => io( $node->{path} )->utf8,
-                docs_url     => $req->uri_for( $self->docs_url ),
-                format       => $node->{format},
-                homepage_url => $req->uri_for( $home ), };
 
-   $node->{name} ne 'index' and $page->{header} = $node->{title};
-
-   return $page;
+   return { content      => io( $node->{path} )->utf8,
+            docs_url     => $req->uri_for( $self->docs_url ),
+            format       => $node->{format},
+            header       => $node->{title},
+            homepage_url => $req->uri_for( $home ),
+            title        => ucfirst $node->{name}, };
 }
 
 sub navigation {
@@ -143,18 +142,6 @@ sub __build_navigation_list {
    return \@nav;
 }
 
-sub __clean_name {
-   my $text = shift; $text =~ s{ [_] }{ }gmx; return $text;
-}
-
-sub __clean_sort {
-   my $text = shift;
-
-   $text =~ s{ \A \d+ [_] }{}mx; $text =~ s{ \. [a-zA-Z0-9_\+]+ \z }{}mx;
-
-   return $text;
-}
-
 sub __current {
    my $href = shift;
 
@@ -175,6 +162,18 @@ sub __find_node {
    }
 
    return $tree;
+}
+
+sub __make_id_from {
+   my $text = shift;
+
+   $text =~ s{ \A \d+ [_] }{}mx; $text =~ s{ \. [a-zA-Z0-9_\+]+ \z }{}mx;
+
+   return $text;
+}
+
+sub __make_name_from {
+   my $text = shift; $text =~ s{ [_] }{ }gmx; return $text;
 }
 
 sub __next {

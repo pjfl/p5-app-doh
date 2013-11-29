@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-11-29 02:09 pjf ;
+# @(#)Ident: Server.pm 2013-11-29 02:42 pjf ;
 
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
@@ -137,7 +137,7 @@ App::Doh::Server - An Plack HTML application server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 24 $ of L<App::Doh::Server>
+This documents version v0.1.$Rev: 25 $ of L<App::Doh::Server>
 
 =head1 Description
 
@@ -183,14 +183,14 @@ Calls the documentation model at application start time. Means that the
 startup time is longer but the response time for the first request is
 shorter
 
+=head2 dispatch_request
+
+The L<Web::Simple> API method used to dispatch requests
+
 =head2 to_psgi_app
 
 Sets the application mount point and pushes some middleware into the Plack
 stack
-
-=head2 dispatch_request
-
-The L<Web::Simple> API method used to dispatch requests
 
 =head1 Diagnostics
 

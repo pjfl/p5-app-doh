@@ -38,7 +38,7 @@
    <!-- Navigation -->
    <script src="[% links.js %]jquery.min.js"></script>
    <script src="[% links.js %]custom.js"></script>
-   <title>[% config.title %]</title>
+   <title>[% config.title %] - [% page.title %]</title>
 </head>
 <body>
    [% content %]

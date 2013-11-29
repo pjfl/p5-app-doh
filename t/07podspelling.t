@@ -1,8 +1,8 @@
-# @(#)Ident: 07podspelling.t 2013-11-29 02:24 pjf ;
+# @(#)Ident: 07podspelling.t 2013-11-29 02:41 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 use File::Spec::Functions qw(catdir catfile updir);
 use FindBin qw( $Bin );
 use lib catdir( $Bin, updir, q(lib) );
@@ -42,9 +42,11 @@ __DATA__
 peter
 flanigan
 API
+BUILDARGS
 doh
 filename
 JavaScript
+loc
 microformat
 microformats
 middleware

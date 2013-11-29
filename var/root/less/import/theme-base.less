@@ -164,7 +164,7 @@ table tr th:last-child, table tr td:last-child {
 .content-page p, .content-page pre, .content-page table  {
    font-size: 14px; line-height: 18px;
 }
-.content-page pre { font-weight: 700; }
+.content-page pre { font-weight: 700; padding: 9px; }
 .content-page ul { margin-bottom: 18px; }
 .footer { bottom: 0; left: 0; padding: 18px; position: fixed; }
 .github-ribbon { position: absolute; right: 18px; top: 54px; z-index: 10; }
@@ -322,8 +322,6 @@ table tr th:last-child, table tr td:last-child {
 }
 
 /* Media queries */
-@media (max-width: 480px) {
-}
 @media only screen and (max-width: 800px) {
    /* Force table to not be like tables anymore */
    table, thead, tbody, th, td, tr { border: none; display: block; }
@@ -367,100 +365,59 @@ table tr th:last-child, table tr td:last-child {
 }
 @media (min-width: 1150px) {
    .float-view .content-page {
-      background-color: transparent !important;
-      height: 100%;
-      max-width: 10000px !important;
-      padding: 0 !important;
+      background-color: transparent !important; height: 100%;
+      max-width: 10000px !important; padding: 0 !important;
       position: relative;
    }
    .float-view .content-page article {
       border-left: 15px solid white;
-      min-height: 100%;
-      overflow: auto;
-      position: relative;
-      width: 100%;
-      z-index: 1;
+      min-height: 100%; overflow: auto;
+      position: relative; width: 100%;
    }
    .float-view .content-page article:before {
-      content: "";
-      width: 57%;
-      min-height: 100%;
-      overflow: auto;
-      background-color: white;
-      display: block;
-      margin: 0;
-      position: absolute;
-      z-index: -1;
+      background-color: white; content: ""; display: block;
+      margin: 0; min-height: 100%; min-width: 450px; overflow: auto;
+      position: absolute; width: 55%; z-index: -1;
    }
    .float-view .content-page blockquote p {
       margin-bottom: 10px;
    }
    .float-view .content-page blockquote:before {
-      content: "";
-      width: 100%;
-      height: 10px;
-      display: block;
-      clear: both;
+      clear: both; content: ""; display: block; height: 10px; width: 100%;
    }
    .float-view .content-page hr {
-      border-color: @lines;
-      clear: left;
-      float: left;
-      width: 54%;
+      border-color: @lines; clear: left; float: left; width: 54%;
    }
-   .float-view .content-page ol li,
-   .float-view .content-page ul li {
-      clear: left;
-      float: left;
-      margin-left: 30px;
+   .float-view .content-page ol li, .float-view .content-page ul li {
+      clear: left; float: left; margin-left: 30px;
    }
-   .float-view .content-page ol li p,
-   .float-view .content-page ul li p {
-      float: left;
-      clear: right;
-      margin-left: 1.5%;
-      margin-right: 1.5%;
-      background-color: white;
-      width: 100%;
+   .float-view .content-page ol li p, .float-view .content-page ul li p {
+      background-color: white; clear: right; float: left;
+      margin-left: 1.5%; margin-right: 1.5%; width: 100%;
    }
-   .float-view .content-page ol li pre,
-   .float-view .content-page ul li pre {
+   .float-view .content-page ol li pre, .float-view .content-page ul li pre {
       -khtml-box-sizing: border-box; -moz-box-sizing: border-box;
       -webkit-box-sizing: border-box; box-sizing: border-box;
-      margin-right: 1.5%;
-      width: 100%;
+      margin-right: 1.5%; width: 100%;
    }
    .float-view .content-page p {
-      float: left;
-      clear: left;
-      width: 52.5%;
-      margin: 0 3% 10px 0;
-      background-color: white;
+      background-color: white; clear: left; float: left;
+      margin: 0 18px 18px 0; min-width: 450px; width: 52.5%;
    }
    .float-view .content-page p.toplink {
-      background-color: transparent;
-      margin-bottom: 0; margin-top: -23px;
+      background-color: transparent; margin-bottom: 0; margin-top: -23px;
       text-align: right;
   }
    .float-view .content-page pre {
-      float: left;
-      clear: right;
-      border: none;
-      border-left: 5px solid @contrast;
-      margin: 0 0 9px 0;
-      padding: 9px;
+      border: none; border-left: 5px solid @contrast; clear: right;
+      float: left; margin: 0 0 9px 0;
    }
    .float-view .content-page table {
-      float: left;
-      clear: left;
+      background-color: white; clear: left; float: left;
+      margin-left: 1.5%; margin-right: 18px; white-space: normal;
       width: 52.5%;
-      margin-left: 1.5%;
-      margin-right: 3%;
-      background-color: white;
-      white-space: normal;
    }
-   .float-view .content-page table pre,
-   .float-view .content-page table code {
+   .float-view .content-page table pre, .float-view .content-page table code {
       white-space: normal;
    }
    .float-view .content-page .page-header {
@@ -475,11 +432,8 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page h4,
    .float-view .content-page h5,
    .float-view .content-page h6 {
-      float: left;
-      clear: left;
-      width: 52.5%;
-      margin: 0 3% 18px 0;
-      background-color: white;
+      background-color: white; clear: left; float: left;
+      margin: 0 18px 18px 0; min-width: 450px; width: 52.5%;
    }
    .float-view .content-page .page-header:before,
    .float-view .content-page ul:before,
@@ -490,15 +444,10 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page h4:before,
    .float-view .content-page h5:before,
    .float-view .content-page h6:before {
-      content: "";
-      width: 100%;
-      height: 10px;
-      display: block;
-      clear: both;
+      clear: both; content: ""; display: block; height: 10px; width: 100%;
    }
    .float-view .content-page .pod {
-      display: inline-block;
-      position: relative;
+      display: inline-block; position: relative;
    }
 }
 @media (min-width: 1200px) {

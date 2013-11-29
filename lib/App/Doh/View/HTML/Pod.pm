@@ -1,9 +1,9 @@
-# @(#)Ident: Pod.pm 2013-11-28 18:08 pjf ;
+# @(#)Ident: Pod.pm 2013-11-29 12:10 pjf ;
 
 package App::Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -33,9 +33,7 @@ sub render {
 
    my $hacc        = $self->_hacc;
    my $content     = $page->{content};
-   my $anchor      = $hacc->a( { id => 'podtop' } );
-   my $title       = $hacc->h1( $page->{title} );
-   my $heading     = $anchor.$hacc->div( { class => 'page-header' }, $title );
+   my $header      = $hacc->a( { id => 'podtop' } );
    my $link_parser = Pod::Hyperlink::BounceURL->new;
       $link_parser->configure( URL => $page->{url} );
    my $parser      = Pod::Xhtml->new
@@ -48,7 +46,7 @@ sub render {
    $content and $content->exists
       and $parser->parse_from_file( $content->pathname );
 
-   return $heading.( $parser->asString || $self->_error( $req, $content ) );
+   return $header.( $parser->asString || $self->_error( $req, $content ) );
 }
 
 # Private methods

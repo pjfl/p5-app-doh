@@ -1,9 +1,9 @@
-# @(#)Ident: Help.pm 2013-11-29 01:23 pjf ;
+# @(#)Ident: Help.pm 2013-11-29 12:26 pjf ;
 
 package App::Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -46,13 +46,14 @@ sub get_stash {
 }
 
 sub load_page {
-   my ($self, $req) = @_;
+   my ($self, $req) = @_; my $title = $req->loc( 'Help' );
 
    my $want = $req->args->[ 0 ] || $self->config->appclass;
 
    return { content => io( find_source( $want ) || $req->args->[ 0 ] ),
             format  => 'pod',
-            title   => "${want} Help",
+            header  => "${title} - ${want}",
+            title   => $title,
             url     => 'https://metacpan.org/module/%s', };
 }
 

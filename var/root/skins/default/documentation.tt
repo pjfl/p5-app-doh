@@ -30,7 +30,7 @@
 [% level = 0 -%]
             <ul class="nav nav-list">
 [% FOREACH node = nav -%]
-   [% IF node.level < level; level = level - 1 -%]
+   [% WHILE node.level < level; level = level - 1 -%]
                   </ul>
                </li>
    [% END -%]

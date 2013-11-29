@@ -48,9 +48,6 @@
       <div class="row">
          <div class="span12">
 [% IF page.format == 'html' -%]
-   [% IF page.header -%]
-            <div class="page-header"><h1>[% page.header %]</h1></div>
-   [% END -%]
             [% page.content | eval %]
 [% END -%]
          </div>
