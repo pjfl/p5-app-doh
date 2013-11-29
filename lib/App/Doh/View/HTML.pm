@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-11-23 14:30 pjf ;
+# @(#)Ident: HTML.pm 2013-11-28 23:57 pjf ;
 
 package App::Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -19,17 +19,47 @@ use Template;
 extends q(App::Doh);
 
 # Public attributes
-has 'formatters' => is => 'lazy', isa => HashRef;
+has 'formatters' => is => 'lazy', isa => HashRef, builder => sub {
+   my $self = shift; my $formatters = {};
 
-has 'skin_dir'   => is => 'lazy', isa => Directory,
-   default       => sub { $_[ 0 ]->config->root->catdir( 'skins' ) },
-   coerce        => Directory->coercion;
+   my $finder = Module::Pluggable::Object->new
+      ( search_path => [ __PACKAGE__ ], require => TRUE, );
 
-has 'template'   => is => 'lazy', isa => Object,
-   default       => sub { Template->new( $_[ 0 ]->_template_args )
-                             or throw $Template::ERROR };
+   for my $formatter ($finder->plugins) {
+      my $format = lc ((split m{ :: }mx, $formatter)[ -1 ]);
 
-has 'type_map'   => is => 'lazy', isa => HashRef;
+      $formatters->{ $format } = $formatter->new( builder => $self->_usul );
+   }
+
+   return $formatters;
+};
+
+has 'skin_dir' => is => 'lazy', isa => Directory,
+   builder     => sub { $_[ 0 ]->config->root->catdir( 'skins' ) },
+   coerce      => Directory->coercion;
+
+has 'template' => is => 'lazy', isa => Object, builder => sub {
+   my $self =  shift;
+   my $args =  {
+      RELATIVE     => TRUE,
+      INCLUDE_PATH => [ $self->skin_dir->pathname ],
+      WRAPPER      => catfile( qw( default wrapper.tt ) ), };
+   my $template =  Template->new( $args ) or throw $Template::ERROR;
+
+   return $template;
+};
+
+has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
+   my $self = shift; my $map = { htm => 'html', html => 'html' };
+
+   for my $format (keys %{ $self->formatters }) {
+      for my $extn (@{ $self->formatters->{ $format }->extensions }) {
+         $map->{ $extn } = $format;
+      }
+   }
+
+   return $map;
+};
 
 # Public methods
 sub render {
@@ -61,33 +91,6 @@ sub render {
 }
 
 # Private methods
-sub _build_formatters {
-   my $self = shift; my $formatters = {};
-
-   my $finder = Module::Pluggable::Object->new
-      ( search_path => [ __PACKAGE__ ], require => TRUE, );
-
-   for my $formatter ($finder->plugins) {
-      my $format = lc ((split m{ :: }mx, $formatter)[ -1 ]);
-
-      $formatters->{ $format } = $formatter->new( builder => $self->_usul );
-   }
-
-   return $formatters;
-}
-
-sub _build_type_map {
-   my $self = shift; my $map = { htm => 'html', html => 'html' };
-
-   for my $format (keys %{ $self->formatters }) {
-      for my $extn (@{ $self->formatters->{ $format }->extensions }) {
-         $map->{ $extn } = $format;
-      }
-   }
-
-   return $map;
-}
-
 sub _render_microformat {
    my ($self, $req, $page) = @_; defined $page->{format} or return;
 
@@ -112,14 +115,6 @@ sub _serialize_preferences {
                                     -name    => $self->config->name.'_prefs',
                                     -path    => $req->path,
                                     -value   => $value, );
-}
-
-sub _template_args {
-   my $self = shift; weaken( $self );
-
-   return { RELATIVE     => TRUE,
-            INCLUDE_PATH => [ $self->skin_dir->pathname ],
-            WRAPPER      => catfile( qw( default wrapper.tt ) ), };
 }
 
 1;

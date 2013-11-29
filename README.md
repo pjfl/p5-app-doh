@@ -4,26 +4,42 @@ App::Doh - An easy way to document a project using Markdown
 
 # Synopsis
 
-    use App::Doh;
-    # Brief but working code examples
+    # Start the server in the background
+    bin/doh-daemon start
+
+    # Stop the background server
+    bin/doh-daemon stop
+
+    # Options help
+    bin/doh-daemon -?
 
 # Version
 
-This documents version v0.1.$Rev: 22 $ of [App::Doh](https://metacpan.org/module/App::Doh)
+This documents version v0.1.$Rev: 24 $ of [App::Doh](https://metacpan.org/pod/App::Doh)
 
 # Description
 
+A simple microformat document server written in Perl utilising [Plack](https://metacpan.org/pod/Plack)
+and [Web::Simple](https://metacpan.org/pod/Web::Simple)
+
 # Configuration and Environment
 
-Defines no attributes
+The configuration file attributes are documented in the [App::Doh::Config](https://metacpan.org/pod/App::Doh::Config)
+package
 
 # Subroutines/Methods
 
+None
+
 # Diagnostics
+
+Starting the daemon with the `-D` option will cause it to print debug
+information to the log file `var/logs/daemon.log`
 
 # Dependencies
 
-- [Class::Usul](https://metacpan.org/module/Class::Usul)
+- [Class::Usul](https://metacpan.org/pod/Class::Usul)
+- [Moo](https://metacpan.org/pod/Moo)
 
 # Incompatibilities
 
@@ -48,7 +64,7 @@ Peter Flanigan, `<pjfl@cpan.org>`
 Copyright (c) 2013 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself. See [perlartistic](https://metacpan.org/module/perlartistic)
+under the same terms as Perl itself. See [perlartistic](https://metacpan.org/pod/perlartistic)
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT WARRANTY; without even the implied warranty of

@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-11-28 17:18 pjf ;
+# @(#)Ident: Daemon.pm 2013-11-29 02:25 pjf ;
 
 package App::Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -53,6 +53,29 @@ around 'run' => sub {
    return $orig->( $self );
 };
 
+sub _build__daemon_control {
+   my $self = shift; my $config = $self->config; my $name = $config->name;
+
+   return Daemon::Control->new( {
+      name         => blessed $self || $self,
+      lsb_start    => '$syslog $remote_fs',
+      lsb_stop     => '$syslog',
+      lsb_sdesc    => 'Documentation Server',
+      lsb_desc     => 'Manages the Documentation Server daemons',
+      path         => $config->pathname,
+
+      directory    => $config->appldir,
+      program      => sub { shift; $self->_daemon( @_ ) },
+      program_args => [],
+
+      pid_file     => $config->rundir->catfile( "${name}_".$self->port.'.pid' ),
+      stderr_file  => $self->_stdio_file( 'err' ),
+      stdout_file  => $self->_stdio_file( 'out' ),
+
+      fork         => 2,
+   } );
+}
+
 # Public methods
 sub get_init_file : method {
    $_[ 0 ]->_daemon_control->do_get_init_file; return OK;
@@ -79,29 +102,6 @@ sub stop : method {
 }
 
 # Private methods
-sub _build__daemon_control {
-   my $self = shift; my $config = $self->config; my $name = $config->name;
-
-   return Daemon::Control->new( {
-      name         => blessed $self || $self,
-      lsb_start    => '$syslog $remote_fs',
-      lsb_stop     => '$syslog',
-      lsb_sdesc    => 'Documentation Server',
-      lsb_desc     => 'Manages the Documentation Server daemons',
-      path         => $config->pathname,
-
-      directory    => $config->appldir,
-      program      => sub { shift; $self->_daemon( @_ ) },
-      program_args => [],
-
-      pid_file     => $config->rundir->catfile( "${name}_".$self->port.'.pid' ),
-      stderr_file  => $self->_stdio_file( 'err' ),
-      stdout_file  => $self->_stdio_file( 'out' ),
-
-      fork         => 2,
-   } );
-}
-
 sub _daemon {
    my $self = shift; $PROGRAM_NAME = $self->app;
 
@@ -150,12 +150,12 @@ App::Doh::Daemon - Background process control for the documentation server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 23 $ of L<App::Doh::Daemon>
+This documents version v0.1.$Rev: 24 $ of L<App::Doh::Daemon>
 
 =head1 Description
 
 Manages the documentation web server process. The command line wrapper for this
-class provides a SYSV init script
+class provides a SYSV initialisation script
 
 =head1 Configuration and Environment
 
@@ -166,6 +166,11 @@ Defines the following attributes;
 =item C<app>
 
 The name of the PSGI file in the F<bin> directory
+
+=item C<config_class>
+
+Defaults to C<App::Doh::Config> the name of the applications configuration
+class
 
 =item C<port>
 
@@ -181,13 +186,19 @@ The name of the L<Plack> engine used by the server
 
 Defines the following methods
 
-=head2 get_init_file - Dump SYSV init script to stdout
+=head2 get_init_file - Dump SYSV initialisation script to stdout
 
-Dump the SYSV init script to stdout
+Dump the SYSV initialisation script to stdout
 
 =head2 restart - Restart the server
 
 Restart the server
+
+=head2 run
+
+Validates some L<Daemon::Control> attribute values and then calls the
+same method in the parent class which calls the requested method in
+a try / catch block
 
 =head2 show_warnings - Show server warnings
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env perl
-# @(#)Ident: doh-daemon 2013-11-28 17:21 pjf ;
+# @(#)Ident: doh-daemon 2013-11-29 02:16 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 use File::Spec::Functions   qw( catdir updir );
 use FindBin                 qw( $Bin );
 use lib                 catdir( $Bin, updir, 'lib' );
@@ -33,7 +33,7 @@ Start / stop the documentation server
 
 =item B<doh-daemon> I<get_init_file>
 
-Prints a SYSV init script to stdout
+Prints a SYSV initialisation script to stdout
 
 =item B<doh-daemon> B<-H> | B<-h> I<[method]> | B<-?>
 
@@ -47,7 +47,7 @@ Lists the methods available in this program
 
 =head1 VERSION
 
-This documents version v0.1.$Rev: 23 $ of C<doh-daemon>
+This documents version v0.1.$Rev: 24 $ of C<doh-daemon>
 
 =head1 DESCRIPTION
 

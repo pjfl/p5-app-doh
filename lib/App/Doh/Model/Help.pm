@@ -1,9 +1,9 @@
-# @(#)Ident: Help.pm 2013-11-23 14:31 pjf ;
+# @(#)Ident: Help.pm 2013-11-29 01:23 pjf ;
 
 package App::Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 22 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -15,29 +15,8 @@ extends q(App::Doh);
 with    q(App::Doh::TraitFor::CommonLinks);
 with    q(App::Doh::TraitFor::Preferences);
 
-has 'navigation' => is => 'lazy', isa => ArrayRef;
-
-sub get_stash {
-   my ($self, $req) = @_;
-
-   return { nav      => $self->navigation,
-            page     => $self->load_page( $req ),
-            template => 'documentation', };
-}
-
-sub load_page {
-   my ($self, $req) = @_;
-
-   my $want = $req->args->[ 0 ] || $self->config->appclass;
-
-   return { content => io( find_source( $want ) || $req->args->[ 0 ] ),
-            format  => 'pod',
-            title   => "${want} Help",
-            url     => 'https://metacpan.org/module/%s', };
-}
-
-# Private methods
-sub _build_navigation {
+# Public attributes
+has 'navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
    my $self     = shift;
    my $appclass = $self->config->appclass;
    my $help_url = $self->config->help_url;
@@ -55,6 +34,26 @@ sub _build_navigation {
    }
 
    return \@nav;
+};
+
+# Public methods
+sub get_stash {
+   my ($self, $req) = @_;
+
+   return { nav      => $self->navigation,
+            page     => $self->load_page( $req ),
+            template => 'documentation', };
+}
+
+sub load_page {
+   my ($self, $req) = @_;
+
+   my $want = $req->args->[ 0 ] || $self->config->appclass;
+
+   return { content => io( find_source( $want ) || $req->args->[ 0 ] ),
+            format  => 'pod',
+            title   => "${want} Help",
+            url     => 'https://metacpan.org/module/%s', };
 }
 
 1;

@@ -1,8 +1,8 @@
-# @(#)Ident: 03podcoverage.t 2013-04-22 22:44 pjf ;
+# @(#)Ident: 03podcoverage.t 2013-11-29 02:31 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 1 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 use File::Spec::Functions;
 use FindBin qw( $Bin );
 use lib catdir( $Bin, updir, q(lib) );
@@ -19,7 +19,15 @@ eval "use Test::Pod::Coverage 1.04";
 
 $EVAL_ERROR and plan skip_all => 'Test::Pod::Coverage 1.04 required';
 
-all_pod_coverage_ok();
+pod_coverage_ok( 'App::Doh' );
+pod_coverage_ok( 'App::Doh::Config' );
+pod_coverage_ok( 'App::Doh::Daemon' );
+pod_coverage_ok( 'App::Doh::Request' );
+pod_coverage_ok( 'App::Doh::Server' );
+pod_coverage_ok( 'App::Doh' );
+pod_coverage_ok( 'App::Doh' );
+
+done_testing;
 
 # Local Variables:
 # mode: perl

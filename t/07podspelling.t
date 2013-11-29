@@ -1,8 +1,8 @@
-# @(#)Ident: 07podspelling.t 2013-04-22 22:46 pjf ;
+# @(#)Ident: 07podspelling.t 2013-11-29 02:24 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 1 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 use File::Spec::Functions qw(catdir catfile updir);
 use FindBin qw( $Bin );
 use lib catdir( $Bin, updir, q(lib) );
@@ -41,4 +41,17 @@ done_testing();
 __DATA__
 peter
 flanigan
-Daux
+API
+doh
+filename
+JavaScript
+microformat
+microformats
+middleware
+Plack
+pre
+PSGI
+startup
+stderr
+stdout
+SYSV

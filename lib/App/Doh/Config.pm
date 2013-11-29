@@ -1,9 +1,9 @@
-# @(#)Ident: Config.pm 2013-11-28 18:19 pjf ;
+# @(#)Ident: Config.pm 2013-11-29 02:23 pjf ;
 
 package App::Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -139,7 +139,7 @@ App::Doh::Config - Defines the configuration file options and their defaults
 
 =head1 Version
 
-This documents version v0.1.$Rev: 23 $ of L<App::Doh::Config>
+This documents version v0.1.$Rev: 24 $ of L<App::Doh::Config>
 
 =head1 Description
 
@@ -169,7 +169,7 @@ creates a custom colour scheme for the project
 =item C<common_links>
 
 An array reference that defaults to C<[ css help_url images less js ]>.
-The application precalculates URIs for these static directories for use
+The application pre-calculates URIs for these static directories for use
 in the HTML templates
 
 =item C<css>
@@ -190,7 +190,7 @@ root for the microformat content pages
 =item C<extensions>
 
 A hash reference. The keys are microformat names and the values are an
-array reference of filename extensions that the coresponding view can
+array reference of filename extensions that the corresponding view can
 render
 
 =item C<float>
@@ -211,7 +211,7 @@ code
 
 =item C<help_url>
 
-A simple string that defaults to C<help>. The partion URI path which locates
+A simple string that defaults to C<help>. The partial URI path which locates
 this POD when rendered as HTML and served by this application
 
 =item C<images>
@@ -226,7 +226,7 @@ locates the static JavaScript files
 
 =item C<keywords>
 
-A simple string that defaults to null. The HTML meta attribures keyword
+A simple string that defaults to null. The HTML meta attributes keyword
 list value
 
 =item C<less>
@@ -284,7 +284,7 @@ name to load when the documentation server is started
 =item C<skin>
 
 A non empty simple string that defaults to C<default>. The name of the default
-skin used to theme the appearence of the application
+skin used to theme the appearance of the application
 
 =item C<template>
 

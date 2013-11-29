@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-11-28 17:01 pjf ;
+# @(#)Ident: Server.pm 2013-11-29 02:09 pjf ;
 
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
@@ -42,6 +42,31 @@ has '_html_view'   => is => 'lazy', isa => Object,   reader => 'html_view',
 has '_usul'        => is => 'lazy', isa => BaseType, reader => 'usul';
 
 # Construction
+sub _build__usul {
+   my $self   = shift;
+   my $myconf = $self->config;
+   my $extns  = [ keys %{ Class::Usul::File->extensions } ];
+   my $attr   = { config => {}, config_class => $self->config_class, };
+   my $conf   = $attr->{config};
+
+   $conf->{appclass} = $self->appclass || blessed $self || $self;
+   $conf->{name    } = app_prefix   $conf->{appclass};
+   $conf->{home    } = find_apphome $conf->{appclass}, $myconf->{home}, $extns;
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home}, $extns;
+
+   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
+
+   $bootconf->inflate_paths( $bootconf->projects );
+
+   my $port    = $ENV{DOH_SERVER_PORT} || $bootconf->port;
+   my $docs    = $bootconf->projects->{ $port } || $bootconf->docs_path;
+   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
+
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs, $extns;
+
+   return Class::Usul->new( $attr );
+}
+
 around 'to_psgi_app' => sub {
    my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
 
@@ -82,31 +107,6 @@ sub dispatch_request {
 }
 
 # Private methods
-sub _build__usul {
-   my $self   = shift;
-   my $myconf = $self->config;
-   my $extns  = [ keys %{ Class::Usul::File->extensions } ];
-   my $attr   = { config => {}, config_class => $self->config_class, };
-   my $conf   = $attr->{config};
-
-   $conf->{appclass} = $self->appclass || blessed $self || $self;
-   $conf->{name    } = app_prefix   $conf->{appclass};
-   $conf->{home    } = find_apphome $conf->{appclass}, $myconf->{home}, $extns;
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home}, $extns;
-
-   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
-
-   $bootconf->inflate_paths( $bootconf->projects );
-
-   my $port    = $ENV{DOH_SERVER_PORT} || $bootconf->port;
-   my $docs    = $bootconf->projects->{ $port } || $bootconf->docs_path;
-   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
-
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs, $extns;
-
-   return Class::Usul->new( $attr );
-}
-
 sub _get_html_response {
    my ($self, $model, @args) = @_;
 
@@ -137,7 +137,7 @@ App::Doh::Server - An Plack HTML application server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 23 $ of L<App::Doh::Server>
+This documents version v0.1.$Rev: 24 $ of L<App::Doh::Server>
 
 =head1 Description
 
@@ -182,6 +182,11 @@ A lazily evaluated object reference to an instance of L<Class::Usul>
 Calls the documentation model at application start time. Means that the
 startup time is longer but the response time for the first request is
 shorter
+
+=head2 to_psgi_app
+
+Sets the application mount point and pushes some middleware into the Plack
+stack
 
 =head2 dispatch_request
 

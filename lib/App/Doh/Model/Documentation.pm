@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-11-28 18:27 pjf ;
+# @(#)Ident: Documentation.pm 2013-11-28 23:13 pjf ;
 
 package App::Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -24,47 +24,6 @@ has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
 has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
 
 # Construction
-sub BUILD { # The docs_tree attribute constructor may take some time to run
-   $_[ 0 ]->docs_url; return;
-}
-
-# Public methods
-sub get_stash {
-   my ($self, $req) = @_;
-
-   return { nav      => $self->navigation( $req ),
-            page     => $self->load_page ( $req ),
-            template => $req->{args}->[ 0 ] ? 'documentation' : undef, };
-}
-
-sub load_page {
-   my ($self, $req) = @_; my $doc_path = [ @{ $req->args } ]; my $tree;
-
-   my $node = __find_node( $tree = $self->docs_tree, $doc_path );
-
-   ($node and exists $node->{type} and $node->{type} eq 'file')
-      or return { content => "> Oh no. That page doesn't exist",
-                  format  => 'markdown' };
-
-   my $home = exists $tree->{index} ? NUL : $self->docs_url;
-   my $page = { content      => io( $node->{path} )->utf8,
-                docs_url     => $req->uri_for( $self->docs_url ),
-                format       => $node->{format},
-                homepage_url => $req->uri_for( $home ), };
-
-   $node->{name} ne 'index' and $page->{header} = $node->{title};
-
-   return $page;
-}
-
-sub navigation {
-   my ($self, $req) = @_; my $parts = [ @{ $req->args } ];
-
-   return __build_navigation_list
-      ( $self->docs_tree, $parts, (join '/', @{ $parts }), 0 );
-}
-
-# Private methods
 sub _build_docs_tree {
    my ($self, $path, $clean_path, $title) = @_; state $index //= 0;
 
@@ -111,6 +70,47 @@ sub _build_docs_url {
    return $self->_build_docs_url( $tree, $node );
 }
 
+sub BUILD { # The docs_tree attribute constructor may take some time to run
+   $_[ 0 ]->docs_url; return;
+}
+
+# Public methods
+sub get_stash {
+   my ($self, $req) = @_;
+
+   return { nav      => $self->navigation( $req ),
+            page     => $self->load_page ( $req ),
+            template => $req->{args}->[ 0 ] ? 'documentation' : undef, };
+}
+
+sub load_page {
+   my ($self, $req) = @_; my $doc_path = [ @{ $req->args } ]; my $tree;
+
+   my $node = __find_node( $tree = $self->docs_tree, $doc_path );
+
+   ($node and exists $node->{type} and $node->{type} eq 'file')
+      or return { content => "> Oh no. That page doesn't exist",
+                  format  => 'markdown' };
+
+   my $home = exists $tree->{index} ? NUL : $self->docs_url;
+   my $page = { content      => io( $node->{path} )->utf8,
+                docs_url     => $req->uri_for( $self->docs_url ),
+                format       => $node->{format},
+                homepage_url => $req->uri_for( $home ), };
+
+   $node->{name} ne 'index' and $page->{header} = $node->{title};
+
+   return $page;
+}
+
+sub navigation {
+   my ($self, $req) = @_; my $parts = [ @{ $req->args } ];
+
+   return __build_navigation_list
+      ( $self->docs_tree, $parts, (join '/', @{ $parts }), 0 );
+}
+
+# Private methods
 sub _get_format {
    my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
 
