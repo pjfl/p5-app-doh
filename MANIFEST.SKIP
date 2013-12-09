@@ -35,7 +35,6 @@
 \b_build
 
 # Avoid Dist::Zilla config file
-\bcpanfile$
 \bdist.ini$
 
 # Avoid Devel::Cover generated files

@@ -1,9 +1,9 @@
-# @(#)Ident: Request.pm 2013-11-29 02:39 pjf ;
+# @(#)Ident: Request.pm 2013-12-04 14:23 pjf ;
 
 package App::Doh::Request;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use CGI::Simple::Cookie;
@@ -31,9 +31,8 @@ has 'params' => is => 'ro', isa => HashRef, default => sub { {} };
 has 'path'   => is => 'ro', isa => SimpleStr, default => NUL;
 
 around 'BUILDARGS' => sub {
-   my ($orig, $self, @args) = @_; my $attr = {};
+   my ($orig, $self, $usul, @args) = @_; my $attr = {};
 
-   my $usul = shift @args;
    my $env  = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    my $prot = lc( (split m{ / }mx, $env->{SERVER_PROTOCOL} || 'HTTP')[ 0 ] );
    my $path = $env->{SCRIPT_NAME} || '/'; $path =~ s{ / \z }{}gmx;
@@ -87,7 +86,7 @@ Doh::Request - Represents the request sent from the client to the server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 25 $ of L<Doh::Request>
+This documents version v0.1.$Rev: 26 $ of L<Doh::Request>
 
 =head1 Description
 

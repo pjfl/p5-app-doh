@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-11-28 23:57 pjf ;
+# @(#)Ident: HTML.pm 2013-12-09 03:09 pjf ;
 
 package App::Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -80,7 +80,7 @@ sub render {
 
    $self->_render_microformat( $req, $stash->{page} ||= {} );
    $stash->{config } = $self->config;
-   $stash->{env    } = $req->env;
+   $stash->{req    } = $req;
    $stash->{loc    } = sub { $req->loc( @_ ) };
    $stash->{uri_for} = sub { $req->uri_for( @_ ) };
 

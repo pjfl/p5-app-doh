@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-11-29 12:26 pjf ;
+# @(#)Ident: Documentation.pm 2013-12-09 01:05 pjf ;
 
 package App::Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -13,8 +13,9 @@ use File::DataClass::Types  qw( HashRef NonEmptySimpleStr );
 use File::Spec::Functions   qw( curdir );
 
 extends q(App::Doh);
-with    q(App::Doh::TraitFor::CommonLinks);
-with    q(App::Doh::TraitFor::Preferences);
+with    q(App::Doh::Role::CommonLinks);
+with    q(App::Doh::Role::PageConfiguration);
+with    q(App::Doh::Role::Preferences);
 
 # Public attributes
 has 'docs_tree' => is => 'lazy', isa => HashRef;
@@ -25,30 +26,29 @@ has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
 
 # Construction
 sub _build_docs_tree {
-   my ($self, $path, $url_base, $title) = @_; state $index //= 0;
+   my ($self, $dir, $url_base, $title) = @_; state $index //= 0;
 
-   $path //= $self->config->docs_path; $url_base //= NUL; $title //= NUL;
+   $dir //= io( $self->config->docs_path ); $url_base //= NUL; $title //= NUL;
 
-   my $re  = join '|', @{ $self->config->no_index }; my $tree = {};
+   my $re = join '|', @{ $self->config->no_index }; my $tree = {};
 
-   for my $file (io( $path )->filter( sub { not m{ (?: $re ) }mx } )->all) {
-      my $id         =  __make_id_from  ( $file->filename );
+   for my $path ($dir->filter( sub { not m{ (?: $re ) }mx } )->all) {
+      my $id         =  __make_id_from  ( $path->filename );
       my $name       =  __make_name_from( $id );
-      my $path_name  =  $file->pathname;
-      my $full_title =  $title ? "${title} - ${name}" : $name;
-      my $url        =  ($url_base ? "${url_base}/" : NUL).$id;
+      my $url        =  $url_base ? "${url_base}/${id}"  : $id;
+      my $full_title =  $title    ? "${title} - ${name}" : $name;
       my $node       =  $tree->{ $id } = {
          clean       => $id,
-         format      => $self->_get_format( $path_name ),
+         format      => $self->_get_format( $path->pathname ),
          name        => $name,
-         path        => $path_name,
+         path        => $path->pathname,
          title       => $full_title,
          type        => 'file',
          url         => $url,
          _order      => $index++, };
 
-      $file->is_dir or next;
-      $node->{tree} = $self->_build_docs_tree( $path_name, $url, $name );
+      $path->is_dir or next;
+      $node->{tree} = $self->_build_docs_tree( $path, $url, $name );
       $node->{type} = 'folder';
    }
 
@@ -84,22 +84,25 @@ sub get_stash {
 }
 
 sub load_page {
-   my ($self, $req) = @_; my $doc_path = [ @{ $req->args } ]; my $tree;
+   my ($self, $req) = @_;
 
-   my $node = __find_node( $tree = $self->docs_tree, $doc_path );
+   my $tree = $self->docs_tree;
+   my $node = __find_node( $tree, [ @{ $req->args } ] );
+   my $home = $req->uri_for( exists $tree->{index} ? NUL : $self->docs_url );
 
-   ($node and exists $node->{type} and $node->{type} eq 'file')
-      or return { content => "> Oh no. That page doesn't exist",
-                  format  => 'markdown' };
+   $node and exists $node->{type} and $node->{type} eq 'file'
+      and return { content      => io( $node->{path} )->utf8,
+                   docs_url     => $req->uri_for( $self->docs_url ),
+                   format       => $node->{format},
+                   header       => $node->{title},
+                   homepage_url => $home,
+                   title        => ucfirst $node->{name}, };
 
-   my $home = exists $tree->{index} ? NUL : $self->docs_url;
-
-   return { content      => io( $node->{path} )->utf8,
+   return { content      => '> '.$req->loc( "Oh no. That page doesn't exist" ),
             docs_url     => $req->uri_for( $self->docs_url ),
-            format       => $node->{format},
-            header       => $node->{title},
-            homepage_url => $req->uri_for( $home ),
-            title        => ucfirst $node->{name}, };
+            format       => 'markdown',
+            homepage_url => $home,
+            title        => $req->loc( 'Not found' ), };
 }
 
 sub navigation {

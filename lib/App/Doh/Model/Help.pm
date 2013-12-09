@@ -1,9 +1,9 @@
-# @(#)Ident: Help.pm 2013-11-29 12:26 pjf ;
+# @(#)Ident: Help.pm 2013-12-08 23:34 pjf ;
 
 package App::Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -12,8 +12,9 @@ use Class::Usul::Types      qw( ArrayRef );
 use File::DataClass::IO;
 
 extends q(App::Doh);
-with    q(App::Doh::TraitFor::CommonLinks);
-with    q(App::Doh::TraitFor::Preferences);
+with    q(App::Doh::Role::CommonLinks);
+with    q(App::Doh::Role::PageConfiguration);
+with    q(App::Doh::Role::Preferences);
 
 # Public attributes
 has 'navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
@@ -22,7 +23,7 @@ has 'navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
    my $help_url = $self->config->help_url;
   (my $path     = find_source( $appclass )) =~ s{ \.pm }{}mx;
    my $io       = io( $path )->filter( sub { m{ (?: \.pm | \.pod ) \z }mx } );
-   my $paths    = [ NUL, grep { not m{ \A (?: Model | TraitFor | View ) }mx }
+   my $paths    = [ NUL, grep { not m{ \A (?: Model | Role | View ) }mx }
                          map  { $_->abs2rel( $path ) } $io->deep->all_files ];
    my $classes  = [ map { s{ (?: :: | \.pm ) \z }{}mx; $_ }
                     map { s{ [/] }{::}gmx; "${appclass}::${_}" } @{ $paths } ];
@@ -46,9 +47,10 @@ sub get_stash {
 }
 
 sub load_page {
-   my ($self, $req) = @_; my $title = $req->loc( 'Help' );
+   my ($self, $req) = @_;
 
-   my $want = $req->args->[ 0 ] || $self->config->appclass;
+   my $title = $req->loc( 'Help' );
+   my $want  = $req->args->[ 0 ] || $self->config->appclass;
 
    return { content => io( find_source( $want ) || $req->args->[ 0 ] ),
             format  => 'pod',

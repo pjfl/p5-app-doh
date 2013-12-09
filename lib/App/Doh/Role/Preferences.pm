@@ -1,6 +1,6 @@
-# @(#)Ident: Preferences.pm 2013-09-05 11:16 pjf ;
+# @(#)Ident: Preferences.pm 2013-12-09 02:57 pjf ;
 
-package App::Doh::TraitFor::Preferences;
+package App::Doh::Role::Preferences;
 
 use namespace::sweep;
 use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
@@ -10,28 +10,24 @@ use Class::Usul::Functions  qw( base64_decode_ns );
 use Storable                qw( thaw );
 use Moo::Role;
 
-requires qw( config );
+requires qw( config get_stash );
 
 around 'get_stash' => sub {
    my ($orig, $self, $req) = @_; my $stash = $orig->( $self, $req );
 
-   $stash->{prefs} = $self->_get_preferences( $req );
-   return $stash;
-};
-
-sub _get_preferences {
-   my ($self, $req) = @_; my $conf = $self->config; my $r = {};
-
+   my $params = $req->params;
+   my $conf   = $self->config;
    my $cookie = $req->cookie->{ $conf->name.'_prefs' };
    my $frozen = $cookie ? base64_decode_ns( $cookie->value ) : FALSE;
    my $prefs  = $frozen ? thaw $frozen : {};
 
    for my $k (@{ $conf->preferences }) {
-      $r->{ $k } = $req->params->{ $k } // $prefs->{ $k } // $conf->$k();
+      $stash->{prefs}->{ $k }
+         = $params->{ $k } // $prefs->{ $k } // $conf->$k();
    }
 
-   return $r;
-}
+   return $stash;
+};
 
 1;
 

@@ -1,12 +1,13 @@
-# @(#)Ident: Markdown.pm 2013-11-28 18:28 pjf ;
+# @(#)Ident: Markdown.pm 2013-12-09 01:01 pjf ;
 
 package App::Doh::View::HTML::Markdown;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 23 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Types      qw( ArrayRef Object );
+use Scalar::Util            qw( blessed );
 use Text::Markdown;
 
 extends q(App::Doh);
@@ -18,9 +19,11 @@ has 'tm'         => is => 'lazy', isa => Object,
    builder       => sub { Text::Markdown->new( tab_width => 3 ) };
 
 sub render {
-   my ($self, $req, $page) = @_;
+   my ($self, $req, $page) = @_; my $content = $page->{content};
 
-   return $self->tm->markdown( $page->{content}->all );
+   my $markdown = blessed $content ? $content->all : $content;
+
+   return $self->tm->markdown( $markdown );
 }
 
 1;

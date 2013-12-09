@@ -1,15 +1,15 @@
-# @(#)Ident: Config.pm 2013-11-29 02:23 pjf ;
+# @(#)Ident: Config.pm 2013-11-29 20:21 pjf ;
 
 package App::Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
-use File::DataClass::Types  qw( ArrayRef Directory HashRef NonEmptySimpleStr
-                                NonNumericSimpleStr NonZeroPositiveInt
-                                SimpleStr );
+use File::DataClass::Types  qw( ArrayRef Bool Directory HashRef
+                                NonEmptySimpleStr NonNumericSimpleStr
+                                NonZeroPositiveInt SimpleStr );
 
 extends q(Class::Usul::Config::Programs);
 
@@ -36,8 +36,7 @@ has 'extensions'       => is => 'ro',   isa => HashRef,
    builder             => sub { { markdown => [ qw( md mkdn )   ],
                                   pod      => [ qw( pl pm pod ) ], } };
 
-has 'float'            => is => 'ro',   isa => NonNumericSimpleStr,
-   coerce              => sub { $_[ 0 ] ? 'float-view' : NUL }, default => TRUE;
+has 'float'            => is => 'ro',   isa => Bool, default => TRUE;
 
 has 'font'             => is => 'ro',   isa => SimpleStr,
    default             => sub {
@@ -139,7 +138,7 @@ App::Doh::Config - Defines the configuration file options and their defaults
 
 =head1 Version
 
-This documents version v0.1.$Rev: 24 $ of L<App::Doh::Config>
+This documents version v0.1.$Rev: 26 $ of L<App::Doh::Config>
 
 =head1 Description
 

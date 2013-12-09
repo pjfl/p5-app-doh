@@ -1,10 +1,10 @@
-# @(#)Ident: Doh.pm 2013-11-29 02:17 pjf ;
+# @(#)Ident: Doh.pm 2013-12-08 23:37 pjf ;
 
 package App::Doh;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 24 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -40,7 +40,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.1.$Rev: 24 $ of L<App::Doh>
+This documents version v0.1.$Rev: 26 $ of L<App::Doh>
 
 =head1 Description
 
