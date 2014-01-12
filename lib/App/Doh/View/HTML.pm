@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-12-09 03:09 pjf ;
+# @(#)Ident: HTML.pm 2013-12-10 03:27 pjf ;
 
 package App::Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -66,11 +66,12 @@ sub render {
    my ($self, $req, $stash) = @_; weaken( $req );
 
    my $text     = NUL;
-   my $prefs    = $stash->{prefs} || {};
+   my $prefs    = $stash->{prefs } || {};
+   my $conf     = $stash->{config} = $self->config;
+   my $skin     = $stash->{skin  } = $prefs->{skin} || $conf->skin;
    my $cookie   = $self->_serialize_preferences( $req, $prefs );
    my $header   = [ 'Content-Type', 'text/html', 'Set-Cookie', $cookie ];
-   my $skin     = $stash->{skin} = $prefs->{skin} || $self->config->skin;
-   my $template = ($stash->{template} ||= $self->config->template).'.tt';
+   my $template = ($stash->{template} ||= $conf->template).'.tt';
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
    unless ($path->exists) {
@@ -79,7 +80,6 @@ sub render {
    }
 
    $self->_render_microformat( $req, $stash->{page} ||= {} );
-   $stash->{config } = $self->config;
    $stash->{req    } = $req;
    $stash->{loc    } = sub { $req->loc( @_ ) };
    $stash->{uri_for} = sub { $req->uri_for( @_ ) };

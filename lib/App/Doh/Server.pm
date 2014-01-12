@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2013-11-29 02:42 pjf ;
+# @(#)Ident: Server.pm 2014-01-10 14:43 pjf ;
 
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
@@ -11,11 +11,10 @@ use App::Doh::Request;
 use App::Doh::View::HTML;
 use Class::Usul;
 use Class::Usul::Constants;
-use Class::Usul::File;
-use Class::Usul::Functions  qw( app_prefix find_apphome get_cfgfiles );
-use Class::Usul::Types      qw( BaseType NonEmptySimpleStr Object );
+use Class::Usul::Functions     qw( app_prefix find_apphome get_cfgfiles );
+use Class::Usul::Types         qw( BaseType NonEmptySimpleStr Object );
+use File::DataClass::Functions qw( supported_extensions );
 use Plack::Builder;
-use Scalar::Util            qw( blessed );
 use Web::Simple;
 
 # Public attributes
@@ -45,11 +44,11 @@ has '_usul'        => is => 'lazy', isa => BaseType, reader => 'usul';
 sub _build__usul {
    my $self   = shift;
    my $myconf = $self->config;
-   my $extns  = [ keys %{ Class::Usul::File->extensions } ];
+   my $extns  = [ supported_extensions() ];
    my $attr   = { config => {}, config_class => $self->config_class, };
    my $conf   = $attr->{config};
 
-   $conf->{appclass} = $self->appclass || blessed $self || $self;
+   $conf->{appclass} = $self->appclass;
    $conf->{name    } = app_prefix   $conf->{appclass};
    $conf->{home    } = find_apphome $conf->{appclass}, $myconf->{home}, $extns;
    $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home}, $extns;
@@ -78,12 +77,13 @@ around 'to_psgi_app' => sub {
    builder {
       mount "${point}" => builder {
          enable 'LogErrors', logger => sub {
-            my $p = shift; my $lvl = $p->{level};
-            $logger->$lvl( $p->{message} ) };
+            my $p = shift; my $level = $p->{level};
+            $logger->$level( $p->{message} ) };
          enable 'Deflater',
             content_type    => [ qw( text/css text/html text/javascript
                                      application/javascript ) ],
             vary_user_agent => TRUE;
+         # TODO: User Plack::Middleware::Static::Minifier
          enable 'Static',
             path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
          enable_if { $debug } 'Debug';
@@ -137,7 +137,7 @@ App::Doh::Server - An Plack HTML application server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 25 $ of L<App::Doh::Server>
+This documents version v0.1.$Rev: 27 $ of L<App::Doh::Server>
 
 =head1 Description
 
@@ -228,7 +228,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2013 Peter Flanigan. All rights reserved
+Copyright (c) 2014 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>

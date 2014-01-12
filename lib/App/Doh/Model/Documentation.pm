@@ -1,10 +1,10 @@
-# @(#)Ident: Documentation.pm 2013-12-09 01:05 pjf ;
+# @(#)Ident: Documentation.pm 2014-01-04 01:15 pjf ;
 
 package App::Doh::Model::Documentation;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -60,14 +60,16 @@ sub _build_docs_url {
 
    $tree //= $self->docs_tree; $node //= __current( $tree );
 
-   if ($node->{type} eq 'file') { return $node->{url} }
-   elsif (exists $node->{tree}) {
-      return $self->_build_docs_url( $node->{tree} );
-   }
+   $node->{type} eq 'file' and return $node->{url};
+   exists $node->{tree}    and return $self->_build_docs_url( $node->{tree} );
+   $node = __next( $tree ) and return $self->_build_docs_url( $tree, $node  );
 
-   $node = __next( $tree ) or $self->log->fatal( 'Config Error: Unable to find the first page in the /docs folder. Double check you have at least one file in the root of of the /docs folder. Also make sure you do not have any empty folders' );
+   my $error = "Config Error: Unable to find the first page in\n"
+      ."the /docs folder. Double check you have at least one file in the root\n"
+      ."of the /docs folder. Also make sure you do not have any empty folders";
 
-   return $self->_build_docs_url( $tree, $node );
+   $self->log->fatal( $error );
+   return '/';
 }
 
 sub BUILD { # The docs_tree attribute constructor may take some time to run
@@ -136,8 +138,7 @@ sub __build_navigation_list {
       if ($page->{type} eq 'folder') {
          $page->{url} = '#';
          push @nav, $page, @{ __build_navigation_list
-                                 ( $node->{tree}, $parts,
-                                   $path_url, $level + 1 ) };
+                             ( $node->{tree}, $parts, $path_url, $level + 1 ) };
       }
       else { $page->{url} = $node->{url}; push @nav, $page }
    }

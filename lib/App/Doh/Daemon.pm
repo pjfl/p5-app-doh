@@ -1,9 +1,9 @@
-# @(#)Ident: Daemon.pm 2013-11-29 02:44 pjf ;
+# @(#)Ident: Daemon.pm 2014-01-12 19:34 pjf ;
 
 package App::Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -14,6 +14,7 @@ use Daemon::Control;
 use English                 qw( -no_match_vars );
 use Plack::Runner;
 use Scalar::Util            qw( blessed );
+use Unexpected::Functions   qw( Unspecified );
 
 extends q(Class::Usul::Programs);
 
@@ -41,9 +42,9 @@ has '_daemon_control' => is => 'lazy', isa => Object;
 around 'run' => sub {
    my ($orig, $self) = @_; my $daemon = $self->_daemon_control;
 
-   $daemon->name     or throw 'Name must be defined';
-   $daemon->program  or throw 'Program must be defined';
-   $daemon->pid_file or throw 'Pid file must be defined';
+   $daemon->name     or throw class => Unspecified, args => [ 'name'     ];
+   $daemon->program  or throw class => Unspecified, args => [ 'program'  ];
+   $daemon->pid_file or throw class => Unspecified, args => [ 'pid file' ];
 
    $daemon->uid and not $daemon->gid
       and $daemon->gid( get_user( $daemon->uid )->gid );
@@ -150,7 +151,7 @@ App::Doh::Daemon - Background process control for the documentation server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 25 $ of L<App::Doh::Daemon>
+This documents version v0.1.$Rev: 27 $ of L<App::Doh::Daemon>
 
 =head1 Description
 
@@ -252,7 +253,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2013 Peter Flanigan. All rights reserved
+Copyright (c) 2014 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>
