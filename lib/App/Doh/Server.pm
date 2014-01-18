@@ -1,9 +1,9 @@
-# @(#)Ident: Server.pm 2014-01-10 14:43 pjf ;
+# @(#)Ident: Server.pm 2014-01-13 00:42 pjf ;
 
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 28 $ =~ /\d+/gmx );
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
@@ -11,9 +11,8 @@ use App::Doh::Request;
 use App::Doh::View::HTML;
 use Class::Usul;
 use Class::Usul::Constants;
-use Class::Usul::Functions     qw( app_prefix find_apphome get_cfgfiles );
-use Class::Usul::Types         qw( BaseType NonEmptySimpleStr Object );
-use File::DataClass::Functions qw( supported_extensions );
+use Class::Usul::Functions  qw( app_prefix find_apphome get_cfgfiles );
+use Class::Usul::Types      qw( BaseType NonEmptySimpleStr Object );
 use Plack::Builder;
 use Web::Simple;
 
@@ -44,14 +43,13 @@ has '_usul'        => is => 'lazy', isa => BaseType, reader => 'usul';
 sub _build__usul {
    my $self   = shift;
    my $myconf = $self->config;
-   my $extns  = [ supported_extensions() ];
    my $attr   = { config => {}, config_class => $self->config_class, };
    my $conf   = $attr->{config};
 
    $conf->{appclass} = $self->appclass;
    $conf->{name    } = app_prefix   $conf->{appclass};
-   $conf->{home    } = find_apphome $conf->{appclass}, $myconf->{home}, $extns;
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home}, $extns;
+   $conf->{home    } = find_apphome $conf->{appclass}, $myconf->{home};
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home};
 
    my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
 
@@ -137,7 +135,7 @@ App::Doh::Server - An Plack HTML application server
 
 =head1 Version
 
-This documents version v0.1.$Rev: 27 $ of L<App::Doh::Server>
+This documents version v0.1.$Rev: 28 $ of L<App::Doh::Server>
 
 =head1 Description
 

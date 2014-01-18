@@ -1,9 +1,9 @@
-# @(#)Ident: HTML.pm 2013-12-10 03:27 pjf ;
+# @(#)Ident: HTML.pm 2014-01-17 17:59 pjf ;
 
 package App::Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 28 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -19,7 +19,7 @@ use Template;
 extends q(App::Doh);
 
 # Public attributes
-has 'formatters' => is => 'lazy', isa => HashRef, builder => sub {
+has 'formatters' => is => 'lazy', isa => HashRef[Object], builder => sub {
    my $self = shift; my $formatters = {};
 
    my $finder = Module::Pluggable::Object->new
