@@ -1,12 +1,10 @@
 #!/usr/bin/env perl
-# @(#)Ident: doh-daemon 2013-11-29 02:16 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
-use File::Spec::Functions   qw( catdir updir );
-use FindBin                 qw( $Bin );
-use lib                 catdir( $Bin, updir, 'lib' );
+use File::Spec::Functions qw( catdir updir );
+use FindBin               qw( $Bin );
+use lib               catdir( $Bin, updir, 'lib' );
 
 use App::Doh::Daemon;
 
@@ -44,10 +42,6 @@ Display man page / method help  / usage strings
 Lists the methods available in this program
 
 =back
-
-=head1 VERSION
-
-This documents version v0.1.$Rev: 27 $ of C<doh-daemon>
 
 =head1 DESCRIPTION
 

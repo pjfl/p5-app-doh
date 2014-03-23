@@ -1,12 +1,10 @@
 #!/usr/bin/env perl
-# @(#)Ident: doh-server 2013-09-05 12:17 pjf ;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
-use File::Spec::Functions   qw( catdir updir );
-use FindBin                 qw( $Bin );
-use lib                 catdir( $Bin, updir, 'lib' );
+use File::Spec::Functions qw( catdir updir );
+use FindBin               qw( $Bin );
+use lib               catdir( $Bin, updir, 'lib' );
 
 use App::Doh::Server;
 
@@ -31,10 +29,6 @@ doh-server - One-line description of the programs purpose
 Command line access to the web application
 
 =back
-
-=head1 VERSION
-
-This documents version v0.1.$Rev: 27 $ of C<doh-server>
 
 =head1 DESCRIPTION
 

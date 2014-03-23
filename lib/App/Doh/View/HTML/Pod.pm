@@ -1,13 +1,10 @@
-# @(#)Ident: Pod.pm 2013-11-29 12:10 pjf ;
-
 package App::Doh::View::HTML::Pod;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 25 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Types      qw( ArrayRef NonEmptySimpleStr Object Str );
+use Class::Usul::Types qw( ArrayRef NonEmptySimpleStr Object Str );
 use HTML::Accessors;
 use Pod::Hyperlink::BounceURL;
 use Pod::Xhtml;

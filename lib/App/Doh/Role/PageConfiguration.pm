@@ -1,9 +1,6 @@
-# @(#)Ident: PageConfiguration.pm 2013-12-09 03:00 pjf ;
-
 package App::Doh::Role::PageConfiguration;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo::Role;
 

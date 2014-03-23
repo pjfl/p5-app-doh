@@ -1,15 +1,12 @@
-# @(#)Ident: Config.pm 2013-11-29 20:21 pjf ;
-
 package App::Doh::Config;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
-use File::DataClass::Types  qw( ArrayRef Bool Directory HashRef
-                                NonEmptySimpleStr NonNumericSimpleStr
-                                NonZeroPositiveInt SimpleStr );
+use File::DataClass::Types qw( ArrayRef Bool Directory HashRef
+                               NonEmptySimpleStr NonNumericSimpleStr
+                               NonZeroPositiveInt SimpleStr );
 
 extends q(Class::Usul::Config::Programs);
 
@@ -21,7 +18,7 @@ has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
 has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
 has 'common_links'     => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( css help_url images less js ) ] };
+   builder             => sub { [ qw( css help_url images js less ) ] };
 
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'css/';
@@ -135,10 +132,6 @@ App::Doh::Config - Defines the configuration file options and their defaults
    my $usul = Class::Usul->new( config_class => 'App::Doh::Config' );
 
    my $author = $usul->config->author;
-
-=head1 Version
-
-This documents version v0.1.$Rev: 27 $ of L<App::Doh::Config>
 
 =head1 Description
 

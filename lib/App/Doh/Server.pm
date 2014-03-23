@@ -1,9 +1,6 @@
-# @(#)Ident: Server.pm 2014-01-13 00:42 pjf ;
-
 package App::Doh::Server;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 28 $ =~ /\d+/gmx );
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
@@ -11,8 +8,8 @@ use App::Doh::Request;
 use App::Doh::View::HTML;
 use Class::Usul;
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( app_prefix find_apphome get_cfgfiles );
-use Class::Usul::Types      qw( BaseType NonEmptySimpleStr Object );
+use Class::Usul::Functions qw( app_prefix find_apphome get_cfgfiles );
+use Class::Usul::Types     qw( BaseType NonEmptySimpleStr Object );
 use Plack::Builder;
 use Web::Simple;
 
@@ -59,7 +56,7 @@ sub _build__usul {
    my $docs    = $bootconf->projects->{ $port } || $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs, $extns;
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
 
    return Class::Usul->new( $attr );
 }
@@ -74,9 +71,7 @@ around 'to_psgi_app' => sub {
 
    builder {
       mount "${point}" => builder {
-         enable 'LogErrors', logger => sub {
-            my $p = shift; my $level = $p->{level};
-            $logger->$level( $p->{message} ) };
+         enable "LogDispatch", logger => $logger;
          enable 'Deflater',
             content_type    => [ qw( text/css text/html text/javascript
                                      application/javascript ) ],
@@ -132,10 +127,6 @@ App::Doh::Server - An Plack HTML application server
    use App::Doh::Server;
 
    App::Doh::Server->new->run_if_script;
-
-=head1 Version
-
-This documents version v0.1.$Rev: 28 $ of L<App::Doh::Server>
 
 =head1 Description
 

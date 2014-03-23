@@ -1,20 +1,17 @@
-# @(#)Ident: Daemon.pm 2014-01-12 19:34 pjf ;
-
 package App::Doh::Daemon;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( get_user throw );
+use Class::Usul::Functions qw( get_user throw );
 use Class::Usul::Options;
-use Class::Usul::Types      qw( NonEmptySimpleStr NonZeroPositiveInt Object );
+use Class::Usul::Types     qw( NonEmptySimpleStr NonZeroPositiveInt Object );
 use Daemon::Control;
-use English                 qw( -no_match_vars );
+use English                qw( -no_match_vars );
 use Plack::Runner;
-use Scalar::Util            qw( blessed );
-use Unexpected::Functions   qw( Unspecified );
+use Scalar::Util           qw( blessed );
+use Unexpected::Functions  qw( Unspecified );
 
 extends q(Class::Usul::Programs);
 
@@ -148,10 +145,6 @@ App::Doh::Daemon - Background process control for the documentation server
    use App::Doh::Daemon;
 
    exit App::Doh::Daemon->new_with_options( appclass => 'App::Doh' )->run;
-
-=head1 Version
-
-This documents version v0.1.$Rev: 27 $ of L<App::Doh::Daemon>
 
 =head1 Description
 

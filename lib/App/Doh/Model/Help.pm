@@ -1,14 +1,11 @@
-# @(#)Ident: Help.pm 2013-12-08 23:34 pjf ;
-
 package App::Doh::Model::Help;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( find_source );
-use Class::Usul::Types      qw( ArrayRef );
+use Class::Usul::Functions qw( find_source );
+use Class::Usul::Types     qw( ArrayRef );
 use File::DataClass::IO;
 
 extends q(App::Doh);

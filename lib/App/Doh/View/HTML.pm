@@ -1,19 +1,16 @@
-# @(#)Ident: HTML.pm 2014-01-17 17:59 pjf ;
-
 package App::Doh::View::HTML;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 28 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( base64_encode_ns merge_attributes throw );
+use Class::Usul::Functions qw( base64_encode_ns merge_attributes throw );
 use Encode;
-use File::DataClass::Types  qw( Directory HashRef Object );
-use File::Spec::Functions   qw( catfile );
+use File::DataClass::Types qw( Directory HashRef Object );
+use File::Spec::Functions  qw( catfile );
 use Module::Pluggable::Object;
-use Scalar::Util            qw( weaken );
-use Storable                qw( nfreeze );
+use Scalar::Util           qw( weaken );
+use Storable               qw( nfreeze );
 use Template;
 
 extends q(App::Doh);

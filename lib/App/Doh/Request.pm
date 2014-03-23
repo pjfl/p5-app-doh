@@ -1,55 +1,58 @@
-# @(#)Ident: Request.pm 2013-12-04 14:23 pjf ;
-
 package App::Doh::Request;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 27 $ =~ /\d+/gmx );
 
 use Moo;
 use CGI::Simple::Cookie;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( is_arrayref is_hashref trim );
+use Class::Usul::Functions qw( first_char is_arrayref is_hashref
+                               is_member trim );
 use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
                                Object SimpleStr );
+use URI::http;
+use URI::https;
 
 extends q(App::Doh);
 
-has 'args'   => is => 'ro', isa => ArrayRef, default => sub { [] };
+has 'args'   => is => 'ro',   isa => ArrayRef, default => sub { [] };
 
-has 'base'   => is => 'ro', isa => NonEmptySimpleStr, required => TRUE;
+has 'base'   => is => 'ro',   isa => NonEmptySimpleStr, required => TRUE;
 
-has 'cookie' => is => 'ro', isa => HashRef, default => sub { {} };
+has 'cookie' => is => 'lazy', isa => HashRef, builder => sub {
+   { CGI::Simple::Cookie->parse( $_[ 0 ]->env->{HTTP_COOKIE} ) || {} } };
 
-has 'domain' => is => 'ro', isa => NonEmptySimpleStr, required => TRUE;
+has 'domain' => is => 'ro',   isa => NonEmptySimpleStr, required => TRUE;
 
-has 'env'    => is => 'ro', isa => HashRef, default => sub { {} };
+has 'env'    => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'locale' => is => 'ro', isa => NonEmptySimpleStr, default => LANG;
+has 'locale' => is => 'lazy', isa => NonEmptySimpleStr, init_arg => undef;
 
-has 'params' => is => 'ro', isa => HashRef, default => sub { {} };
+has 'params' => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'path'   => is => 'ro', isa => SimpleStr, default => NUL;
+has 'path'   => is => 'ro',   isa => SimpleStr, default => NUL;
 
+has 'scheme' => is => 'ro',   isa => NonEmptySimpleStr;
+
+# Construction
 around 'BUILDARGS' => sub {
-   my ($orig, $self, $usul, @args) = @_; my $attr = {};
+   my ($orig, $self, $builder, @args) = @_; my $attr = {};
 
-   my $env  = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-   my $prot = lc( (split m{ / }mx, $env->{SERVER_PROTOCOL} || 'HTTP')[ 0 ] );
-   my $path = $env->{SCRIPT_NAME} || '/'; $path =~ s{ / \z }{}gmx;
-   my $host = $env->{HTTP_HOST} || 'localhost';
+   my $env    = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
+   my $scheme = $attr->{scheme} = $env->{ 'psgi.url_scheme' } || 'http';
+   my $host   = $env->{ 'HTTP_HOST'   } || $env->{ 'SERVER_NAME' };
+   my $script = $env->{ 'SCRIPT_NAME' } || '/'; $script =~ s{ / \z }{}gmx;
 
-   $attr->{builder} = $usul;
+   $attr->{builder} = $builder;
    $attr->{env    } = $env;
-   $attr->{params } = ($args[ -1 ] && is_hashref $args[ -1 ]) ? pop @args : {};
+   $attr->{params } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{args   } = [ split m{ / }mx, trim $args[ 0 ] || NUL ];
-   $attr->{base   } = $prot.'://'.$host.$path.'/';
-   $attr->{cookie } = { CGI::Simple::Cookie->parse( $env->{HTTP_COOKIE} ) };
+   $attr->{base   } = "${scheme}://${host}${script}/";
    $attr->{domain } = (split m{ : }mx, $host)[ 0 ];
-   $attr->{path   } = $path;
-   $attr->{locale } = $usul->config->locale; # TODO: Make request dependent
+   $attr->{path   } = $script;
    return $attr;
 };
 
+# Public methods
 sub loc {
    my ($self, $key, @args) = @_; my $car = $args[ 0 ];
 
@@ -63,8 +66,39 @@ sub loc {
 }
 
 sub uri_for {
-   my ($self, $args) = @_; return $self->base.$args;
+   my ($self, $path, $args, $query_params) = @_;
+
+   $args and defined $args->[ 0 ] and $path = join '/', $path, @{ $args };
+   first_char $path ne '/' and $path = $self->base.$path;
+
+   my $uri = bless \$path, 'URI::'.$self->scheme;
+
+   $query_params and $uri->query_form( @{ $query_params } );
+
+   return $uri;
 }
+
+# Private methods
+sub _acceptable_locales {
+   my $self = shift; my $lang = $self->env->{ 'HTTP_ACCEPT_LANGUAGE' } || NUL;
+
+   return [ map    { s{ _ \z }{}mx; $_ }
+            map    { join '_', $_->[ 0 ], uc $_->[ 1 ] }
+            map    { [ split m{ - }mx, $_ ] }
+            map    { ( split m{ ; }mx, $_ )[ 0 ] }
+            split m{ , }mx, lc $lang ];
+}
+
+sub _build_locale {
+   my $self = shift;
+
+   for my $locale (@{ $self->_acceptable_locales }) {
+      is_member $locale, $self->config->locales and return $locale;
+   }
+
+   return $self->config->locale;
+}
+
 
 1;
 
@@ -84,15 +118,12 @@ Doh::Request - Represents the request sent from the client to the server
 
    my $req = App::Doh::Request->new( $class_usul_object_ref, @args );
 
-=head1 Version
-
-This documents version v0.1.$Rev: 27 $ of L<Doh::Request>
-
 =head1 Description
 
-Creates an object that combines the request parameters and the L<Plack>
-environment. Supplies all information about the current request to the
-rest of the application (that would be the model and the view)
+Creates an immutable object that combines the request parameters and
+the L<Plack> environment. Supplies all information about the current
+request to the rest of the application (that would be the model and
+the view)
 
 =head1 Configuration and Environment
 
@@ -122,7 +153,8 @@ A hash reference, the L<Plack> request environment
 
 =item C<locale>
 
-Defaults to the C<LANG> constant C<en> (for English)
+The language requested by the client. Defaults to the C<LANG> constant
+C<en> (for English)
 
 =item C<params>
 
@@ -132,6 +164,10 @@ A hash reference of query parameters supplied with the request URI
 
 Taken from the request path, this should be the same as the
 C<mount_point> configuration attribute
+
+=item C<scheme>
+
+The HTTP protocol used in the request. Defaults to C<http>
 
 =back
 

@@ -59,7 +59,6 @@
                <!-- Twitter -->
    [% FOREACH handle = config.twitter -%]
                <div class="twitter">
-                  <hr/>
                   <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
                </div>
    [% END -%]

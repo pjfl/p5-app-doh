@@ -1,13 +1,10 @@
-# @(#)Ident: Preferences.pm 2013-12-09 02:57 pjf ;
-
 package App::Doh::Role::Preferences;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 19 $ =~ /\d+/gmx );
 
 use Class::Usul::Constants;
-use Class::Usul::Functions  qw( base64_decode_ns );
-use Storable                qw( thaw );
+use Class::Usul::Functions qw( base64_decode_ns );
+use Storable               qw( thaw );
 use Moo::Role;
 
 requires qw( config get_stash );

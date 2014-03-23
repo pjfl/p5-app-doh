@@ -1,13 +1,10 @@
-# @(#)Ident: Markdown.pm 2013-12-09 01:01 pjf ;
-
 package App::Doh::View::HTML::Markdown;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 26 $ =~ /\d+/gmx );
 
 use Moo;
-use Class::Usul::Types      qw( ArrayRef Object );
-use Scalar::Util            qw( blessed );
+use Class::Usul::Types qw( ArrayRef Object );
+use Scalar::Util       qw( blessed );
 use Text::Markdown;
 
 extends q(App::Doh);
