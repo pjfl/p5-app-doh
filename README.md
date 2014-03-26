@@ -15,7 +15,7 @@ App::Doh - An easy way to document a project using Markdown
 
 # Version
 
-This documents version v0.1.$Rev: 24 $ of [App::Doh](https://metacpan.org/pod/App::Doh)
+This documents version v0.1.$Rev: 30 $ of [App::Doh](https://metacpan.org/pod/App::Doh)
 
 # Description
 
@@ -36,6 +36,10 @@ None
 Starting the daemon with the `-D` option will cause it to print debug
 information to the log file `var/logs/daemon.log`
 
+The development server can be started using
+
+    plackup bin/doh-server
+
 # Dependencies
 
 - [Class::Usul](https://metacpan.org/pod/Class::Usul)
@@ -53,7 +57,13 @@ Patches are welcome
 
 # Acknowledgements
 
-Larry Wall - For the Perl programming language
+- Larry Wall
+
+    For the Perl programming language
+
+- Justin Walsh
+
+    For https://github.com/justinwalsh/daux.io from which [App::Doh](https://metacpan.org/pod/App::Doh) was forked
 
 # Author
 
@@ -61,7 +71,7 @@ Peter Flanigan, `<pjfl@cpan.org>`
 
 # License and Copyright
 
-Copyright (c) 2013 Peter Flanigan. All rights reserved
+Copyright (c) 2014 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See [perlartistic](https://metacpan.org/pod/perlartistic)

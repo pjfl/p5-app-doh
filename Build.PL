@@ -25,11 +25,12 @@ if ($] < $perl_ver) {
 my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
   'module_name'  => $name,
   'notes'        => { min_perl_version => $perl_ver },
-  'install_path' => { var => catdir( q(), 'var', lc $distname ) },
   %{ $prereqs },
 ##{ $plugin->get_default('share_dir') ##}
 );
 
+$bob->install_path( 'lib' => catdir( $bob->install_base, 'lib' ) );
+$bob->install_path( 'var' => catdir( $bob->install_base, 'var' ) );
 $bob->add_build_element( 'var' );
 $bob->create_build_script;
 exit 0;
@@ -42,11 +43,23 @@ use File::Find            qw( find );
 use File::Path            qw( make_path );
 use File::Spec::Functions qw( catdir );
 
+sub ACTION_install {
+   my ($self) = @_; $self->SUPER::ACTION_install(); umask oct '0007';
+
+   for my $dir (qw( logs run tmp )) {
+      my $path = catdir( $self->install_path( 'var' ), $dir );
+
+      -d $path or make_path( $path, { mode => oct '0770' } );
+   }
+
+   return;
+}
+
 sub process_var_files {
-   my $self = shift; my $pattern;
+   my $self = shift; my $pattern; umask oct '0027';
 
    for (qw( .git logs tmp )) {
-      $pattern .= ($pattern ? ' | ' : q()).(catdir( q(), $_ ));
+      $pattern .= ($pattern ? '|' : q()).(catdir( q(), $_ ));
    }
 
    $self->_skip_pattern( qr{ (?: $pattern ) }mx );

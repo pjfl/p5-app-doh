@@ -1,6 +1,7 @@
 Revision history for App-Doh
 
 0.1.19    2013-08-23 12:00:33
+          - Split out navbar.tt
           - Removed Ident and extra VERSION lines
           - Going to re use less on the CSS
           - Help model doesn't hard code the url

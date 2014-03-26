@@ -5,8 +5,6 @@
    <meta name="description" content="[% page.description %]">
    <meta name="keywords" content="[% page.keywords %]">
    <meta name="author" content="[% page.author %]">
-   <!-- Mobile -->
-   <meta name="apple-mobile-web-app-capable" content="yes">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 [% IF config.colours.0 -%]
    <link href="[% links.images %]favicon.png" rel="icon" type="image/png">
@@ -15,10 +13,8 @@
           rel="icon" type="image/png">
 [% END -%]
 [% IF config.font -%]
-   <!-- Font -->
    <link href="[% config.font %]" rel="stylesheet" type="text/css">
 [% END -%]
-   <!-- CSS -->
 [% IF config.colours.0 -%]
    <style type="text/less">
    [% FOREACH colour = config.colours -%]
@@ -31,10 +27,8 @@
    <link href="[% links.css %]theme-[% prefs.theme %].css"
           rel="stylesheet" type="text/css">
 [% END -%]
-   <!-- Code Highlighter -->
    <script src="[% links.js %]highlight.min.js"></script>
    <script>hljs.initHighlightingOnLoad();</script>
-   <!-- Navigation -->
    <script src="[% links.js %]jquery.min.js"></script>
    <script src="[% links.js %]custom.js"></script>
    <title>[% config.title %] - [% page.title %]</title>

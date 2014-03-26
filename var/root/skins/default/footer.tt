@@ -1,16 +1,17 @@
+<!-- Footer -->
 [% IF config.google_analytics -%]
-   <script>
-      ( function( w, d, t, s, f) {
-           w[ 'GoogleAnalyticsObject' ] = f;
-           w[ f ] = w[ f ] || function() {
-              ( w[ f ].q = w[ f ].q || [] ).push( arguments ) };
-           w[ f ].l = 1 * new Date();
-           var e = d.createElement( t ); e.async = 1; e.src = s;
-           var m = d.getElementsByTagName( t )[ 0 ];
-           m.parentNode.insertBefore( e, m );
-        } )( window, document, 'script',
-                '//www.google-analytics.com/analytics.js', 'ga' );
-      ga( 'create', '[% config.google_analytics %]', '[% req.domain %]' );
-      ga( 'send', 'pageview' );
-   </script>
+<script>
+   ( function( w, d, t, s, f) {
+        w[ 'GoogleAnalyticsObject' ] = f;
+        w[ f ] = w[ f ] || function() {
+           ( w[ f ].q = w[ f ].q || [] ).push( arguments ) };
+        w[ f ].l = 1 * new Date();
+        var e = d.createElement( t ); e.async = 1; e.src = s;
+        var m = d.getElementsByTagName( t )[ 0 ];
+        m.parentNode.insertBefore( e, m );
+     } )( window, document, 'script',
+             '//www.google-analytics.com/analytics.js', 'ga' );
+   ga( 'create', '[% config.google_analytics %]', '[% req.domain %]' );
+   ga( 'send', 'pageview' );
+</script>
 [% END -%]
