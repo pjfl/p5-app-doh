@@ -11,7 +11,7 @@
 [% END -%]
 [% IF config.brand -%]
       <div class="row">
-         <div class="span10 offset1">
+         <div class="span12">
             <img class="homepage-image" alt="[% config.title %]"
                  src="[% links.images %][% config.brand %]">
          </div>

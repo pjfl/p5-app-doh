@@ -56,7 +56,7 @@ blockquote { margin: 1em 36px; }
 body {
    font-family: Verdana, "Lucida Sans", tahoma, arial, sans-serif;
    font-size: 62.5%; font-weight: normal; height: 100%; line-height: 1.8em;
-   max-height: 100%; width: 100%; /* 10 18 */
+   max-height: 100%; width: auto; /* 10 18 */
 }
 br { clear: left; }
 button, input, select { cursor: pointer; line-height: normal; }
@@ -85,7 +85,7 @@ hr {
    -khtml-box-sizing: content-box; -moz-box-sizing: content-box;
    -webkit-box-sizing: content-box;
    border-bottom: 1px solid; border-top: 1px solid; height: 0;
-   margin: 8px 0; width: 100%;
+   margin: 8px 0; width: auto;
 }
 html { height: 100%; max-height: 100%; }
 ins { border-bottom: 3px double; }
@@ -99,7 +99,7 @@ small { font-size: 1em; line-height: 1.8em; }
 sub, sup { font-size: 0.9em; line-height: 0; }
 sub { vertical-align: sub; }
 sup { vertical-align: super; }
-table { height: auto; width: 100%; }
+table { height: auto; width: auto; }
 td { vertical-align: middle; }
 textarea { overflow: auto; }
 tfoot { font-style: italic; }
@@ -130,7 +130,7 @@ table tr th:last-child, table tr td:last-child {
 }
 
 /* Classes */
-[class*="span"] { float: left; margin-left: 18px; min-height: 18px; }
+[class*="span"] { float: left; min-height: 18px; }
 .btn { display: inline-block; text-align: center; vertical-align: middle }
 .btn.btn-sidebar {
   background-color: @sidebar-hover; border: none; padding: 9px 9px;
@@ -153,8 +153,10 @@ table tr th:last-child, table tr td:last-child {
    background-color: white; display: inline-block; max-width: 800px;
    min-height: 100%; padding: 9px 36px 9px 18px; position: relative;
 }
-.container { margin-left: auto; margin-right: auto; width: 940px; }
-.container img { border: 0 none; height: auto; max-width: 100%; }
+.container {
+   margin-left: auto; margin-right: auto; overflow: hidden; width: 940px;
+}
+.container img { border: 0 none; height: auto; max-width: auto; }
 .container-fluid { margin: 0 auto; padding-top: 54px; }
 .container-fluid.fluid-height { height: 100%; }
 .content-area, .article-tree { height: 100%; overflow: auto; }
@@ -230,14 +232,14 @@ table tr th:last-child, table tr td:last-child {
    -moz-box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
    -webkit-box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
    box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
-   height: 54px; width: 100%; z-index: 200;
+   height: 54px; width: auto; z-index: 200;
 }
-.navbar-fixed-top { left: 0; position: fixed; top: 0; }
+.navbar-fixed-top { left: 0; position: fixed; right: 0; top: 0; }
 .navbar-static-top .container, .navbar-fixed-top .container,
 .navbar-fixed-bottom .container { width: 940px; }
 .navbar .navbar-inner {
-   background-color: @dark; display: inline-block; padding: 0 18px;
-   position: relative; width: 100%;
+   background-color: @dark; padding: 0 18px; overflow: hidden;
+   position: relative;
 }
 .navbar .navbar-inner p { display: inline-block; }
 .navbar .navbar-inner .brand {
@@ -254,7 +256,7 @@ table tr th:last-child, table tr td:last-child {
    border-bottom: 1px solid @lines; color: @dark; display: block;
    font-family: 'Roboto Slab', serif; font-size: 16px; font-weight: 400;
    height: 36px; line-height: 36px; overflow: hidden; padding: 0 18px;
-   width: 100%;
+   width: auto;
 }
 .nav.nav-list li a:hover   { background-color: @sidebar-hover; color: @dark; }
 .nav.nav-list li.active a  { background-color: @sidebar-hover; }
@@ -274,11 +276,11 @@ table tr th:last-child, table tr td:last-child {
 .offset1 { margin-left: 8%; }
 .page-header { margin: 9px 0; padding: 0; }
 .page-header h1 { margin-bottom: 0; margin-top: 0; }
-.pod dd p { width: 100% !important; }
+.pod dd p { width: auto !important; }
 .pod dt { clear: left; }
 .pod dt a, .pod li a { display: block; font-size: 14px; line-height: 18px; }
 .pod h3 { margin: 9px 0; }
-.pod ul ul { width: 100% !important; }
+.pod ul ul { width: auto !important; }
 .pod > ul > li > ul {
    clear: none !important; float: none !important; height: 0;
    list-style-position: inside; list-style-type: none;
@@ -298,8 +300,8 @@ table tr th:last-child, table tr td:last-child {
 .roboto-slab.book    { font-family: 'Roboto Slab', serif; font-weight: 300; }
 .roboto-slab.regular { font-family: 'Roboto Slab', serif; font-weight: 400; }
 .roboto-slab.bold    { font-family: 'Roboto Slab', serif; font-weight: 700; }
-.row         { margin-left: -20px; }
-.row-fluid   { width: 100%;  }
+.row         { overflow: hidden; }
+.row-fluid   { width: auto;  }
 .span2       { width: 16%;   }
 .span2p5     { width: 18%;   }
 .span3       { width: 25%;   }
@@ -345,7 +347,7 @@ table tr th:last-child, table tr td:last-child {
 }
 @media (max-width: 767px) {
    .columns .left-column, .columns .right-column {
-      height: auto; padding-top: 0; width: 100% !important;
+      height: auto; padding-top: 0; width: auto !important;
    }
    .hero-buttons.container-fluid .btn-hero.btn {
       display: block; margin-bottom: 10px;
@@ -372,7 +374,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page article {
       border-left: 15px solid white;
       min-height: 100%; overflow: auto;
-      position: relative; width: 100%;
+      position: relative; width: auto;
    }
    .float-view .content-page article:before {
       background-color: white; content: ''; display: block;
@@ -383,7 +385,7 @@ table tr th:last-child, table tr td:last-child {
       margin-bottom: 10px;
    }
    .float-view .content-page blockquote:before {
-      clear: both; content: ''; display: block; height: 10px; width: 100%;
+      clear: both; content: ''; display: block; height: 10px; width: auto;
    }
    .float-view .content-page hr {
       border-color: @lines; clear: left; float: left; width: 54%;
@@ -393,12 +395,12 @@ table tr th:last-child, table tr td:last-child {
    }
    .float-view .content-page ol li p, .float-view .content-page ul li p {
       background-color: white; clear: right; float: left;
-      margin-left: 1.5%; margin-right: 1.5%; width: 100%;
+      margin-left: 1.5%; margin-right: 1.5%; width: auto;
    }
    .float-view .content-page ol li pre, .float-view .content-page ul li pre {
       -khtml-box-sizing: border-box; -moz-box-sizing: border-box;
       -webkit-box-sizing: border-box; box-sizing: border-box;
-      margin-right: 1.5%; width: 100%;
+      margin-right: 1.5%; width: auto;
    }
    .float-view .content-page p {
       background-color: white; clear: left; float: left;
@@ -444,7 +446,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page h4:before,
    .float-view .content-page h5:before,
    .float-view .content-page h6:before {
-      clear: both; content: ''; display: block; height: 10px; width: 100%;
+      clear: both; content: ''; display: block; height: 10px; width: auto;
    }
    .float-view .content-page .pod {
       display: inline-block; position: relative;

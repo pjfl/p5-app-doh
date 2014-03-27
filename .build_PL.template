@@ -1,43 +1,15 @@
 use strict;
 use warnings;
 
-use Module::Build 0.4004;
+use Module::Build ##{ $meta2{prereqs}->{configure}->{requires}->{'Module::Build'} ##};
 use File::Spec::Functions qw( catdir );
 
 sub whimper { print {*STDOUT} $_[ 0 ]."\n"; exit 0 }
 
-my $perl_ver = 5.010001;
-my $distname = 'App-Doh'; (my $name = $distname) =~ s{ - }{::}gmx;
+my $perl_ver = ##{ $meta2{prereqs}->{runtime}->{requires}->{perl} ##};
+my $distname = '##{ $zilla->name ##}'; (my $name = $distname) =~ s{ - }{::}gmx;
 my $prereqs  = {
-  'build_requires' => {
-    'Module::Build' => '0.4004',
-    'version' => '0.88'
-  },
-  'configure_requires' => {
-    'Module::Build' => '0.4004',
-    'version' => '0.88'
-  },
-  'requires' => {
-    'CGI::Simple' => '1.113',
-    'Class::Usul' => 'v0.39.0',
-    'Daemon::Control' => '0.000009',
-    'File::DataClass' => 'v0.33.0',
-    'HTML::Accessors' => 'v0.11.0',
-    'Module::Pluggable' => '4.8',
-    'Moo' => '1.003',
-    'Plack' => '1.0018',
-    'Plack::Middleware::Deflater' => '0.08',
-    'Plack::Middleware::LogErrors' => '0.001',
-    'Pod::Xhtml' => '1.61',
-    'Template' => '2.22',
-    'Text::Markdown' => '1.000031',
-    'Twiggy' => '0.1021',
-    'URI' => '1.60',
-    'Unexpected' => 'v0.22.0',
-    'Web::Simple' => '0.020',
-    'namespace::sweep' => '0.006',
-    'perl' => '5.010001'
-  },
+##{ $plugin->get_prereqs( 1 ) ##}
 };
 
 if ($] < $perl_ver) {
@@ -54,7 +26,7 @@ my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
   'module_name'  => $name,
   'notes'        => { min_perl_version => $perl_ver },
   %{ $prereqs },
-
+##{ $plugin->get_default('share_dir') ##}
 );
 
 $bob->install_path( 'lib' => catdir( $bob->install_base, 'lib' ) );
