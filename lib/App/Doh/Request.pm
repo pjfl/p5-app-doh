@@ -39,7 +39,7 @@ around 'BUILDARGS' => sub {
 
    my $env    = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    my $scheme = $attr->{scheme} = $env->{ 'psgi.url_scheme' } || 'http';
-   my $host   = $env->{ 'HTTP_HOST'   } || $env->{ 'SERVER_NAME' };
+   my $host   = $env->{ 'HTTP_HOST' } || $env->{ 'SERVER_NAME' } || 'localhost';
    my $script = $env->{ 'SCRIPT_NAME' } || '/'; $script =~ s{ / \z }{}gmx;
 
    $attr->{builder} = $builder;

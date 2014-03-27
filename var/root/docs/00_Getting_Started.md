@@ -42,9 +42,14 @@ If you don't already have it, bootstrap
 
    curl -L http://cpanmin.us | perl - --sudo App::cpanminus
 
+Then install [local::lib](https://metacpan.org/module/local::lib) with:
+
+   cpanm --local-lib=~/perl5 local::lib && \
+      eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
+
 Install **App-Doh** with:
 
-   cpanm git://github.com/pjfl/p5-app-doh.git
+   cpanm git://github.com/pjfl/p5-app-doh.git Doh
 
 By default the server will run at: <a href="http://localhost:5000"
 target="_blank">http://localhost:5000</a> and can be started
