@@ -1,6 +1,7 @@
 Revision history for App-Doh
 
 0.1.19    2013-08-23 12:00:33
+          - Added MANIFEST to repository
           - Added more installation instuctions
           - Renamed Build.PL template
           - Removed width: 100% from CSS
