@@ -35,7 +35,7 @@ application is installed.
 
 **Requirements:**
 
-* Perl 5.10.1 or above
+* Perl 5.12.0 or above
 
 If you don't already have it, bootstrap
 [App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
@@ -44,28 +44,35 @@ If you don't already have it, bootstrap
 
 Then install [local::lib](https://metacpan.org/module/local::lib) with:
 
-   cpanm --local-lib=~/perl5 local::lib && \
-      eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
+   cpanm --local-lib=~/App-Doh local::lib && \
+      eval $(perl -I ~/App-Doh/lib/perl5/ -Mlocal::lib=~/App-Doh)
 
-Install **App-Doh** with:
+The second statement sets environment variables to include the local
+Perl library.  You can append the output of the perl command to your shell
+startup if you want to make it permanent.  Install **App-Doh** with:
 
-   cpanm git://github.com/pjfl/p5-app-doh.git Doh
+   cpanm git://github.com/pjfl/p5-app-doh.git
 
-By default the server will run at: <a href="http://localhost:5000"
-target="_blank">http://localhost:5000</a> and can be started
+If that fails run it again with the --force option
+
+   cpanm --force git:...
+
+By default the server will run at:
+[http://localhost:5000](http://localhost:5000) and can be started
 in the foreground with:
 
+   cd App-Doh
    plackup bin/doh-server
 
 To start in the background listening by default on port 8085 use:
 
-   bin/doh-daemon start
+   doh-daemon start
 
 The doh-daemon program provides normal SysV init script semantics. Additionally
 the daemon program will write an init script to standard output in response
 to the command:
 
-   bin/doh-daemon get_init_file
+   doh-daemon get_init_file
 
 ## Folders
 

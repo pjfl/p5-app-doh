@@ -31,6 +31,7 @@ my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
 
 $bob->install_path( 'lib' => catdir( $bob->install_base, 'lib' ) );
 $bob->install_path( 'var' => catdir( $bob->install_base, 'var' ) );
+$bob->add_build_element( 'config' );
 $bob->add_build_element( 'var' );
 $bob->create_build_script;
 exit 0;
@@ -41,7 +42,7 @@ use File::Basename        qw( dirname );
 use File::Copy            qw( copy );
 use File::Find            qw( find );
 use File::Path            qw( make_path );
-use File::Spec::Functions qw( catdir );
+use File::Spec::Functions qw( catdir catfile );
 
 sub ACTION_install {
    my ($self) = @_; $self->SUPER::ACTION_install(); umask oct '0007';
@@ -53,6 +54,14 @@ sub ACTION_install {
    }
 
    return;
+}
+
+sub process_config_files {
+   my $self     = shift; umask oct '0027';
+   my $distname = $self->dist_name;
+   my $home     = catdir( 'lib', split m{ - }mx, $distname);
+
+   return $self->_process_files( catfile( $home, (lc $distname).'.json' ) );
 }
 
 sub process_var_files {
