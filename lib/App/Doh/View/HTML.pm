@@ -4,13 +4,13 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( base64_encode_ns merge_attributes throw );
+use Class::Usul::Functions qw( throw );
+use Class::Usul::Time      qw( time2str );
 use Encode;
 use File::DataClass::Types qw( Directory HashRef Object );
 use File::Spec::Functions  qw( catfile );
 use Module::Pluggable::Object;
 use Scalar::Util           qw( weaken );
-use Storable               qw( nfreeze );
 use Template;
 
 extends q(App::Doh);
@@ -25,7 +25,7 @@ has 'formatters' => is => 'lazy', isa => HashRef[Object], builder => sub {
    for my $formatter ($finder->plugins) {
       my $format = lc ((split m{ :: }mx, $formatter)[ -1 ]);
 
-      $formatters->{ $format } = $formatter->new( builder => $self->_usul );
+      $formatters->{ $format } = $formatter->new( builder => $self->usul );
    }
 
    return $formatters;
@@ -59,15 +59,14 @@ has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
 };
 
 # Public methods
-sub render {
+sub serialize {
    my ($self, $req, $stash) = @_; weaken( $req );
 
    my $text     = NUL;
-   my $prefs    = $stash->{prefs } || {};
+   my $prefs    = $stash->{prefs } // {};
    my $conf     = $stash->{config} = $self->config;
-   my $skin     = $stash->{skin  } = $prefs->{skin} || $conf->skin;
-   my $cookie   = $self->_serialize_preferences( $req, $prefs );
-   my $header   = [ 'Content-Type', 'text/html', 'Set-Cookie', $cookie ];
+   my $skin     = $stash->{skin  } = $prefs->{skin} // $conf->skin;
+   my $header   = __header( $stash->{http_headers} );
    my $template = ($stash->{template} ||= $conf->template).'.tt';
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
@@ -77,9 +76,10 @@ sub render {
    }
 
    $self->_render_microformat( $req, $stash->{page} ||= {} );
-   $stash->{req    } = $req;
-   $stash->{loc    } = sub { $req->loc( @_ ) };
-   $stash->{uri_for} = sub { $req->uri_for( @_ ) };
+   $stash->{req     } = $req;
+   $stash->{loc     } = sub { $req->loc( @_ ) };
+   $stash->{time2str} = sub { time2str( $_[ 0 ], $_[ 1 ], $_[ 2 ] ) };
+   $stash->{uri_for } = sub { $req->uri_for( @_ ) };
 
    $self->template->process( catfile( $skin, $template ), $stash, \$text )
       or return [ 500, $header, [ $self->template->error ] ];
@@ -104,14 +104,9 @@ sub _render_microformat {
    return;
 }
 
-sub _serialize_preferences {
-   my ($self, $req, $prefs) = @_; my $value = base64_encode_ns nfreeze $prefs;
-
-   return CGI::Simple::Cookie->new( -domain  => $req->domain,
-                                    -expires => '+3M',
-                                    -name    => $self->config->name.'_prefs',
-                                    -path    => $req->path,
-                                    -value   => $value, );
+# Private functions
+sub __header {
+   return [ 'Content-Type' => 'text/html', @{ $_[ 0 ] || [] } ];
 }
 
 1;

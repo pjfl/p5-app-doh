@@ -1,7 +1,8 @@
 Revision history for App-Doh
 
 0.1.19    2013-08-23 12:00:33
-          - Adde green.css to repository
+          - Added markdown editor
+          - Added green.css to repository
           - Added MANIFEST to repository
           - Added more installation instuctions
           - Renamed Build.PL template

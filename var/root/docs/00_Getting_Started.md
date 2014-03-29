@@ -49,7 +49,9 @@ Then install [local::lib](https://metacpan.org/module/local::lib) with:
 
 The second statement sets environment variables to include the local
 Perl library.  You can append the output of the perl command to your shell
-startup if you want to make it permanent.  Install **App-Doh** with:
+startup if you want to make it permanent
+
+Install **App-Doh** with:
 
    cpanm git://github.com/pjfl/p5-app-doh.git
 
@@ -76,8 +78,8 @@ to the command:
 
 ## Folders
 
-The generator will look for folders in the `/docs` folder. Add your
-folders inside the `/docs` folder. This project contains some example
+The generator will look for folders in the `var/root/docs` folder. Add your
+folders inside the `var/root/docs` folder. This project contains some example
 folders and files to get you started.
 
 You can nest folders any number of levels to get the exact structure
@@ -87,7 +89,7 @@ navigation.
 ## Files
 
 The generator will look for Markdown `*.md` or `*.mkdn` files inside
-the `/docs` folder and any of the subfolders within `/docs`.
+the `var/root/docs` folder and any of the subfolders within `var/root/docs`.
 
 You must use either the `.md` or the `.mkdn` file extension for your
 files. Also, you must use underscores instead of spaces. Here are some
@@ -111,15 +113,15 @@ Text files with `.txt` extension will be rendered wrapped in 'pre' tags.
 ## Sorting
 
 To sort your files and folders in a specific way, you can prefix them
-with a number and underscore, e.g. `/docs/01_Hello_World.md` and
-`/docs/05_Features.md` This will list *Hello World* before *Features*,
+with a number and underscore, e.g. `var/root/docs/01_Hello_World.md` and
+`var/root/docs/05_Features.md` This will list *Hello World* before *Features*,
 overriding the deafult alpha-numeric sorting. The numbers will be
 stripped out of the navigation and urls.
 
 ## Landing page
 
 If you want to create a beautiful landing page for your project,
-simply create a `index.md` file in the root of the `/docs`
+simply create a `index.md` file in the root of the `var/root/docs`
 folder. This file will then be used to create a landing page. You can
 also add a description and image to this page using the config file like
 this:
@@ -133,7 +135,7 @@ this:
 ## Configuration
 
 To customize the look and feel of your documentation, you can create a
-`doh.json` file in the of the `/docs` folder. The `doh.json`
+`doh.json` file in the of the `var/root/docs` folder. The `doh.json`
 file is a simple JSON object that you can use to change some of the
 basic settings of the documentation.
 
@@ -185,7 +187,7 @@ to get started:
 By deafult your code blocks will be floated to a column on the right
 side of your content. To disable this feature, set the `float`
 property to `false`, or add `?float=0` to any URI to store the choice
-in the preferences. Add `?float=float-view` to any URI to re-enable the
+in the preferences. Add `?float=1` to any URI to re-enable the
 feature
 
    {
@@ -230,3 +232,6 @@ This will embed the google analytics tracking code.
 If you need help using Doh, or have found a bug, please create an
 issue on the <a href="https://github.com/pjfl/p5-app-doh/issues"
 target="_blank">Github repo</a>.
+
+Please note that a Perl module failing to install is not an
+issue for *this* application.

@@ -7,6 +7,7 @@ use Class::Usul::Constants;
 use File::DataClass::Types qw( ArrayRef Bool Directory HashRef
                                NonEmptySimpleStr NonNumericSimpleStr
                                NonZeroPositiveInt SimpleStr );
+use Sys::Hostname          qw( hostname );
 
 extends q(Class::Usul::Config::Programs);
 
@@ -32,6 +33,10 @@ has 'docs_path'        => is => 'lazy', isa => Directory,
 has 'extensions'       => is => 'ro',   isa => HashRef,
    builder             => sub { { markdown => [ qw( md mkdn )   ],
                                   pod      => [ qw( pl pm pod ) ], } };
+
+has 'file_root'        => is => 'lazy', isa => Directory,
+   builder             => sub { $_[ 0 ]->docs_path },
+   coerce              => Directory->coercion;
 
 has 'float'            => is => 'ro',   isa => Bool, default => TRUE;
 
@@ -71,6 +76,9 @@ has 'preferences'      => is => 'ro',   isa => ArrayRef,
 has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
 
 has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'secret'           => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => hostname;
 
 has 'server'           => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Twiggy';
@@ -184,6 +192,10 @@ root for the microformat content pages
 A hash reference. The keys are microformat names and the values are an
 array reference of filename extensions that the corresponding view can
 render
+
+=item C<file_root>
+
+The project's document root. Lazily evaluated it defaults to C<docs_path>
 
 =item C<float>
 

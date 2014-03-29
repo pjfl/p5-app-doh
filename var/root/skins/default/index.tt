@@ -1,5 +1,5 @@
-<!-- Index -->
 [% INCLUDE default/navbar.tt %]
+<!-- Index -->
 <div class="homepage-hero well container-fluid">
    <div class="container">
 [% IF config.description -%]
@@ -51,7 +51,7 @@
 [% IF config.links.0 -%]
             <ul class="footer-nav">
    [% FOREACH link = config.links -%]
-               <li><a href="[% link.url %]" target="_blank">
+               <li><a href="[% link.url | eval %]" target="_blank">
                   [% link.name %]</a></li>
    [% END -%]
             </ul>

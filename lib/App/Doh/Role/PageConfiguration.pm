@@ -2,6 +2,7 @@ package App::Doh::Role::PageConfiguration;
 
 use namespace::sweep;
 
+use Class::Usul::Constants;
 use Moo::Role;
 
 requires qw( config load_page );
@@ -14,6 +15,8 @@ around 'load_page' => sub {
 
    $page->{ $_ } = $conf->$_() for (qw( author description keywords ));
 
+   $page->{application_version} = $App::Doh::VERSION;
+   $page->{status_message     } = delete $req->session->{status_message} // NUL;
    return $page;
 };
 

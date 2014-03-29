@@ -45,7 +45,7 @@ use File::Path            qw( make_path );
 use File::Spec::Functions qw( catdir catfile );
 
 sub ACTION_install {
-   my ($self) = @_; $self->SUPER::ACTION_install(); umask oct '0007';
+   my $self = shift; umask oct '0007'; $self->SUPER::ACTION_install();
 
    for my $dir (qw( logs run tmp )) {
       my $path = catdir( $self->install_path( 'var' ), $dir );

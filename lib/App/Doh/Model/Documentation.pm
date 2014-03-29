@@ -5,6 +5,7 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
+use Class::Usul::Functions qw( throw );
 use File::DataClass::IO;
 use File::DataClass::Types qw( HashRef NonEmptySimpleStr );
 use File::Spec::Functions  qw( curdir );
@@ -22,10 +23,14 @@ has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
 has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
 
 # Construction
+sub BUILD { # The docs_tree attribute constructor may take some time to run
+   $_[ 0 ]->docs_url; return;
+}
+
 sub _build_docs_tree {
    my ($self, $dir, $url_base, $title) = @_; state $index //= 0;
 
-   $dir //= io( $self->config->docs_path ); $url_base //= NUL; $title //= NUL;
+   $dir //= io( $self->config->file_root ); $url_base //= NUL; $title //= NUL;
 
    my $re = join '|', @{ $self->config->no_index }; my $tree = {};
 
@@ -39,6 +44,7 @@ sub _build_docs_tree {
          format      => $self->_get_format( $path->pathname ),
          name        => $name,
          path        => $path->pathname,
+         mtime       => $path->stat->{mtime},
          title       => $full_title,
          type        => 'file',
          url         => $url,
@@ -69,32 +75,30 @@ sub _build_docs_url {
    return '/';
 }
 
-sub BUILD { # The docs_tree attribute constructor may take some time to run
-   $_[ 0 ]->docs_url; return;
-}
-
 # Public methods
 sub get_stash {
    my ($self, $req) = @_;
 
-   return { nav      => $self->navigation( $req ),
-            page     => $self->load_page ( $req ),
-            template => $req->{args}->[ 0 ] ? 'documentation' : undef, };
+  return { nav      => $self->navigation( $req ),
+           page     => $self->load_page ( $req ),
+           template => $req->{args}->[ 0 ] ? 'documentation' : undef, };
 }
 
 sub load_page {
    my ($self, $req) = @_;
 
    my $tree = $self->docs_tree;
-   my $node = __find_node( $tree, [ @{ $req->args } ] );
+   my $node = $self->_find_node( $req->args );
    my $home = $req->uri_for( exists $tree->{index} ? NUL : $self->docs_url );
 
    $node and exists $node->{type} and $node->{type} eq 'file'
       and return { content      => io( $node->{path} )->utf8,
                    docs_url     => $req->uri_for( $self->docs_url ),
+                   editing      => $req->params->{edit} // FALSE,
                    format       => $node->{format},
                    header       => $node->{title},
                    homepage_url => $home,
+                   mtime        => $node->{mtime},
                    title        => ucfirst $node->{name}, };
 
    return { content      => '> '.$req->loc( "Oh no. That page doesn't exist" ),
@@ -111,7 +115,41 @@ sub navigation {
       ( $self->docs_tree, $parts, (join '/', @{ $parts }), 0 );
 }
 
+sub update_file {
+   my ($self, $req) = @_;
+
+   $req->username ne 'unknown' or throw 'Update not authorised';
+
+   my $node    = $self->_find_node( $req->args )
+      or throw 'Cannot find document tree node to update';
+   my $out     = io( '/tmp/fli' );
+   my $content = $req->body->param->{content};
+
+   $content =~ s{ \r\n }{\n}gmx; $out->print( $content );
+
+   my $path    = io( $node->{path} )->abs2rel( $self->config->file_root );
+   my $message = [ 'File [_1] updated by [_2]', $path, $req->username ];
+
+   return { redirect => { location => $req->uri, message => $message } };
+}
+
+
 # Private methods
+sub _find_node {
+   my ($self, $args) = @_; my $tree = $self->docs_tree;
+
+   my $path = [ @{ $args } ]; $path->[ 0 ] or $path->[ 0 ] = 'index';
+
+   for my $node (@{ $path }) {
+      $node or $node = 'index'; exists $tree->{ $node } or return FALSE;
+
+      $tree = $tree->{ $node }->{type} eq 'folder'
+            ? $tree->{ $node }->{tree} : $tree->{ $node };
+   }
+
+   return $tree;
+}
+
 sub _get_format {
    my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
 
@@ -150,19 +188,6 @@ sub __current {
       or $href->{_iterator} = [ 0, __sort_pages( $href ) ];
 
    return $href->{ $href->{_iterator}->[ $href->{_iterator}->[ 0 ] + 1 ] };
-}
-
-sub __find_node {
-   my ($tree, $path) = @_; $path->[ 0 ] or $path->[ 0 ] = 'index';
-
-   for my $node (@{ $path }) {
-      $node or $node = 'index'; exists $tree->{ $node } or return FALSE;
-
-      $tree = $tree->{ $node }->{type} eq 'folder'
-            ? $tree->{ $node }->{tree} : $tree->{ $node };
-   }
-
-   return $tree;
 }
 
 sub __make_id_from {

@@ -20,7 +20,7 @@ sub render {
 
    my $markdown = blessed $content ? $content->all : $content;
 
-   return $self->tm->markdown( $markdown );
+   return $page->{editing} ? $markdown : $self->tm->markdown( $markdown );
 }
 
 1;

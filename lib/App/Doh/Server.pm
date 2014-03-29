@@ -8,9 +8,11 @@ use App::Doh::Request;
 use App::Doh::View::HTML;
 use Class::Usul;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( app_prefix find_apphome get_cfgfiles );
-use Class::Usul::Types     qw( BaseType NonEmptySimpleStr Object );
+use Class::Usul::Functions qw( app_prefix find_apphome get_cfgfiles throw );
+use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr Object );
+use HTTP::Status           qw( HTTP_FOUND HTTP_INTERNAL_SERVER_ERROR );
 use Plack::Builder;
+use Try::Tiny;
 use Web::Simple;
 
 # Public attributes
@@ -21,22 +23,27 @@ has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
    default         => 'App::Doh::Config';
 
 # Private attributes
-has '_doc_model'   => is => 'lazy', isa => Object,   reader => 'doc_model',
-   builder         => sub { App::Doh::Model::Documentation->new
-      ( builder    => $_[ 0 ]->usul,
-        type_map   => $_[ 0 ]->html_view->type_map ) };
+has '_models' => is => 'lazy', isa => HashRef[Object], reader => 'models',
+   builder    => sub { {
+      'docs'  => App::Doh::Model::Documentation->new
+         ( builder  => $_[ 0 ]->usul,
+           type_map => $_[ 0 ]->views->{html}->type_map ),
+      'help'  => App::Doh::Model::Help->new( builder => $_[ 0 ]->usul ),
+   } };
 
-has '_help_model'  => is => 'lazy', isa => Object,   reader => 'help_model',
-   builder         => sub { App::Doh::Model::Help->new
-      ( builder    => $_[ 0 ]->usul ) };
+has '_views'  => is => 'lazy', isa => HashRef[Object], reader => 'views',
+   builder    => sub { {
+      'html'  => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
+   } };
 
-has '_html_view'   => is => 'lazy', isa => Object,   reader => 'html_view',
-   builder         => sub { App::Doh::View::HTML->new
-      ( builder    => $_[ 0 ]->usul ) };
-
-has '_usul'        => is => 'lazy', isa => BaseType, reader => 'usul';
+has '_usul'   => is => 'lazy', isa => BaseType,
+   handles    => [ 'log' ], reader => 'usul';
 
 # Construction
+sub BUILD { # Take the hit at application startup not on first request
+   $_[ 0 ]->models->{docs}->docs_url; return;
+}
+
 sub _build__usul {
    my $self   = shift;
    my $myconf = $self->config;
@@ -56,7 +63,8 @@ sub _build__usul {
    my $docs    = $bootconf->projects->{ $port } || $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{cfgfiles } = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{file_root} = $docs;
 
    return Class::Usul->new( $attr );
 }
@@ -71,7 +79,6 @@ around 'to_psgi_app' => sub {
 
    builder {
       mount "${point}" => builder {
-         enable "LogDispatch", logger => $logger;
          enable 'Deflater',
             content_type    => [ qw( text/css text/html text/javascript
                                      application/javascript ) ],
@@ -79,33 +86,72 @@ around 'to_psgi_app' => sub {
          # TODO: User Plack::Middleware::Static::Minifier
          enable 'Static',
             path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
+         enable "LogDispatch", logger => $logger;
+         enable 'Session::Cookie',
+            httponly => TRUE,          path        => $point,
+            secret   => $conf->secret, session_key => 'doh_session';
+         enable '+App::Doh::Auth::Htpasswd',
+            file_root => $conf->file_root, params => [ 'edit' ];
          enable_if { $debug } 'Debug';
-         $app;
+         mount '/' => $app;
       };
    };
 };
 
-sub BUILD { # Take the hit at application startup not on first request
-   $_[ 0 ]->doc_model; return;
-}
-
 # Public methods
 sub dispatch_request {
-   sub (GET + /help | /help/** + ?*) {
-      return shift->_get_html_response( 'help_model', @_ );
+   sub (GET  + /help | /help/** + ?*) {
+      return shift->_execute( qw( html help get_stash ), @_ );
    },
-   sub (GET + / | /** + ?*) {
-      return shift->_get_html_response( 'doc_model', @_ );
+   sub (POST + / | /** + ?*) {
+      return shift->_execute( qw( html docs update_file ), @_ );
+   },
+   sub (GET  + / | /** + ?*) {
+      return shift->_execute( qw( html docs get_stash ), @_ );
    };
 }
 
 # Private methods
-sub _get_html_response {
-   my ($self, $model, @args) = @_;
+sub _execute {
+   my ($self, $view, $model, $method, @args) = @_;
 
-   my $req = App::Doh::Request->new( $self->usul, @args );
+   my $req = App::Doh::Request->new( $self->usul, @args ); my $res;
 
-   return $self->html_view->render( $req, $self->$model->get_stash( $req ) );
+   try {
+      my $stash = $self->models->{ $model }->$method( $req );
+
+      exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
+
+      $res or $res = $self->views->{ $view }->serialize( $req, $stash )
+           or throw error => 'View [_1] returned false', args => [ $view ];
+   }
+   catch { $res = __internal_server_error( $req, $_ ) };
+
+   return $res;
+}
+
+sub _redirect {
+   my ($self, $req, $stash) = @_;
+
+   my $redirect = $stash->{redirect};
+   my $code     = $redirect->{code} || HTTP_FOUND;
+   my $message  = $redirect->{message};
+
+   $message and $req->session->{status_message} = $req->loc( @{ $message } )
+            and $self->log->info( $req->loc_default( @{ $message } ) );
+
+   return [ $code, [ 'Location', $redirect->{location} ], [] ];
+}
+
+# Private functions
+sub __internal_server_error {
+   my ($req, $e) = @_; my $message = "Error: ${e}\r\n";
+
+   return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
+}
+
+sub __plain_header {
+   return [ 'Content-Type', 'text/plain' ];
 }
 
 1;

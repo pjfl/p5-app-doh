@@ -515,7 +515,7 @@ table tr td:last-child {
 .container img {
   border: 0 none;
   height: auto;
-  max-width: auto;
+  max-width: 100%;
 }
 .container-fluid {
   margin: 0 auto;
@@ -721,6 +721,7 @@ table tr td:last-child {
 .navbar .navbar-inner .navbar-text {
   color: #569220;
   font-size: 14px;
+  font-weight: 700;
   line-height: 36px;
 }
 .nav-list {
@@ -787,12 +788,14 @@ table tr td:last-child {
   margin-left: 8%;
 }
 .page-header {
-  margin: 9px 0;
-  padding: 0;
+  border-bottom: 1px solid;
+  border-color: #adcb83;
+  margin: 0;
+  overflow: hidden;
+  padding: 9px 0 8px 0;
 }
 .page-header h1 {
-  margin-bottom: 0;
-  margin-top: 0;
+  margin: 9px 0;
 }
 .pod dd p {
   width: auto !important;
@@ -975,7 +978,7 @@ table tr td:last-child {
   .columns .right-column {
     height: auto;
     padding-top: 0;
-    width: auto !important;
+    width: 100% !important;
   }
   .hero-buttons.container-fluid .btn-hero.btn {
     display: block;
@@ -1111,9 +1114,6 @@ table tr td:last-child {
   .float-view .content-page table pre,
   .float-view .content-page table code {
     white-space: normal;
-  }
-  .float-view .content-page .page-header {
-    padding: 0;
   }
   .float-view .content-page .page-header,
   .float-view .content-page ul,

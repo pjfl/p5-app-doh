@@ -1,5 +1,5 @@
-<!-- Documentation -->
 [% INCLUDE default/navbar.tt %]
+<!-- Documentation -->
 [% IF config.repo_url -%]
 <a href="[% config.repo_url %]" target="_blank"
    id="github-ribbon" class="github-ribbon">
@@ -8,68 +8,11 @@
 <div class="container-fluid fluid-height wrapper">
    <div class="row-fluid columns content">
       <div class="left-column article-tree span2p5">
-         <!-- For Mobile -->
-         <div class="responsive-collapse">
-            <button type="button" class="btn btn-sidebar"
-                    data-toggle="collapse" data-target="#sub-nav-collapse">
-               <span class="icon-bar"></span>
-               <span class="icon-bar"></span>
-               <span class="icon-bar"></span>
-            </button>
-         </div>
-         <div id="sub-nav-collapse" class="collapse in">
-            <!-- Navigation -->
-[% level = 0 -%]
-            <ul class="nav nav-list">
-[% FOREACH node = nav -%]
-   [% WHILE node.level < level; level = level - 1 -%]
-                  </ul>
-               </li>
-   [% END -%]
-               <li class="[% node.class %]">
-   [% IF node.type == 'folder'; level = level + 1 -%]
-                  <a href="[% uri_for( node.url ) %]" class="aj-nav folder">
-                     [% node.name %]</a>
-                  <ul class="nav nav-list">
-   [% ELSE -%]
-                  <a href="[% uri_for( node.url ) %]">[% node.name %]</a>
-               </li>
-   [% END -%]
-[% END -%]
-[% WHILE level > 0; level = level - 1 -%]
-                  </ul>
-               </li>
-[% END -%]
-            </ul>
-[% IF config.links.0 || config.twitter.0 -%]
-            <div class="well well-sidebar">
-               <!-- Links -->
-   [% FOREACH link = config.links -%]
-               <a href="[% link.url %]" target="_blank">[% link.name %]</a>
-               <br>
-   [% END -%]
-               <!-- Twitter -->
-   [% FOREACH handle = config.twitter -%]
-               <div class="twitter">
-                  <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
-               </div>
-   [% END -%]
-            </div>
-[% END -%]
-         </div>
+[% INCLUDE default/left_column.tt -%]
       </div>
 [% col_class = ''; IF prefs.float; col_class = 'float-view'; END -%]
       <div class="right-column [% col_class %] content-area span9p5">
-         <div class="content-page">
-[% IF page.format == 'html' -%]
-            <article>
-   [% IF page.header -%]
-               <div class="page-header"><h1>[% page.header %]</h1></div>
-   [% END -%]
-               [% page.content | eval %]
-            </article>
-[% END -%]
-         </div>
+[% INCLUDE default/right_column.tt -%]
       </div>
    </div>
 </div>

@@ -1,4 +1,8 @@
 <!-- Footer -->
+<script src="[% links.js %]highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script src="[% links.js %]jquery.min.js"></script>
+<script src="[% links.js %]custom.js"></script>
 [% IF config.google_analytics -%]
 <script>
    ( function( w, d, t, s, f) {

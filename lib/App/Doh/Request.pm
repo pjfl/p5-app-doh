@@ -3,66 +3,107 @@ package App::Doh::Request;
 use namespace::sweep;
 
 use Moo;
-use CGI::Simple::Cookie;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                is_member trim );
 use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
                                Object SimpleStr );
+use HTTP::Body;
 use URI::http;
 use URI::https;
 
 extends q(App::Doh);
 
-has 'args'   => is => 'ro',   isa => ArrayRef, default => sub { [] };
+has 'args'     => is => 'ro',   isa => ArrayRef, default => sub { [] };
 
-has 'base'   => is => 'ro',   isa => NonEmptySimpleStr, required => TRUE;
+has 'base'     => is => 'ro',   isa => Object, required => TRUE;
 
-has 'cookie' => is => 'lazy', isa => HashRef, builder => sub {
-   { CGI::Simple::Cookie->parse( $_[ 0 ]->env->{HTTP_COOKIE} ) || {} } };
+has 'body'     => is => 'lazy', isa => Object, init_arg => undef;
 
-has 'domain' => is => 'ro',   isa => NonEmptySimpleStr, required => TRUE;
+has 'domain'   => is => 'ro',   isa => NonEmptySimpleStr, required => TRUE;
 
-has 'env'    => is => 'ro',   isa => HashRef, default => sub { {} };
+has 'env'      => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'locale' => is => 'lazy', isa => NonEmptySimpleStr, init_arg => undef;
+has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr, init_arg => undef;
 
-has 'params' => is => 'ro',   isa => HashRef, default => sub { {} };
+has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'path'   => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'path'     => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'scheme' => is => 'ro',   isa => NonEmptySimpleStr;
+has 'query'    => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'scheme'   => is => 'ro',   isa => NonEmptySimpleStr;
+
+has 'session'  => is => 'lazy', isa => HashRef,
+   builder     => sub { $_[ 0 ]->env->{ 'psgix.session' } // {} };
+
+has 'uri'      => is => 'ro',   isa => Object, required => TRUE;
+
+has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub { $_[ 0 ]->env->{ 'REMOTE_USER' } // 'unknown' };
 
 # Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, $builder, @args) = @_; my $attr = {};
 
-   my $env    = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-   my $scheme = $attr->{scheme} = $env->{ 'psgi.url_scheme' } || 'http';
-   my $host   = $env->{ 'HTTP_HOST' } || $env->{ 'SERVER_NAME' } || 'localhost';
-   my $script = $env->{ 'SCRIPT_NAME' } || '/'; $script =~ s{ / \z }{}gmx;
+   my $env       = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
+   my $scheme    = $attr->{scheme} = $env->{ 'psgi.url_scheme' } // 'http';
+   my $host      = $env->{ 'HTTP_HOST'    }
+                // $env->{ 'SERVER_NAME'  } // 'localhost';
+   my $script    = $env->{ 'SCRIPT_NAME'  } // '/'; $script =~ s{ / \z }{}gmx;
+   my $path_info = $env->{ 'PATH_INFO'    };
+      $path_info =~ s{ \A / }{}mx; $path_info =~ s{ \? .* \z }{}mx;
+   my $query     = $env->{ 'QUERY_STRING' } ? '?'.$env->{ 'QUERY_STRING' } : '';
+   my $base_uri  = "${scheme}://${host}${script}/";
+   my $req_uri   = "${base_uri}${path_info}";
+   my $uri_class = "URI::${scheme}";
 
    $attr->{builder} = $builder;
    $attr->{env    } = $env;
    $attr->{params } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{args   } = [ split m{ / }mx, trim $args[ 0 ] || NUL ];
-   $attr->{base   } = "${scheme}://${host}${script}/";
+   $attr->{base   } = bless \$base_uri, $uri_class;
    $attr->{domain } = (split m{ : }mx, $host)[ 0 ];
    $attr->{path   } = $script;
+   $attr->{query  } = $query;
+   $attr->{uri    } = bless \$req_uri,  $uri_class;
    return $attr;
 };
 
+sub _build_body {
+   my $self = shift; my $env = $self->env; my $content = NUL;
+
+   $env->{CONTENT_LENGTH}
+      and $env->{ 'psgi.input' }->read( $content, $env->{CONTENT_LENGTH} );
+
+   my $body = HTTP::Body->new( $env->{CONTENT_TYPE}, length $content );
+
+   length $content and $body->add( $content );
+
+   return $body;
+}
+
+sub _build_locale {
+   my $self = shift;
+
+   for my $locale (@{ $self->_acceptable_locales }) {
+      is_member $locale, $self->config->locales and return $locale;
+   }
+
+   return $self->config->locale;
+}
+
 # Public methods
 sub loc {
-   my ($self, $key, @args) = @_; my $car = $args[ 0 ];
+   my ($self, $key, @args) = @_;
 
-   my $args = (is_hashref $car) ? { %{ $car } }
-            : { params => (is_arrayref $car) ? $car : [ @args ] };
+   return $self->_localize( $self->locale, $key, @args );
+}
 
-   $args->{domain_names} ||= [ DEFAULT_L10N_DOMAIN, $self->config->name ];
-   $args->{locale      } ||= $self->locale;
+sub loc_default {
+   my ($self, $key, @args) = @_;
 
-   return $self->localize( $key, $args );
+   return $self->_localize( $self->config->locale, $key, @args );
 }
 
 sub uri_for {
@@ -89,16 +130,17 @@ sub _acceptable_locales {
             split m{ , }mx, lc $lang ];
 }
 
-sub _build_locale {
-   my $self = shift;
+sub _localize {
+   my ($self, $locale, $key, @args) = @_; my $car = $args[ 0 ];
 
-   for my $locale (@{ $self->_acceptable_locales }) {
-      is_member $locale, $self->config->locales and return $locale;
-   }
+   my $args = (is_hashref $car) ? { %{ $car } }
+            : { params => (is_arrayref $car) ? $car : [ @args ] };
 
-   return $self->config->locale;
+   $args->{domain_names} ||= [ DEFAULT_L10N_DOMAIN, $self->config->name ];
+   $args->{locale      } ||= $locale;
+
+   return $self->localize( $key, $args );
 }
-
 
 1;
 
