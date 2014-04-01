@@ -1,6 +1,7 @@
 Revision history for App-Doh
 
 0.1.19    2013-08-23 12:00:33
+	  - Adding static generator
 	  - Going multilingual
           - Added markdown editor
           - Added green.css to repository

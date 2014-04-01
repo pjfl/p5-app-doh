@@ -7,7 +7,7 @@ use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( throw );
 use File::DataClass::IO;
-use File::DataClass::Types qw( HashRef NonEmptySimpleStr );
+use File::DataClass::Types qw( HashRef NonEmptySimpleStr Str );
 use File::Spec::Functions  qw( curdir );
 
 extends q(App::Doh);
@@ -16,25 +16,25 @@ with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
 # Public attributes
-has 'docs_tree' => is => 'lazy', isa => HashRef;
+has 'type_map'   => is => 'lazy', isa => HashRef, default => sub { {} };
 
-has 'docs_url'  => is => 'lazy', isa => NonEmptySimpleStr;
+has 'no_index'   => is => 'lazy', isa => Str,
+   builder       => sub { join '|', @{ $_[ 0 ]->config->no_index } };
 
-has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
+# Private attributes
+has '_docs_tree' => is => 'lazy', isa => HashRef;
 
 # Construction
-sub BUILD { # The docs_tree attribute constructor may take some time to run
-   $_[ 0 ]->docs_url; return;
-}
+sub _build__docs_tree {
+   my ($self, $dir, $url_base, $title) = @_;
 
-sub _build_docs_tree {
-   my ($self, $dir, $url_base, $title) = @_; my $tree = {};
+   my $no_index = $self->no_index; my $tree = {};
+
+   state $level //= 0; $level++; state $order //= 0;
 
    $dir //= io( $self->config->file_root ); $url_base //= NUL; $title //= NUL;
 
-   state $index //= 0; state $re //= join '|', @{ $self->config->no_index };
-
-   for my $path ($dir->filter( sub { not m{ (?: $re ) }mx } )->all) {
+   for my $path ($dir->filter( sub { not m{ (?: $no_index ) }mx } )->all) {
       my $id         =  __make_id_from  ( $path->filename );
       my $name       =  __make_name_from( $id );
       my $url        =  $url_base ? "${url_base}/${id}"  : $id;
@@ -48,24 +48,27 @@ sub _build_docs_tree {
          title       => $full_title,
          type        => 'file',
          url         => $url,
-         _order      => $index++, };
+         _order      => $order++, };
 
       $path->is_dir or next;
-      $node->{tree} = $self->_build_docs_tree( $path, $url, $name );
+      $node->{tree} = $level > 1
+                    ? $self->_build__docs_tree( $path, $url, $name )
+                    : $self->_build__docs_tree( $path, NUL, NUL    );
       $node->{type} = 'folder';
    }
 
    return $tree;
 }
 
-sub _build_docs_url {
-   my ($self, $tree, $node) = @_;
+# Public methods
+sub docs_url {
+   my ($self, $req, $tree, $node) = @_;
 
-   $tree //= $self->docs_tree; $node //= __current( $tree );
+   $tree //= $self->_localised_tree( $req ); $node //= __current( $tree );
 
    $node->{type} eq 'file' and return $node->{url};
-   exists $node->{tree}    and return $self->_build_docs_url( $node->{tree} );
-   $node = __next( $tree ) and return $self->_build_docs_url( $tree, $node  );
+   exists $node->{tree}    and return $self->docs_url( $req, $node->{tree} );
+   $node = __next( $tree ) and return $self->docs_url( $req, $tree, $node  );
 
    my $error = "Config Error: Unable to find the first page in\n"
       ."the /docs folder. Double check you have at least one file in the root\n"
@@ -75,7 +78,6 @@ sub _build_docs_url {
    return '/';
 }
 
-# Public methods
 sub get_stash {
    my ($self, $req) = @_;
 
@@ -87,13 +89,14 @@ sub get_stash {
 sub load_page {
    my ($self, $req) = @_;
 
-   my $tree = $self->docs_tree;
-   my $node = $self->_find_node( $req->args );
-   my $home = $req->uri_for( exists $tree->{index} ? NUL : $self->docs_url );
+   my $url  = $self->docs_url( $req );
+   my $node = $self->_find_node( $req );
+   my $tree = $self->_localised_tree( $req );
+   my $home = $req->uri_for( exists $tree->{index} ? NUL : $url );
 
    $node and exists $node->{type} and $node->{type} eq 'file'
       and return { content      => io( $node->{path} )->utf8,
-                   docs_url     => $req->uri_for( $self->docs_url ),
+                   docs_url     => $req->uri_for( $url ),
                    editing      => $req->params->{edit} // FALSE,
                    format       => $node->{format},
                    header       => $node->{title},
@@ -102,17 +105,18 @@ sub load_page {
                    title        => ucfirst $node->{name}, };
 
    return { content      => '> '.$req->loc( "Oh no. That page doesn't exist" ),
-            docs_url     => $req->uri_for( $self->docs_url ),
+            docs_url     => $req->uri_for( $url ),
             format       => 'markdown',
             homepage_url => $home,
             title        => $req->loc( 'Not found' ), };
 }
 
 sub navigation {
-   my ($self, $req) = @_; my $parts = [ @{ $req->args } ];
+   my ($self, $req) = @_;
 
-   return __build_navigation_list
-      ( $self->docs_tree, $parts, (join '/', @{ $parts }), 0 );
+   my $tree = $self->_localised_tree( $req ); my $parts = [ @{ $req->args } ];
+
+   return __build_navigation_list( $tree, $parts, (join '/', @{ $parts }), 0 );
 }
 
 sub update_file {
@@ -120,7 +124,7 @@ sub update_file {
 
    $req->username ne 'unknown' or throw 'Update not authorised';
 
-   my $node     = $self->_find_node( $req->args )
+   my $node     = $self->_find_node( $req )
       or throw 'Cannot find document tree node to update';
    my $content  = $req->body->param->{content}; $content =~ s{ \r\n }{\n}gmx;
    my $path     = io( $node->{path} )->utf8; $path->print( $content );
@@ -135,9 +139,9 @@ sub update_file {
 
 # Private methods
 sub _find_node {
-   my ($self, $args) = @_; my $tree = $self->docs_tree;
+   my ($self, $req) = @_; my $tree = $self->_localised_tree( $req );
 
-   my $path = [ @{ $args } ]; $path->[ 0 ] or $path->[ 0 ] = 'index';
+   my $path = [ @{ $req->args } ]; $path->[ 0 ] or $path->[ 0 ] = 'index';
 
    for my $node (@{ $path }) {
       $node or $node = 'index'; exists $tree->{ $node } or return FALSE;
@@ -153,6 +157,18 @@ sub _get_format {
    my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
 
    return $self->type_map->{ $extn } || 'text';
+}
+
+sub _localised_tree {
+   my ($self, $req) = @_; my $lang;
+
+   if ($req) {
+      $lang = (split m{ _ }mx, $req->locale)[ 0 ];
+      $lang = defined $self->_docs_tree->{ $lang } ? $lang : LANG;
+   }
+   else { $lang = LANG }
+
+   return $self->_docs_tree->{ $lang }->{tree};
 }
 
 # Private functions

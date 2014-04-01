@@ -72,7 +72,7 @@ has 'mount_point'      => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/';
 
 has 'no_index'         => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( .git .svn cgi-bin app-doh.json ) ] };
+   builder             => sub { [ qw( .git .htpasswd .svn app-doh.json ) ] };
 
 has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;

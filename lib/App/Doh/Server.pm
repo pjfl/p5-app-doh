@@ -117,7 +117,6 @@ sub _execute {
 
    try {
       my $req   = App::Doh::Request->new( $self->usul, @args );
-      $req->locale; $self->usul->dumper( $req );
       my $stash = $self->models->{ $model }->$method( $req );
 
       exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
