@@ -62,7 +62,7 @@ has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
 sub serialize {
    my ($self, $req, $stash) = @_; weaken( $req );
 
-   my $text     = NUL;
+   my $html     = NUL;
    my $prefs    = $stash->{prefs } // {};
    my $conf     = $stash->{config} = $self->config;
    my $skin     = $stash->{skin  } = $prefs->{skin} // $conf->skin;
@@ -71,24 +71,24 @@ sub serialize {
    my $path     = $self->skin_dir->catdir( $skin )->catfile( $template );
 
    unless ($path->exists) {
-      $self->log->error( $text = $req->loc( 'Path [_1] not found', $path ) );
-      return [ 500, $header, [ $text ] ];
+      $self->log->error( $html = $req->loc( 'Path [_1] not found', $path ) );
+      return [ 500, $header, [ $html ] ];
    }
 
-   $self->_render_microformat( $req, $stash->{page} ||= {} );
+   $self->_serialize_microformat( $req, $stash->{page} //= {} );
    $stash->{req     } = $req;
    $stash->{loc     } = sub { $req->loc( @_ ) };
    $stash->{time2str} = sub { time2str( $_[ 0 ], $_[ 1 ], $_[ 2 ] ) };
    $stash->{uri_for } = sub { $req->uri_for( @_ ) };
 
-   $self->template->process( catfile( $skin, $template ), $stash, \$text )
+   $self->template->process( catfile( $skin, $template ), $stash, \$html )
       or return [ 500, $header, [ $self->template->error ] ];
 
-   return [ 200, $header, [ encode( 'UTF-8', $text ) ] ];
+   return [ 200, $header, [ encode( 'UTF-8', $html ) ] ];
 }
 
 # Private methods
-sub _render_microformat {
+sub _serialize_microformat {
    my ($self, $req, $page) = @_; defined $page->{format} or return;
 
    $page->{format} eq 'text'
@@ -98,7 +98,7 @@ sub _render_microformat {
 
    my $formatter = $self->formatters->{ $page->{format} } or return;
 
-   $page->{content} = $formatter->render( $req, $page )
+   $page->{content} = $formatter->serialize( $req, $page )
       and $page->{format} = 'html';
 
    return;

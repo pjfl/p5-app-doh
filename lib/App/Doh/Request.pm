@@ -181,9 +181,9 @@ An array reference of the arguments supplied with the URI
 
 A non empty simple string which is the base of the requested URI
 
-=item C<cookie>
+=item C<body>
 
-A hash reference of cookies supplied with the request
+An L<HTTP::Body> object constructed from the current request
 
 =item C<domain>
 
@@ -207,9 +207,26 @@ A hash reference of query parameters supplied with the request URI
 Taken from the request path, this should be the same as the
 C<mount_point> configuration attribute
 
+=item C<query>
+
+The query parameters from the current request
+
 =item C<scheme>
 
 The HTTP protocol used in the request. Defaults to C<http>
+
+=item C<session>
+
+Stores the user preferences. A hash reference
+
+=item C<uri>
+
+The URI of the current request. Does not include the query parameters
+
+=item C<username>
+
+The name of the authenticated user. Defaults to C<unknown> if the user
+is anonymous
 
 =back
 
@@ -228,9 +245,13 @@ Translates C<$key> into the required language and substitutes the bind values.
 The C<locale> is currently set in configuration but will be extracted from
 the request in a future release
 
+=head2 loc_default
+
+Like the C<loc> method but always translates to the default language
+
 =head2 uri_for
 
-   $uri_obj = $self->uri_for( $partial_uri_path );
+   $uri_obj = $self->uri_for( $partial_uri_path, $args, $query_params );
 
 Prefixes C<$partial_uri_path> with the base of the current request. Returns
 an absolute URI

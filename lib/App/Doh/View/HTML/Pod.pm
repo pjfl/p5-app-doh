@@ -25,7 +25,7 @@ has '_hacc'      => is => 'lazy', isa => Object,
    builder       => sub { HTML::Accessors->new( content_type => 'text/html' ) };
 
 # Public methods
-sub render {
+sub serialize {
    my ($self, $req, $page) = @_;
 
    my $hacc        = $self->_hacc;

@@ -18,6 +18,7 @@
 * Git / SVN friendly
 * Google analytics
 * Optional code float layout
+* Markdown editor
 
 ## Acknowledgements
 
@@ -135,18 +136,20 @@ this:
 ## Configuration
 
 To customize the look and feel of your documentation, you can create a
-`doh.json` file in the of the `var/root/docs` folder. The `doh.json`
+`app-doh.json` file in the of the `var/root/docs` folder. The `app-doh.json`
 file is a simple JSON object that you can use to change some of the
-basic settings of the documentation.
+basic settings of the documentation. The
+[config help](/help/App::Doh::Config) page details the available
+configuration attributes
 
-###Title:
+### Title:
 Change the title bar in the docs
 
    {
       "title": "Doh!"
    }
 
-###Themes:
+### Themes:
 We have 4 built-in colour themes. To use one of the themes, just
 set the `theme` option to one of the following:
 
@@ -162,7 +165,7 @@ The value will persist once it has been set.
       "theme": "blue"
    }
 
-###Custom Theme:
+### Custom Theme:
 To create a custom color scheme, set the `theme` property to `custom`
 and then define the required colors. Copy the following configuration
 to get started:
@@ -183,7 +186,7 @@ to get started:
       }
    }
 
-###Code Floating:
+### Code Floating:
 By deafult your code blocks will be floated to a column on the right
 side of your content. To disable this feature, set the `float`
 property to `false`, or add `?float=0` to any URI to store the choice
@@ -194,22 +197,27 @@ feature
       "float": false
    }
 
+### Ignore:
+The config attribute `no_index` is a list of filename patterns to ignore
+when indexing the document tree
 
-###Github Repo:
+### Toggling Code Blocks:
+
+### Github Repo:
 Add a 'Fork me on Github' ribbon.
 
    {
       "repo_url": "https://github.com/pjfl/p5-app-doh.git"
    }
 
-###Twitter:
+### Twitter:
 Include twitter follow buttons in the sidebar.
 
    {
       "twitter": [ "perl", "web-simple" ]
    }
 
-###Links:
+### Links:
 Include custom links in the sidebar.
 
    {
@@ -220,12 +228,22 @@ Include custom links in the sidebar.
       }
    }
 
-###Google Analytics:
+### Multi-language:
+
+### Google Analytics:
 This will embed the google analytics tracking code.
 
    {
       "google_analytics": "UA-XXXXXXXXX-XX"
    }
+
+
+## Markdown Editor
+The markdown in the document tree is editable via the web browser. Users
+must authenticate against the `.htpasswd` files under the document root.
+The default user is `admin` password `admin`
+
+## Generating a set of static files
 
 ## Support
 

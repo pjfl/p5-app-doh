@@ -1,3 +1,5 @@
+/* Green */
+/* Mixins */
 /*  Elements - Reset styling */
 a,
 abbr,
@@ -446,10 +448,6 @@ table tr td:last-child {
   border-right: 1px solid #adcb83;
 }
 /* Classes */
-[class*="span"] {
-  float: left;
-  min-height: 18px;
-}
 .btn {
   display: inline-block;
   text-align: center;
@@ -473,6 +471,16 @@ table tr td:last-child {
 }
 .btn.btn-sidebar:hover .icon-bar {
   background-color: #569220;
+}
+.btn.btn-submit {
+  background-color: #92c86a;
+  border: #000000 1px solid;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  color: #000000;
+  padding: 5px 9px 4px;
 }
 .columns {
   height: 100%;
@@ -500,22 +508,26 @@ table tr td:last-child {
 }
 .columns .right-column .content-page {
   background-color: white;
-  display: inline-block;
+  float: left;
   max-width: 800px;
   min-height: 100%;
   padding: 9px 36px 9px 18px;
   position: relative;
 }
 .container {
-  margin-left: auto;
-  margin-right: auto;
+  float: left;
   overflow: hidden;
-  width: 940px;
+  position: relative;
 }
 .container img {
   border: 0 none;
   height: auto;
   max-width: 100%;
+}
+.container-center {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 940px;
 }
 .container-fluid {
   margin: 0 auto;
@@ -528,6 +540,9 @@ table tr td:last-child {
 .article-tree {
   height: 100%;
   overflow: auto;
+}
+.content-page article {
+  padding-bottom: 18px;
 }
 .content-page code {
   font-weight: 700;
@@ -559,7 +574,7 @@ table tr td:last-child {
 }
 .github-ribbon {
   position: absolute;
-  right: 18px;
+  right: 0;
   top: 54px;
   z-index: 10;
 }
@@ -575,8 +590,8 @@ table tr td:last-child {
   font-weight: 700;
   font-size: 14px;
   line-height: 18px;
-  -moz-opacity: 0.8;
   -khtml-opacity: 0.8;
+  -moz-opacity: 0.8;
   -webkit-opacity: 0.8;
   opacity: 0.8;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=80);
@@ -586,8 +601,8 @@ table tr td:last-child {
   text-transform: uppercase;
 }
 .hero-buttons.container-fluid .btn-hero.btn:hover {
-  -moz-opacity: 1;
   -khtml-opacity: 1;
+  -moz-opacity: 1;
   -webkit-opacity: 1;
   opacity: 1;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100);
@@ -600,6 +615,9 @@ table tr td:last-child {
 .hero-buttons.container-fluid .btn-hero.btn.btn-primary {
   background-color: #000000;
   color: #f5f5f6;
+}
+.hidden {
+  display: none;
 }
 .homepage-content.container-fluid,
 .homepage-footer.container-fluid {
@@ -651,7 +669,9 @@ table tr td:last-child {
 }
 .homepage-footer.container-fluid .footer-nav li a {
   font-family: 'Roboto Slab', serif;
+  font-size: 18px;
   font-weight: 700;
+  line-height: 36px;
 }
 .homepage-footer.container-fluid .footer-nav li a:hover {
   color: #569220;
@@ -674,6 +694,7 @@ table tr td:last-child {
 }
 .homepage-hero .homepage-image {
   margin-bottom: 18px;
+  max-height: 475px;
 }
 .homepage-hero .text-center h2 {
   margin: 18px auto;
@@ -764,8 +785,8 @@ table tr td:last-child {
   font-family: "Helvetica Neue", Helvetica, Verdana, tahoma, arial, sans-serif;
   font-size: 14px;
   font-weight: normal;
-  -moz-opacity: 0.7;
   -khtml-opacity: 0.7;
+  -moz-opacity: 0.7;
   -webkit-opacity: 0.7;
   opacity: 0.7;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=70);
@@ -774,8 +795,8 @@ table tr td:last-child {
 }
 .nav.nav-list li ul li a:hover {
   background-color: transparent;
-  -moz-opacity: 1;
   -khtml-opacity: 1;
+  -moz-opacity: 1;
   -webkit-opacity: 1;
   opacity: 1;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100);
@@ -793,6 +814,9 @@ table tr td:last-child {
   margin: 0;
   overflow: hidden;
   padding: 9px 0 8px 0;
+}
+.page-header .container {
+  clear: both;
 }
 .page-header h1 {
   margin: 9px 0;
@@ -867,6 +891,10 @@ table tr td:last-child {
 .row-fluid {
   width: auto;
 }
+[class*="span"] {
+  float: left;
+  min-height: 18px;
+}
 .span2 {
   width: 16%;
 }
@@ -890,6 +918,10 @@ table tr td:last-child {
 }
 .span12 {
   width: 940px;
+}
+.subtle {
+  border-color: #adcb83;
+  border-top: 0;
 }
 .text-center {
   text-align: center;
@@ -1275,8 +1307,8 @@ pre .xml .javascript,
 pre .xml .vbscript,
 pre .xml .css,
 pre .xml .cdata {
-  -moz-opacity: 0.5;
   -khtml-opacity: 0.5;
+  -moz-opacity: 0.5;
   -webkit-opacity: 0.5;
   opacity: 0.5;
   -ms-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=50);
@@ -1284,6 +1316,6 @@ pre .xml .cdata {
 }
 /* Plack debug */
 #plDebug #plDebugToolbarHandle {
-  right: 18px !important;
+  right: 16px !important;
   top: 54px !important;
 }

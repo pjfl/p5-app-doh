@@ -28,11 +28,11 @@ sub BUILD { # The docs_tree attribute constructor may take some time to run
 }
 
 sub _build_docs_tree {
-   my ($self, $dir, $url_base, $title) = @_; state $index //= 0;
+   my ($self, $dir, $url_base, $title) = @_; my $tree = {};
 
    $dir //= io( $self->config->file_root ); $url_base //= NUL; $title //= NUL;
 
-   my $re = join '|', @{ $self->config->no_index }; my $tree = {};
+   state $index //= 0; state $re //= join '|', @{ $self->config->no_index };
 
    for my $path ($dir->filter( sub { not m{ (?: $re ) }mx } )->all) {
       my $id         =  __make_id_from  ( $path->filename );
@@ -120,15 +120,14 @@ sub update_file {
 
    $req->username ne 'unknown' or throw 'Update not authorised';
 
-   my $node    = $self->_find_node( $req->args )
+   my $node     = $self->_find_node( $req->args )
       or throw 'Cannot find document tree node to update';
-   my $out     = io( '/tmp/fli' );
-   my $content = $req->body->param->{content};
+   my $content  = $req->body->param->{content}; $content =~ s{ \r\n }{\n}gmx;
+   my $path     = io( $node->{path} )->utf8; $path->print( $content );
+   my $rel_path = $path->abs2rel( $self->config->file_root );
+   my $message  = [ 'File [_1] updated by [_2]', $rel_path, $req->username ];
 
-   $content =~ s{ \r\n }{\n}gmx; $out->print( $content );
-
-   my $path    = io( $node->{path} )->abs2rel( $self->config->file_root );
-   my $message = [ 'File [_1] updated by [_2]', $path, $req->username ];
+   $node->{mtime} = $path->stat->{mtime};
 
    return { redirect => { location => $req->uri, message => $message } };
 }

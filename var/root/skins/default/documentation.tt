@@ -1,19 +1,14 @@
-[% INCLUDE default/navbar.tt %]
-<!-- Documentation -->
+[% INCLUDE default/navbar.tt -%]
+   <!-- Documentation -->
 [% IF config.repo_url -%]
-<a href="[% config.repo_url %]" target="_blank"
-   id="github-ribbon" class="github-ribbon">
-   <img alt="Fork me on GitHub" src="[% links.images %]fork-me.png"></a>
+   <a href="[% config.repo_url %]" target="_blank"
+      id="github-ribbon" class="github-ribbon">
+      <img alt="Fork me on GitHub" src="[% links.images %]fork-me.png"></a>
 [% END -%]
-<div class="container-fluid fluid-height wrapper">
-   <div class="row-fluid columns content">
-      <div class="left-column article-tree span2p5">
+   <div class="container-fluid fluid-height wrapper">
+      <div class="row-fluid columns content">
 [% INCLUDE default/left_column.tt -%]
-      </div>
-[% col_class = ''; IF prefs.float; col_class = 'float-view'; END -%]
-      <div class="right-column [% col_class %] content-area span9p5">
 [% INCLUDE default/right_column.tt -%]
       </div>
    </div>
-</div>
-[% INCLUDE default/footer.tt %]
+[% INCLUDE default/footer.tt -%]

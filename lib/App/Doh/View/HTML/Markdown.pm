@@ -15,7 +15,7 @@ has 'extensions' => is => 'lazy', isa => ArrayRef,
 has 'tm'         => is => 'lazy', isa => Object,
    builder       => sub { Text::Markdown->new( tab_width => 3 ) };
 
-sub render {
+sub serialize {
    my ($self, $req, $page) = @_; my $content = $page->{content};
 
    my $markdown = blessed $content ? $content->all : $content;

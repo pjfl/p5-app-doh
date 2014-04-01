@@ -6,6 +6,7 @@
    <meta name="description" content="[% page.description %]">
    <meta name="keywords" content="[% page.keywords %]">
    <meta name="author" content="[% page.author %]">
+   <meta name="apple-mobile-web-app-capable" content="yes" />
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 [% IF config.colours.0 -%]
    <link href="[% links.images %]favicon.png" rel="icon" type="image/png">
@@ -18,9 +19,9 @@
 [% END -%]
 [% IF config.colours.0 -%]
    <style type="text/less">
-   [% FOREACH colour = config.colours -%]
+[%    FOREACH colour = config.colours -%]
       @[% colour.key %]: [% colour.value %];
-   [% END -%]
+[%    END -%]
       @import "[% links.less %]import/theme-base.less";
    </style>
    <script src="[% links.js %]less.min.js"></script>
@@ -30,6 +31,6 @@
 [% END -%]
 </head>
 <body>
-   [% content %]
+   [% content -%]
 </body>
 </html>

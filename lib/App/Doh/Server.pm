@@ -16,10 +16,10 @@ use Try::Tiny;
 use Web::Simple;
 
 # Public attributes
-has 'appclass'     => is => 'ro',   isa => NonEmptySimpleStr,
+has 'appclass'     => is => 'ro', isa => NonEmptySimpleStr,
    default         => 'App::Doh';
 
-has 'config_class' => is => 'ro',   isa => NonEmptySimpleStr,
+has 'config_class' => is => 'ro', isa => NonEmptySimpleStr,
    default         => 'App::Doh::Config';
 
 # Private attributes
@@ -113,11 +113,11 @@ sub dispatch_request {
 
 # Private methods
 sub _execute {
-   my ($self, $view, $model, $method, @args) = @_;
-
-   my $req = App::Doh::Request->new( $self->usul, @args ); my $res;
+   my ($self, $view, $model, $method, @args) = @_; my $res;
 
    try {
+      my $req   = App::Doh::Request->new( $self->usul, @args );
+      $req->locale; $self->usul->dumper( $req );
       my $stash = $self->models->{ $model }->$method( $req );
 
       exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
@@ -125,7 +125,7 @@ sub _execute {
       $res or $res = $self->views->{ $view }->serialize( $req, $stash )
            or throw error => 'View [_1] returned false', args => [ $view ];
    }
-   catch { $res = __internal_server_error( $req, $_ ) };
+   catch { $res = __internal_server_error( $_ ) };
 
    return $res;
 }
@@ -145,7 +145,7 @@ sub _redirect {
 
 # Private functions
 sub __internal_server_error {
-   my ($req, $e) = @_; my $message = "Error: ${e}\r\n";
+   my $e = shift; my $message = "Error: ${e}\r\n";
 
    return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
 }
@@ -164,7 +164,7 @@ __END__
 
 =head1 Name
 
-App::Doh::Server - An Plack HTML application server
+App::Doh::Server - A Plack web application server
 
 =head1 Synopsis
 
@@ -191,22 +191,6 @@ A non empty simple string the defaults to C<App::Doh>
 =item C<config_class>
 
 A non empty simple string the defaults to C<App::Doh::Config>
-
-=item C<_doc_model>
-
-A lazily evaluated object reference to the documentation model
-
-=item C<_help_model>
-
-A lazily evaluated object reference to the help model
-
-=item C<_html_view>
-
-A lazily evaluated object reference to the HTML view
-
-=item C<_usul>
-
-A lazily evaluated object reference to an instance of L<Class::Usul>
 
 =back
 
@@ -237,7 +221,11 @@ None
 
 =item L<Class::Usul>
 
-=item L<Plack::Builder>
+=item L<HTTP::Status>
+
+=item L<Plack>
+
+=item L<Try::Tiny>
 
 =item L<Web::Simple>
 

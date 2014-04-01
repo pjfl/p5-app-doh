@@ -4,7 +4,7 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use File::DataClass::Types qw( ArrayRef Bool Directory HashRef
+use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
                                NonZeroPositiveInt SimpleStr );
 use Sys::Hostname          qw( hostname );
@@ -15,6 +15,8 @@ has 'author'           => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Dave';
 
 has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'code_blocks'      => is => 'ro',   isa => Int, default => 1;
 
 has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
@@ -56,6 +58,11 @@ has 'js'               => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'keywords'         => is => 'ro',   isa => SimpleStr, default => NUL;
 
+has 'languages'        => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
+   builder             => sub {
+      return [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ];
+   };
+
 has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'less/';
 
@@ -71,7 +78,7 @@ has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
 
 has 'preferences'      => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( float skin theme ) ] };
+   builder             => sub { [ qw( code_blocks float skin theme ) ] };
 
 has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
 

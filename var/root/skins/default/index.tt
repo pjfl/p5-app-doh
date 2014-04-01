@@ -1,7 +1,7 @@
-[% INCLUDE default/navbar.tt %]
+[% INCLUDE default/navbar.tt -%]
 <!-- Index -->
 <div class="homepage-hero well container-fluid">
-   <div class="container">
+   <div class="container-center">
 [% IF config.description -%]
       <div class="row">
          <div class="text-center span12">
@@ -20,7 +20,7 @@
    </div>
 </div>
 <div class="hero-buttons container-fluid">
-   <div class="container">
+   <div class="container-center">
       <div class="row">
          <div class="text-center span12">
 [% IF config.repo_url -%]
@@ -34,7 +34,7 @@
    </div>
 </div>
 <div class="homepage-content container-fluid">
-   <div class="container">
+   <div class="container-center">
       <div class="row">
          <div class="span12">
 [% IF page.format == 'html' -%]
@@ -45,7 +45,7 @@
    </div>
 </div>
 <div class="homepage-footer well container-fluid">
-   <div class="container">
+   <div class="container-center">
       <div class="row">
          <div class="span5">
 [% IF config.links.0 -%]
@@ -71,4 +71,4 @@
       </div>
    </div>
 </div>
-[% INCLUDE default/footer.tt %]
+[% INCLUDE default/footer.tt -%]

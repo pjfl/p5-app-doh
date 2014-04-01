@@ -2,9 +2,9 @@
 	<strong>Doh</strong> is a documentation generator that uses a simple folder structure and Markdown files to create custom documentation on the fly. It helps you create great looking documentation in a developer friendly way.
 </p>
 
-<hr/>
+<hr class="subtle"/>
 <h3>Features</h3>
-<hr/>
+<hr class="subtle"/>
 
 <img alt="[application thumbnail]" class="app-thumbnail pull-right"
      src="[% links.images %]app-thumbs.png">
@@ -22,6 +22,7 @@
 * Git/SVN Friendly
 * Google Analytics
 * Optional code float layout
+* Markdown editor
 
 <div class="clear"></div>
-<hr/>
+<hr class="subtle"/>

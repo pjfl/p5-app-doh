@@ -1,10 +1,10 @@
-// Mixins
+/* Mixins */
 .border-radius(@radius: 5px) {
-   -moz-border-radius: @radius; -webkit-border-radius: @radius;
-   border-radius: @radius;
+   -khtml-border-radius: @radius; -moz-border-radius: @radius;
+   -webkit-border-radius: @radius; border-radius: @radius;
 }
 .opacity(@opacity: 0.5) {
-   -moz-opacity: @opacity; -khtml-opacity: @opacity;
+   -khtml-opacity: @opacity; -moz-opacity: @opacity;
    -webkit-opacity: @opacity; opacity: @opacity;
    @opperc: @opacity * 100;
    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
@@ -130,8 +130,7 @@ table tr th:last-child, table tr td:last-child {
 }
 
 /* Classes */
-[class*="span"] { float: left; min-height: 18px; }
-.btn { display: inline-block; text-align: center; vertical-align: middle }
+.btn { display: inline-block; text-align: center; vertical-align: middle; }
 .btn.btn-sidebar {
   background-color: @sidebar-hover; border: none; padding: 9px 9px;
 }
@@ -141,6 +140,10 @@ table tr th:last-child, table tr td:last-child {
 }
 .btn.btn-sidebar:hover { background-color: @dark; }
 .btn.btn-sidebar:hover .icon-bar { background-color: @light; }
+.btn.btn-submit {
+   background-color: @sidebar-hover; border: @dark 1px solid;
+   .border-radius; color: @dark; padding: 5px 9px 4px;
+}
 .columns { height: 100%; }
 .columns .left-column, .columns .right-column { }
 .columns .left-column { background-color: @sidebar-background; margin-left: 0; }
@@ -150,16 +153,16 @@ table tr th:last-child, table tr td:last-child {
 .columns .right-column.span9 { margin-left: 0; width: 76.4866%; }
 .columns .right-column.span9p5 { margin-left: 0; width: 82%; }
 .columns .right-column .content-page {
-   background-color: white; display: inline-block; max-width: 800px;
+   background-color: white; float: left; max-width: 800px;
    min-height: 100%; padding: 9px 36px 9px 18px; position: relative;
 }
-.container {
-   margin-left: auto; margin-right: auto; overflow: hidden; width: 940px;
-}
+.container { float: left; overflow: hidden; position: relative; }
 .container img { border: 0 none; height: auto; max-width: 100%; }
+.container-center {  margin-left: auto; margin-right: auto; max-width: 940px; }
 .container-fluid { margin: 0 auto; padding-top: 54px; }
 .container-fluid.fluid-height { height: 100%; }
 .content-area, .article-tree { height: 100%; overflow: auto; }
+.content-page article { padding-bottom: 18px; }
 .content-page code { font-weight: 700; }
 .content-page dd { margin: 9px 0 9px 18px; }
 .content-page dd, .content-page dt, .content-page li,
@@ -169,7 +172,7 @@ table tr th:last-child, table tr td:last-child {
 .content-page pre { font-weight: 700; padding: 9px; }
 .content-page ul { margin-bottom: 18px; }
 .footer { bottom: 0; left: 0; padding: 18px; position: fixed; }
-.github-ribbon { position: absolute; right: 18px; top: 54px; z-index: 10; }
+.github-ribbon { position: absolute; right: 0; top: 54px; z-index: 10; }
 .hero-buttons.container-fluid {
    background-color: @sidebar-hover; overflow: hidden;
    min-height: 18px; padding: 18px 0;
@@ -187,6 +190,7 @@ table tr th:last-child, table tr td:last-child {
 .hero-buttons.container-fluid .btn-hero.btn.btn-primary {
    background-color: @dark; color: @sidebar-background;
 }
+.hidden { display: none; }
 .homepage-content.container-fluid,
 .homepage-footer.container-fluid { font-size: 14px; line-height: 18px; }
 .homepage-content.container-fluid .lead {
@@ -215,7 +219,8 @@ table tr th:last-child, table tr td:last-child {
 .homepage-footer.container-fluid .footer-nav { margin: 18px 0; }
 .homepage-footer.container-fluid .footer-nav li { list-style: none; }
 .homepage-footer.container-fluid .footer-nav li a {
-   font-family: 'Roboto Slab', serif; font-weight: 700;
+   font-family: 'Roboto Slab', serif; font-size: 18px; font-weight: 700;
+   line-height: 36px;
 }
 .homepage-footer.container-fluid .footer-nav li a:hover { color: @light; }
 .homepage-footer.container-fluid .twitter { margin-top: 36px; }
@@ -225,7 +230,7 @@ table tr th:last-child, table tr td:last-child {
    font-family: 'Roboto Slab', serif; font-weight: 700;
    overflow: hidden; padding-top: 54px;
 }
-.homepage-hero .homepage-image { margin-bottom: 18px; }
+.homepage-hero .homepage-image { margin-bottom: 18px; max-height: 475px; }
 .homepage-hero .text-center h2 { margin: 18px auto; text-align: center; }
 .lead { font-size: 18px; line-height: 36px; }
 .navbar {
@@ -278,6 +283,7 @@ table tr th:last-child, table tr td:last-child {
    border-bottom: 1px solid; border-color: @lines;
    margin: 0; overflow: hidden; padding: 9px 0 8px 0;
 }
+.page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }
 .pod dd p { width: auto !important; }
 .pod dt { clear: left; }
@@ -303,18 +309,20 @@ table tr th:last-child, table tr td:last-child {
 .roboto-slab.book    { font-family: 'Roboto Slab', serif; font-weight: 300; }
 .roboto-slab.regular { font-family: 'Roboto Slab', serif; font-weight: 400; }
 .roboto-slab.bold    { font-family: 'Roboto Slab', serif; font-weight: 700; }
-.row         { overflow: hidden; }
-.row-fluid   { width: auto;  }
-.span2       { width: 16%;   }
-.span2p5     { width: 18%;   }
-.span3       { width: 25%;   }
-.span5       { width: 41%;   }
-.span9       { width: 74%;   }
-.span9p5     { width: 80%;   }
-.span10      { width: 83%;   }
-.span12      { width: 940px; }
-.text-center { text-align: center; }
-.well        { min-height: 18px }
+.row            { overflow: hidden; }
+.row-fluid      { width: auto;  }
+[class*="span"] { float: left; min-height: 18px; }
+.span2          { width: 16%;   }
+.span2p5        { width: 18%;   }
+.span3          { width: 25%;   }
+.span5          { width: 41%;   }
+.span9          { width: 74%;   }
+.span9p5        { width: 80%;   }
+.span10         { width: 83%;   }
+.span12         { width: 940px; }
+.subtle         { border-color: @lines; border-top: 0; }
+.text-center    { text-align: center; }
+.well           { min-height: 18px }
 .well.well-sidebar { padding-left: 18px; padding-right: 18px; }
 .well.well-sidebar a {
    color: @light;
@@ -559,5 +567,5 @@ pre .xml .cdata { .opacity(); }
 
 /* Plack debug */
 #plDebug #plDebugToolbarHandle {
-   right: 18px !important; top: 54px !important;
+   right: 16px !important; top: 54px !important;
 }

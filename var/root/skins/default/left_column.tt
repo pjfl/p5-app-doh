@@ -1,51 +1,72 @@
-<!-- Left Column -->
-<!-- For Mobile -->
-<div class="responsive-collapse">
-   <button type="button" class="btn btn-sidebar"
-           data-toggle="collapse" data-target="#sub-nav-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-   </button>
-</div>
-<div id="sub-nav-collapse" class="collapse in">
-   <!-- Navigation -->
+      <!-- Left Column -->
+      <!-- For Mobile -->
+      <div class="left-column article-tree span2p5">
+         <div class="responsive-collapse">
+            <button class="btn btn-sidebar"
+                       id="menu-spinner-button" type="button">
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+            </button>
+         </div>
+         <div id="sub-nav-collapse" class="collapse in">
+         <!-- Navigation -->
 [% level = 0 -%]
-   <ul class="nav nav-list">
+            <ul class="nav nav-list">
 [% FOREACH node = nav -%]
-   [% WHILE node.level < level; level = level - 1 -%]
-         </ul>
-      </li>
-   [% END -%]
-      <li class="[% node.class %]">
-   [% IF node.type == 'folder'; level = level + 1 -%]
-         <a href="[% uri_for( node.url ) %]" class="aj-nav folder">
-            [% node.name %]</a>
-         <ul class="nav nav-list">
-   [% ELSE -%]
-         <a href="[% uri_for( node.url ) %]">[% node.name %]</a>
-      </li>
-   [% END -%]
+[%    WHILE node.level < level; level = level - 1 -%]
+               </ul>
+            </li>
+[%    END -%]
+            <li class="[% node.class %]">
+[%    IF node.type == 'folder'; level = level + 1 -%]
+               <a href="[% uri_for( node.url ) %]"
+                 class="aj-nav folder">[% node.name %]</a>
+               <ul class="nav nav-list">
+[%    ELSE -%]
+               <a href="[% uri_for( node.url ) %]">[% node.name %]</a>
+            </li>
+[%    END -%]
 [% END -%]
 [% WHILE level > 0; level = level - 1 -%]
-         </ul>
-      </li>
+               </ul>
+            </li>
 [% END -%]
-   </ul>
+            </ul>
 [% IF config.links.0 || config.twitter.0 -%]
-   <div class="well well-sidebar">
-      <!-- Links -->
-   [% FOREACH link = config.links -%]
-      <a href="[% link.url | eval %]" target="_blank">
-         [% link.name %]</a>
-      <br>
-   [% END -%]
-      <!-- Twitter -->
-   [% FOREACH handle = config.twitter -%]
-      <div class="twitter">
-         <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
-      </div>
-   [% END -%]
-   </div>
+            <div class="well well-sidebar">
+               <!-- Links -->
+[%    IF ! page.editing -%]
+               <a href="[% links.req_uri %]?edit=1">[% loc( 'Edit' ) %]</a><br>
+[%    END -%]
+[%    FOREACH link = config.links -%]
+               <a href="[% link.url | eval %]" target="_blank">
+                  [% link.name | eval %]</a>
+               <br>
+[%    END -%]
+               <form action="[% links.req_uri %]"
+                    enctype="application/x-www-form-urlencoded"
+                     method="get" name="preferences">
+                  <select id="code_blocks" name="code_blocks">
+                     <option [% IF prefs.code_blocks == 1;
+                                   'selected="selected"'; ELSE; ''; END %]
+                        value="1">Hide Code Blocks</option>
+                     <option [% IF prefs.code_blocks == 2;
+                                   'selected="selected"'; ELSE; ''; END %]
+                        value="2">Show Code Blocks</option>
+                     <option [% IF prefs.code_blocks == 3;
+                                   'selected="selected"'; ELSE; ''; END %]
+                        value="3">Show Code Blocks Inline</option>
+                  </select>
+               </form>
+               <br>
+               <!-- Twitter -->
+[%    FOREACH handle = config.twitter -%]
+               <div class="twitter">
+                  <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
+               </div>
+[%    END -%]
+            </div>
 [% END -%]
-</div>
+         </div>
+      </div>

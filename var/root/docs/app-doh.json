@@ -6,9 +6,9 @@
       "Built Using Perl": "http://www.perl.org",
       "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
       "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
-      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues",
-      "Edit": "[% links.req_uri %]?edit=1"
+      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues"
    },
+   "locales": [ "en", "de" ],
    "repo_url": "https://github.com/pjfl/p5-app-doh.git",
    "title": "Doh!",
    "twitter": [ "perl", "web-simple" ]
