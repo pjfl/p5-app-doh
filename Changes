@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Updated git hooks
           - Static generator creating pages
           - Adding static generator
           - Going multilingual
