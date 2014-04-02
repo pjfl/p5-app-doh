@@ -44,9 +44,7 @@
                   [% link.name | eval %]</a>
                <br>
 [%    END -%]
-               <form action="[% links.req_uri %]"
-                    enctype="application/x-www-form-urlencoded"
-                     method="get" name="preferences">
+               <form action="[% links.req_uri %]" enctype="application/x-www-form-urlencoded" method="get" name="preferences">
                   <select id="code_blocks" name="code_blocks">
                      <option [% IF prefs.code_blocks == 1;
                                    'selected="selected"'; ELSE; ''; END %]

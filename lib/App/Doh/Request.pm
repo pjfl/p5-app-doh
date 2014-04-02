@@ -84,7 +84,12 @@ sub _build_body {
 }
 
 sub _build_locale {
-   my $self = shift;
+   my $self = shift; my $locale;
+
+   exists $self->params->{locale}
+      and defined  ($locale = $self->params->{locale})
+      and is_member $locale,  $self->config->locales
+      and return $locale;
 
    for my $locale (@{ $self->_acceptable_locales }) {
       is_member $locale, $self->config->locales and return $locale;

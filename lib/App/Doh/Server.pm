@@ -41,7 +41,7 @@ has '_usul'   => is => 'lazy', isa => BaseType,
 
 # Construction
 sub BUILD { # Take the hit at application startup not on first request
-   $_[ 0 ]->models->{docs}->docs_url; return;
+   $_[ 0 ]->models->{docs}->docs_tree; return;
 }
 
 sub _build__usul {

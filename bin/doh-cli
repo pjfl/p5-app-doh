@@ -1,0 +1,109 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use File::Spec::Functions qw( catdir updir );
+use FindBin               qw( $Bin );
+use lib               catdir( $Bin, updir, 'lib' );
+
+use App::Doh::CLI;
+
+exit App::Doh::CLI->new_with_options( appclass => 'App::Doh', noask => 1 )->run;
+
+__END__
+
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+doh-cli - One-line description of the programs purpose
+
+=head1 SYNOPSIS
+
+=over 3
+
+=item B<doh-cli> B<> I<>
+
+I<Command line description>
+
+=item B<doh-cli> B<-H> | B<-h> I<[method]> | B<-?>
+
+Display man page / method help  / usage strings
+
+=item B<doh-cli> B<list_methods>
+
+Lists the methods available in this program
+
+=back
+
+=head1 DESCRIPTION
+
+I<Program description>
+
+=head1 REQUIRED ARGUMENTS
+
+=over 3
+
+=item I<>
+
+=back
+
+=head1 OPTIONS
+
+=over 3
+
+=item B<-D>
+
+Turn debugging on
+
+=back
+
+=head1 DIAGNOSTICS
+
+Prints errors to stderr
+
+=head1 EXIT STATUS
+
+Returns zero on success, non zero on failure
+
+=head1 CONFIGURATION
+
+Uses the constructor's C<appclass> attribute to locate a configuration file
+
+=head1 DEPENDENCIES
+
+=over 3
+
+=item L<Class::Usul>
+
+=back
+
+=head1 INCOMPATIBILITIES
+
+None
+
+=head1 BUGS AND LIMITATIONS
+
+Please report problems to
+http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Doh
+
+=head1 AUTHOR
+
+Peter Flanigan, C<< <pjfl@cpan.org> >>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2014 Peter Flanigan
+
+This is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# tab-width: 3
+# End:
+# vim: expandtab shiftwidth=3:

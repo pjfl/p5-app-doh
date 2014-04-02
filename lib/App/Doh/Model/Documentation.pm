@@ -7,8 +7,8 @@ use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( throw );
 use File::DataClass::IO;
-use File::DataClass::Types qw( HashRef NonEmptySimpleStr Str );
-use File::Spec::Functions  qw( curdir );
+use File::DataClass::Types qw( HashRef Str );
+use Scalar::Util           qw( blessed );
 
 extends q(App::Doh);
 with    q(App::Doh::Role::CommonLinks);
@@ -16,16 +16,15 @@ with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
 # Public attributes
-has 'type_map'   => is => 'lazy', isa => HashRef, default => sub { {} };
+has 'docs_tree' => is => 'lazy', isa => HashRef;
 
-has 'no_index'   => is => 'lazy', isa => Str,
-   builder       => sub { join '|', @{ $_[ 0 ]->config->no_index } };
+has 'type_map'  => is => 'lazy', isa => HashRef, default => sub { {} };
 
-# Private attributes
-has '_docs_tree' => is => 'lazy', isa => HashRef;
+has 'no_index'  => is => 'lazy', isa => Str,
+   builder      => sub { join '|', @{ $_[ 0 ]->config->no_index } };
 
 # Construction
-sub _build__docs_tree {
+sub _build_docs_tree {
    my ($self, $dir, $url_base, $title) = @_;
 
    my $no_index = $self->no_index; my $tree = {};
@@ -52,8 +51,8 @@ sub _build__docs_tree {
 
       $path->is_dir or next;
       $node->{tree} = $level > 1
-                    ? $self->_build__docs_tree( $path, $url, $name )
-                    : $self->_build__docs_tree( $path, NUL, NUL    );
+                    ? $self->_build_docs_tree( $path, $url, $name )
+                    : $self->_build_docs_tree( $path, NUL, NUL    );
       $node->{type} = 'folder';
    }
 
@@ -62,13 +61,16 @@ sub _build__docs_tree {
 
 # Public methods
 sub docs_url {
-   my ($self, $req, $tree, $node) = @_;
+   my ($self, $req) = @_; my $locale = $req->locale;
 
-   $tree //= $self->_localised_tree( $req ); $node //= __current( $tree );
+   state $urls //= {}; defined $urls->{ $locale } and return $urls->{ $locale };
 
-   $node->{type} eq 'file' and return $node->{url};
-   exists $node->{tree}    and return $self->docs_url( $req, $node->{tree} );
-   $node = __next( $tree ) and return $self->docs_url( $req, $tree, $node  );
+   my $iter = $self->iterator( $req->locale );
+
+   while (defined (my $node = $iter->())) {
+      $node->{type} eq 'file' and $node->{name} ne 'index'
+         and return $urls->{ $locale } = $node->{url};
+   }
 
    my $error = "Config Error: Unable to find the first page in\n"
       ."the /docs folder. Double check you have at least one file in the root\n"
@@ -86,17 +88,38 @@ sub get_stash {
            template => $req->{args}->[ 0 ] ? 'documentation' : undef, };
 }
 
+sub iterator {
+   my ($self, $locale) = @_; my $node = $self->_localised_tree( $locale );
+
+   my @folders = $node && exists $node->{type} && $node->{type} eq 'folder'
+               ? ( $node ) : ();
+
+   return sub {
+      while (@folders) {
+         while (defined ($node = __current( $folders[ 0 ]->{tree} ))) {
+            $node->{type} eq 'folder' and push @folders, $node;
+            __next( $folders[ 0 ]->{tree} );
+            return $node;
+         }
+
+         shift @folders;
+      }
+
+      return $node;
+   };
+}
+
 sub load_page {
    my ($self, $req) = @_;
 
-   my $url  = $self->docs_url( $req );
    my $node = $self->_find_node( $req );
-   my $tree = $self->_localised_tree( $req );
-   my $home = $req->uri_for( exists $tree->{index} ? NUL : $url );
+   my $url  = $req->uri_for( $self->docs_url( $req ) );
+   my $tree = $self->_localised_tree( $req->locale )->{tree};
+   my $home = exists $tree->{index} ? $req->uri_for( NUL ) : $url;
 
    $node and exists $node->{type} and $node->{type} eq 'file'
       and return { content      => io( $node->{path} )->utf8,
-                   docs_url     => $req->uri_for( $url ),
+                   docs_url     => $url,
                    editing      => $req->params->{edit} // FALSE,
                    format       => $node->{format},
                    header       => $node->{title},
@@ -105,18 +128,18 @@ sub load_page {
                    title        => ucfirst $node->{name}, };
 
    return { content      => '> '.$req->loc( "Oh no. That page doesn't exist" ),
-            docs_url     => $req->uri_for( $url ),
+            docs_url     => $url,
             format       => 'markdown',
             homepage_url => $home,
             title        => $req->loc( 'Not found' ), };
 }
 
 sub navigation {
-   my ($self, $req) = @_;
+   my ($self, $req) = @_; my $names = [ @{ $req->args } ];
 
-   my $tree = $self->_localised_tree( $req ); my $parts = [ @{ $req->args } ];
+   my $tree = $self->_localised_tree( $req->locale )->{tree};
 
-   return __build_navigation_list( $tree, $parts, (join '/', @{ $parts }), 0 );
+   return __build_navigation_list( $tree, $names, (join '/', @{ $names }), 0 );
 }
 
 sub update_file {
@@ -136,18 +159,18 @@ sub update_file {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-
 # Private methods
 sub _find_node {
-   my ($self, $req) = @_; my $tree = $self->_localised_tree( $req );
+   my ($self, $req) = @_;
 
-   my $path = [ @{ $req->args } ]; $path->[ 0 ] or $path->[ 0 ] = 'index';
+   my $tree  = $self->_localised_tree( $req->locale )->{tree};
+   my $names = [ @{ $req->args } ]; $names->[ 0 ] or $names->[ 0 ] = 'index';
 
-   for my $node (@{ $path }) {
-      $node or $node = 'index'; exists $tree->{ $node } or return FALSE;
-
-      $tree = $tree->{ $node }->{type} eq 'folder'
-            ? $tree->{ $node }->{tree} : $tree->{ $node };
+   for my $node_name (@{ $names }) {
+      $node_name or $node_name = 'index';
+      exists  $tree->{ $node_name } or return FALSE;
+      $tree = $tree->{ $node_name }->{type} eq 'folder'
+            ? $tree->{ $node_name }->{tree} : $tree->{ $node_name };
    }
 
    return $tree;
@@ -160,35 +183,33 @@ sub _get_format {
 }
 
 sub _localised_tree {
-   my ($self, $req) = @_; my $lang;
+   my ($self, $locale) = @_; my $lang;
 
-   if ($req) {
-      $lang = (split m{ _ }mx, $req->locale)[ 0 ];
-      $lang = defined $self->_docs_tree->{ $lang } ? $lang : LANG;
-   }
-   else { $lang = LANG }
+   $locale and $lang = (split m{ _ }mx, $locale)[ 0 ];
 
-   return $self->_docs_tree->{ $lang }->{tree};
+   $lang = $lang && defined $self->docs_tree->{ $lang } ? $lang : LANG;
+
+   return $self->docs_tree->{ $lang };
 }
 
 # Private functions
 sub __build_navigation_list {
-   my ($tree, $parts, $path_url, $level) = @_; my @nav = ();
+   my ($tree, $names, $path_url, $level) = @_; my @nav = ();
 
    for my $node (map  { $tree->{ $_ } }
                  grep { $_ ne 'index' } __sort_pages( $tree )) {
       my $page = { level => $level, name => $node->{name},
                    type  => $node->{type} };
 
-      if (defined $parts->[ 0 ] and $parts->[ 0 ] eq $node->{clean}) {
+      if (defined $names->[ 0 ] and $names->[ 0 ] eq $node->{clean}) {
          $page->{class} = $path_url eq $node->{url} ? 'active' : 'open';
-         shift @{ $parts };
+         shift @{ $names };
       }
 
       if ($page->{type} eq 'folder') {
          $page->{url} = '#';
          push @nav, $page, @{ __build_navigation_list
-                             ( $node->{tree}, $parts, $path_url, $level + 1 ) };
+                             ( $node->{tree}, $names, $path_url, $level + 1 ) };
       }
       else { $page->{url} = $node->{url}; push @nav, $page }
    }
@@ -200,9 +221,11 @@ sub __current {
    my $href = shift;
 
    exists $href->{_iterator}
-      or $href->{_iterator} = [ 0, __sort_pages( $href ) ];
+       or $href->{_iterator} = [ 0, __sort_pages( $href ) ];
 
-   return $href->{ $href->{_iterator}->[ $href->{_iterator}->[ 0 ] + 1 ] };
+   my $key = $href->{_iterator}->[ $href->{_iterator}->[ 0 ] + 1 ] or return;
+
+   return $href->{ $key };
 }
 
 sub __make_id_from {
