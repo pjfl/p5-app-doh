@@ -56,7 +56,7 @@ blockquote { margin: 1em 36px; }
 body {
    font-family: Verdana, "Lucida Sans", tahoma, arial, sans-serif;
    font-size: 62.5%; font-weight: normal; height: 100%; line-height: 1.8em;
-   max-height: 100%; width: auto; /* 10 18 */
+   max-height: 100%; overflow: hidden; /* 10 18 */
 }
 br { clear: left; }
 button, input, select { cursor: pointer; line-height: normal; }
@@ -130,6 +130,7 @@ table tr th:last-child, table tr td:last-child {
 }
 
 /* Classes */
+.article-tree, .content-area { height: 100%; overflow: auto; }
 .btn { display: inline-block; text-align: center; vertical-align: middle; }
 .btn.btn-sidebar {
   background-color: @sidebar-hover; border: none; padding: 9px 9px;
@@ -147,11 +148,11 @@ table tr th:last-child, table tr td:last-child {
 .columns { height: 100%; }
 .columns .left-column, .columns .right-column { }
 .columns .left-column { background-color: @sidebar-background; margin-left: 0; }
-.columns .left-column.span2p5 { width: 18%; }
+.columns .left-column.span2p5 { overflow: hidden; }
 .columns .left-column.span3 {  width: 23.4043%; }
 .columns .right-column { border-left: 1px solid @lines; }
 .columns .right-column.span9 { margin-left: 0; width: 76.4866%; }
-.columns .right-column.span9p5 { margin-left: 0; width: 82%; }
+.columns .right-column.span9p5 { margin-left: 0; }
 .columns .right-column .content-page {
    background-color: white; float: left; max-width: 800px;
    min-height: 100%; padding: 9px 36px 9px 18px; position: relative;
@@ -161,7 +162,6 @@ table tr th:last-child, table tr td:last-child {
 .container-center {  margin-left: auto; margin-right: auto; max-width: 940px; }
 .container-fluid { margin: 0 auto; padding-top: 54px; }
 .container-fluid.fluid-height { height: 100%; }
-.content-area, .article-tree { height: 100%; overflow: auto; }
 .content-page article { padding-bottom: 18px; }
 .content-page code { font-weight: 700; }
 .content-page dd { margin: 9px 0 9px 18px; }
@@ -227,8 +227,7 @@ table tr th:last-child, table tr td:last-child {
 .homepage-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .homepage-hero { background-color: @light; color: @dark; }
 .homepage-hero {
-   font-family: 'Roboto Slab', serif; font-weight: 700;
-   overflow: hidden; padding-top: 54px;
+   font-family: 'Roboto Slab', serif; font-weight: 700; overflow: hidden;
 }
 .homepage-hero .homepage-image { margin-bottom: 18px; max-height: 475px; }
 .homepage-hero .text-center h2 { margin: 18px auto; text-align: center; }
@@ -313,7 +312,7 @@ table tr th:last-child, table tr td:last-child {
 .row-fluid      { width: auto;  }
 [class*="span"] { float: left; min-height: 18px; }
 .span2          { width: 16%;   }
-.span2p5        { width: 18%;   }
+.span2p5        { width: 20%;   }
 .span3          { width: 25%;   }
 .span5          { width: 41%;   }
 .span9          { width: 74%;   }
@@ -323,7 +322,9 @@ table tr th:last-child, table tr td:last-child {
 .subtle         { border-color: @lines; border-top: 0; }
 .text-center    { text-align: center; }
 .well           { min-height: 18px }
-.well.well-sidebar { padding-left: 18px; padding-right: 18px; }
+.well.well-sidebar {
+   margin-bottom: 18px; padding-left: 18px; padding-right: 18px;
+}
 .well.well-sidebar a {
    color: @light;
    font-family: 'Roboto Slab', serif; font-size: 14px; font-weight: 400;
@@ -357,6 +358,7 @@ table tr th:last-child, table tr td:last-child {
    }
 }
 @media (max-width: 767px) {
+   body { overflow: scroll; }
    .columns .left-column, .columns .right-column {
       height: auto; padding-top: 0; width: 100% !important;
    }

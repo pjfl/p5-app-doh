@@ -93,7 +93,7 @@ around 'to_psgi_app' => sub {
          enable '+App::Doh::Auth::Htpasswd',
             file_root => $conf->file_root, params => [ 'edit' ];
          enable_if { $debug } 'Debug';
-         mount '/' => $app;
+         $app;
       };
    };
 };

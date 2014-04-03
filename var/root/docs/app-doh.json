@@ -6,7 +6,8 @@
       "Built Using Perl": "http://www.perl.org",
       "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
       "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
-      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues"
+      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues",
+      "Markdown Syntax": "http://daringfireball.net/projects/markdown/syntax"
    },
    "locales": [ "en", "de" ],
    "repo_url": "https://github.com/pjfl/p5-app-doh.git",

@@ -16,28 +16,45 @@ extends q(App::Doh);
 
 has 'args'     => is => 'ro',   isa => ArrayRef, default => sub { [] };
 
-has 'base'     => is => 'ro',   isa => Object, required => TRUE;
+has 'base'     => is => 'lazy', isa => Object;
 
-has 'body'     => is => 'lazy', isa => Object, init_arg => undef;
+has 'body'     => is => 'lazy', isa => Object;
 
-has 'domain'   => is => 'ro',   isa => NonEmptySimpleStr, required => TRUE;
+has 'domain'   => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub { (split m{ : }mx, $_[ 0 ]->host)[ 0 ] };
+
+has 'host'     => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub {
+      my $env  =  $_[ 0 ]->env;
+         $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
 
 has 'env'      => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr, init_arg => undef;
+has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr;
 
 has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'path'     => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'path'     => is => 'lazy', isa => SimpleStr,
+   builder     => sub {
+      my $v    =  $_[ 0 ]->env->{ 'PATH_INFO' };
+         $v    =~ s{ \A / }{}mx; $v =~ s{ \? .* \z }{}mx; $v };
 
-has 'query'    => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'query'    => is => 'lazy', isa => SimpleStr,
+   builder     => sub {
+      my $v    =  $_[ 0 ]->env->{ 'QUERY_STRING' }; $v ? "'?${v}" : NUL };
 
-has 'scheme'   => is => 'ro',   isa => NonEmptySimpleStr;
+has 'scheme'   => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub { $_[ 0 ]->env->{ 'psgi.url_scheme' } // 'http' };
+
+has 'script'   => is => 'lazy', isa => SimpleStr,
+   builder     => sub {
+      my $v    =  $_[ 0 ]->env->{ 'SCRIPT_NAME' } // '/';
+         $v    =~ s{ / \z }{}gmx; $v };
 
 has 'session'  => is => 'lazy', isa => HashRef,
    builder     => sub { $_[ 0 ]->env->{ 'psgix.session' } // {} };
 
-has 'uri'      => is => 'ro',   isa => Object, required => TRUE;
+has 'uri'      => is => 'lazy', isa => Object;
 
 has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub { $_[ 0 ]->env->{ 'REMOTE_USER' } // 'unknown' };
@@ -46,29 +63,25 @@ has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
 around 'BUILDARGS' => sub {
    my ($orig, $self, $builder, @args) = @_; my $attr = {};
 
-   my $env       = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-   my $scheme    = $attr->{scheme} = $env->{ 'psgi.url_scheme' } // 'http';
-   my $host      = $env->{ 'HTTP_HOST'    }
-                // $env->{ 'SERVER_NAME'  } // 'localhost';
-   my $script    = $env->{ 'SCRIPT_NAME'  } // '/'; $script =~ s{ / \z }{}gmx;
-   my $path_info = $env->{ 'PATH_INFO'    };
-      $path_info =~ s{ \A / }{}mx; $path_info =~ s{ \? .* \z }{}mx;
-   my $query     = $env->{ 'QUERY_STRING' } ? '?'.$env->{ 'QUERY_STRING' } : '';
-   my $base_uri  = "${scheme}://${host}${script}/";
-   my $req_uri   = "${base_uri}${path_info}";
-   my $uri_class = "URI::${scheme}";
-
    $attr->{builder} = $builder;
-   $attr->{env    } = $env;
+   $attr->{env    } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{params } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{args   } = [ split m{ / }mx, trim $args[ 0 ] || NUL ];
-   $attr->{base   } = bless \$base_uri, $uri_class;
-   $attr->{domain } = (split m{ : }mx, $host)[ 0 ];
-   $attr->{path   } = $script;
-   $attr->{query  } = $query;
-   $attr->{uri    } = bless \$req_uri,  $uri_class;
    return $attr;
 };
+
+sub _build_base {
+   my $self = shift; my $params = $self->params; my $base_uri;
+
+   if (exists $params->{mode} and $params->{mode} eq 'static') {
+      my @path_info = split m{ / }mx, $self->path;
+
+      $base_uri = '../' x scalar @path_info;
+   }
+   else { $base_uri = $self->scheme.'://'.$self->host.$self->script.'/' }
+
+   return bless \$base_uri, 'URI::'.$self->scheme;
+}
 
 sub _build_body {
    my $self = shift; my $env = $self->env; my $content = NUL;
@@ -98,6 +111,18 @@ sub _build_locale {
    return $self->config->locale;
 }
 
+sub _build_uri {
+   my $self = shift; my $params = $self->params;
+
+   my $req_uri = $self->base.$self->path;
+
+   if (exists $params->{mode} and $params->{mode} eq 'static') {
+      $req_uri = $self->base.$self->locale.'/'.$self->path.'.html';
+   }
+
+   return bless \$req_uri, 'URI::'.$self->scheme;
+}
+
 # Public methods
 sub loc {
    my ($self, $key, @args) = @_;
@@ -112,10 +137,16 @@ sub loc_default {
 }
 
 sub uri_for {
-   my ($self, $path, $args, $query_params) = @_;
+   my ($self, $path, $args, $query_params) = @_; my $params = $self->params;
 
    $args and defined $args->[ 0 ] and $path = join '/', $path, @{ $args };
-   first_char $path ne '/' and $path = $self->base.$path;
+
+   if (exists $params->{mode}
+          and $params->{mode} eq 'static' and '/' ne substr $path, -1, 1) {
+      $path or $path = 'index';
+      $path = $self->base.$self->locale."/${path}.html";
+   }
+   else { first_char $path ne '/' and $path = $self->base.$path }
 
    my $uri = bless \$path, 'URI::'.$self->scheme;
 

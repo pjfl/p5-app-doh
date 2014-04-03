@@ -206,7 +206,7 @@ body {
   height: 100%;
   line-height: 1.8em;
   max-height: 100%;
-  width: auto;
+  overflow: hidden;
   /* 10 18 */
 
 }
@@ -448,6 +448,11 @@ table tr td:last-child {
   border-right: 1px solid #adcb83;
 }
 /* Classes */
+.article-tree,
+.content-area {
+  height: 100%;
+  overflow: auto;
+}
 .btn {
   display: inline-block;
   text-align: center;
@@ -490,7 +495,7 @@ table tr td:last-child {
   margin-left: 0;
 }
 .columns .left-column.span2p5 {
-  width: 18%;
+  overflow: hidden;
 }
 .columns .left-column.span3 {
   width: 23.4043%;
@@ -504,7 +509,6 @@ table tr td:last-child {
 }
 .columns .right-column.span9p5 {
   margin-left: 0;
-  width: 82%;
 }
 .columns .right-column .content-page {
   background-color: white;
@@ -535,11 +539,6 @@ table tr td:last-child {
 }
 .container-fluid.fluid-height {
   height: 100%;
-}
-.content-area,
-.article-tree {
-  height: 100%;
-  overflow: auto;
 }
 .content-page article {
   padding-bottom: 18px;
@@ -690,7 +689,6 @@ table tr td:last-child {
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
   overflow: hidden;
-  padding-top: 54px;
 }
 .homepage-hero .homepage-image {
   margin-bottom: 18px;
@@ -899,7 +897,7 @@ table tr td:last-child {
   width: 16%;
 }
 .span2p5 {
-  width: 18%;
+  width: 20%;
 }
 .span3 {
   width: 25%;
@@ -930,6 +928,7 @@ table tr td:last-child {
   min-height: 18px;
 }
 .well.well-sidebar {
+  margin-bottom: 18px;
   padding-left: 18px;
   padding-right: 18px;
 }
@@ -1006,6 +1005,9 @@ table tr td:last-child {
   }
 }
 @media (max-width: 767px) {
+  body {
+    overflow: scroll;
+  }
   .columns .left-column,
   .columns .right-column {
     height: auto;

@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Only code block to go on static pages
           - Updated git hooks
           - Static generator creating pages
           - Adding static generator

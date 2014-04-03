@@ -34,16 +34,19 @@
 [% END -%]
             </ul>
 [% IF config.links.0 || config.twitter.0 -%]
+            <!-- Links -->
             <div class="well well-sidebar">
-               <!-- Links -->
-[%    IF ! page.editing -%]
-               <a href="[% links.req_uri %]?edit=1">[% loc( 'Edit' ) %]</a><br>
+[%    IF ! page.editing && page.mode != 'static' -%]
+               <a href="[% links.req_uri %]?edit=1">[% loc( 'Edit' ) %]</a>
+               <br>
 [%    END -%]
 [%    FOREACH link = config.links -%]
                <a href="[% link.url | eval %]" target="_blank">
                   [% link.name | eval %]</a>
                <br>
 [%    END -%]
+            </div>
+            <div class="well well-sidebar">
                <form action="[% links.req_uri %]" enctype="application/x-www-form-urlencoded" method="get" name="preferences">
                   <select id="code_blocks" name="code_blocks">
                      <option [% IF prefs.code_blocks == 1;
@@ -57,14 +60,17 @@
                         value="3">Show Code Blocks Inline</option>
                   </select>
                </form>
-               <br>
-               <!-- Twitter -->
-[%    FOREACH handle = config.twitter -%]
+            </div>
+[%    IF config.twitter.0 -%]
+            <!-- Twitter -->
+            <div class="well well-sidebar">
+[%       FOREACH handle = config.twitter -%]
                <div class="twitter">
                   <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
                </div>
-[%    END -%]
+   [%    END -%]
             </div>
+[%    END -%]
 [% END -%]
          </div>
       </div>

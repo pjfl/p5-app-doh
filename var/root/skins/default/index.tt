@@ -1,71 +1,75 @@
 [% INCLUDE default/navbar.tt -%]
 <!-- Index -->
-<div class="homepage-hero well container-fluid">
-   <div class="container-center">
+<div class="container-fluid fluid-height wrapper">
+   <div class="row-fluid columns content-area">
+      <div class="homepage-hero well">
+         <div class="container-center">
 [% IF config.description -%]
-      <div class="row">
-         <div class="text-center span12">
-            <h2>[% config.description %]</h2>
-         </div>
-      </div>
+            <div class="row">
+               <div class="text-center span12">
+                  <h2>[% config.description %]</h2>
+               </div>
+            </div>
 [% END -%]
 [% IF config.brand -%]
-      <div class="row">
-         <div class="span12">
-            <img class="homepage-image" alt="[% config.title %]"
-                 src="[% links.images %][% config.brand %]">
+            <div class="row">
+               <div class="span12">
+                  <img class="homepage-image" alt="[% config.title %]"
+                       src="[% links.images %][% config.brand %]">
+               </div>
+            </div>
+[% END -%]
          </div>
       </div>
-[% END -%]
-   </div>
-</div>
-<div class="hero-buttons container-fluid">
-   <div class="container-center">
-      <div class="row">
-         <div class="text-center span12">
+      <div class="hero-buttons container-fluid">
+         <div class="container-center">
+            <div class="row">
+               <div class="text-center span12">
 [% IF config.repo_url -%]
-            <a class="btn btn-secondary btn-hero"
-                href="[% config.repo_url %]">View Repository</a>
+                  <a class="btn btn-secondary btn-hero"
+                      href="[% config.repo_url %]">View Repository</a>
 [% END -%]
-            <a class="btn btn-primary btn-hero"
-                href="[% page.docs_url %]">View Documentation</a>
+                  <a class="btn btn-primary btn-hero"
+                      href="[% page.docs_url %]">View Documentation</a>
+               </div>
+            </div>
          </div>
       </div>
-   </div>
-</div>
-<div class="homepage-content container-fluid">
-   <div class="container-center">
-      <div class="row">
-         <div class="span12">
+      <div class="homepage-content container-fluid">
+         <div class="container-center">
+            <div class="row">
+               <div class="span12">
 [% IF page.format == 'html' -%]
-            [% page.content | eval %]
+                  [% page.content | eval %]
 [% END -%]
+               </div>
+            </div>
          </div>
       </div>
-   </div>
-</div>
-<div class="homepage-footer well container-fluid">
-   <div class="container-center">
-      <div class="row">
-         <div class="span5">
+      <div class="homepage-footer well container-fluid">
+         <div class="container-center">
+            <div class="row">
+               <div class="span5">
 [% IF config.links.0 -%]
-            <ul class="footer-nav">
+                  <ul class="footer-nav">
    [% FOREACH link = config.links -%]
-               <li><a href="[% link.url | eval %]" target="_blank">
-                  [% link.name %]</a></li>
+                     <li><a href="[% link.url | eval %]" target="_blank">
+                        [% link.name %]</a></li>
    [% END -%]
-            </ul>
+                  </ul>
 [% END -%]
-         </div>
-         <div class="span5">
-            <div class="pull-right">
+               </div>
+               <div class="span5">
+                  <div class="pull-right">
 [% IF config.twitter.0 -%]
    [% FOREACH handle = config.twitter -%]
-               <div class="twitter">
-                  <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
-               </div>
+                     <div class="twitter">
+                        <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
+                     </div>
    [% END -%]
 [% END -%]
+                  </div>
+               </div>
             </div>
          </div>
       </div>

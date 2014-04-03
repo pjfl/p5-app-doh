@@ -1,6 +1,7 @@
 package App::Doh::CLI;
 
 use namespace::sweep;
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 33 $ =~ /\d+/gmx );
 
 use Moo;
 use App::Doh::Model::Documentation;
@@ -18,6 +19,7 @@ has 'model' => is => 'lazy', isa => Object, builder => sub {
    App::Doh::Model::Documentation->new( builder => $_[ 0 ] );
 };
 
+# Public methods
 sub make_static : method {
    my $self = shift; my $dest = io( $self->next_argv // 'static' );
 
@@ -25,12 +27,13 @@ sub make_static : method {
    $self->_copy_assets( $dest );
 
    for my $locale (keys %{ $self->model->docs_tree }) {
-      $self->_make_static( $dest, $locale );
+      $self->_make_localised_static( $dest, $locale );
    }
 
    return OK;
 }
 
+# Private methods
 sub _copy_assets {
    my ($self, $dest) = @_; my $conf = $self->config; my $root = $conf->root;
 
@@ -56,26 +59,27 @@ sub _copy_assets {
    return;
 }
 
-sub _make_static {
-   my ($self, $dest, $locale) = @_;
+sub _make_localised_static {
+   my ($self, $dest, $locale) = @_; my $conf = $self->config;
 
    my $iter = $self->model->iterator( $locale );
 
    while (my $node = $iter->()) {
-      $node->{type} ne 'file' and next;
+      $node->{type} eq 'file' or next;
 
-      my $url     =  '/'.$node->{url}."?locale=${locale}";
-      my $cmd     =  [ $self->config->binsdir->catfile( 'doh-server' ), $url ];
-      my $content =  $self->run_cmd( $cmd )->out;
-      my $path    =  io( $node->{path} )->abs2rel( $self->config->file_root );
-         $path    =~ s{ \. (.+) \z }{\.html}mx;
+      my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
+      my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
+      my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
+      my $path = io( [ $dest, @path ] )->assert_filepath;
 
-      io( [ $dest, $path ] )->assert_filepath->print( $content );
+      $self->info( 'Writing '.$node->{url} );
+      $path->print( $self->run_cmd( $cmd )->stdout );
    }
 
    return;
 }
 
+# Private functions
 sub __deep_copy {
    my ($src, $dest, $excluding) = @_; $excluding //= qr{ NUL() }mx;
 
@@ -101,14 +105,17 @@ __END__
 
 =head1 Name
 
-App::Doh::CLI - One-line description of the modules purpose
+App::Doh::CLI - Command line interface class for the application
 
 =head1 Synopsis
 
    use App::Doh::CLI;
-   # Brief but working code examples
+
+   exit App::Doh::Cli->new( appclass => 'App::Doh', noask => 1 )->run;
 
 =head1 Description
+
+Command line interface class for the application
 
 =head1 Configuration and Environment
 
@@ -116,19 +123,31 @@ Defines the following attributes;
 
 =over 3
 
+=item C<model>
+
+A reference to the L<App::Doh::Model::Documentation> object
+
 =back
 
 =head1 Subroutines/Methods
 
 =head2 make_static - Make a static HTML copy of the documentation
 
+Creates static HTML pages
+
 =head1 Diagnostics
+
+None
 
 =head1 Dependencies
 
 =over 3
 
 =item L<Class::Usul>
+
+=item L<File::DataClass>
+
+=item L<Moo>
 
 =back
 
