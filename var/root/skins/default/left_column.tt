@@ -51,14 +51,15 @@
                   <select id="code_blocks" name="code_blocks">
                      <option [% IF prefs.code_blocks == 1;
                                    'selected="selected"'; ELSE; ''; END %]
-                        value="1">Hide Code Blocks</option>
+                        value="1">Show Code Blocks</option>
                      <option [% IF prefs.code_blocks == 2;
                                    'selected="selected"'; ELSE; ''; END %]
-                        value="2">Show Code Blocks</option>
+                        value="2">Show Code Blocks Inline</option>
                      <option [% IF prefs.code_blocks == 3;
                                    'selected="selected"'; ELSE; ''; END %]
-                        value="3">Show Code Blocks Inline</option>
+                        value="3">Hide Code Blocks</option>
                   </select>
+                  <input name="mode" type="hidden" value="[% page.mode %]">
                </form>
             </div>
 [%    IF config.twitter.0 -%]
@@ -68,7 +69,7 @@
                <div class="twitter">
                   <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
                </div>
-   [%    END -%]
+[%       END -%]
             </div>
 [%    END -%]
 [% END -%]

@@ -105,7 +105,7 @@ sub load_page {
       format       => $node->{format},
       header       => $node->{title},
       homepage_url => $home,
-      mode         => $req->params->{mode} // 'live',
+      mode         => $req->params->{mode} // 'online',
       mtime        => $node->{mtime},
       title        => ucfirst $node->{name}, };
 
@@ -137,7 +137,7 @@ sub update_file {
    my $node     = $self->_find_node( $req )
       or throw 'Cannot find document tree node to update';
    my $content  = $req->body->param->{content}; $content =~ s{ \r\n }{\n}gmx;
-   my $path     = $node->{path}; $path->print( $content );
+   my $path     = $node->{path}; $path->print( $content ); $path->close;
    my $rel_path = $path->abs2rel( $self->config->file_root );
    my $message  = [ 'File [_1] updated by [_2]', $rel_path, $req->username ];
 

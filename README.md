@@ -15,7 +15,7 @@ App::Doh - An easy way to document a project using Markdown
 
 # Version
 
-This documents version v0.1.$Rev: 30 $ of [App::Doh](https://metacpan.org/pod/App::Doh)
+This documents version v0.1.$Rev: 34 $ of [App::Doh](https://metacpan.org/pod/App::Doh)
 
 # Description
 

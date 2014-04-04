@@ -6,7 +6,7 @@
 ## Features
 
 * 100% Mobile responsive
-* Supports GitHub flavored narkdown
+* Supports GitHub flavored markdown
 * Automatically created home / landing page
 * Automatic syntax highlighting
 * Automatically generated navigation
@@ -83,6 +83,10 @@ The generator will look for folders in the `var/root/docs` folder. Add your
 folders inside the `var/root/docs` folder. This project contains some example
 folders and files to get you started.
 
+The first folder under `var/root/docs` should be a language code. This defaults
+to `en` for English. Even if you only plan to use one language you will still
+need to create your files and folders underneath the language folder.
+
 You can nest folders any number of levels to get the exact structure
 you want. The folder structure will be converted to the nested
 navigation.
@@ -114,15 +118,15 @@ Text files with `.txt` extension will be rendered wrapped in 'pre' tags.
 ## Sorting
 
 To sort your files and folders in a specific way, you can prefix them
-with a number and underscore, e.g. `var/root/docs/01_Hello_World.md` and
-`var/root/docs/05_Features.md` This will list *Hello World* before *Features*,
-overriding the deafult alpha-numeric sorting. The numbers will be
-stripped out of the navigation and urls.
+with a number and underscore, e.g. `var/root/docs/en/01_Hello_World.md` and
+`var/root/docs/en/05_Features.md` This will list *Hello World* before
+*Features*, overriding the deafult alpha-numeric sorting. The numbers and
+the language codes will be stripped out of the navigation and urls.
 
 ## Landing page
 
 If you want to create a beautiful landing page for your project,
-simply create a `index.md` file in the root of the `var/root/docs`
+simply create a `index.md` file in the root of the `var/root/docs/en`
 folder. This file will then be used to create a landing page. You can
 also add a description and image to this page using the config file like
 this:
@@ -201,8 +205,6 @@ feature
 The config attribute `no_index` is a list of filename patterns to ignore
 when indexing the document tree
 
-### Toggling Code Blocks:
-
 ### Github Repo:
 Add a 'Fork me on Github' ribbon.
 
@@ -228,8 +230,6 @@ Include custom links in the sidebar.
       }
    }
 
-### Multi-language:
-
 ### Google Analytics:
 This will embed the google analytics tracking code.
 
@@ -238,12 +238,27 @@ This will embed the google analytics tracking code.
    }
 
 
+## Toggling Code Blocks
+The select menu in the left column of the documentation template allows
+for the selection of different code block display modes. Code blocks
+can be displayed in the page float view, the can be displayed inline, and
+they can be hidden
+
+## Multi-language
+Use your browsers preferences to set the `Accept-Language` header in the
+request to the desired language. If available it will be served in
+preference to the default language, English.
+
 ## Markdown Editor
 The markdown in the document tree is editable via the web browser. Users
 must authenticate against the `.htpasswd` files under the document root.
 The default user is `admin` password `admin`
 
 ## Generating a set of static files
+This command creates a static HTML version of the documentation in the
+`var/root/static` directory
+
+   bin/doh-cli make_static
 
 ## Support
 

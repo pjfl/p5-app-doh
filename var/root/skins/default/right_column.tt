@@ -25,7 +25,7 @@
                        enctype="application/x-www-form-urlencoded"
                         method="post" name="edit">
                      <textarea class="editor autosize"
-                                cols="80" id="content" name="content"
+                                cols="80" id="markdown-editor" name="content"
                                 rows="40">[% page.content | html %]</textarea>
                      <br>
                      <button class="btn btn-submit" name="_method" type="submit"

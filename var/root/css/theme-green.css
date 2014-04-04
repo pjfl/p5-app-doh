@@ -565,6 +565,10 @@ table tr td:last-child {
 .content-page ul {
   margin-bottom: 18px;
 }
+.editor {
+  font-family: "Andale Mono", monaco, "Courier New", courier, monospace;
+  font-size: 16px;
+}
 .footer {
   bottom: 0;
   left: 0;

@@ -12,5 +12,5 @@
    "locales": [ "en", "de" ],
    "repo_url": "https://github.com/pjfl/p5-app-doh.git",
    "title": "Doh!",
-   "twitter": [ "perl", "web-simple" ]
+   "twitter": [ "perl", "moose" ]
 }

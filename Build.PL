@@ -23,14 +23,19 @@ my $prereqs  = {
     'Daemon::Control' => '0.000009',
     'File::DataClass' => 'v0.33.0',
     'HTML::Accessors' => 'v0.11.0',
+    'HTTP::Body' => '1.11',
+    'HTTP::Message' => '6.06',
     'Module::Pluggable' => '4.8',
     'Moo' => '1.003',
     'Plack' => '1.0018',
+    'Plack::Middleware::Auth::Htpasswd' => '0.02',
     'Plack::Middleware::Deflater' => '0.08',
     'Plack::Middleware::LogErrors' => '0.001',
+    'Plack::Middleware::Session' => '0.21',
     'Pod::Xhtml' => '1.61',
     'Template' => '2.22',
     'Text::Markdown' => '1.000031',
+    'Try::Tiny' => '0.18',
     'Twiggy' => '0.1021',
     'URI' => '1.60',
     'Unexpected' => 'v0.22.0',
@@ -73,7 +78,7 @@ use File::Path            qw( make_path );
 use File::Spec::Functions qw( catdir catfile );
 
 sub ACTION_install {
-   my ($self) = @_; $self->SUPER::ACTION_install(); umask oct '0007';
+   my $self = shift; umask oct '0007'; $self->SUPER::ACTION_install();
 
    for my $dir (qw( logs run tmp )) {
       my $path = catdir( $self->install_path( 'var' ), $dir );

@@ -59,6 +59,7 @@
 TAGS
 Thumbs.db
 \bipc_srlock
+\bvar/root/static
 \bvar/run
 \bvar/tmp
 \bvar/logs
