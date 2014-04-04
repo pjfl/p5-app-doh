@@ -205,6 +205,15 @@ feature
 The config attribute `no_index` is a list of filename patterns to ignore
 when indexing the document tree
 
+   [ '.git', '.htpasswd', '.svn', 'app-doh.json' ]
+
+### Locales:
+The list of locales (languages) supported
+
+   {
+      "locales": [ "en", "de" ]
+   }
+
 ### Github Repo:
 Add a 'Fork me on Github' ribbon.
 
@@ -238,6 +247,16 @@ This will embed the google analytics tracking code.
    }
 
 
+## Markdown Editor
+<img alt="[File editor]" class="app-thumbnail"
+     src="[% links.images %]app-editor.png"/>
+
+The markdown in the document tree is editable via the web browser. Click
+the `Edit` link in the left navigation column. Users must authenticate
+against the `.htpasswd` files under the document root. The default user
+is `admin` password `admin`. Click the `Save` button at the bottom of
+the text editor to make the changes permanent.
+
 ## Toggling Code Blocks
 The select menu in the left column of the documentation template allows
 for the selection of different code block display modes. Code blocks
@@ -249,10 +268,27 @@ Use your browsers preferences to set the `Accept-Language` header in the
 request to the desired language. If available it will be served in
 preference to the default language, English.
 
-## Markdown Editor
-The markdown in the document tree is editable via the web browser. Users
-must authenticate against the `.htpasswd` files under the document root.
-The default user is `admin` password `admin`
+Directory structure:
+
+   ├── docs/
+   │   ├── en
+   │   │   ├── index.md
+   │   │   ├── 00_Getting_Started.md
+   │   │   ├── 01_Examples
+   │   │   │   ├── 01_GitHub_Flavored_Markdown.md
+   │   │   │   ├── 05_Code_Highlighting.md
+   │   │   ├── 05_More_Examples
+   │   │   │   ├── Hello_World.md
+   │   │   │   ├── 05_Code_Highlighting.md
+   │   ├── de
+   │   │   ├── index.md
+   │   │   ├── 00_Getting_Started.md
+   │   │   ├── 01_Examples
+   │   │   │   ├── 01_GitHub_Flavored_Markdown.md
+   │   │   │   ├── 05_Code_Highlighting.md
+   │   │   ├── 05_More_Examples
+   │   │   │   ├── Hello_World.md
+   │   │   │   ├── 05_Code_Highlighting.md
 
 ## Generating a set of static files
 This command creates a static HTML version of the documentation in the

@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added app editor image
           - Markdown editor autosizes textarea
           - Only code block to go on static pages
           - Updated git hooks
