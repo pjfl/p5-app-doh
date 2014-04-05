@@ -18,10 +18,9 @@ my $prereqs  = {
     'version' => '0.88'
   },
   'requires' => {
-    'CGI::Simple' => '1.113',
     'Class::Usul' => 'v0.39.0',
     'Daemon::Control' => '0.000009',
-    'File::DataClass' => 'v0.33.0',
+    'File::DataClass' => 'v0.34.0',
     'HTML::Accessors' => 'v0.11.0',
     'HTTP::Body' => '1.11',
     'HTTP::Message' => '6.06',
