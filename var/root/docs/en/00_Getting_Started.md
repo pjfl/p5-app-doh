@@ -19,6 +19,8 @@
 * Google analytics
 * Optional code float layout
 * Markdown editor
+* Multi-language support
+* Static site generator
 
 ## Acknowledgements
 
@@ -59,6 +61,9 @@ Install **App-Doh** with:
 If that fails run it again with the --force option
 
    cpanm --force git:...
+
+Depending on how many of the required distributions are already
+installed the above may take a while to run
 
 By default the server will run at:
 [http://localhost:5000](http://localhost:5000) and can be started
@@ -268,7 +273,7 @@ Use your browsers preferences to set the `Accept-Language` header in the
 request to the desired language. If available it will be served in
 preference to the default language, English.
 
-Directory structure:
+### Directory structure:
 
    ├── docs/
    │   ├── en

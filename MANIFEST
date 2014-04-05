@@ -43,6 +43,7 @@ var/root/docs/en/01_Examples/01_GitHub_Flavored_Markdown.md
 var/root/docs/en/01_Examples/05_Code_Highlighting.md
 var/root/docs/en/05_More_Examples/Hello_World.md
 var/root/docs/en/index.md
+var/root/img/app-editor.png
 var/root/img/app-thumbs.png
 var/root/img/app.png
 var/root/img/favicon-blue.png
@@ -51,12 +52,11 @@ var/root/img/favicon-navy.png
 var/root/img/favicon-red.png
 var/root/img/favicon.png
 var/root/img/fork-me.png
-var/root/img/glyphicons-halflings-white.png
-var/root/img/glyphicons-halflings.png
 var/root/js/custom.js
 var/root/js/highlight.min.js
 var/root/js/jquery.min.js
 var/root/js/less.min.js
+var/root/js/plugins.min.js
 var/root/less/import/theme-base.less
 var/root/less/theme-blue.less
 var/root/less/theme-green.less

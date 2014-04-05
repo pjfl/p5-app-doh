@@ -1,6 +1,7 @@
 Revision history for App-Doh
 
-          - Added app editor image
+          - Updated dependencies
+          - Added app editor image to Getting_Started
           - Markdown editor autosizes textarea
           - Only code block to go on static pages
           - Updated git hooks
