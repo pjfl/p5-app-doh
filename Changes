@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Made README.md a copy of Getting Started
           - Updated dependencies
           - Added app editor image to Getting_Started
           - Markdown editor autosizes textarea

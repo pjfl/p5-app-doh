@@ -8,6 +8,7 @@ use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                is_member trim );
 use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
                                Object SimpleStr );
+use Encode                 qw( decode );
 use HTTP::Body;
 use URI::http;
 use URI::https;
@@ -92,6 +93,10 @@ sub _build_body {
    my $body = HTTP::Body->new( $env->{CONTENT_TYPE}, length $content );
 
    length $content and $body->add( $content );
+
+   for my $k (keys %{ $body->param }) {
+      $body->param->{ $k } = decode( 'UTF-8', $body->param->{ $k } );
+   }
 
    return $body;
 }

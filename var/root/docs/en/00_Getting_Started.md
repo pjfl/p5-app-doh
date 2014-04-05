@@ -62,17 +62,20 @@ If that fails run it again with the --force option
 
    cpanm --force git:...
 
-Depending on how many of the required distributions are already
-installed the above may take a while to run
+Although this is a simple application it is composed of many CPAN
+distributions and, depending on how many of them are already installed,
+may take a while to complete. The flip side is that there are no external
+dependencies like Node.io or Grunt to install.
 
-By default the server will run at:
+By default the development server will run at:
 [http://localhost:5000](http://localhost:5000) and can be started
 in the foreground with:
 
    cd App-Doh
    plackup bin/doh-server
 
-To start in the background listening by default on port 8085 use:
+To start the production server in the background listening on the
+default port 8085 use:
 
    doh-daemon start
 
