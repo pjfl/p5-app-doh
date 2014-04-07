@@ -38,8 +38,8 @@ sub _build_docs_tree {
       my $url        =  $url_base ? "${url_base}/${id}"  : $id;
       my $full_title =  $title    ? "${title} - ${name}" : $name;
       my $node       =  $tree->{ $id } = {
-         clean       => $id,
          format      => $self->_get_format( $path->pathname ),
+         id          => $id,
          name        => $name,
          path        => $path->utf8,
          mtime       => $path->stat->{mtime},
@@ -50,7 +50,7 @@ sub _build_docs_tree {
 
       $path->is_dir or next;
       $node->{type} = 'folder';
-      $node->{tree} = $level > 1
+      $node->{tree} = $level > 1 # Skip the language code directories
                     ? $self->_build_docs_tree( $path, $url, $name )
                     : $self->_build_docs_tree( $path, NUL, NUL    );
    }
@@ -60,9 +60,9 @@ sub _build_docs_tree {
 
 # Public methods
 sub get_stash {
-   my ($self, $req) = @_; my $args = $req->{args}; my $template;
+   my ($self, $req) = @_; my $ids = $req->{args}; my $template;
 
-   defined $args->[ 0 ] and $args->[ 0 ] ne 'index'
+   defined $ids->[ 0 ] and $ids->[ 0 ] ne 'index'
        and $template = 'documentation';
 
    return { nav      => $self->navigation( $req ),
@@ -122,11 +122,11 @@ sub load_page {
 }
 
 sub navigation {
-   my ($self, $req) = @_; my $names = [ @{ $req->args } ];
+   my ($self, $req) = @_; my $ids = [ @{ $req->args } ];
 
    my $tree = $self->_localised_tree( $req->locale )->{tree};
 
-   return __build_navigation_list( $tree, $names, (join '/', @{ $names }), 0 );
+   return __build_nav_list( $tree, $ids, (join '/', @{ $ids }), 0 );
 }
 
 sub update_file {
@@ -134,12 +134,13 @@ sub update_file {
 
    $req->username ne 'unknown' or throw 'Update not authorised';
 
-   my $node     = $self->_find_node( $req )
+   my $node     =  $self->_find_node( $req )
       or throw 'Cannot find document tree node to update';
-   my $content  = $req->body->param->{content}; $content =~ s{ \r\n }{\n}gmx;
-   my $path     = $node->{path}; $path->print( $content ); $path->close;
-   my $rel_path = $path->abs2rel( $self->config->file_root );
-   my $message  = [ 'File [_1] updated by [_2]', $rel_path, $req->username ];
+   my $content  =  $req->body->param->{content};
+      $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
+   my $path     =  $node->{path}; $path->println( $content ); $path->close;
+   my $rel_path =  $path->abs2rel( $self->config->file_root );
+   my $message  =  [ 'File [_1] updated by [_2]', $rel_path, $req->username ];
 
    $node->{mtime} = $path->stat->{mtime};
 
@@ -155,7 +156,7 @@ sub _docs_url {
    my $iter = $self->iterator( $locale );
 
    while (defined (my $node = $iter->())) {
-      $node->{type} eq 'file' and $node->{name} ne 'index'
+      $node->{type} eq 'file' and $node->{id} ne 'index'
          and return $urls->{ $lang } = $node->{url};
    }
 
@@ -170,14 +171,13 @@ sub _docs_url {
 sub _find_node {
    my ($self, $req) = @_;
 
-   my $tree  = $self->_localised_tree( $req->locale )->{tree};
-   my $names = [ @{ $req->args } ]; $names->[ 0 ] or $names->[ 0 ] = 'index';
+   my $tree = $self->_localised_tree( $req->locale )->{tree};
+   my $ids  = [ @{ $req->args } ]; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
 
-   for my $node_name (@{ $names }) {
-      $node_name or $node_name = 'index';
-      exists  $tree->{ $node_name } or return FALSE;
-      $tree = $tree->{ $node_name }->{type} eq 'folder'
-            ? $tree->{ $node_name }->{tree} : $tree->{ $node_name };
+   for my $node_id (map { $_ ? $_ : 'index' } @{ $ids }) {
+      exists  $tree->{ $node_id } or return FALSE;
+      $tree = $tree->{ $node_id }->{type} eq 'folder'
+            ? $tree->{ $node_id }->{tree} : $tree->{ $node_id };
    }
 
    return $tree;
@@ -202,25 +202,25 @@ sub _localised_tree {
 }
 
 # Private functions
-sub __build_navigation_list {
-   my ($tree, $names, $path_url, $level) = @_; my @nav = ();
+sub __build_nav_list {
+   my ($tree, $ids, $wanted, $level) = @_; my @nav = ();
 
    for my $node (map  { $tree->{ $_ } }
-                 grep { $_ ne 'index' } __sort_pages( $tree )) {
-      my $page = { level => $level, name => $node->{name},
-                   type  => $node->{type} };
+                 grep { $_ ne 'index' } __sorted_keys( $tree )) {
+      my $page = { level => $level,
+                   name  => $node->{name},
+                   type  => $node->{type},
+                   url   => $node->{type} eq 'folder' ? '#' : $node->{url}, };
 
-      if (defined $names->[ 0 ] and $names->[ 0 ] eq $node->{clean}) {
-         $page->{class} = $path_url eq $node->{url} ? 'active' : 'open';
-         shift @{ $names };
+      if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
+         $page->{class} = $node->{url} eq $wanted ? 'active' : 'open';
+         shift @{ $ids };
       }
 
-      if ($page->{type} eq 'folder') {
-         $page->{url} = '#';
-         push @nav, $page, @{ __build_navigation_list
-                             ( $node->{tree}, $names, $path_url, $level + 1 ) };
-      }
-      else { $page->{url} = $node->{url}; push @nav, $page }
+      push @nav, $page;
+
+      $node->{type} eq 'folder' and push @nav, @{
+         __build_nav_list( $node->{tree}, $ids, $wanted, $level + 1 ) };
    }
 
    return \@nav;
@@ -230,7 +230,7 @@ sub __current {
    my $href = shift;
 
    exists $href->{_iterator}
-       or $href->{_iterator} = [ 0, __sort_pages( $href ) ];
+       or $href->{_iterator} = [ 0, __sorted_keys( $href ) ];
 
    my $key = $href->{_iterator}->[ $href->{_iterator}->[ 0 ] + 1 ] or return;
 
@@ -259,7 +259,7 @@ sub __next {
    return __current( $href );
 }
 
-sub __sort_pages {
+sub __sorted_keys {
    my $href = shift;
 
    return ( sort { $href->{ $a }->{_order} cmp $href->{ $b }->{_order} }

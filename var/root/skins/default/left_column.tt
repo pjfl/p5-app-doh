@@ -21,10 +21,10 @@
             <li class="[% node.class %]">
 [%    IF node.type == 'folder'; level = level + 1 -%]
                <a href="[% uri_for( node.url ) %]"
-                 class="aj-nav folder">[% node.name %]</a>
+                 class="aj-nav fade folder">[% node.name %]</a>
                <ul class="nav nav-list">
 [%    ELSE -%]
-               <a href="[% uri_for( node.url ) %]">[% node.name %]</a>
+               <a class="fade" href="[% uri_for( node.url ) %]">[% node.name %]</a>
             </li>
 [%    END -%]
 [% END -%]
@@ -37,11 +37,11 @@
             <!-- Links -->
             <div class="well well-sidebar">
 [%    IF ! page.editing && page.mode != 'static' -%]
-               <a href="[% links.req_uri %]?edit=1">[% loc( 'Edit' ) %]</a>
+               <a class="fade tips" href="[% links.req_uri %]?edit=1" title="Edit the markdown for this page">[% loc( 'Edit' ) %]</a>
                <br>
 [%    END -%]
 [%    FOREACH link = config.links -%]
-               <a href="[% link.url | eval %]" target="_blank">
+               <a class="fade" href="[% link.url | eval %]" target="_blank">
                   [% link.name | eval %]</a>
                <br>
 [%    END -%]

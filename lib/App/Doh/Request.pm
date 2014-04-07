@@ -72,16 +72,14 @@ around 'BUILDARGS' => sub {
 };
 
 sub _build_base {
-   my $self = shift; my $params = $self->params; my $base_uri;
+   my $self = shift; my $params = $self->params; my $uri;
 
    if (exists $params->{mode} and $params->{mode} eq 'static') {
-      my @path_info = split m{ / }mx, $self->path;
-
-      $base_uri = '../' x scalar @path_info;
+      my @path = split m{ / }mx, $self->path; $uri = '../' x scalar @path;
    }
-   else { $base_uri = $self->scheme.'://'.$self->host.$self->script.'/' }
+   else { $uri = $self->scheme.'://'.$self->host.$self->script.'/' }
 
-   return bless \$base_uri, 'URI::'.$self->scheme;
+   return bless \$uri, 'URI::'.$self->scheme;
 }
 
 sub _build_body {
@@ -117,15 +115,14 @@ sub _build_locale {
 }
 
 sub _build_uri {
-   my $self = shift; my $params = $self->params;
-
-   my $req_uri = $self->base.$self->path;
+   my $self = shift; my $params = $self->params; my $uri;
 
    if (exists $params->{mode} and $params->{mode} eq 'static') {
-      $req_uri = $self->base.$self->locale.'/'.$self->path.'.html';
+      $uri = $self->base.$self->locale.'/'.$self->path.'.html';
    }
+   else { $uri = $self->base.$self->path }
 
-   return bless \$req_uri, 'URI::'.$self->scheme;
+   return bless \$uri, 'URI::'.$self->scheme;
 }
 
 # Public methods
@@ -146,8 +143,8 @@ sub uri_for {
 
    $args and defined $args->[ 0 ] and $path = join '/', $path, @{ $args };
 
-   if (exists $params->{mode}
-          and $params->{mode} eq 'static' and '/' ne substr $path, -1, 1) {
+   if (exists $params->{mode} and $params->{mode} eq 'static'
+          and '/' ne substr $path, -1, 1) {
       $path or $path = 'index';
       $path = $self->base.$self->locale."/${path}.html";
    }

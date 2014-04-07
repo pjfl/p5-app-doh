@@ -18,7 +18,8 @@ has 'tm'         => is => 'lazy', isa => Object,
 sub serialize {
    my ($self, $req, $page) = @_; my $content = $page->{content};
 
-   my $markdown = blessed $content ? $content->all : $content;
+   my $markdown =  blessed $content ? $content->all : $content;
+      $markdown =~ s{ \s+ \z }{}mx; $markdown .= "\n\n";
 
    return $page->{editing} ? $markdown : $self->tm->markdown( $markdown );
 }

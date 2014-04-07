@@ -22,7 +22,7 @@ $( function() {
          if (ribbon) ribbon.style.right = '16px';
       }
 
-      var editor; if (editor = $( '#markdown-editor' )) editor.autosize().val();
+      var editor; if (editor = $( '#markdown-editor' )) editor.autosize();
 
       var prefs; if (prefs = document.forms[ 'preferences' ]) {
          var cblocks = prefs.code_blocks; setCodeBlockClass( cblocks.value );

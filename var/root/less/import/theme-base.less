@@ -10,6 +10,11 @@
    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
    filter: ~"alpha(opacity=@{opperc})";
 }
+.box-shadow(@depth: 5px) {
+   -moz-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
+   -webkit-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
+   box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
+}
 
 /*  Elements - Reset styling */
 a, abbr, acronym, address, article, aside, audio, b, big, blockquote,
@@ -89,7 +94,6 @@ hr {
 }
 html { height: 100%; max-height: 100%; }
 ins { border-bottom: 3px double; }
-ol, ul { margin-left: 18px; }
 ol { list-style-position: outside; list-style-type: decimal; }
 option { margin: 3px 0; padding: 0 3px; }
 p { margin: 9px 0; }
@@ -154,7 +158,7 @@ table tr th:last-child, table tr td:last-child {
 .columns .right-column.span9 { margin-left: 0; width: 76.4866%; }
 .columns .right-column.span9p5 { margin-left: 0; }
 .columns .right-column .content-page {
-   background-color: white; float: left; max-width: 800px;
+   background-color: white; float: left; max-width: 100%;
    min-height: 100%; padding: 9px 36px 9px 18px; position: relative;
 }
 .container { float: left; overflow: hidden; position: relative; }
@@ -162,18 +166,33 @@ table tr th:last-child, table tr td:last-child {
 .container-center {  margin-left: auto; margin-right: auto; max-width: 940px; }
 .container-fluid { margin: 0 auto; padding-top: 54px; }
 .container-fluid.fluid-height { height: 100%; }
-.content-page article { padding-bottom: 18px; }
+.content-page article {
+   max-width: 700px; min-width: 400px; padding-bottom: 18px;
+}
+.content-page > article > pre { font-weight: 700; padding: 9px; }
 .content-page code { font-weight: 700; }
 .content-page dd { margin: 9px 0 9px 18px; }
 .content-page dd, .content-page dt, .content-page li,
-.content-page p, .content-page pre, .content-page table  {
-   font-size: 14px; line-height: 18px;
+.content-page p, .content-page > article > pre, .content-page table  {
+   font-size: 14px; line-height: 18px; min-width: 400px;
 }
-.content-page pre { font-weight: 700; padding: 9px; }
-.content-page ul { margin-bottom: 18px; }
 .editor {
    font-family: "Andale Mono", monaco, "Courier New", courier, monospace;
-   font-size: 16px;
+   font-size: 16px; line-height: 18px;
+}
+.expanding_area {
+   margin-bottom: 18px; overflow: hidden; position: relative;
+}
+.expanding_area > textarea, .expanding_spacer, .expanding_spacer > span {
+   white-space: pre-wrap; word-wrap: break-word;
+}
+.expanding_area > textarea {
+   height: 100%; left: 0; margin: 0; overflow: hidden;
+   position: absolute; resize: none; top: 0; width: 100%;
+}
+.expanding_spacer {
+   display: block; visibility: hidden; font-size: 16px !important;
+   margin: 0 !important; padding: 3px !important; text-align: left;
 }
 .footer { bottom: 0; left: 0; padding: 18px; position: fixed; }
 .github-ribbon { position: absolute; right: 0; top: 54px; z-index: 10; }
@@ -226,7 +245,9 @@ table tr th:last-child, table tr td:last-child {
    font-family: 'Roboto Slab', serif; font-size: 18px; font-weight: 700;
    line-height: 36px;
 }
-.homepage-footer.container-fluid .footer-nav li a:hover { color: @light; }
+.homepage-footer.container-fluid .footer-nav li a:hover {
+   color: @light; text-decoration: none;
+}
 .homepage-footer.container-fluid .twitter { margin-top: 36px; }
 .homepage-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .homepage-hero { background-color: @light; color: @dark; }
@@ -237,14 +258,12 @@ table tr th:last-child, table tr td:last-child {
 .homepage-hero .text-center h2 { margin: 18px auto; text-align: center; }
 .lead { font-size: 18px; line-height: 36px; }
 .navbar {
-   -moz-box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
-   -webkit-box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
-   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
-   height: 54px; width: auto; z-index: 200;
+   .box-shadow; height: 54px; width: auto; z-index: 200;
 }
 .navbar-fixed-top { left: 0; position: fixed; right: 0; top: 0; }
 .navbar-static-top .container, .navbar-fixed-top .container,
 .navbar-fixed-bottom .container { width: 940px; }
+.navbar-text a { text-decoration: none; }
 .navbar .navbar-inner {
    background-color: @dark; padding: 0 18px; overflow: hidden;
    position: relative;
@@ -266,7 +285,9 @@ table tr th:last-child, table tr td:last-child {
    height: 36px; line-height: 36px; overflow: hidden; padding: 0 18px;
    width: auto;
 }
-.nav.nav-list li a:hover   { background-color: @sidebar-hover; color: @dark; }
+.nav.nav-list li a:hover   {
+   background-color: @sidebar-hover; color: @dark; text-decoration: none;
+}
 .nav.nav-list li.active a  { background-color: @sidebar-hover; }
 .nav.nav-list li.open > ul { display: block; }
 .nav.nav-list li ul        {
@@ -278,20 +299,28 @@ table tr th:last-child, table tr td:last-child {
    font-size: 14px; font-weight: normal; .opacity(0.7); padding-right: 0;
 }
 .nav.nav-list li ul li a:hover {
-   background-color: transparent; .opacity(1);
+   background-color: transparent; .opacity(1); text-decoration: none;
 }
 .nav.nav-list li ul li.active a { color: @dark; }
 .offset1 { margin-left: 8%; }
 .page-header {
    border-bottom: 1px solid; border-color: @lines;
-   margin: 0; overflow: hidden; padding: 9px 0 8px 0;
+   margin: 0; min-width: 400px; overflow: hidden; padding: 9px 0 8px 0;
 }
 .page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }
 .pod dd p { width: auto !important; }
 .pod dt { clear: left; }
 .pod dt a, .pod li a { display: block; font-size: 14px; line-height: 18px; }
+.pod dt a:hover, .pod li a:hover {
+   display: block; font-size: 14px; line-height: 18px; text-decoration: none;
+}
 .pod h3 { margin: 9px 0; }
+.pod pre {
+   clear: left; float: left; font-size: 14px; font-weight: 700;
+   margin-bottom: 18px; min-width: 500px; padding-top: 18px;
+   padding-right: 18px;
+}
 .pod ul ul { width: auto !important; }
 .pod > ul > li > ul {
    clear: none !important; float: none !important; height: 0;
@@ -301,7 +330,10 @@ table tr th:last-child, table tr td:last-child {
 .pod > ul > li > ul > li {
    clear: none !important; float: none !important; margin: 0 !important;
 }
-.pod > ul > li > ul > li > ul { margin-top: -9px !important; }
+.pod > ul > li > ul > li > ul {
+   border-right: 0 !important; margin-left: 0 !important;
+   margin-top: -9px !important;
+}
 .pull-left  { float: left;  text-align: left;  }
 .pull-right { float: right; text-align: right; }
 .responsive-collapse {
@@ -325,7 +357,29 @@ table tr th:last-child, table tr td:last-child {
 .span12         { width: 940px; }
 .subtle         { border-color: @lines; border-top: 0; }
 .text-center    { text-align: center; }
-.well           { min-height: 18px }
+.tips-container {
+   background: @light; border: 2px solid transparent; border-color: @lines;
+   .border-radius; .box-shadow; text-align: center; z-index: 13000;
+}
+.tips-mark0 {
+   border: 9px solid; border-color: transparent transparent @lines @lines;
+   content: ' '; height: 0; left: 16px; position: absolute;
+   top: -18px; width: 0;
+}
+.tips-mark1 {
+   border: 7px solid; border-color: transparent transparent @light @light;
+   content: ' '; height: 0; left: 18px; position: absolute;
+   width: 0; top: -14px;
+}
+.tips-defn {
+   color: #000; display: block; font-size: 12px; line-height: 18px;
+   padding: 4px 16px 16px 16px;
+}
+.tips-term {
+   color: Yellow; display: block; font-size: 16px; line-height: 18px;
+   padding: 8px 16px 4px 16px;
+}
+.well { min-height: 18px }
 .well.well-sidebar {
    margin-bottom: 18px; padding-left: 18px; padding-right: 18px;
 }
@@ -334,7 +388,7 @@ table tr th:last-child, table tr td:last-child {
    font-family: 'Roboto Slab', serif; font-size: 14px; font-weight: 400;
    line-height: 18px;
 }
-.well.well-sidebar a:hover { color: @text; }
+.well.well-sidebar a:hover { color: @text; text-decoration: none; }
 .well.well-sidebar .twitter hr {
    border-bottom: none; margin-left: -20px; margin-right: -20px;
 }
@@ -362,7 +416,7 @@ table tr th:last-child, table tr td:last-child {
    }
 }
 @media (max-width: 767px) {
-   body { overflow: scroll; }
+   body { overflow-y: scroll; }
    .columns .left-column, .columns .right-column {
       height: auto; padding-top: 0; width: 100% !important;
    }
@@ -385,71 +439,71 @@ table tr th:last-child, table tr td:last-child {
 @media (min-width: 1150px) {
    .float-view .content-page {
       background-color: transparent !important; height: 100%;
-      max-width: 10000px !important; padding: 0 !important;
-      position: relative;
+      padding: 0 !important;
    }
    .float-view .content-page article {
-      border-left: 15px solid white;
-      min-height: 100%; overflow: auto;
-      position: relative; width: auto;
+      border-left: 15px solid white; max-width: 100% !important;
+      min-height: 100%; overflow: auto; position: relative; width: auto;
    }
    .float-view .content-page article:before {
       background-color: white; content: ''; display: block;
-      margin: 0; min-height: 100%; min-width: 450px; overflow: auto;
-      position: absolute; width: 55%; z-index: -1;
+      margin: 0; min-height: 100%; overflow: auto;
+      position: absolute; width: 52.55%; z-index: -1;
    }
    .float-view .content-page blockquote p {
-      margin-bottom: 10px;
+      margin-bottom: 18px;
    }
    .float-view .content-page blockquote:before {
-      clear: both; content: ''; display: block; height: 10px; width: auto;
+      clear: both; content: ''; display: block; height: 18px; width: auto;
    }
    .float-view .content-page hr {
-      border-color: @lines; clear: left; float: left; width: 54%;
+      border-color: @lines; clear: left; float: left; width: 50%;
    }
    .float-view .content-page ol li, .float-view .content-page ul li {
       clear: left; float: left; margin-left: 30px;
    }
    .float-view .content-page ol li p, .float-view .content-page ul li p {
       background-color: white; clear: right; float: left;
-      margin-left: 1.5%; margin-right: 1.5%; width: auto;
+      margin-left: 18px; margin-right: 18px; width: auto;
    }
    .float-view .content-page ol li pre, .float-view .content-page ul li pre {
       -khtml-box-sizing: border-box; -moz-box-sizing: border-box;
       -webkit-box-sizing: border-box; box-sizing: border-box;
-      margin-right: 1.5%; width: auto;
+      clear: left; float: left; margin-right: 18px; width: auto;
    }
    .float-view .content-page p {
-      background-color: white; clear: left; float: left;
-      margin: 0 18px 18px 0; min-width: 450px; width: 52.5%;
+      background-color: white; border-right: 15px solid white;
+      clear: left; float: left; margin-bottom: 18px; margin-top: 0;
+      width: 52.5%;
    }
    .float-view .content-page p.toplink {
       background-color: transparent; margin-bottom: 0; margin-top: -23px;
       text-align: right;
   }
-   .float-view .content-page pre {
+   .float-view .content-page > article > pre {
       border: none; border-left: 5px solid @contrast; clear: right;
       float: left; margin: 0 0 9px 0;
    }
    .float-view .content-page table {
       background-color: white; clear: left; float: left;
-      margin-left: 1.5%; margin-right: 18px; white-space: normal;
-      width: 52.5%;
+      margin-left: 18px; margin-right: 18px; white-space: normal;
+      width: 50%;
    }
    .float-view .content-page table pre, .float-view .content-page table code {
       white-space: normal;
    }
    .float-view .content-page .page-header,
-   .float-view .content-page ul,
-   .float-view .content-page ol,
    .float-view .content-page dl,
+   .float-view .content-page ol,
+   .float-view .content-page ul,
    .float-view .content-page h2,
    .float-view .content-page h3,
    .float-view .content-page h4,
    .float-view .content-page h5,
    .float-view .content-page h6 {
-      background-color: white; clear: left; float: left;
-      margin: 0 18px 18px 0; min-width: 450px; width: 52.5%;
+      background-color: white; border-right: 15px solid white;
+      clear: left; float: left; margin-bottom: 18px; min-width: 400px;
+      width: 52.5%;
    }
    .float-view .content-page .page-header:before,
    .float-view .content-page ul:before,

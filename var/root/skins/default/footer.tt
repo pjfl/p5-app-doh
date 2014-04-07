@@ -1,9 +1,9 @@
    <!-- Footer -->
    <script src="[% links.js %]highlight.min.js"></script>
    <script>hljs.initHighlightingOnLoad();</script>
-   <script src="[% links.js %]jquery.min.js"></script>
-   <script src="[% links.js %]plugins.min.js"></script>
-   <script src="[% links.js %]custom.js"></script>
+   <script src="[% links.js %]mootools.min.js"></script>
+   <script src="[% links.js %]classes.js"></script>
+   <script>var behaviour = new Behaviour( {} );</script>
 [% IF config.google_analytics -%]
    <script>
       ( function( w, d, t, s, f) {

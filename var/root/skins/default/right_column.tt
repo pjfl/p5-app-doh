@@ -24,16 +24,15 @@
                   <form action="[% links.req_uri %]?edit=1"
                        enctype="application/x-www-form-urlencoded"
                         method="post" name="edit">
-                     <textarea class="editor autosize"
-                                cols="80" id="markdown-editor" name="content"
-                                rows="40">[% page.content | html %]</textarea>
+                     <textarea class="editor autosize" id="markdown-editor"
+                             name="content">[% page.content | html %]</textarea>
                      <br>
                      <button class="btn btn-submit" name="_method" type="submit"
                              value="save">[% loc( 'Save' ) %]</button>
                   </form>
                </div>
 [%    ELSE -%]
-      [%- page.content | eval %]
+            [% page.content | eval %]
 [%    END -%]
             </article>
 [% END -%]
