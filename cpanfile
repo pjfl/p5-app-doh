@@ -24,6 +24,7 @@ requires "perl" => "5.010001";
 
 on 'build' => sub {
   requires "Module::Build" => "0.4004";
+  requires "Test::Warnings" => "0.014";
   requires "version" => "0.88";
 };
 

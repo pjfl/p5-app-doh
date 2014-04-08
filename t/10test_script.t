@@ -20,16 +20,14 @@ use Test::Requires "${perl_ver}";
 use_ok 'App::Doh::Server';
 
 my $self  = App::Doh::Server->new;
-my $model = $self->doc_model;
+my $model = $self->models->{docs};
 my $tree  = $model->docs_tree;
 
-ok exists $tree->{Getting_Started}, 'Creates docs tree';
+ok exists $tree->{en}->{tree}->{Getting_Started}, 'Creates docs tree';
 
 my $req   = App::Doh::Request->new( $self->usul, 'Getting_Started' );
 my $stash = $model->get_stash( $req );
-my $res   = $self->html_view->render( $req, $stash );
-
-is $model->docs_url, 'Getting_Started', 'Docs url';
+my $res   = $self->views->{html}->serialize( $req, $stash );
 
 #$self->usul->dumper( $req );
 #$self->usul->dumper( $stash );

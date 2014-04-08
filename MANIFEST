@@ -52,11 +52,10 @@ var/root/img/favicon-navy.png
 var/root/img/favicon-red.png
 var/root/img/favicon.png
 var/root/img/fork-me.png
-var/root/js/custom.js
+var/root/js/classes.js
 var/root/js/highlight.min.js
-var/root/js/jquery.min.js
 var/root/js/less.min.js
-var/root/js/plugins.min.js
+var/root/js/mootools.min.js
 var/root/less/import/theme-base.less
 var/root/less/theme-blue.less
 var/root/less/theme-green.less

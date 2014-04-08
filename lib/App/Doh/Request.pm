@@ -37,7 +37,7 @@ has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
 has 'path'     => is => 'lazy', isa => SimpleStr,
    builder     => sub {
-      my $v    =  $_[ 0 ]->env->{ 'PATH_INFO' };
+      my $v    =  $_[ 0 ]->env->{ 'PATH_INFO' } // '/';
          $v    =~ s{ \A / }{}mx; $v =~ s{ \? .* \z }{}mx; $v };
 
 has 'query'    => is => 'lazy', isa => SimpleStr,

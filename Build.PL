@@ -11,6 +11,7 @@ my $distname = 'App-Doh'; (my $name = $distname) =~ s{ - }{::}gmx;
 my $prereqs  = {
   'build_requires' => {
     'Module::Build' => '0.4004',
+    'Test::Warnings' => '0.014',
     'version' => '0.88'
   },
   'configure_requires' => {
