@@ -37,7 +37,9 @@
             <!-- Links -->
             <div class="well well-sidebar">
 [%    IF ! page.editing && page.mode != 'static' -%]
-               <a class="fade tips" href="[% links.req_uri %]?edit=1" title="Edit the markdown for this page">[% loc( 'Edit' ) %]</a>
+               <a class="fade tips" href="[% links.req_uri %]?edit=1" title="Edit the markdown for this page">[% loc( 'Edit Markdown' ) %]</a>
+               <br>
+               <a class="fade tips" href="[% uri_for( 'create' ) %]" title="Create File">[% loc( 'Create File' ) %]</a>
                <br>
 [%    END -%]
 [%    FOREACH link = config.links -%]

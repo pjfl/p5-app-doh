@@ -2,33 +2,31 @@ Highlight.js highlights syntax in code examples on blogs, forums and in fact on 
 
 **Perl**
 
-	# loads object
-	sub load
-	{
-	  my $flds = $c->db_load($id,@_) || do {
-	    Carp::carp "Can`t load (class: $c, id: $id): '$!'"; return undef
-	  };
-	  my $o = $c->_perl_new();
-	  $id12 = $id / 24 / 3600;
-	  $o->{'ID'} = $id12 + 123;
-	  #$o->{'SHCUT'} = $flds->{'SHCUT'};
-	  my $p = $o->props;
-	  my $vt;
-	  $string =~ m/^sought_text$/;
-	  $items = split //, 'abc';
-	  for my $key (keys %$p)
-	  {
-	    if(${$vt.'::property'}) {
-	      $o->{$key . '_real'} = $flds->{$key};
-	      tie $o->{$key}, 'CMSBuilder::Property', $o, $key;
-	    }
-	  }
-	  $o->save if delete $o->{'_save_after_load'};
-	  return $o;
+	sub _build__usul {
+	   my $self   = shift;
+	   my $myconf = $self->config;
+	   my $attr   = { config => {}, config_class => $self->config_class, };
+	   my $conf   = $attr->{config};
+
+	   $conf->{appclass} = $self->appclass;
+	   $conf->{name    } = app_prefix   $conf->{appclass};
+	   $conf->{home    } = find_apphome $conf->{appclass}, $myconf->{home};
+	   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home};
+
+	   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
+
+	   $bootconf->inflate_paths( $bootconf->projects );
+
+	   my $port    = $ENV{DOH_SERVER_PORT} || $bootconf->port;
+	   my $docs    = $bootconf->projects->{ $port } || $bootconf->docs_path;
+	   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
+
+	   $conf->{cfgfiles } = get_cfgfiles $conf->{appclass}, $cfgdirs;
+	   $conf->{file_root} = $docs;
+
+	   return Class::Usul->new( $attr );
 	}
 
-	=head1 NAME
-	POD till the end of file
 
 **Python**
 
@@ -2159,4 +2157,3 @@ Custom markup + TAB replacement
 	<span style="background:yellow">	</span>count(x)
 		if x == 3:
 		<span style="background:yellow">	</span>count(x + 1)
-

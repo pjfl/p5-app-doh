@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Started to add create screen
           - Switched from jQuery to Mootools. Autosize textarea works
           - Made README.md a copy of Getting Started
           - Updated dependencies
