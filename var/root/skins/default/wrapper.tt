@@ -1,3 +1,4 @@
+[% IF page.content_only; content; ELSE -%]
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,29 +9,30 @@
    <meta name="author" content="[% page.author %]">
    <meta name="apple-mobile-web-app-capable" content="yes" />
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-[% IF config.colours.0 -%]
+[%    IF config.colours.0 -%]
    <link href="[% links.images %]favicon.png" rel="icon" type="image/png">
-[% ELSE -%]
+[%    ELSE -%]
    <link href="[% links.images %]favicon-[% prefs.theme %].png"
           rel="icon" type="image/png">
-[% END -%]
-[% IF config.font -%]
-   <link href="[% config.font %]" rel="stylesheet" type="text/css">
-[% END -%]
-[% IF config.colours.0 -%]
-   <style type="text/less">
-[%    FOREACH colour = config.colours -%]
-      @[% colour.key %]: [% colour.value %];
 [%    END -%]
+[%    IF config.font -%]
+   <link href="[% config.font %]" rel="stylesheet" type="text/css">
+[%    END -%]
+[%    IF config.colours.0 -%]
+   <style type="text/less">
+[%       FOREACH colour = config.colours -%]
+      @[% colour.key %]: [% colour.value %];
+[%       END -%]
       @import "[% links.less %]import/theme-base.less";
    </style>
    <script src="[% links.js %]less.min.js"></script>
-[% ELSE -%]
+[%    ELSE -%]
    <link href="[% links.css %]theme-[% prefs.theme %].css"
           rel="stylesheet" type="text/css">
-[% END -%]
+[%    END -%]
 </head>
 <body>
    [% content -%]
 </body>
 </html>
+[% END -%]

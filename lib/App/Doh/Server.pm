@@ -6,6 +6,7 @@ use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
 use App::Doh::Request;
 use App::Doh::View::HTML;
+use App::Doh::View::XML;
 use Class::Usul;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( app_prefix find_apphome get_cfgfiles throw );
@@ -34,6 +35,7 @@ has '_models' => is => 'lazy', isa => HashRef[Object], reader => 'models',
 has '_views'  => is => 'lazy', isa => HashRef[Object], reader => 'views',
    builder    => sub { {
       'html'  => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
+      'xml'   => App::Doh::View::XML->new ( builder => $_[ 0 ]->usul ),
    } };
 
 has '_usul'   => is => 'lazy', isa => BaseType,
@@ -91,7 +93,8 @@ around 'to_psgi_app' => sub {
             httponly => TRUE,          path        => $point,
             secret   => $conf->secret, session_key => 'doh_session';
          enable '+App::Doh::Auth::Htpasswd',
-            file_root => $conf->file_root, params => [ 'edit' ];
+            file_root => $conf->file_root,
+            params    => [ qw( create delete edit rename ) ];
          enable_if { $debug } 'Debug';
          $app;
       };
@@ -100,14 +103,26 @@ around 'to_psgi_app' => sub {
 
 # Public methods
 sub dispatch_request {
+   sub (POST + /create + ?*) {
+      return shift->_execute( qw( html docs create_file ), @_ );
+   },
+   sub (GET  + /create + ?*) {
+      return shift->_execute( qw( xml  docs create_file_form ), @_ );
+   },
    sub (GET  + /help | /help/** + ?*) {
-      return shift->_execute( qw( html help get_stash ), @_ );
+      return shift->_execute( qw( html help content_from_pod ), @_ );
+   },
+   sub (POST + /rename + ?*) {
+      return shift->_execute( qw( html docs rename_file), @_ );
+   },
+   sub (GET  + /rename + ?*) {
+      return shift->_execute( qw( xml  docs rename_file_form), @_ );
    },
    sub (POST + / | /** + ?*) {
-      return shift->_execute( qw( html docs update_file ), @_ );
+      return shift->_execute( qw( html docs file_action ), @_ );
    },
    sub (GET  + / | /** + ?*) {
-      return shift->_execute( qw( html docs get_stash ), @_ );
+      return shift->_execute( qw( html docs content_from_file ), @_ );
    };
 }
 
@@ -116,7 +131,11 @@ sub _execute {
    my ($self, $view, $model, $method, @args) = @_; my $res;
 
    try {
-      my $req   = App::Doh::Request->new( $self->usul, @args );
+      my $req = App::Doh::Request->new( $self->usul, @args );
+
+      $method =~ m{ _action \z }mx
+         and $method = $self->_modify_action( $req, $method );
+
       my $stash = $self->models->{ $model }->$method( $req );
 
       exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
@@ -124,16 +143,35 @@ sub _execute {
       $res or $res = $self->views->{ $view }->serialize( $req, $stash )
            or throw error => 'View [_1] returned false', args => [ $view ];
    }
-   catch { $res = __internal_server_error( $_ ) };
+   catch { $res = $self->_internal_server_error( $_ ) };
 
    return $res;
+}
+
+sub _internal_server_error {
+   my ($self, $e) = @_; my $msg = "${e}"; chomp $msg;
+
+   $self->log->error( $msg ); $msg = "Error: ${msg}\r\n";
+
+   return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $msg ] ];
+}
+
+sub _modify_action {
+   my ($self, $req, $method) = @_;
+
+   my $action = $req->body->param->{_method} || NUL;
+
+   $action and $action = lc "_${action}" and $action =~ s{ \s }{_}gmx;
+   $method =~ s{ _action \z }{$action}mx;
+
+   return $method;
 }
 
 sub _redirect {
    my ($self, $req, $stash) = @_;
 
+   my $code     = $stash->{code    } || HTTP_FOUND;
    my $redirect = $stash->{redirect};
-   my $code     = $redirect->{code} || HTTP_FOUND;
    my $message  = $redirect->{message};
 
    $message and $req->session->{status_message} = $req->loc( @{ $message } )
@@ -143,12 +181,6 @@ sub _redirect {
 }
 
 # Private functions
-sub __internal_server_error {
-   my $e = shift; my $message = "Error: ${e}\r\n";
-
-   return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
-}
-
 sub __plain_header {
    return [ 'Content-Type', 'text/plain' ];
 }

@@ -26,6 +26,9 @@ has 'common_links'     => is => 'ro',   isa => ArrayRef,
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'css/';
 
+has 'default_content'  => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => 'Page intentionally created blank';
+
 has 'description'      => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'docs_path'        => is => 'lazy', isa => Directory,
@@ -72,7 +75,8 @@ has 'mount_point'      => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/';
 
 has 'no_index'         => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( .git .htpasswd .svn app-doh.json ) ] };
+   builder             => sub {
+      [ qw( .git .htpasswd .mtime .svn app-doh.json ) ] };
 
 has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
@@ -183,6 +187,10 @@ in the HTML templates
 
 A non empty simple string that defaults to F<css/>. Relative URI path
 that locates the static CSS files
+
+=item C<default_content>
+
+The string of text that is the content of any new markdown files
 
 =item C<description>
 

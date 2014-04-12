@@ -8,7 +8,7 @@ use Class::Usul::Functions qw( find_source );
 use Class::Usul::Types     qw( ArrayRef );
 use File::DataClass::IO;
 
-extends q(App::Doh);
+extends q(App::Doh::Model);
 with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
@@ -35,12 +35,14 @@ has 'navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
 };
 
 # Public methods
-sub get_stash {
+sub content_from_pod {
    my ($self, $req) = @_;
 
-   return { nav      => $self->navigation,
-            page     => $self->load_page( $req ),
-            template => 'documentation', };
+   my $stash = $self->get_stash( $req, $self->load_page( $req ) );
+
+   $stash->{nav} = $self->navigation; $stash->{template} = 'documentation';
+
+   return $stash;
 }
 
 sub load_page {

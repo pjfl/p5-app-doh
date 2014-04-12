@@ -7,9 +7,13 @@ use Moo::Role;
 requires qw( config get_stash );
 
 around 'get_stash' => sub {
-   my ($orig, $self, $req) = @_; my $stash = $orig->( $self, $req );
+   my ($orig, $self, $req, @args) = @_;
 
-   my $conf = $self->config; $stash->{links}->{req_uri} = $req->uri;
+   my $stash = $orig->( $self, $req, @args );
+   my $conf  = $self->config;
+
+   $stash->{links}->{req_uri } = $req->uri;
+   $stash->{links}->{base_uri} = $req->base;
 
    for (@{ $conf->common_links }) {
       $stash->{links}->{ $_ } = $req->uri_for( $conf->$_() );

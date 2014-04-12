@@ -33,23 +33,11 @@
             </li>
 [% END -%]
             </ul>
-[% IF config.links.0 || config.twitter.0 -%]
-            <!-- Links -->
             <div class="well well-sidebar">
-[%    IF ! page.editing && page.mode != 'static' -%]
-               <a class="fade tips" href="[% links.req_uri %]?edit=1" title="Edit the markdown for this page">[% loc( 'Edit Markdown' ) %]</a>
-               <br>
-               <a class="fade tips" href="[% uri_for( 'create' ) %]" title="Create File">[% loc( 'Create File' ) %]</a>
-               <br>
-[%    END -%]
-[%    FOREACH link = config.links -%]
-               <a class="fade" href="[% link.url | eval %]" target="_blank">
-                  [% link.name | eval %]</a>
-               <br>
-[%    END -%]
-            </div>
-            <div class="well well-sidebar">
-               <form action="[% links.req_uri %]" enctype="application/x-www-form-urlencoded" method="get" name="preferences">
+               <form action="[% links.req_uri %]"
+                    enctype="application/x-www-form-urlencoded"
+                     method="get" name="preferences">
+                  <input name="mode" type="hidden" value="[% page.mode %]">
                   <select id="code_blocks" name="code_blocks">
                      <option [% IF prefs.code_blocks == 1;
                                    'selected="selected"'; ELSE; ''; END %]
@@ -61,8 +49,47 @@
                                    'selected="selected"'; ELSE; ''; END %]
                         value="3">Hide Code Blocks</option>
                   </select>
-                  <input name="mode" type="hidden" value="[% page.mode %]">
                </form>
+            </div>
+[% IF config.links.0 || config.twitter.0 -%]
+            <!-- Links -->
+            <div class="well well-sidebar">
+[%    IF ! page.editing && page.mode != 'static' -%]
+[%       hint  = loc( 'Hint' ) -%]
+[%       title = hint _ ' ~ ' _ loc( 'Create a new markdown file' ) -%]
+[%       text  = loc( 'Create' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="create-file">[% text %]</a></span>
+               <br>
+[%       title = hint _ ' ~ ' _ loc( 'Rename this markdown file' ) -%]
+[%       text  = loc( 'Rename' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="rename-file">[% text %]</a></span>
+               <br>
+[%       title = hint _ ' ~ ' _ loc( 'Edit the markdown for this page' ) -%]
+[%       text  = loc( 'Update' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="fade"
+                      href="[% links.req_uri %]?edit=1">[% text %]</a></span>
+               <br>
+[%       title = hint _ ' ~ ' _ loc( 'Delete this markdown file' ) -%]
+[%       text  = loc( 'Delete' ) %]
+               <form action="[% links.req_uri %]?delete=1"
+                    enctype="application/x-www-form-urlencoded"
+                     method="post" name="markdown">
+                  <span class="tips" title="[% title %]">
+                     <button class="btn btn-subit fade"
+                              name="_method" type="submit"
+                             value="delete">[% text %]</button></span>
+               </form>
+[%    END -%]
+[%    FOREACH link = config.links -%]
+               <a class="fade" href="[% link.url | eval %]" target="_blank">
+                  [% link.name | eval %]</a>
+               <br>
+[%    END -%]
             </div>
 [%    IF config.twitter.0 -%]
             <!-- Twitter -->

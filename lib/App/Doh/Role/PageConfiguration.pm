@@ -16,6 +16,7 @@ around 'load_page' => sub {
    $page->{ $_ } = $conf->$_() for (qw( author description keywords ));
 
    $page->{application_version} = $App::Doh::VERSION;
+   $page->{language           } = (split m{ _ }mx, $req->locale)[ 0 ];
    $page->{status_message     } = delete $req->session->{status_message} // NUL;
    return $page;
 };

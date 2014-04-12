@@ -7,8 +7,9 @@ use Moo::Role;
 requires qw( config get_stash );
 
 around 'get_stash' => sub {
-   my ($orig, $self, $req) = @_; my $stash = $orig->( $self, $req );
+   my ($orig, $self, $req, @args) = @_;
 
+   my $stash  = $orig->( $self, $req, @args );
    my $params = $req->params;
    my $sess   = $req->session;
    my $conf   = $self->config;

@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Refactored docs tree to cache and recalculate on update
+          - Added XML view
           - Added Test::Warnings as a dependenct to fix P:M:LogErrors
           - Started to add create screen
           - Switched from jQuery to Mootools. Autosize textarea works

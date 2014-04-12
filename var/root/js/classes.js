@@ -17,11 +17,13 @@ Date.extend( 'nowUTC', function() { // Calculate UTC
 Date.implement( {
    dayFraction: function() { // Elapsed time since SOD in thousandths of a day
       return ( this.getHours() * 3600 + this.getMinutes() * 60
-               + this.getSeconds() ) /  86.4;
+               + this.getSeconds() ) / 86.4;
    },
 
    swatchTime: function() {
-      return Number.from( Date.nowMET().dayFraction() ).round( 2 );
+      var met_day_fraction = Date.nowMET().dayFraction();
+
+      return Number.from( met_day_fraction ).format( { decimals: 2 } );
    }
 } );
 
@@ -118,8 +120,12 @@ String.implement( {
 var Behaviour = new Class( {
    Implements: [ Events, Options ],
 
+   config: {
+      anchors: {}
+   },
+
    options           : {
-      defaultURL     : null,
+      baseURL        : null,
       firstField     : null,
       popup          : false,
       statusUpdPeriod: 4320,
@@ -185,7 +191,7 @@ var Behaviour = new Class( {
       this.window       = new WindowUtils( {
          context        : this,
          target         : opt.target,
-         url            : opt.defaultURL } );
+         url            : opt.baseURL } );
       this.replacements = new Replacements( { context: this } );
       this.linkFade     = new LinkFader( { context: this } );
       this.tips         = new Tips( {
@@ -250,6 +256,68 @@ var Behaviour = new Class( {
       var swatch_time = Date.swatchTime();
 
       window.defaultStatus = 'w: ' + w + ' h: ' + h + ' @' + swatch_time;
+   }
+} );
+
+var Dialog = new Class( {
+   Implements: [ Options ],
+
+   Binds: [ '_keyup' ],
+
+   options: {
+      klass   : 'dialog',
+      maskOpts: {},
+      title   : 'Options',
+      useMask : true,
+   },
+
+   initialize: function( el, body, options ) {
+      this.setOptions( options ); this.attach( this.create( el, body ) );
+   },
+
+   attach: function( el ) {
+      el.addEvent( 'click', function( ev ) {
+         ev.stop(); this.hide() }.bind( this ) );
+      window.addEvent( 'keyup', this._keyup );
+   },
+
+   create: function( el, body ) {
+      var opt = this.options;
+
+      if (opt.useMask) this.mask = new Mask( el, opt.maskOpts );
+
+      this.parent = this.mask ? this.mask.element : $( document.body );
+      this.dialog = new Element( 'div', { 'class': opt.klass } ).hide()
+          .inject( this.parent );
+
+      var title   = new Element( 'div', { 'class': opt.klass + '-title' } )
+          .appendText( opt.title ).inject( this.dialog );
+
+      this.close  = new Element( 'span', { 'class': opt.klass + '-close' } )
+          .appendText( 'x' ).inject( title );
+
+      body.addClass( opt.klass + '-body' ).inject( this.dialog );
+      return this.close;
+   },
+
+   hide: function() {
+      this.visible = false; this.dialog.hide(); if (this.mask) this.mask.hide();
+   },
+
+   position: function() {
+      this.dialog.position( { relativeTo: this.parent } );
+   },
+
+   show: function() {
+      if (this.mask) this.mask.show();
+
+      this.position(); this.dialog.show(); this.visible = true;
+   },
+
+   _keyup: function( ev ) {
+      ev = new Event( ev ); ev.stop();
+
+      if (this.visible && (ev.key == 'esc')) this.hide();
    }
 } );
 
@@ -370,21 +438,9 @@ var LoadMore = new Class( {
    },
 
    _response: function( text, xml ) {
-      var doc = xml.documentElement, html = this._unpack( doc );
+      var doc = xml.documentElement; var html = this._unpack_items( doc );
 
       $( doc.getAttribute( 'id' ) ).set( 'html', html.unescapeHTML() );
-
-      if (this.onComplete) this.onComplete.call( this.context, doc, html );
-   },
-
-   _unpack: function( doc ) {
-      var html = '';
-
-      $$( doc.getElementsByTagName( 'items' ) ).each( function( item ) {
-         for (var i = 0, il = item.childNodes.length; i < il; i++) {
-            html += item.childNodes[ i ].nodeValue;
-         }
-      } );
 
       $$( doc.getElementsByTagName( 'script' ) ).each( function( item ) {
          var text = '';
@@ -394,6 +450,18 @@ var LoadMore = new Class( {
          }
 
          if (text) Browser.exec( text );
+      } );
+
+      if (this.onComplete) this.onComplete.call( this.context, doc, html );
+   },
+
+   _unpack_items: function( doc ) {
+      var html = '';
+
+      $$( doc.getElementsByTagName( 'items' ) ).each( function( item ) {
+         for (var i = 0, il = item.childNodes.length; i < il; i++) {
+            html += item.childNodes[ i ].nodeValue;
+         }
       } );
 
       return html;
@@ -541,14 +609,14 @@ var getText = function( el ) {
    return (el.get( 'rel' ) || el.get( 'href' ) || '').replace( 'http://', '' );
 };
 
-var read = function( opt, el ) {
+var read = function( el, opt ) {
    return opt ? (typeOf( opt ) == 'function' ? opt( el ) : el.get( opt )) : '';
 };
 
 var storeTitleAndText = function( el, opt ) {
    if (el.retrieve( 'tip:title' )) return;
 
-   var title = read( opt.title, el ), text = read( opt.text, el );
+   var title = read( el, opt.title ), text = read( el, opt.text );
 
    if (title) {
       el.store( 'tip:native', title ); var pair = title.split( opt.separator );
@@ -828,6 +896,7 @@ var WindowUtils = new Class( {
 
       if (opt.target == 'top') this.placeOnTop();
 
+      this.dialogs = [];
       this.build();
    },
 
@@ -839,12 +908,33 @@ var WindowUtils = new Class( {
    logger: function( message ) {
       if (this.options.quiet) return;
 
-      message = 'mootools.js: ' + message;
+      message = 'formwidgets.js: ' + message;
 
       if (this.customLogFn) { this.customLogFn( message ) }
       else if (window.console && window.console.log) {
          window.console.log( message );
       }
+   },
+
+   modalDialog: function( href, options ) {
+      var opt = this.mergeOptions( options ), id = opt.name + '_dialog', dialog;
+
+      if (! (dialog = this.dialogs[ opt.name ])) {
+         var content = new Element( 'div', {
+            'id': id } ).appendText( 'Loading...' );
+
+         dialog = this.dialogs[ opt.name ]
+                = new Dialog( undefined, content, opt );
+      }
+
+      this.request( href, id, opt.value || '', opt.onComplete || function() {
+         this.rebuild(); dialog.show() } );
+
+      return dialog;
+   },
+
+   openWindow: function( href, options ) {
+      return new Browser.Popup( href, this.mergeOptions( options ) );
    },
 
    placeOnTop: function() {

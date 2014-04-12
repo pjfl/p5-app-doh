@@ -20,6 +20,7 @@
                </div>
 [%    END -%]
 [%    IF page.editing -%]
+               <br>
                <div class="container">
                   <form action="[% links.req_uri %]?edit=1"
                        enctype="application/x-www-form-urlencoded"
