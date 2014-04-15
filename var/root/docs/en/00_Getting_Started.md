@@ -15,15 +15,17 @@
 * Git / SVN friendly
 * Google analytics
 * Optional code float layout
-* Markdown editor
+* Markdown editor and file management
 * Multi-language support
 * Static site generator
 
 ## Acknowledgements
 
-I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it
-said "Fork Me" so I did. I also exchanged the PHP for Perl. Not a fan of
-Bootstrap so that went also.
+I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it said "Fork Me" so I did.
+
+## Differences
+
+I exchanged the PHP for [Perl](http://www.perl.org). Not a fan of Bootstrap so that went also. Prefer class based inheritance when JavaScript programming hence [Mootools](http://mootools.net/) not jQuery.
 
 ## Installation
 

@@ -63,7 +63,7 @@ has 'keywords'         => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'languages'        => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
    builder             => sub {
-      return [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ];
+      [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ];
    };
 
 has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
@@ -82,7 +82,8 @@ has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
    default             => 8085;
 
 has 'preferences'      => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( code_blocks float skin theme ) ] };
+   builder             => sub {
+      [ qw( code_blocks float skin theme use_flags ) ] };
 
 has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
 
@@ -108,6 +109,7 @@ has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'twitter'          => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
+has 'use_flags'        => is => 'ro',   isa => Bool, default => TRUE;
 
 has '_colours'         => is => 'ro',   isa => HashRef,
    builder             => sub { {} }, init_arg => 'colours';
@@ -154,6 +156,10 @@ App::Doh::Config - Defines the configuration file options and their defaults
 
 =head1 Description
 
+Each of the attributes defined here, plus the ones inherited from
+L<Class::Usul::Config::Programs>, can have their default value overriden
+by the value in the configuration file
+
 =head1 Configuration and Environment
 
 Defines the following attributes;
@@ -169,6 +175,11 @@ author value
 
 A simple string that defaults to null. The name of the image file used
 on the splash screen to represent the application
+
+=item C<code_blocks>
+
+An integer which defaults to 1. Can be 1 (shown code blocks), 2 (show
+code blocks inline), or 3 (hide code blocks)
 
 =item C<colours>
 
@@ -278,9 +289,10 @@ when started by the control daemon
 
 =item C<preferences>
 
-An array reference that defaults to C<[ float skin theme ]>. List of
-attributes that can be specified as query parameters in URIs.  Their
-values are persisted between requests stored in cookie
+An array reference that defaults to
+C<[ code_blocks float skin theme use_flags ]>. List of attributes that can be
+specified as query parameters in URIs.  Their values are persisted between
+requests stored in cookie
 
 =item C<projects>
 
@@ -324,6 +336,12 @@ project's title as displayed in the title bar of all pages
 
 An array reference that defaults to an empty array reference. List of
 Twitter follow buttons
+
+=item C<use_flags>
+
+Boolean which defaults to C<TRUE>. Display the language code, which is
+derived from browsers accept language header value, as a national flag. If
+false display as text
 
 =back
 

@@ -1,10 +1,32 @@
 /* Green */
 /* Mixins */
-.box-sizing {
+.border-box {
   -khtml-box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+}
+.content-box {
+  -khtml-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+}
+.serif-light {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 100;
+}
+.serif-book {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 300;
+}
+.serif-regular {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 400;
+}
+.serif-bold {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 700;
 }
 /*  Elements - Reset styling */
 a,
@@ -309,11 +331,12 @@ h6 {
 }
 /* 16 18 */
 hr {
+  border-bottom: 1px solid;
+  border-top: 1px solid;
   -khtml-box-sizing: content-box;
   -moz-box-sizing: content-box;
   -webkit-box-sizing: content-box;
-  border-bottom: 1px solid;
-  border-top: 1px solid;
+  box-sizing: content-box;
   height: 0;
   margin: 8px 0;
   width: auto;
@@ -437,9 +460,9 @@ table {
 }
 table tr th,
 table tr td {
-  border-top: 1px solid #adcb83;
-  border-left: 1px solid #adcb83;
   border-color: #adcb83 !important;
+  border-left: 1px solid #adcb83;
+  border-top: 1px solid #adcb83;
   line-height: 18px;
   padding: 6px;
   text-align: left;
@@ -464,6 +487,12 @@ table tr td:last-child {
   background-color: #92c86a;
   border: none;
   padding: 9px 9px;
+}
+.btn.btn-sidebar.collapse-bar {
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
 }
 .btn.btn-sidebar .icon-bar {
   background-color: #000000;
@@ -517,7 +546,7 @@ table tr td:last-child {
   float: left;
   max-width: 100%;
   min-height: 100%;
-  padding: 9px 36px 9px 18px;
+  padding: 9px 18px 9px 18px;
   position: relative;
 }
 .container {
@@ -543,7 +572,7 @@ table tr td:last-child {
   height: 100%;
 }
 .content-page article {
-  max-width: 700px;
+  max-width: 600px;
   min-width: 400px;
   padding-bottom: 18px;
 }
@@ -552,10 +581,8 @@ table tr td:last-child {
   padding: 9px;
 }
 .content-page blockquote {
-  clear: both;
-  display: inline-block;
-  float: left;
   margin-top: 0;
+  margin-bottom: 0;
 }
 .content-page code {
   font-weight: 700;
@@ -665,9 +692,12 @@ table tr td:last-child {
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   border-radius: 5px;
+  font-size: 12px;
   height: 30px;
+  line-height: 26px;
   margin: 12px 0 12px 18px;
   padding: 3px;
+  text-transform: uppercase;
 }
 .footer {
   bottom: 0;
@@ -689,8 +719,6 @@ table tr td:last-child {
 }
 .hero-buttons.container-fluid .btn-hero.btn {
   border: 5px solid #000000;
-  font-family: 'Roboto Slab', serif;
-  font-weight: 700;
   font-size: 14px;
   line-height: 18px;
   -khtml-opacity: 0.8;
@@ -701,6 +729,8 @@ table tr td:last-child {
   filter: alpha(opacity=80);
   padding: 18px 36px;
   margin: 0 8px;
+  font-family: 'Roboto Slab', serif;
+  font-weight: 700;
   text-transform: uppercase;
 }
 .hero-buttons.container-fluid .btn-hero.btn:hover {
@@ -771,10 +801,10 @@ table tr td:last-child {
   list-style: none;
 }
 .homepage-footer.container-fluid .footer-nav li a {
-  font-family: 'Roboto Slab', serif;
   font-size: 18px;
-  font-weight: 700;
   line-height: 36px;
+  font-family: 'Roboto Slab', serif;
+  font-weight: 700;
 }
 .homepage-footer.container-fluid .footer-nav li a:hover {
   color: #569220;
@@ -791,9 +821,9 @@ table tr td:last-child {
   color: #000000;
 }
 .homepage-hero {
+  overflow: hidden;
   font-family: 'Roboto Slab', serif;
   font-weight: 700;
-  overflow: hidden;
 }
 .homepage-hero .homepage-image {
   margin-bottom: 18px;
@@ -843,11 +873,11 @@ table tr td:last-child {
   display: inline-block;
 }
 .navbar .navbar-inner .brand {
-  font-family: 'Roboto Slab', serif;
-  font-weight: 700;
   font-size: 24px;
   line-height: 36px;
   margin: 9px 0;
+  font-family: 'Roboto Slab', serif;
+  font-weight: 700;
 }
 .navbar .navbar-inner .navbar-text {
   color: #569220;
@@ -865,13 +895,13 @@ table tr td:last-child {
   border-bottom: 1px solid #adcb83;
   color: #000000;
   display: block;
-  font-family: 'Roboto Slab', serif;
   font-size: 16px;
-  font-weight: 400;
   height: 36px;
   line-height: 36px;
   overflow: hidden;
   padding: 0 18px;
+  font-family: 'Roboto Slab', serif;
+  font-weight: 400;
   width: auto;
 }
 .nav.nav-list li a:hover {
@@ -1018,22 +1048,6 @@ table tr td:last-child {
   display: none;
   padding: 9px 18px;
 }
-.roboto-slab.light {
-  font-family: 'Roboto Slab', serif;
-  font-weight: 100;
-}
-.roboto-slab.book {
-  font-family: 'Roboto Slab', serif;
-  font-weight: 300;
-}
-.roboto-slab.regular {
-  font-family: 'Roboto Slab', serif;
-  font-weight: 400;
-}
-.roboto-slab.bold {
-  font-family: 'Roboto Slab', serif;
-  font-weight: 700;
-}
 .row {
   overflow: hidden;
 }
@@ -1089,6 +1103,13 @@ table tr td:last-child {
   text-align: center;
   z-index: 13000;
 }
+.tips-defn {
+  color: #000;
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 4px 16px 16px 16px;
+}
 .tips-mark0 {
   border: 9px solid;
   border-color: transparent transparent #adcb83 #adcb83;
@@ -1109,13 +1130,6 @@ table tr td:last-child {
   width: 0;
   top: -14px;
 }
-.tips-defn {
-  color: #000;
-  display: block;
-  font-size: 12px;
-  line-height: 18px;
-  padding: 4px 16px 16px 16px;
-}
 .tips-term {
   color: Yellow;
   display: block;
@@ -1134,10 +1148,10 @@ table tr td:last-child {
 .well.well-sidebar a,
 .well.well-sidebar button {
   color: #569220;
-  font-family: 'Roboto Slab', serif;
   font-size: 14px;
-  font-weight: 400;
   line-height: 18px;
+  font-family: 'Roboto Slab', serif;
+  font-weight: 400;
 }
 .well.well-sidebar a:hover {
   text-decoration: none;
@@ -1151,7 +1165,7 @@ table tr td:last-child {
   margin-right: -20px;
 }
 /* Media queries */
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 820px) {
   /* Force table to not be like tables anymore */
   table,
   thead,
@@ -1207,7 +1221,7 @@ table tr td:last-child {
     content: attr(data-title);
   }
 }
-@media (max-width: 767px) {
+@media (max-width: 820px) {
   body {
     overflow-y: scroll;
   }
@@ -1216,6 +1230,9 @@ table tr td:last-child {
     height: auto;
     padding-top: 0;
     width: 100% !important;
+  }
+  .columns .right-column .content-page {
+    padding-right: 220px !important;
   }
   .hero-buttons.container-fluid .btn-hero.btn {
     display: block;
@@ -1230,25 +1247,8 @@ table tr td:last-child {
   .homepage-footer.container-fluid {
     padding: 0 20px;
   }
-  .navbar.navbar-fixed-top {
-    margin-left: 0;
-    margin-right: 0;
-  }
-  .navbar .navbar-inner {
-    padding: 6px 10px;
-  }
-  .navbar .navbar-inner .navbar-text {
-    font-size: 12px;
-    line-height: 18px;
-    margin: 9px 6px;
-  }
   .responsive-collapse {
-    display: block;
-  }
-}
-@media (min-width: 768px) and (max-width: 979px) {
-  .navbar.navbar-fixed-top {
-    position: fixed;
+    display: block !important;
   }
 }
 @media (max-width: 1149px) {
@@ -1282,8 +1282,10 @@ table tr td:last-child {
     width: 52.55%;
     z-index: -1;
   }
-  .float-view .content-page blockquote p {
-    margin-bottom: 18px;
+  .float-view .content-page blockquote {
+    clear: both;
+    display: inline-block;
+    float: left;
   }
   .float-view .content-page blockquote:before {
     clear: both;
@@ -1291,6 +1293,9 @@ table tr td:last-child {
     display: block;
     height: 18px;
     width: auto;
+  }
+  .float-view .content-page blockquote p {
+    margin-bottom: 18px;
   }
   .float-view .content-page hr {
     border-color: #adcb83;
@@ -1353,7 +1358,7 @@ table tr td:last-child {
     margin-left: 18px;
     margin-right: 18px;
     white-space: normal;
-    width: 50%;
+    max-width: 50%;
   }
   .float-view .content-page table pre,
   .float-view .content-page table code {

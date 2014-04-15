@@ -6,7 +6,6 @@ use namespace::sweep;
 use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( throw );
-use File::DataClass::IO;
 use File::DataClass::Types qw( HashRef Int Path Str );
 use Unexpected::Functions  qw( Unspecified );
 
@@ -42,7 +41,7 @@ sub create_file {
 
    $req->username ne 'unknown' or throw 'File creation not authorised';
 
-   my $node     = $self->_get_file_meta( $req );
+   my $node     = $self->_get_file_paths( $req );
    my $content  = $req->loc( $self->config->default_content );
    my $path     = $node->{path};
 
@@ -60,10 +59,10 @@ sub create_file_form {
    my ($self, $req) = @_;
 
    my $page  = {
+      meta       => { id => __get_or_throw( $req->params, 'id' ) },
       literal_js => [ "var form = document.forms[ 'create-file' ];",
                       "var f    = function() { form.pathname.focus() };",
-                      "f.delay( 100 );" ],
-      meta       => { id => __get_or_throw( $req->params, 'id' ) }, };
+                      "f.delay( 100 );" ], };
    my $stash = $self->get_stash( $req, $page );
 
    $stash->{template} = 'create-file';
@@ -71,12 +70,12 @@ sub create_file_form {
 }
 
 sub docs_tree {
-   my $self = shift; state $tree //= $self->_build_docs_tree;
+   my $self = shift; state $cache //= $self->_build_docs_tree;
 
-   $self->root_mtime->stat->{mtime} > $tree->{_mtime}
-      and $tree = $self->_build_docs_tree;
+   $self->root_mtime->stat->{mtime} > $cache->{_mtime}
+      and $cache = $self->_build_docs_tree;
 
-   return $tree;
+   return $cache;
 }
 
 sub file_delete {
@@ -84,14 +83,14 @@ sub file_delete {
 
    $req->username ne 'unknown' or throw 'Delete not authorised';
 
-   my $node     = $self->_find_node( $req, [ @{ $req->args } ] )
+   my $node     = $self->_find_node( $req->locale, [ @{ $req->args } ] )
       or throw 'Cannot find document tree node to delete';
    my $path     = $node->{path}; $path->unlink; $self->root_mtime->touch;
+   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
    my $rel_path = $path->abs2rel( $self->config->file_root );
    my $message  = [ 'File [_1] deleted by [_2]', $rel_path, $req->username ];
 
-   # TODO: Make the message visible on the index page
-   return { redirect => { location => $req->base, message => $message } };
+   return { redirect => { location => $location, message => $message } };
 }
 
 sub file_save {
@@ -99,9 +98,9 @@ sub file_save {
 
    $req->username ne 'unknown' or throw 'Update not authorised';
 
-   my $node     =  $self->_find_node( $req, [ @{ $req->args } ] )
+   my $node     =  $self->_find_node( $req->locale, [ @{ $req->args } ] )
       or throw 'Cannot find document tree node to update';
-   my $content  =  $req->body->param->{content};
+   my $content  =  __get_or_throw( $req->body->param, 'content' );
       $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
    my $path     =  $node->{path}; $path->println( $content ); $path->close;
    my $rel_path =  $path->abs2rel( $self->config->file_root );
@@ -135,42 +134,43 @@ sub iterator {
 sub load_page {
    my ($self, $req) = @_;
 
-   my $node = $self->_find_node( $req, [ @{ $req->args } ] );
-   my $tree = $self->_localised_tree( $req->locale )->{tree};
-   my $url  = $req->uri_for( $self->_docs_url( $req->locale ) );
-   my $home = exists $tree->{index} ? $req->uri_for( NUL ) : $url;
+   for my $locale ($req->locale, $self->config->locale) {
+      my $node = $self->_find_node( $locale, [ @{ $req->args } ] );
+      my $url  = $req->uri_for( $self->_docs_url( $locale ) );
+      my $home = $node ? $url : $req->uri_for( NUL );
 
-   $node and $node->{type} eq 'file' and return {
-      content      => $node->{path},
-      docs_url     => $url,
-      editing      => $req->params->{edit} // FALSE,
-      format       => $node->{format},
-      header       => $node->{title},
-      homepage_url => $home,
-      mode         => $req->params->{mode} // 'online',
-      mtime        => $node->{mtime},
-      title        => ucfirst $node->{name}, };
+      $node and $node->{type} eq 'file' and return {
+         content      => $node->{path},
+         docs_url     => $url,
+         editing      => $req->params->{edit} // FALSE,
+         format       => $node->{format},
+         header       => $node->{title},
+         homepage_url => $home,
+         mode         => $req->params->{mode} // 'online',
+         mtime        => $node->{mtime},
+         title        => ucfirst $node->{name},
+         url          => $node->{url}, };
+   }
 
-   my $title   = $req->loc( 'Not found' );
-   my $content = '> '.$req->loc( "Oh no. That page doesn't exist" )
-                 ."\n\n    Code 404\n\n";
-
-   return { content      => $content,
-            docs_url     => $url,
-            editing      => FALSE,
-            format       => 'markdown',
-            header       => $title,
-            homepage_url => $home,
-            mtime        => time,
-            title        => $title, };
+   return $self->_not_found( $req );
 }
 
 sub navigation {
-   my ($self, $req) = @_; my $ids = [ @{ $req->args } ];
+   my ($self, $req) = @_; state $cache //= {};
 
-   my $tree = $self->_localised_tree( $req->locale )->{tree};
+   my $locale = $self->config->locale;
+   my $tree   = $self->_localised_tree( $locale )->{tree};
+   my $lang   = __extract_lang( $locale );
+   my @ids    = @{ $req->args };
+   my $wanted = join '/', @ids;
+   my $list   = $cache->{ $lang.$wanted };
 
-   return __build_nav_list( $tree, $ids, (join '/', @{ $ids }), 0 );
+   (not $list or $tree->{_mtime} > $list->{mtime})
+      and $cache->{ $lang.$wanted } = $list
+         = { items => __build_nav_list( $tree, \@ids, $wanted, 0 ),
+             mtime => $tree->{_mtime}, };
+
+   return $list->{items};
 }
 
 sub rename_file {
@@ -178,11 +178,13 @@ sub rename_file {
 
    $req->username ne 'unknown' or throw 'File creation not authorised';
 
-   my $node     = $self->_find_node( $req, [ @{ $req->args } ] )
+   my $param    = $req->body->param;
+   my $old_path = [ split m{ / }mx, __get_or_throw( $param, 'old_path' ) ];
+   my $node     = $self->_find_node( $req->locale, $old_path )
       or throw 'Cannot find document tree node to rename';
-   my $new_node = $self->_get_file_meta( $req );
+   my $new_node = $self->_get_file_paths( $req );
 
-   $node->{path}->move( $new_node->{path} ); $self->root_mtime->touch;
+   $node->{path}->close->move( $new_node->{path} ); $self->root_mtime->touch;
 
    my $location = $req->uri_for( $new_node->{url} );
    my $rel_path = $node->{path}->abs2rel( $self->config->file_root );
@@ -195,10 +197,11 @@ sub rename_file_form {
    my ($self, $req) = @_;
 
    my $page  = {
+      meta       => { id => __get_or_throw( $req->params, 'id' ) },
+      old_path   => __get_or_throw( $req->params, 'val' ),
       literal_js => [ "var form = document.forms[ 'rename-file' ];",
                       "var f    = function() { form.pathname.focus() };",
-                      "f.delay( 100 );" ],
-      meta       => { id => __get_or_throw( $req->params, 'id' ) }, };
+                      "f.delay( 100 );" ], };
    my $stash = $self->get_stash( $req, $page );
 
    $stash->{template} = 'rename-file';
@@ -269,13 +272,13 @@ sub _docs_url {
 }
 
 sub _find_node {
-   my ($self, $req, $ids) = @_;
+   my ($self, $locale, $ids) = @_;
+
+   my $tree = $self->_localised_tree( $locale );
 
    $ids //= []; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
 
-   my $tree = $self->_localised_tree( $req->locale );
-
-   for my $node_id (map { $_ ? $_ : 'index' } @{ $ids }) {
+   for my $node_id (@{ $ids }) {
       $tree->{type} eq 'folder' and $tree = $tree->{tree};
       exists  $tree->{ $node_id } or return FALSE;
       $tree = $tree->{ $node_id };
@@ -284,18 +287,18 @@ sub _find_node {
    return $tree;
 }
 
-sub _get_file_meta {
+sub _get_file_paths {
    my ($self, $req) = @_;
 
-   my $pathname =  $req->body->param->{pathname};
+   my $pathname =  __get_or_throw( $req->body->param, 'pathname' );
       $pathname !~ m{ \. [m][k]?[d][n]? \z }mx and $pathname .= '.md';
    my @filepath =  map { __make_id_from( $_ ) }
    my @pathname =  split m{ / }mx, $pathname;
    my $id       =  pop @filepath;
    my $url      =  join '/', @filepath, $id;
-   my $parent   =  $self->_find_node( $req, [ @filepath ] );
-   my $lang     = (split m{ _ }mx, $req->locale)[ 0 ];
+   my $lang     =  __extract_lang( $req->locale );
    my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
+   my $parent   =  $self->_find_node( $req->locale, [ @filepath ] );
 
    ($parent and $parent->{type} eq 'folder')
        or throw error => 'Parent folder [_1] does not exist',
@@ -324,6 +327,24 @@ sub _localised_tree {
    $lang and defined $tree->{ $lang } and return $tree->{ $lang };
 
    return $tree->{ LANG };
+}
+
+sub _not_found {
+   my ($self, $req) = @_;
+
+   my $home    = $req->uri_for( NUL );
+   my $title   = $req->loc( 'Not found' );
+   my $content = '> '.$req->loc( "Oh no. That page doesn't exist" )
+                 ."\n\n    Code 404\n\n";
+
+   return { content      => $content,
+            docs_url     => $home,
+            editing      => FALSE,
+            format       => 'markdown',
+            header       => $title,
+            homepage_url => $home,
+            mtime        => time,
+            title        => $title, };
 }
 
 # Private functions

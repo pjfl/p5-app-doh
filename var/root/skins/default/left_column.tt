@@ -2,7 +2,7 @@
       <!-- For Mobile -->
       <div class="left-column article-tree span2p5">
          <div class="responsive-collapse">
-            <button class="btn btn-sidebar"
+            <button class="btn btn-sidebar collapse-bar"
                        id="menu-spinner-button" type="button">
                <span class="icon-bar"></span>
                <span class="icon-bar"></span>
@@ -69,18 +69,18 @@
                         id="rename-file">[% text %]</a></span>
                <br>
 [%       title = hint _ ' ~ ' _ loc( 'Edit the markdown for this page' ) -%]
-[%       text  = loc( 'Update' ) -%]
+[%       text  = loc( 'Edit' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="fade"
                       href="[% links.req_uri %]?edit=1">[% text %]</a></span>
                <br>
 [%       title = hint _ ' ~ ' _ loc( 'Delete this markdown file' ) -%]
 [%       text  = loc( 'Delete' ) %]
-               <form action="[% links.req_uri %]?delete=1"
+               <form action="[% links.req_uri %]?auth=1"
                     enctype="application/x-www-form-urlencoded"
                      method="post" name="markdown">
                   <span class="tips" title="[% title %]">
-                     <button class="btn btn-subit fade"
+                     <button class="btn btn-subit fade submit" id="delete-file"
                               name="_method" type="submit"
                              value="delete">[% text %]</button></span>
                </form>

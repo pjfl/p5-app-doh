@@ -1,6 +1,7 @@
-<form action="[% links.req_uri %]?rename=1"
+<form action="[% links.req_uri %]?auth=1"
      enctype="application/x-www-form-urlencoded"
       method="post" name="rename-file">
+   <input  name="old_path" type="hidden" value="[% page.old_path %]">
    <input  class="pathname" name="pathname" type="textfield">
    <button class="btn btn-submit" name="_method" type="submit"
            value="rename">[% loc( 'Rename' ) %]</button>

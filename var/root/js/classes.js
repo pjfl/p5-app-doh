@@ -1,3 +1,5 @@
+// Perl Artistic license except where stated otherwise
+
 Date.extend( 'nowMET', function() { // Calculate Middle European Time UTC + 1
    var now = new Date();
 
@@ -127,6 +129,7 @@ var Behaviour = new Class( {
    options           : {
       baseURL        : null,
       firstField     : null,
+      formName       : null,
       popup          : false,
       statusUpdPeriod: 4320,
       target         : null
@@ -192,6 +195,9 @@ var Behaviour = new Class( {
          context        : this,
          target         : opt.target,
          url            : opt.baseURL } );
+      this.submit       = new SubmitUtils( {
+         context        : this,
+         formName       : opt.formName } );
       this.replacements = new Replacements( { context: this } );
       this.linkFade     = new LinkFader( { context: this } );
       this.tips         = new Tips( {
@@ -220,7 +226,7 @@ var Behaviour = new Class( {
    resize: function() {
       var nav, ribbon = $( 'github-ribbon' ), w = window.getWidth();
 
-      if (w >= 768) {
+      if (w >= 820) {
          if (ribbon) ribbon.setStyle( 'right', '16px' );
 
          if (nav = $( 'sub-nav-collapse' )) nav.removeProperty( 'style' );
@@ -315,7 +321,7 @@ var Dialog = new Class( {
    },
 
    _keyup: function( ev ) {
-      ev = new Event( ev ); ev.stop();
+      ev = new DOMEvent( ev ); ev.stop();
 
       if (this.visible && (ev.key == 'esc')) this.hide();
    }
@@ -595,6 +601,157 @@ var Replacements = new Class( {
          }
       }
       else el.removeProperty( 'checked' );
+   }
+} );
+
+var SubmitUtils = new Class( {
+   Implements: [ Options ],
+
+   options       : {
+      config_attr: 'anchors',
+      formName   : null,
+      selector   : '.submit',
+      wildCards  : [ '%', '*' ]
+   },
+
+   initialize: function( options ) {
+      this.aroundSetOptions( options );
+      this.form = document.forms ? document.forms[ this.options.formName ]
+                                 : function() {};
+      this.build();
+   },
+
+   attach: function( el ) {
+      var cfg; if (! (cfg = this.config[ el.id ])) return;
+
+      var event = cfg.event || 'click', key = 'submit:' + event, handler;
+
+      if (! (handler = el.retrieve( key )))
+         el.store( key, handler = function( ev ) {
+            return this[ cfg.method ].apply( this, cfg.args ) }.bind( this ) );
+
+      el.addEvent( event, handler );
+   },
+
+   chooser: function( href, options ) {
+      var opt   = this.mergeOptions( options );
+      var value = this.form.elements[ opt.field ].value || '';
+
+      for (var i = 0, max = opt.wildCards.length; i < max; i++) {
+         if (value.indexOf( opt.wildCards[ i ] ) > -1) {
+            var uri = href + '?form=' + opt.formName + '&field='  + opt.field
+                                                     + '&button=' + opt.button;
+
+            if (opt.subtype == 'modal') {
+               opt.value        = value;
+               opt.name         = opt.field;
+               opt.onComplete   = function() { this.rebuild() };
+               this.modalDialog = this.context.window.modalDialog( uri, opt );
+               return false;
+            }
+
+            opt.name = 'chooser'; uri += '&val=' + value;
+            top.chooser = this.context.window.openWindow( uri, opt );
+            top.chooser.opener = top;
+            return false;
+         }
+      }
+
+      return this.submitForm( opt.button );
+   },
+
+   clearField: function( field_name ) {
+      this.setField( field_name, '' ); return false;
+   },
+
+   confirmSubmit: function( button_value, text ) {
+      if (text.length < 1 || window.confirm( text ))
+         return this.submitForm( button_value );
+
+      return false;
+   },
+
+   detach: function( el ) {
+      var remove = function( el ) {
+         var cfg; if (! (cfg = this.config[ el.id ])) return;
+
+         var event   = cfg.event || 'click', key = 'submit:' + event;
+         var handler = el.retrieve( key );
+
+         if (handler) el.removeEvent( event, handler ).eliminate( key );
+      }.bind( this );
+
+      if (el) { remove( el ); this.collection.erase( el ) }
+      else { this.collection.each( remove ); this.collection = [] }
+
+      return this;
+   },
+
+   historyBack: function() {
+      window.history.back(); return false;
+   },
+
+   postData: function( url, data ) {
+      new Request( { url: url } ).post( data ); return false;
+   },
+
+   refresh: function( name, value ) {
+      if (name) this.context.cookies.set( name, value );
+
+      this.form.submit();
+      return false;
+   },
+
+   returnValue: function( form_name, field_name, value, button ) {
+      if (form_name && field_name) {
+         var form = opener ? opener.document.forms[ form_name ]
+                           :        document.forms[ form_name ];
+
+         var el; if (form && (el = form.elements[ field_name ])) {
+            el.value = value; if (el.focus) el.focus();
+         }
+      }
+
+      if (opener) window.close();
+      else if (this.modalDialog) this.modalDialog.hide();
+
+      if (button) this.submitForm( button );
+
+      return false;
+   },
+
+   setField: function( name, value ) {
+      var el; if (name && (el = this.form.elements[ name ])) el.value = value;
+
+      return el ? el.value : null;
+   },
+
+   submitForm: function( button_value ) {
+      var button; $$( '*[name=_method]' ).some( function( el ) {
+         if (el.value == button_value) { button = el; return true }
+         return false;
+      }.bind( this ) );
+
+      if (button) { this.detach( button ); button.click() }
+      else {
+         new Element( 'input', {
+            name: '_method', type: 'hidden', value: button_value
+         } ).inject( $( 'top' ), 'after' );
+      }
+
+      this.form.submit();
+      return true;
+   },
+
+   submitOnReturn: function( button_value ) {
+      ev = new DOMEvent();
+
+      if (ev.key == 'enter') {
+         if (document.forms) return this.submitForm( button_value );
+         else window.alert( 'Document contains no forms' );
+      }
+
+      return false;
    }
 } );
 

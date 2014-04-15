@@ -4,16 +4,25 @@
    <script src="[% links.js %]mootools.min.js"></script>
    <script src="[% links.js %]classes.js"></script>
    <script>
-      var behaviour = new Behaviour( { baseURI: '[% links.base_uri %]' } );
+      var behaviour = new Behaviour( {
+         baseURI : '[% links.base_uri %]',
+         formName: 'markdown'
+      } );
 [% IF ! page.editing && page.mode != 'static' -%]
       behaviour.config.anchors[ 'create-file' ]
-         = { args: [ '[% uri_for( 'create' ) %]?create=1', {
-                name: 'create_file', title: '[% loc( 'Create File' ) %]' } ],
-             method: 'modalDialog' };
+         = { method  : 'modalDialog',
+             args    : [ '[% uri_for( 'create' ) %]?auth=1', {
+                name : 'create_file', title: '[% loc( 'Create File' ) %]' } ] };
+      behaviour.config.anchors[ 'delete-file' ]
+         = { method  : 'confirmSubmit',
+             args    : [ 'delete',
+                '[% loc( 'Are you sure you want to delete this file?' ) %]' ] };
       behaviour.config.anchors[ 'rename-file' ]
-         = { args: [ '[% uri_for( 'rename' ) %]?rename=1', {
-                name: 'rename_file', title: '[% loc( 'Rename File' ) %]' } ],
-             method: 'modalDialog' };
+         = { method  : 'modalDialog',
+             args    : [ '[% uri_for( 'rename' ) %]?auth=1', {
+                name : 'rename_file',
+                title: '[% loc( 'Rename File' ) %]',
+                value: '[% page.url %]' } ] };
 [% END -%]
    </script>
 [% IF config.google_analytics -%]

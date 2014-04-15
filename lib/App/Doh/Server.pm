@@ -93,8 +93,7 @@ around 'to_psgi_app' => sub {
             httponly => TRUE,          path        => $point,
             secret   => $conf->secret, session_key => 'doh_session';
          enable '+App::Doh::Auth::Htpasswd',
-            file_root => $conf->file_root,
-            params    => [ qw( create delete edit rename ) ];
+            file_root => $conf->file_root, params => [ qw( auth edit ) ];
          enable_if { $debug } 'Debug';
          $app;
       };
@@ -113,10 +112,10 @@ sub dispatch_request {
       return shift->_execute( qw( html help content_from_pod ), @_ );
    },
    sub (POST + /rename + ?*) {
-      return shift->_execute( qw( html docs rename_file), @_ );
+      return shift->_execute( qw( html docs rename_file ), @_ );
    },
    sub (GET  + /rename + ?*) {
-      return shift->_execute( qw( xml  docs rename_file_form), @_ );
+      return shift->_execute( qw( xml  docs rename_file_form ), @_ );
    },
    sub (POST + / | /** + ?*) {
       return shift->_execute( qw( html docs file_action ), @_ );

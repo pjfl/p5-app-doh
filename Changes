@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Rewriting docs tree walker
           - Refactored docs tree to cache and recalculate on update
           - Added XML view
           - Added Test::Warnings as a dependenct to fix P:M:LogErrors

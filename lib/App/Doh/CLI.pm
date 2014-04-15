@@ -1,7 +1,7 @@
 package App::Doh::CLI;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 33 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 43 $ =~ /\d+/gmx );
 
 use Moo;
 use App::Doh::Model::Documentation;
@@ -133,7 +133,9 @@ A reference to the L<App::Doh::Model::Documentation> object
 
 =head2 make_static - Make a static HTML copy of the documentation
 
-Creates static HTML pages
+   bin/doh-cli make_static
+
+Creates static HTML pages under F<var/root/static>
 
 =head1 Diagnostics
 

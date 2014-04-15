@@ -1,7 +1,20 @@
 /* Mixins */
+.border-box {
+   -khtml-box-sizing: border-box; -moz-box-sizing: border-box;
+   -webkit-box-sizing: border-box; box-sizing: border-box;
+}
 .border-radius(@radius: 5px) {
    -khtml-border-radius: @radius; -moz-border-radius: @radius;
    -webkit-border-radius: @radius; border-radius: @radius;
+}
+.box-shadow(@depth: 5px) {
+   -moz-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
+   -webkit-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
+   box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
+}
+.content-box {
+   -khtml-box-sizing: content-box; -moz-box-sizing: content-box;
+   -webkit-box-sizing: content-box; box-sizing: content-box;
 }
 .opacity(@opacity: 0.5) {
    -khtml-opacity: @opacity; -moz-opacity: @opacity;
@@ -10,15 +23,10 @@
    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
    filter: ~"alpha(opacity=@{opperc})";
 }
-.box-shadow(@depth: 5px) {
-   -moz-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
-   -webkit-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
-   box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
-}
-.box-sizing {
-   -khtml-box-sizing: border-box; -moz-box-sizing: border-box;
-   -webkit-box-sizing: border-box; box-sizing: border-box;
-}
+.serif-light   { font-family: 'Roboto Slab', serif; font-weight: 100; }
+.serif-book    { font-family: 'Roboto Slab', serif; font-weight: 300; }
+.serif-regular { font-family: 'Roboto Slab', serif; font-weight: 400; }
+.serif-bold    { font-family: 'Roboto Slab', serif; font-weight: 700; }
 
 /*  Elements - Reset styling */
 a, abbr, acronym, address, article, aside, audio, b, big, blockquote,
@@ -27,7 +35,7 @@ fieldset, figure, footer, form, h1, h2, h3, h4, h5, h6, header,
 hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu,
 nav, object, ol, p, pre, q, samp, section, small, span, strong, sub,
 sup, table, tbody, td, tfoot, th, thead, time, tr, tt, ul, var, video {
-   background: transparent; border: 0; .box-sizing; margin: 0; outline: 0;
+   background: transparent; border: 0; .border-box; margin: 0; outline: 0;
    padding: 0; text-align: left; vertical-align: baseline; white-space: normal;
 /* color: inherit; font-family: inherit; font-size: inherit;
    font-style: inherit; font-weight: inherit; */
@@ -89,10 +97,8 @@ h4 { font-size: 2.4em; line-height: 1.5em;   margin: 0.75em   0; } /* 24 36 */
 h5 { font-size: 2.0em; line-height: 1.8em;   margin: 0.9em    0; } /* 20 36 */
 h6 { font-size: 1.6em; line-height: 1.125em; margin: 0.5em    0; } /* 16 18 */
 hr {
-   -khtml-box-sizing: content-box; -moz-box-sizing: content-box;
-   -webkit-box-sizing: content-box;
-   border-bottom: 1px solid; border-top: 1px solid; height: 0;
-   margin: 8px 0; width: auto;
+   border-bottom: 1px solid; border-top: 1px solid; .content-box;
+   height: 0; margin: 8px 0; width: auto;
 }
 html { height: 100%; max-height: 100%; }
 ins { border-bottom: 3px double; }
@@ -117,7 +123,7 @@ a     { color: @contrast; text-decoration: none; }
 a:focus, a:hover { color: @text; }
 body  { background-color: @light; color: @text; }
 code  { color: @light; }
-h1, h2, h3, h4, h5, h6 { font-family: 'Roboto Slab', serif; font-weight: 300; }
+h1, h2, h3, h4, h5, h6 { .serif-book }
 h1 { font-size: 32px; line-height: 36px; }
 h2 { font-size: 28px; line-height: 36px; }
 h3 { font-size: 24px; line-height: 36px; }
@@ -127,8 +133,8 @@ pre   { background-color: @light; }
 pre code, pre code span { white-space: pre-wrap; }
 table { border-bottom: 1px solid @lines; margin-bottom: 17px; }
 table tr th, table tr td {
-   border-top: 1px solid @lines; border-left: 1px solid @lines;
    border-color: @lines !important;
+   border-left: 1px solid @lines; border-top: 1px solid @lines;
    line-height: 18px; padding: 6px; text-align: left; vertical-align: top;
 }
 table tr th:last-child, table tr td:last-child {
@@ -141,6 +147,7 @@ table tr th:last-child, table tr td:last-child {
 .btn.btn-sidebar {
   background-color: @sidebar-hover; border: none; padding: 9px 9px;
 }
+.btn.btn-sidebar.collapse-bar { .border-radius; }
 .btn.btn-sidebar .icon-bar {
   background-color: @dark; display: block; height: 2px;
   margin-bottom: 3px; margin-top: 2px; width: 18px;
@@ -161,7 +168,7 @@ table tr th:last-child, table tr td:last-child {
 .columns .right-column.span9p5 { margin-left: 0; }
 .columns .right-column .content-page {
    background-color: white; float: left; max-width: 100%;
-   min-height: 100%; padding: 9px 36px 9px 18px; position: relative;
+   min-height: 100%; padding: 9px 18px 9px 18px; position: relative;
 }
 .container { float: left; overflow: hidden; position: relative; }
 .container img { border: 0 none; height: auto; max-width: 100%; }
@@ -169,12 +176,10 @@ table tr th:last-child, table tr td:last-child {
 .container-fluid { margin: 0 auto; padding-top: 54px; }
 .container-fluid.fluid-height { height: 100%; }
 .content-page article {
-   max-width: 700px; min-width: 400px; padding-bottom: 18px;
+   max-width: 600px; min-width: 400px; padding-bottom: 18px;
 }
 .content-page > article > pre { font-weight: 700; padding: 9px; }
-.content-page blockquote {
-   clear: both; display: inline-block; float: left; margin-top: 0;
-}
+.content-page blockquote { margin-top: 0; margin-bottom: 0; }
 .content-page code { font-weight: 700; }
 .content-page dd { margin: 9px 0 9px 18px; }
 .content-page dd, .content-page dt, .content-page li,
@@ -222,8 +227,9 @@ table tr th:last-child, table tr td:last-child {
    text-align: left;
 }
 .flag-container {
-   background-color: @sidebar-background; .border-radius; height: 30px;
-   margin: 12px 0 12px 18px; padding: 3px;
+   background-color: @sidebar-background; .border-radius;
+   font-size: 12px; height: 30px; line-height: 26px; margin: 12px 0 12px 18px;
+   padding: 3px; text-transform: uppercase;
 }
 .footer { bottom: 0; left: 0; padding: 18px; position: fixed; }
 .github-ribbon { position: absolute; right: 0; top: 54px; z-index: 10; }
@@ -232,10 +238,9 @@ table tr th:last-child, table tr td:last-child {
    min-height: 18px; padding: 18px 0;
 }
 .hero-buttons.container-fluid .btn-hero.btn {
-   border: 5px solid @dark;
-   font-family: 'Roboto Slab', serif; font-weight: 700;
-   font-size: 14px; line-height: 18px; .opacity(0.8);
-   padding: 18px 36px; margin: 0 8px; text-transform: uppercase;
+   border: 5px solid @dark; font-size: 14px; line-height: 18px; .opacity(0.8);
+   padding: 18px 36px; margin: 0 8px; .serif-bold;
+   text-transform: uppercase;
 }
 .hero-buttons.container-fluid .btn-hero.btn:hover { .opacity(1); }
 .hero-buttons.container-fluid .btn-hero.btn.btn-secondary {
@@ -248,7 +253,7 @@ table tr th:last-child, table tr td:last-child {
 .homepage-content.container-fluid,
 .homepage-footer.container-fluid { font-size: 14px; line-height: 18px; }
 .homepage-content.container-fluid .lead {
-   font-family: 'Roboto Slab', serif; font-weight: 400;
+   .serif-regular;
 }
 .homepage-content.container-fluid ul,
 .homepage-content.container-fluid ol { margin: 0 0 18px 0; padding: 18px 0; }
@@ -273,8 +278,7 @@ table tr th:last-child, table tr td:last-child {
 .homepage-footer.container-fluid .footer-nav { margin: 18px 0; }
 .homepage-footer.container-fluid .footer-nav li { list-style: none; }
 .homepage-footer.container-fluid .footer-nav li a {
-   font-family: 'Roboto Slab', serif; font-size: 18px; font-weight: 700;
-   line-height: 36px;
+   font-size: 18px; line-height: 36px; .serif-bold;
 }
 .homepage-footer.container-fluid .footer-nav li a:hover {
    color: @light; text-decoration: none;
@@ -283,7 +287,7 @@ table tr th:last-child, table tr td:last-child {
 .homepage-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .homepage-hero { background-color: @light; color: @dark; }
 .homepage-hero {
-   font-family: 'Roboto Slab', serif; font-weight: 700; overflow: hidden;
+    overflow: hidden; .serif-bold;
 }
 .homepage-hero .homepage-image { margin-bottom: 18px; max-height: 475px; }
 .homepage-hero .text-center h2 { margin: 18px auto; text-align: center; }
@@ -302,8 +306,7 @@ table tr th:last-child, table tr td:last-child {
 .navbar .navbar-inner a { text-decoration: none; }
 .navbar .navbar-inner p { display: inline-block; }
 .navbar .navbar-inner .brand {
-   font-family: 'Roboto Slab', serif; font-weight: 700;
-   font-size: 24px; line-height: 36px; margin: 9px 0;
+   font-size: 24px; line-height: 36px; margin: 9px 0; .serif-bold;
 }
 .navbar .navbar-inner .navbar-text {
    color: @light; font-size: 14px; font-weight: 700; line-height: 36px;
@@ -313,9 +316,8 @@ table tr th:last-child, table tr td:last-child {
 }
 .nav.nav-list li a {
    border-bottom: 1px solid @lines; color: @dark; display: block;
-   font-family: 'Roboto Slab', serif; font-size: 16px; font-weight: 400;
-   height: 36px; line-height: 36px; overflow: hidden; padding: 0 18px;
-   width: auto;
+   font-size: 16px; height: 36px; line-height: 36px; overflow: hidden;
+   padding: 0 18px; .serif-regular; width: auto;
 }
 .nav.nav-list li a:hover   {
    background-color: @sidebar-hover; color: @dark; text-decoration: none;
@@ -342,7 +344,7 @@ table tr th:last-child, table tr td:last-child {
 .page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }
 .pathname {
-   border: 2px inset; .box-sizing; font-size: 16px; line-height: 18px;
+   border: 2px inset; .border-box; font-size: 16px; line-height: 18px;
    margin: 4px 0; min-width: 400px; padding: 3px 9px; vertical-align: middle;
 }
 .pod dd p { width: auto !important; }
@@ -377,10 +379,6 @@ table tr th:last-child, table tr td:last-child {
    background-color: @lines; border-bottom: 1px solid @lines;
    display: none; padding: 9px 18px;
 }
-.roboto-slab.light   { font-family: 'Roboto Slab', serif; font-weight: 100; }
-.roboto-slab.book    { font-family: 'Roboto Slab', serif; font-weight: 300; }
-.roboto-slab.regular { font-family: 'Roboto Slab', serif; font-weight: 400; }
-.roboto-slab.bold    { font-family: 'Roboto Slab', serif; font-weight: 700; }
 .row            { overflow: hidden; }
 .row-fluid      { width: auto;  }
 [class*="span"] { float: left; min-height: 18px; }
@@ -398,6 +396,10 @@ table tr th:last-child, table tr td:last-child {
    background: @light; border: 2px solid transparent; border-color: @lines;
    .border-radius; .box-shadow; text-align: center; z-index: 13000;
 }
+.tips-defn {
+   color: #000; display: block; font-size: 12px; line-height: 18px;
+   padding: 4px 16px 16px 16px;
+}
 .tips-mark0 {
    border: 9px solid; border-color: transparent transparent @lines @lines;
    content: ' '; height: 0; left: 16px; position: absolute;
@@ -408,10 +410,6 @@ table tr th:last-child, table tr td:last-child {
    content: ' '; height: 0; left: 18px; position: absolute;
    width: 0; top: -14px;
 }
-.tips-defn {
-   color: #000; display: block; font-size: 12px; line-height: 18px;
-   padding: 4px 16px 16px 16px;
-}
 .tips-term {
    color: Yellow; display: block; font-size: 16px; line-height: 18px;
    padding: 8px 16px 4px 16px;
@@ -421,8 +419,7 @@ table tr th:last-child, table tr td:last-child {
    margin-bottom: 18px; padding-left: 18px; padding-right: 18px;
 }
 .well.well-sidebar a, .well.well-sidebar button {
-   color: @light; font-family: 'Roboto Slab', serif; font-size: 14px;
-   font-weight: 400; line-height: 18px;
+   color: @light; font-size: 14px; line-height: 18px; .serif-regular;
 }
 .well.well-sidebar a:hover { text-decoration: none; }
 .well.well-sidebar button { margin-left: -3px; }
@@ -431,7 +428,7 @@ table tr th:last-child, table tr td:last-child {
 }
 
 /* Media queries */
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 820px) {
    /* Force table to not be like tables anymore */
    table, thead, tbody, th, td, tr { border: none; display: block; }
    /* Hide table headers (but not display: none;, for accessibility) */
@@ -452,10 +449,13 @@ table tr th:last-child, table tr td:last-child {
       content: attr(data-title);
    }
 }
-@media (max-width: 767px) {
+@media (max-width: 820px) {
    body { overflow-y: scroll; }
    .columns .left-column, .columns .right-column {
       height: auto; padding-top: 0; width: 100% !important;
+   }
+   .columns .right-column .content-page {
+      padding-right: 220px !important;
    }
    .hero-buttons.container-fluid .btn-hero.btn {
       display: block; margin-bottom: 10px;
@@ -463,15 +463,7 @@ table tr th:last-child, table tr td:last-child {
    .homepage-hero { padding-top: 0 !important; }
    .homepage-content.container-fluid { padding: 40px 20px; }
    .homepage-footer.container-fluid { padding: 0 20px; }
-   .navbar.navbar-fixed-top { margin-left: 0; margin-right: 0 };
-   .navbar .navbar-inner { padding: 6px 10px; };
-   .navbar .navbar-inner .navbar-text {
-      font-size: 12px; line-height: 18px; margin: 9px 6px;
-   }
-   .responsive-collapse { display: block; }
-}
-@media (min-width: 768px) and (max-width: 979px) {
-   .navbar.navbar-fixed-top { position: fixed; }
+   .responsive-collapse { display: block !important; }
 }
 @media (max-width: 1149px) {
    .pod > div { overflow: hidden; position: relative; }
@@ -490,12 +482,13 @@ table tr th:last-child, table tr td:last-child {
       margin: 0; min-height: 100%; overflow: auto;
       position: absolute; width: 52.55%; z-index: -1;
    }
-   .float-view .content-page blockquote p {
-      margin-bottom: 18px;
+   .float-view .content-page blockquote {
+      clear: both; display: inline-block; float: left;
    }
    .float-view .content-page blockquote:before {
       clear: both; content: ''; display: block; height: 18px; width: auto;
    }
+   .float-view .content-page blockquote p { margin-bottom: 18px; }
    .float-view .content-page hr {
       border-color: @lines; clear: left; float: left; width: 50%;
    }
@@ -526,7 +519,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page table {
       background-color: white; clear: left; float: left;
       margin-left: 18px; margin-right: 18px; white-space: normal;
-      width: 50%;
+      max-width: 50%;
    }
    .float-view .content-page table pre, .float-view .content-page table code {
       white-space: normal;

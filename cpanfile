@@ -19,11 +19,13 @@ requires "Twiggy" => "0.1021";
 requires "URI" => "1.60";
 requires "Unexpected" => "v0.22.0";
 requires "Web::Simple" => "0.020";
+requires "XML::Simple" => "2.18";
 requires "namespace::sweep" => "0.006";
 requires "perl" => "5.010001";
 
 on 'build' => sub {
   requires "Module::Build" => "0.4004";
+  requires "Test::Requires" => "0.06";
   requires "Test::Warnings" => "0.014";
   requires "version" => "0.88";
 };
