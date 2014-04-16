@@ -5,7 +5,7 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( throw );
+use Class::Usul::Functions qw( first_char throw );
 use File::DataClass::Types qw( HashRef Int Path Str );
 use Unexpected::Functions  qw( Unspecified );
 
@@ -60,9 +60,7 @@ sub create_file_form {
 
    my $page  = {
       meta       => { id => __get_or_throw( $req->params, 'id' ) },
-      literal_js => [ "var form = document.forms[ 'create-file' ];",
-                      "var f    = function() { form.pathname.focus() };",
-                      "f.delay( 100 );" ], };
+      literal_js => __set_element_focus( 'create-file', 'pathname' ), };
    my $stash = $self->get_stash( $req, $page );
 
    $stash->{template} = 'create-file';
@@ -112,22 +110,25 @@ sub file_save {
 }
 
 sub iterator {
-   my ($self, $locale) = @_; my $node = $self->_localised_tree( $locale );
+   my ($self, $locale) = @_;
 
-   my @folders = $node && $node->{type} eq 'folder' ? ( $node ) : ();
+   my @folders = ( __make_tuple( $self->_localised_tree( $locale ) ) );
 
    return sub {
-      while (@folders) {
-         while (defined ($node = __current( $folders[ 0 ]->{tree} ))) {
-            $node->{type} eq 'folder' and push @folders, $node;
-            __next( $folders[ 0 ]->{tree} );
+      while (my $tuple = $folders[ 0 ]) {
+         while (defined (my $k = $tuple->[ 1 ]->[ $tuple->[ 0 ]++ ])) {
+            my $node = $tuple->[ 2 ]->{tree}->{ $k };
+
+            $node->{type} eq 'folder'
+               and unshift @folders, __make_tuple( $node );
+
             return $node;
          }
 
          shift @folders;
       }
 
-      return $node;
+      return;
    };
 }
 
@@ -155,6 +156,10 @@ sub load_page {
    return $self->_not_found( $req );
 }
 
+sub locales {
+   return grep { first_char $_ ne '_' } keys %{ $_[ 0 ]->docs_tree };
+}
+
 sub navigation {
    my ($self, $req) = @_; state $cache //= {};
 
@@ -167,7 +172,7 @@ sub navigation {
 
    (not $list or $tree->{_mtime} > $list->{mtime})
       and $cache->{ $lang.$wanted } = $list
-         = { items => __build_nav_list( $tree, \@ids, $wanted, 0 ),
+         = { items => $self->_build_nav_list( $locale, \@ids, $wanted ),
              mtime => $tree->{_mtime}, };
 
    return $list->{items};
@@ -199,9 +204,7 @@ sub rename_file_form {
    my $page  = {
       meta       => { id => __get_or_throw( $req->params, 'id' ) },
       old_path   => __get_or_throw( $req->params, 'val' ),
-      literal_js => [ "var form = document.forms[ 'rename-file' ];",
-                      "var f    = function() { form.pathname.focus() };",
-                      "f.delay( 100 );" ], };
+      literal_js => __set_element_focus( 'rename-file', 'pathname' ), };
    my $stash = $self->get_stash( $req, $page );
 
    $stash->{template} = 'rename-file';
@@ -249,6 +252,31 @@ sub _build_docs_tree {
    $level == 1 and $self->root_mtime->touch( $max_mtime );
    $tree->{_mtime} = $max_mtime;
    return $tree;
+}
+
+sub _build_nav_list {
+   my ($self, $locale, $ids, $wanted) = @_;
+
+   my $iter = $self->iterator( $locale ); my @nav = ();
+
+   while (my $node = $iter->()) {
+      $node->{id} eq 'index' and next;
+
+      my $link = { level => $node->{level} - 2,
+                   name  => $node->{name},
+                   tip   => $self->_get_tip_text( $node ),
+                   type  => $node->{type},
+                   url   => $node->{type} eq 'folder' ? '#' : $node->{url}, };
+
+      if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
+         $link->{class} = $node->{url} eq $wanted ? 'active' : 'open';
+         shift @{ $ids };
+      }
+
+      push @nav, $link;
+   }
+
+   return \@nav;
 }
 
 sub _docs_url {
@@ -317,6 +345,16 @@ sub _get_format {
    return $self->type_map->{ $extn } || 'text';
 }
 
+sub _get_tip_text {
+   my ($self, $node) = @_;
+
+   my $text = $node->{path}->abs2rel( $self->config->file_root );
+
+   $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ [/] }{ / }gmx;
+
+   return $text;
+}
+
 sub _localised_tree {
    my ($self, $locale) = @_;
 
@@ -348,41 +386,6 @@ sub _not_found {
 }
 
 # Private functions
-sub __build_nav_list {
-   my ($tree, $ids, $wanted, $level) = @_; my @nav = ();
-
-   for my $node (map  { $tree->{ $_ } }
-                 grep { $_ ne 'index' } __sorted_keys( $tree )) {
-      my $page = { level => $level,
-                   name  => $node->{name},
-                   type  => $node->{type},
-                   url   => $node->{type} eq 'folder' ? '#' : $node->{url}, };
-
-      if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
-         $page->{class} = $node->{url} eq $wanted ? 'active' : 'open';
-         shift @{ $ids };
-      }
-
-      push @nav, $page;
-
-      $node->{type} eq 'folder' and push @nav, @{
-         __build_nav_list( $node->{tree}, $ids, $wanted, $level + 1 ) };
-   }
-
-   return \@nav;
-}
-
-sub __current {
-   my $href = shift;
-
-   exists $href->{_iterator}
-       or $href->{_iterator} = [ 0, __sorted_keys( $href ) ];
-
-   my $key = $href->{_iterator}->[ $href->{_iterator}->[ 0 ] + 1 ] or return;
-
-   return $href->{ $key };
-}
-
 sub __extract_lang {
    my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
 }
@@ -408,17 +411,26 @@ sub __make_name_from {
    my $text = shift; $text =~ s{ [_] }{ }gmx; return $text;
 }
 
-sub __next {
-   my $href = shift; __current( $href ); $href->{_iterator}->[ 0 ] += 1;
+sub __make_tuple {
+   my $node = shift;
 
-   return __current( $href );
+   return [ 0, $node && $node->{type} eq 'folder'
+               ? [ __sorted_keys( $node->{tree} ) ] : [], $node, ];
+}
+
+sub __set_element_focus {
+   my ($form, $name) = @_;
+
+   return [ "var form = document.forms[ '${form}' ];",
+            "var f    = function() { form.${name}.focus() };",
+            "f.delay( 100 );" ];
 }
 
 sub __sorted_keys {
-   my $href = shift;
+   my $node = shift;
 
-   return ( sort { $href->{ $a }->{_order} cmp $href->{ $b }->{_order} }
-            grep { '_' ne substr $_, 0, 1 } keys %{ $href } );
+   return ( sort { $node->{ $a }->{_order} cmp $node->{ $b }->{_order} }
+            grep { first_char $_ ne '_' } keys %{ $node } );
 }
 
 1;

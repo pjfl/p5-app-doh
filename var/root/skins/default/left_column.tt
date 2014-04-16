@@ -1,6 +1,16 @@
+[% MACRO fadingLink( href, class, content ) BLOCK -%]
+<a href="[% href %]" class="[% class %] fade">[% content %]</a>
+[% END -%]
+[% MACRO linkWithTips( href, class, content, title, tip ) IF tip -%]
+               <span class="tips" title="[% loc( title ) _ ' ~ ' _ tip %]">
+                  [% fadingLink( href, class, content ) -%]
+               </span>
+[% ELSE -%]
+   [% fadingLink( href, class, content ) -%]
+[% END -%]
       <!-- Left Column -->
-      <!-- For Mobile -->
       <div class="left-column article-tree span2p5">
+         <!-- For Mobile -->
          <div class="responsive-collapse">
             <button class="btn btn-sidebar collapse-bar"
                        id="menu-spinner-button" type="button">
@@ -10,7 +20,7 @@
             </button>
          </div>
          <div id="sub-nav-collapse" class="collapse in">
-         <!-- Navigation -->
+            <!-- Navigation -->
 [% level = 0 -%]
             <ul class="nav nav-list">
 [% FOREACH node = nav -%]
@@ -19,12 +29,12 @@
             </li>
 [%    END -%]
             <li class="[% node.class %]">
-[%    IF node.type == 'folder'; level = level + 1 -%]
-               <a href="[% uri_for( node.url ) %]"
-                 class="aj-nav fade folder">[% node.name %]</a>
+[%    uri = uri_for( node.url ) -%]
+[%    IF node.type == 'folder'; level = level + 1; class = 'aj-nav folder' -%]
+[%       linkWithTips( uri, class, node.name, 'Folder Path', node.tip ) -%]
                <ul class="nav nav-list">
 [%    ELSE -%]
-               <a class="fade" href="[% uri_for( node.url ) %]">[% node.name %]</a>
+[%       linkWithTips( uri, '', node.name, 'File Path', node.tip ) -%]
             </li>
 [%    END -%]
 [% END -%]
@@ -33,6 +43,7 @@
             </li>
 [% END -%]
             </ul>
+            <!-- Code Blocks -->
             <div class="well well-sidebar">
                <form action="[% links.req_uri %]"
                     enctype="application/x-www-form-urlencoded"
@@ -41,41 +52,40 @@
                   <select id="code_blocks" name="code_blocks">
                      <option [% IF prefs.code_blocks == 1;
                                    'selected="selected"'; ELSE; ''; END %]
-                        value="1">Show Code Blocks</option>
+                        value="1">[% loc( 'Show Code Blocks' ) %]</option>
                      <option [% IF prefs.code_blocks == 2;
                                    'selected="selected"'; ELSE; ''; END %]
-                        value="2">Show Code Blocks Inline</option>
+                        value="2">[% loc( 'Show Code Blocks Inline' ) %]</option>
                      <option [% IF prefs.code_blocks == 3;
                                    'selected="selected"'; ELSE; ''; END %]
-                        value="3">Hide Code Blocks</option>
+                        value="3">[% loc( 'Hide Code Blocks' ) %]</option>
                   </select>
                </form>
             </div>
-[% IF config.links.0 || config.twitter.0 -%]
             <!-- Links -->
             <div class="well well-sidebar">
-[%    IF ! page.editing && page.mode != 'static' -%]
-[%       hint  = loc( 'Hint' ) -%]
-[%       title = hint _ ' ~ ' _ loc( 'Create a new markdown file' ) -%]
-[%       text  = loc( 'Create' ) -%]
+[% IF ! page.editing && page.mode != 'static' -%]
+[%    hint  = loc( 'Hint' ) -%]
+[%    title = hint _ ' ~ ' _ loc( 'Create a new markdown file' ) -%]
+[%    text  = loc( 'Create' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="windows fade" href="#"
                         id="create-file">[% text %]</a></span>
                <br>
-[%       title = hint _ ' ~ ' _ loc( 'Rename this markdown file' ) -%]
-[%       text  = loc( 'Rename' ) -%]
+[%    title = hint _ ' ~ ' _ loc( 'Rename this markdown file' ) -%]
+[%    text  = loc( 'Rename' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="windows fade" href="#"
                         id="rename-file">[% text %]</a></span>
                <br>
-[%       title = hint _ ' ~ ' _ loc( 'Edit the markdown for this page' ) -%]
-[%       text  = loc( 'Edit' ) -%]
+[%    title = hint _ ' ~ ' _ loc( 'Edit the markdown for this page' ) -%]
+[%    text  = loc( 'Edit' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="fade"
                       href="[% links.req_uri %]?edit=1">[% text %]</a></span>
                <br>
-[%       title = hint _ ' ~ ' _ loc( 'Delete this markdown file' ) -%]
-[%       text  = loc( 'Delete' ) %]
+[%    title = hint _ ' ~ ' _ loc( 'Delete this markdown file' ) -%]
+[%    text  = loc( 'Delete' ) %]
                <form action="[% links.req_uri %]?auth=1"
                     enctype="application/x-www-form-urlencoded"
                      method="post" name="markdown">
@@ -84,23 +94,24 @@
                               name="_method" type="submit"
                              value="delete">[% text %]</button></span>
                </form>
-[%    END -%]
+[% END -%]
+[% IF config.links.0 -%]
 [%    FOREACH link = config.links -%]
                <a class="fade" href="[% link.url | eval %]" target="_blank">
                   [% link.name | eval %]</a>
                <br>
 [%    END -%]
+[% END -%]
             </div>
-[%    IF config.twitter.0 -%]
+[% IF config.twitter.0 -%]
             <!-- Twitter -->
             <div class="well well-sidebar">
-[%       FOREACH handle = config.twitter -%]
+[%    FOREACH handle = config.twitter -%]
                <div class="twitter">
                   <iframe allowtransparency="true" frameborder="0" scrolling="no" style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
                </div>
-[%       END -%]
-            </div>
 [%    END -%]
+            </div>
 [% END -%]
          </div>
       </div>

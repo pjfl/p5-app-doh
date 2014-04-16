@@ -317,7 +317,7 @@ table tr th:last-child, table tr td:last-child {
 .nav.nav-list li a {
    border-bottom: 1px solid @lines; color: @dark; display: block;
    font-size: 16px; height: 36px; line-height: 36px; overflow: hidden;
-   padding: 0 18px; .serif-regular; width: auto;
+   padding: 0 18px; .serif-regular;
 }
 .nav.nav-list li a:hover   {
    background-color: @sidebar-hover; color: @dark; text-decoration: none;
@@ -336,6 +336,7 @@ table tr th:last-child, table tr td:last-child {
    background-color: transparent; .opacity(1); text-decoration: none;
 }
 .nav.nav-list li ul li.active a { color: @dark; }
+.nav.nav-list .tips { display: block; }
 .offset1 { margin-left: 8%; }
 .page-header {
    border-bottom: 1px solid; border-color: @lines;
@@ -392,6 +393,7 @@ table tr th:last-child, table tr td:last-child {
 .span12         { width: 940px; }
 .subtle         { border-color: @lines; border-top: 0; }
 .text-center    { text-align: center; }
+.tips           { display: inline-block; position: relative; }
 .tips-container {
    background: @light; border: 2px solid transparent; border-color: @lines;
    .border-radius; .box-shadow; text-align: center; z-index: 13000;
@@ -479,7 +481,7 @@ table tr th:last-child, table tr td:last-child {
    }
    .float-view .content-page article:before {
       background-color: white; content: ''; display: block;
-      margin: 0; min-height: 100%; overflow: auto;
+      margin: 0; min-height: 100%; min-width: 400px; overflow: auto;
       position: absolute; width: 52.55%; z-index: -1;
    }
    .float-view .content-page blockquote {

@@ -902,7 +902,6 @@ table tr td:last-child {
   padding: 0 18px;
   font-family: 'Roboto Slab', serif;
   font-weight: 400;
-  width: auto;
 }
 .nav.nav-list li a:hover {
   background-color: #92c86a;
@@ -946,6 +945,9 @@ table tr td:last-child {
 }
 .nav.nav-list li ul li.active a {
   color: #000000;
+}
+.nav.nav-list .tips {
+  display: block;
 }
 .offset1 {
   margin-left: 8%;
@@ -1088,6 +1090,10 @@ table tr td:last-child {
 }
 .text-center {
   text-align: center;
+}
+.tips {
+  display: inline-block;
+  position: relative;
 }
 .tips-container {
   background: #569220;
@@ -1277,6 +1283,7 @@ table tr td:last-child {
     display: block;
     margin: 0;
     min-height: 100%;
+    min-width: 400px;
     overflow: auto;
     position: absolute;
     width: 52.55%;

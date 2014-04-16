@@ -163,9 +163,9 @@ var Behaviour = new Class( {
       $$( '.aj-nav' ).each( function( el ) {
          el.addEvent( 'click', function( ev ) {
             ev.stop();
-            this.getParent().getSiblings().getElements( 'ul' )
+            this.getParent().getParent().getSiblings().getElements( 'ul' )
                 .each( function( list ) { list.dissolve() } );
-            this.getNext().reveal();
+            this.getParent().getNext().reveal();
          } );
       } );
 
@@ -797,7 +797,7 @@ this.Tips = new Class( {
    options         : {
       className    : 'tips',
       fixed        : false,
-      fsWidthRatio : 1.35,
+      fsWidthRatio : 1.25,
       hellip       : '\u2026',
       hideDelay    : 100,
       id           : 'tips',

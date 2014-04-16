@@ -61,26 +61,19 @@ If that fails run it again with the --force option
 
    cpanm --force git:...
 
-Although this is a simple application it is composed of many CPAN
-distributions and, depending on how many of them are already installed,
-may take a while to complete. The flip side is that there are no external
-dependencies like Node.io or Grunt to install.
+Although this is a simple application it is composed of many CPAN distributions and, depending on how many of them are already available, installation may take a while to complete. The flip side is that there are no external dependencies like Node.io or Grunt to install.
 
 By default the development server will run at:
-[http://localhost:5000](http://localhost:5000) and can be started
-in the foreground with:
+[http://localhost:5000](http://localhost:5000) and can be started in the foreground with:
 
    cd App-Doh
    plackup bin/doh-server
 
-To start the production server in the background listening on the
-default port 8085 use:
+To start the production server in the background listening on the default port 8085 use:
 
    doh-daemon start
 
-The doh-daemon program provides normal SysV init script semantics. Additionally
-the daemon program will write an init script to standard output in response
-to the command:
+The doh-daemon program provides normal SysV init script semantics. Additionally the daemon program will write an init script to standard output in response to the command:
 
    doh-daemon get_init_file
 

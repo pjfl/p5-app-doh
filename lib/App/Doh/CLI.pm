@@ -1,7 +1,7 @@
 package App::Doh::CLI;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 43 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 44 $ =~ /\d+/gmx );
 
 use Moo;
 use App::Doh::Model::Documentation;
@@ -26,7 +26,7 @@ sub make_static : method {
    $dest->is_absolute or $dest = io( $dest->rel2abs( $self->config->root ) );
    $self->_copy_assets( $dest );
 
-   for my $locale (keys %{ $self->model->docs_tree }) {
+   for my $locale ($self->model->locales) {
       $self->_make_localised_static( $dest, $locale );
    }
 

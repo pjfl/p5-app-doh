@@ -27,7 +27,8 @@ var/tmp
 var/root/css
 var/root/docs/.mtime
 var/root/docs/de
-var/root/docs/Projects
-var/root/docs/01_Examples/06_Next_Level/
+var/root/docs/en/01_Examples/03_Test.md
+var/root/docs/en/01_Examples/06_Next_Level/
+var/root/docs/en/Projects
 var/root/static
 App-Doh-*
