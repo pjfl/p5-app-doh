@@ -117,11 +117,7 @@ Text files with `.txt` extension will be rendered wrapped in 'pre' tags.
 
 ## Sorting
 
-To sort your files and folders in a specific way, you can prefix them
-with a number and underscore, e.g. `var/root/docs/en/01_Hello_World.md` and
-`var/root/docs/en/05_Features.md` This will list *Hello World* before
-*Features*, overriding the deafult alpha-numeric sorting. The numbers and
-the language codes will be stripped out of the navigation and urls.
+To sort your files and folders in a specific way, you can prefix them with a number and underscore, e.g. `var/root/docs/en/01_Hello_World.md` and `var/root/docs/en/05_Features.md`. This will list *Hello World* before *Features*, overriding the deafult alpha-numeric sorting. The language code, numbers, and file extensions will be stripped out of the navigation links and URIs.
 
 ## Landing page
 
@@ -247,26 +243,17 @@ This will embed the google analytics tracking code.
    }
 
 
-## Markdown Editor
-<img alt="[File editor]" class="app-thumbnail"
-     src="[% links.images %]app-editor.png"/>
-
-The markdown in the document tree is editable via the web browser. Click
-the `Edit` link in the left navigation column. Users must authenticate
-against the `.htpasswd` files under the document root. The default user
-is `admin` password `admin`. Click the `Save` button at the bottom of
-the text editor to make the changes permanent.
-
 ## Toggling Code Blocks
 The select menu in the left column of the documentation template allows
 for the selection of different code block display modes. Code blocks
 can be displayed in the page float view, the can be displayed inline, and
 they can be hidden
 
-## Multi-language
-Use your browsers preferences to set the `Accept-Language` header in the
-request to the desired language. If available it will be served in
-preference to the default language, English.
+## Multi-language Support
+
+Use your browsers preferences to set the `Accept-Language` header in the request to the desired language. If available it will be served in preference to the default language, English.
+
+The national flag on the right of the title bar indicates the language of the file being displayed or edited. Adding `?use_flags=0` to a URI will turn the flags off and display a language code instead.
 
 ### Directory structure:
 
@@ -290,7 +277,18 @@ preference to the default language, English.
    │   │   │   ├── Hello_World.md
    │   │   │   ├── 05_Code_Highlighting.md
 
+## Markdown Editor
+<img alt="[File editor]" class="app-thumbnail"
+     src="[% links.images %]app-editor.png"/>
+
+The markdown in the document tree is editable via the web browser. The `Edit` link is in the left navigation column after the code blocks selector. Users must authenticate against the `.htpasswd` files under the document root. The default user is `admin` password `admin`. The `Save` button at the bottom of the text editor makes the changes permanent.
+
+The `Create` link displays a modal dialog. Enter the path to the file you want to create. The path should be relative to the language sub-directory, it should not begin with a leading slash. Do include numeric prefixes for sorting purposes, use slashes to delineate directories and files, spaces will be replaced with underscores, and the file extension is optional. Any new directories in the file path will be automatically created.
+
+The `Delete` link will prompt for confirmation before deleting the markdown file.
+
 ## Generating a set of static files
+
 This command creates a static HTML version of the documentation in the
 `var/root/static` directory
 
@@ -298,9 +296,8 @@ This command creates a static HTML version of the documentation in the
 
 ## Support
 
-If you need help using Doh, or have found a bug, please create an
-issue on the <a href="https://github.com/pjfl/p5-app-doh/issues"
-target="_blank">Github repo</a>.
+There is a link on the right side of the title bar that displays the Perl documentation for [App::Doh](/help)
 
-Please note that a Perl module failing to install is not an
-issue for *this* application.
+If you need help using Doh, or have found a bug, please create an issue on the <a href="https://github.com/pjfl/p5-app-doh/issues" target="_blank">Github repo</a>.
+
+Please note that a Perl module failing to install is not an issue for *this* application.

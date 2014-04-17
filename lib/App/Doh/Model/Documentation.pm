@@ -5,7 +5,7 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( first_char throw );
+use Class::Usul::Functions qw( first_char throw trim );
 use File::DataClass::Types qw( HashRef Int Path Str );
 use Unexpected::Functions  qw( Unspecified );
 
@@ -163,7 +163,7 @@ sub locales {
 sub navigation {
    my ($self, $req) = @_; state $cache //= {};
 
-   my $locale = $self->config->locale;
+   my $locale = $self->config->locale; # Always index config default language
    my $tree   = $self->_localised_tree( $locale )->{tree};
    my $lang   = __extract_lang( $locale );
    my @ids    = @{ $req->args };
@@ -189,7 +189,9 @@ sub rename_file {
       or throw 'Cannot find document tree node to rename';
    my $new_node = $self->_get_file_paths( $req );
 
-   $node->{path}->close->move( $new_node->{path} ); $self->root_mtime->touch;
+   $new_node->{path}->assert_filepath;
+   $node->{path}->close->move( $new_node->{path} );
+   $self->root_mtime->touch;
 
    my $location = $req->uri_for( $new_node->{url} );
    my $rel_path = $node->{path}->abs2rel( $self->config->file_root );
@@ -259,7 +261,7 @@ sub _build_nav_list {
 
    my $iter = $self->iterator( $locale ); my @nav = ();
 
-   while (my $node = $iter->()) {
+   while (defined (my $node = $iter->())) {
       $node->{id} eq 'index' and next;
 
       my $link = { level => $node->{level} - 2,
@@ -280,15 +282,24 @@ sub _build_nav_list {
 }
 
 sub _docs_url {
-   my ($self, $locale) = @_; my $lang = __extract_lang( $locale );
+   my ($self, $locale) = @_; state $cache //= {};
 
-   state $urls //= {}; defined $urls->{ $lang } and return $urls->{ $lang };
+   my $mtime = $self->_localised_tree( $locale )->{tree}->{_mtime};
+   my $lang  = __extract_lang( $locale );
+   my $entry = $cache->{ $lang };
 
-   my $iter = $self->iterator( $locale );
+   (not $entry or $mtime > $entry->{mtime}) and $cache->{ $lang } = $entry
+      = { mtime => $mtime, url => $self->_find_docs_url( $locale ), };
+
+   return $entry->{url};
+}
+
+sub _find_docs_url {
+   my ($self, $locale) = @_; my $iter = $self->iterator( $locale );
 
    while (defined (my $node = $iter->())) {
       $node->{type} eq 'file' and $node->{id} ne 'index'
-         and return $urls->{ $lang } = $node->{url};
+         and return $node->{url};
    }
 
    my $error = "Config Error: Unable to find the first page in\n"
@@ -300,9 +311,7 @@ sub _docs_url {
 }
 
 sub _find_node {
-   my ($self, $locale, $ids) = @_;
-
-   my $tree = $self->_localised_tree( $locale );
+   my ($self, $locale, $ids) = @_; my $tree = $self->_localised_tree( $locale );
 
    $ids //= []; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
 
@@ -321,18 +330,17 @@ sub _get_file_paths {
    my $pathname =  __get_or_throw( $req->body->param, 'pathname' );
       $pathname !~ m{ \. [m][k]?[d][n]? \z }mx and $pathname .= '.md';
    my @filepath =  map { __make_id_from( $_ ) }
-   my @pathname =  split m{ / }mx, $pathname;
+   my @pathname =  map { s{ [ ] }{_}gmx; $_   }
+                   map { trim $_              } split m{ / }mx, $pathname;
    my $id       =  pop @filepath;
    my $url      =  join '/', @filepath, $id;
    my $lang     =  __extract_lang( $req->locale );
    my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
    my $parent   =  $self->_find_node( $req->locale, [ @filepath ] );
 
-   ($parent and $parent->{type} eq 'folder')
-       or throw error => 'Parent folder [_1] does not exist',
-                 args => [ join '/', $lang, @pathname ];
-
-   exists $parent->{tree}->{ $id }
+   $parent and $parent->{type} eq 'folder'
+      and exists $parent->{tree}->{ $id }
+      and $parent->{tree}->{ $id }->{path} eq $path
       and throw error => 'Path [_1] already exists',
                  args => [ join '/', $lang, @pathname ];
 
@@ -350,8 +358,9 @@ sub _get_tip_text {
 
    my $text = $node->{path}->abs2rel( $self->config->file_root );
 
-   $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ [/] }{ / }gmx;
-
+   $text =~ s{ \A [a-z]+ / }{}mx;
+   $text =~ s{ [/] }{ / }gmx;
+   $text =~ s{ \. .+ \z }{}mx;
    return $text;
 }
 
@@ -429,7 +438,7 @@ sub __set_element_focus {
 sub __sorted_keys {
    my $node = shift;
 
-   return ( sort { $node->{ $a }->{_order} cmp $node->{ $b }->{_order} }
+   return ( sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
             grep { first_char $_ ne '_' } keys %{ $node } );
 }
 

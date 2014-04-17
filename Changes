@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Fixed output from Pod::Xhtml. Indexes work
           - Navigation uses new iterator. No more hidden state
           - Rewriting docs tree walker
           - Refactored docs tree to cache and recalculate on update

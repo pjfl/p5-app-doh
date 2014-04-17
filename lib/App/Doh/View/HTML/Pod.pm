@@ -37,13 +37,16 @@ sub serialize {
       (  FragmentOnly => TRUE,
          LinkParser   => $link_parser,
          StringMode   => TRUE,
-         TopHeading   => 2,
+         TopHeading   => 1,
          TopLinks     => $self->_top_link( $req ), );
 
    $content and $content->exists
       and $parser->parse_from_file( $content->pathname );
-
-   return $header.( $parser->asString || $self->_error( $req, $content ) );
+   $content = $parser->asString || $self->_error( $req, $content );
+   # Setting TopHeading = 2 screws the indent level in the index
+   $content =~ s{ <   h (\d) }{"<h"  . ( $1 + 1 ) }egmx;
+   $content =~ s{ < / h (\d) }{"</h" . ( $1 + 1 ) }egmx;
+   return $header.$content;
 }
 
 # Private methods
