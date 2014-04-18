@@ -36,6 +36,7 @@ t/05kwalitee.t
 t/06yaml.t
 t/07podspelling.t
 t/10test_script.t
+var/root/css/highlight.css
 var/root/css/theme-blue.css
 var/root/css/theme-green.css
 var/root/css/theme-navy.css
@@ -44,8 +45,9 @@ var/root/docs/app-doh.json
 var/root/docs/de/01_Examples/03_Test.md
 var/root/docs/en/00_Getting_Started.md
 var/root/docs/en/01_Examples/01_GitHub_Flavored_Markdown.md
+var/root/docs/en/01_Examples/03_Test.md
 var/root/docs/en/01_Examples/05_Code_Highlighting.md
-var/root/docs/en/05_More_Examples/Hello_World.md
+var/root/docs/en/05_More_Examples/01_Hello_World.md
 var/root/docs/en/index.md
 var/root/img/app-editor.png
 var/root/img/app-thumbs.png

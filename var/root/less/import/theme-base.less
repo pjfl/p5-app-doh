@@ -115,10 +115,13 @@ th { padding: 3px 6px; }
 ul { list-style-position: outside; list-style-type: disc; }
 
 /* Application styling */
-.serif-light   { font-family: 'Roboto Slab', serif; font-weight: 100; }
-.serif-book    { font-family: 'Roboto Slab', serif; font-weight: 300; }
-.serif-regular { font-family: 'Roboto Slab', serif; font-weight: 400; }
-.serif-bold    { font-family: 'Roboto Slab', serif; font-weight: 700; }
+.serif-default {
+   font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
+}
+.serif-light   { font-weight: 100; .serif-default; }
+.serif-book    { font-weight: 300; .serif-default; }
+.serif-regular { font-weight: 400; .serif-default; }
+.serif-bold    { font-weight: 700; .serif-default; }
 
 /* Elements */
 a     { color: @contrast; text-decoration: none; }
@@ -476,7 +479,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page article:before {
       background-color: white; content: ''; display: block;
       margin: 0; min-height: 100%; min-width: 400px; overflow: auto;
-      position: absolute; width: 52.55%; z-index: -1;
+      position: absolute; width: 55%; z-index: -1;
    }
    .float-view .content-page blockquote {
       clear: both; display: inline-block; float: left;
@@ -502,7 +505,7 @@ table tr th:last-child, table tr td:last-child {
    }
    .float-view .content-page p, .float-view .content-page .page-header {
       clear: left; float: left; margin-bottom: 18px; margin-top: 0;
-      min-width: 400px; padding-right: 18px; width: 52.5%;
+      min-width: 400px; padding-right: 18px; width: 55%;
    }
    .float-view .content-page p.toplink {
       background-color: transparent; margin-bottom: 0; margin-top: -23px;
@@ -529,7 +532,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page h5,
    .float-view .content-page h6 {
       clear: left; float: left; margin-bottom: 18px; min-width: 400px;
-      padding-right: 18px; width: 52.5%;
+      padding-right: 18px; width: 55%;
    }
    .float-view .content-page .page-header:before,
    .float-view .content-page ul:before,
@@ -596,106 +599,59 @@ table tr th:last-child, table tr td:last-child {
    height: 24px; padding: 0 0 0 32px;
 }
 
-/* Code Highlighting */
-pre code { display: block; padding: 0.5em; }
-pre code,
-pre .subst,
-pre .tag .title,
-pre .lisp .title,
-pre .clojure .built_in,
-pre .nginx .title { color: @dark; }
-pre .string,
-pre .title,
-pre .constant,
-pre .parent,
-pre .tag .value,
-pre .rules .value,
-pre .rules .value .number,
-pre .preprocessor,
-pre .ruby .symbol,
-pre .ruby .symbol .string,
-pre .aggregate,
-pre .template_tag,
-pre .django .variable,
-pre .smalltalk .class,
-pre .addition,
-pre .flow,
-pre .stream,
-pre .bash .variable,
-pre .apache .tag,
-pre .apache .cbracket,
-pre .tex .command,
-pre .tex .special,
-pre .erlang_repl .function_or_atom,
-pre .markdown .header { color: @syntax-string; }
-pre .comment,
-pre .annotation,
-pre .template_comment,
-pre .diff .header,
-pre .chunk,
-pre .markdown .blockquote { color: @syntax-comment; }
-pre .number,
-pre .date,
-pre .regexp,
-pre .literal,
-pre .smalltalk .symbol,
-pre .smalltalk .char,
-pre .go .constant,
-pre .change,
-pre .markdown .bullet,
-pre .markdown .link_url { color: @syntax-number; }
-pre .label,
-pre .javadoc,
-pre .ruby .string,
-pre .decorator,
-pre .filter .argument,
-pre .localvars,
-pre .array,
-pre .attr_selector,
-pre .important,
-pre .pseudo,
-pre .pi,
-pre .doctype,
-pre .deletion,
-pre .envvar,
-pre .shebang,
-pre .apache .sqbracket,
-pre .nginx .built_in,
-pre .tex .formula,
-pre .erlang_repl .reserved,
-pre .prompt,
-pre .markdown .link_label,
-pre .vhdl .attribute,
-pre .clojure .attribute,
-pre .coffeescript .property { color: @syntax-label; }
-pre .keyword,
-pre .id,
-pre .phpdoc,
-pre .title,
-pre .built_in,
-pre .aggregate,
-pre .css .tag,
-pre .javadoctag,
-pre .phpdoc,
-pre .yardoctag,
-pre .smalltalk .class,
-pre .winutils,
-pre .bash .variable,
-pre .apache .tag,
-pre .go .typename,
-pre .tex .command,
-pre .markdown .strong,
-pre .request,
-pre .status { font-weight: bold; }
-pre .markdown .emphasis { font-style: italic; }
-pre .nginx .built_in { font-weight: normal; }
-pre .coffeescript .javascript,
-pre .javascript .xml,
-pre .tex .formula,
-pre .xml .javascript,
-pre .xml .vbscript,
-pre .xml .css,
-pre .xml .cdata { .opacity(); }
+/* Date: 17.V.2011 Author: pumbur <pumbur@pumbur.net> */
+
+.hljs { display: block; padding: 0.5em; }
+
+.profile .hljs-header *, .ini .hljs-title,
+.nginx .hljs-title { color: #000; }
+
+.hljs-comment, .hljs-javadoc, .hljs-preprocessor,
+.hljs-preprocessor .hljs-title, .hljs-pragma, .hljs-shebang,
+.profile .hljs-summary, .diff, .hljs-pi, .hljs-doctype, .hljs-tag,
+.hljs-template_comment, .css .hljs-rules,
+.tex .hljs-special { color: #910101; }
+
+.hljs-string, .hljs-symbol, .diff .hljs-change, .hljs-regexp,
+.xml .hljs-attribute, .smalltalk .hljs-char, .xml .hljs-value,
+.ini .hljs-value, .clojure .hljs-attribute,
+.coffeescript .hljs-attribute { color: #fc3; }
+
+.hljs-number, .hljs-addition { color: #00cc66; }
+
+.hljs-built_in, .hljs-literal, .vhdl .hljs-typename, .go .hljs-constant,
+.go .hljs-typename, .ini .hljs-keyword, .lua .hljs-title,
+.perl .hljs-variable, .php .hljs-variable, .mel .hljs-variable,
+.django .hljs-variable, .css .funtion, .smalltalk .method,
+.hljs-hexcolor, .hljs-important, .hljs-flow, .hljs-inheritance,
+.parser3 .hljs-variable { color: #32AAEE; }
+
+.hljs-keyword, .hljs-tag .hljs-title, .css .hljs-tag, .css .hljs-class,
+.css .hljs-id, .css .hljs-pseudo, .css .hljs-attr_selector,
+.lisp .hljs-title, .clojure .hljs-built_in, .hljs-winutils,
+.tex .hljs-command, .hljs-request,
+.hljs-status { color: #bb1166; }
+
+.hljs-sub, .hljs-title, .ruby .hljs-constant, .vala .hljs-constant,
+.hljs-parent, .hljs-deletion, .hljs-template_tag, .css .hljs-keyword,
+.objectivec .hljs-class .hljs-id, .smalltalk .hljs-class,
+.lisp .hljs-keyword, .apache .hljs-tag, .nginx .hljs-variable,
+.hljs-envvar, .bash .hljs-variable, .go .hljs-built_in,
+.vbscript .hljs-built_in, .lua .hljs-built_in, .rsl .hljs-built_in,
+.tail, .avrasm .hljs-label, .tex .hljs-formula,
+.tex .hljs-formula * { color: #d65d12; }
+
+.hljs-yardoctag, .hljs-phpdoc, .profile .hljs-header, .ini .hljs-title,
+.apache .hljs-tag, .parser3 .hljs-title { font-weight: bold; }
+
+.coffeescript .javascript, .javascript .xml, .tex .hljs-formula,
+.xml .javascript, .xml .vbscript, .xml .css,
+.xml .hljs-cdata { opacity: 0.6; }
+
+.hljs, .javascript, .css, .xml, .hljs-subst, .diff .hljs-chunk,
+.css .hljs-value, .css .hljs-attribute, .lisp .hljs-string,
+.lisp .hljs-number, .tail .hljs-params, .hljs-container,
+.haskell *, .erlang *, .erlang_repl * { color: #000; }
 
 /* Plack debug */
 #plDebug #plDebugToolbarHandle {

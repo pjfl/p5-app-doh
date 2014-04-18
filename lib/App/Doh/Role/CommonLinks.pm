@@ -9,11 +9,10 @@ requires qw( config get_stash );
 around 'get_stash' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $stash = $orig->( $self, $req, @args );
-   my $conf  = $self->config;
+   my $stash = $orig->( $self, $req, @args ); my $conf = $self->config;
 
-   $stash->{links}->{req_uri } = $req->uri;
    $stash->{links}->{base_uri} = $req->base;
+   $stash->{links}->{req_uri } = $req->uri;
 
    for (@{ $conf->common_links }) {
       $stash->{links}->{ $_ } = $req->uri_for( $conf->$_() );

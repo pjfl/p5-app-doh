@@ -1,4 +1,6 @@
-**Doh** is a documentation generator that uses a simple folder structure and Markdown files to create custom documentation on the fly. It helps you create great looking documentation in a developer friendly way.
+**Doh** is a documentation generator that uses a simple folder structure and
+Markdown files to create custom documentation on the fly. It helps you create
+great looking documentation in a developer friendly way.
 
 ## Features
 
@@ -21,19 +23,22 @@
 
 ## Acknowledgements
 
-I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it said "Fork Me" so I did.
+I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it said
+"Fork Me" so I did.
 
 ## Differences
 
-I exchanged the PHP for [Perl](http://www.perl.org). Not a fan of Bootstrap so that went also. Prefer class based inheritance when JavaScript programming hence [Mootools](http://mootools.net/) not jQuery.
+I exchanged the PHP for [Perl](http://www.perl.org). Not a fan of Bootstrap so
+that went also. Prefer class based inheritance when JavaScript programming
+hence [Mootools](http://mootools.net/) not jQuery.
 
 ## Installation
 
-The App-Doh repository contains meta data that lists the CPAN modules
-used by the application. Modern Perl CPAN distribution installers
-(like [App::cpanminus](https://metacpan.org/module/App::cpanminus))
-use this information to install the required dependencies when this
-application is installed.
+The App-Doh repository contains meta data that lists the CPAN modules used by
+the application. Modern Perl CPAN distribution installers (like
+[App::cpanminus](https://metacpan.org/module/App::cpanminus)) use this
+information to install the required dependencies when this application is
+installed.
 
 **Requirements:**
 
@@ -49,9 +54,9 @@ Then install [local::lib](https://metacpan.org/module/local::lib) with:
    cpanm --local-lib=~/App-Doh local::lib && \
       eval $(perl -I ~/App-Doh/lib/perl5/ -Mlocal::lib=~/App-Doh)
 
-The second statement sets environment variables to include the local
-Perl library.  You can append the output of the perl command to your shell
-startup if you want to make it permanent
+The second statement sets environment variables to include the local Perl
+library. You can append the output of the perl command to your shell startup
+if you want to make it permanent
 
 Install **App-Doh** with:
 
@@ -61,19 +66,26 @@ If that fails run it again with the --force option
 
    cpanm --force git:...
 
-Although this is a simple application it is composed of many CPAN distributions and, depending on how many of them are already available, installation may take a while to complete. The flip side is that there are no external dependencies like Node.io or Grunt to install.
+Although this is a simple application it is composed of many CPAN
+distributions and, depending on how many of them are already available,
+installation may take a while to complete. The flip side is that there are no
+external dependencies like Node.io or Grunt to install.
 
 By default the development server will run at:
-[http://localhost:5000](http://localhost:5000) and can be started in the foreground with:
+[http://localhost:5000](http://localhost:5000) and can be started in the
+foreground with:
 
    cd App-Doh
    plackup bin/doh-server
 
-To start the production server in the background listening on the default port 8085 use:
+To start the production server in the background listening on the default port
+8085 use:
 
    doh-daemon start
 
-The doh-daemon program provides normal SysV init script semantics. Additionally the daemon program will write an init script to standard output in response to the command:
+The doh-daemon program provides normal SysV init script semantics.
+Additionally the daemon program will write an init script to standard output
+in response to the command:
 
    doh-daemon get_init_file
 
@@ -87,9 +99,8 @@ The first folder under `var/root/docs` should be a language code. This defaults
 to `en` for English. Even if you only plan to use one language you will still
 need to create your files and folders underneath the language folder.
 
-You can nest folders any number of levels to get the exact structure
-you want. The folder structure will be converted to the nested
-navigation.
+You can nest folders any number of levels to get the exact structure you want.
+The folder structure will be converted to the nested navigation.
 
 ## Files
 
@@ -117,7 +128,12 @@ Text files with `.txt` extension will be rendered wrapped in 'pre' tags.
 
 ## Sorting
 
-To sort your files and folders in a specific way, you can prefix them with a number and underscore, e.g. `var/root/docs/en/01_Hello_World.md` and `var/root/docs/en/05_Features.md`. This will list *Hello World* before *Features*, overriding the deafult alpha-numeric sorting. The language code, numbers, and file extensions will be stripped out of the navigation links and URIs.
+To sort your files and folders in a specific way, you can prefix them with a
+number and underscore, e.g. `var/root/docs/en/01_Hello_World.md` and
+`var/root/docs/en/05_Features.md`. This will list *Hello World* before
+*Features*, overriding the deafult alpha-numeric sorting. The language code,
+numbers, and file extensions will be stripped out of the navigation links and
+URIs.
 
 ## Landing page
 
@@ -251,29 +267,33 @@ they can be hidden
 
 ## Multi-language Support
 
-Use your browsers preferences to set the `Accept-Language` header in the request to the desired language. If available it will be served in preference to the default language, English.
+Use your browsers preferences to set the `Accept-Language` header in the
+request to the desired language. If available it will be served in preference
+to the default language, English.
 
-The national flag on the right of the title bar indicates the language of the file being displayed or edited. Adding `?use_flags=0` to a URI will turn the flags off and display a language code instead.
+The national flag on the right of the title bar indicates the language of the
+file being displayed or edited. Adding `?use_flags=0` to a URI will turn the
+flags off and display a language code instead.
 
 ### Directory structure:
 
    ├── docs/
-   │   ├── en
+   │   ├── en/
    │   │   ├── index.md
    │   │   ├── 00_Getting_Started.md
-   │   │   ├── 01_Examples
+   │   │   ├── 01_Examples/
    │   │   │   ├── 01_GitHub_Flavored_Markdown.md
    │   │   │   ├── 05_Code_Highlighting.md
-   │   │   ├── 05_More_Examples
+   │   │   ├── 05_More_Examples/
    │   │   │   ├── Hello_World.md
    │   │   │   ├── 05_Code_Highlighting.md
-   │   ├── de
+   │   ├── de/
    │   │   ├── index.md
    │   │   ├── 00_Getting_Started.md
-   │   │   ├── 01_Examples
+   │   │   ├── 01_Examples/
    │   │   │   ├── 01_GitHub_Flavored_Markdown.md
    │   │   │   ├── 05_Code_Highlighting.md
-   │   │   ├── 05_More_Examples
+   │   │   ├── 05_More_Examples/
    │   │   │   ├── Hello_World.md
    │   │   │   ├── 05_Code_Highlighting.md
 
@@ -281,11 +301,21 @@ The national flag on the right of the title bar indicates the language of the fi
 <img alt="[File editor]" class="app-thumbnail"
      src="[% links.images %]app-editor.png"/>
 
-The markdown in the document tree is editable via the web browser. The `Edit` link is in the left navigation column after the code blocks selector. Users must authenticate against the `.htpasswd` files under the document root. The default user is `admin` password `admin`. The `Save` button at the bottom of the text editor makes the changes permanent.
+The markdown in the document tree is editable via the web browser. The `Edit`
+link is in the left navigation column after the code blocks selector. Users
+must authenticate against the `.htpasswd` files under the document root. The
+default user is `admin` password `admin`. The `Save` button at the bottom of
+the text editor makes the changes permanent.
 
-The `Create` link displays a modal dialog. Enter the path to the file you want to create. The path should be relative to the language sub-directory, it should not begin with a leading slash. Do include numeric prefixes for sorting purposes, use slashes to delineate directories and files, spaces will be replaced with underscores, and the file extension is optional. Any new directories in the file path will be automatically created.
+The `Create` link displays a modal dialog. Enter the path to the file you want
+to create. The path should be relative to the language sub-directory, it
+should not begin with a leading slash. Do include numeric prefixes for sorting
+purposes, use slashes to delineate directories and files, spaces will be
+replaced with underscores, and the file extension is optional. Any new
+directories in the file path will be automatically created.
 
-The `Delete` link will prompt for confirmation before deleting the markdown file.
+The `Delete` link will prompt for confirmation before deleting the markdown
+file. Empty directories will be removed.
 
 ## Generating a set of static files
 
@@ -296,8 +326,12 @@ This command creates a static HTML version of the documentation in the
 
 ## Support
 
-There is a link on the right side of the title bar that displays the Perl documentation for [App::Doh](/help)
+There is a link on the right side of the title bar that displays the Perl
+documentation for [App::Doh](/help)
 
-If you need help using Doh, or have found a bug, please create an issue on the <a href="https://github.com/pjfl/p5-app-doh/issues" target="_blank">Github repo</a>.
+If you need help using Doh, or have found a bug, please create an issue on the
+<a href="https://github.com/pjfl/p5-app-doh/issues" target="_blank">Github
+repo</a>.
 
-Please note that a Perl module failing to install is not an issue for *this* application.
+Please note that a Perl module failing to install is not an issue for *this*
+application.

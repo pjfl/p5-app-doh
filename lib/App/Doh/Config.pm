@@ -45,9 +45,7 @@ has 'file_root'        => is => 'lazy', isa => Directory,
 
 has 'float'            => is => 'ro',   isa => Bool, default => TRUE;
 
-has 'font'             => is => 'ro',   isa => SimpleStr,
-   default             => sub {
-      'http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' };
+has 'font'             => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'google_analytics' => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -93,7 +91,7 @@ has 'secret'           => is => 'ro',   isa => NonEmptySimpleStr,
    default             => hostname;
 
 has 'server'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'Twiggy';
+   default             => 'Starman';
 
 has 'skin'             => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'default';
@@ -309,8 +307,8 @@ for this project
 
 =item C<server>
 
-A non empty simple string that defaults to C<Twiggy>. The L<Plack> engine
-name to load when the documentation server is started
+A non empty simple string that defaults to C<Starman>. The L<Plack> engine
+name to load when the documentation server is started in production mode
 
 =item C<skin>
 

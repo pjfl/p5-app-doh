@@ -1,6 +1,6 @@
 [% IF page.content_only; content; ELSE -%]
 <!doctype html>
-<html lang="en">
+<html lang="[% page.language %]">
 <head>
    <title>[% config.title %] - [% page.title %]</title>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

@@ -387,21 +387,24 @@ ul {
   list-style-type: disc;
 }
 /* Application styling */
+.serif-default {
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
+}
 .serif-light {
-  font-family: 'Roboto Slab', serif;
   font-weight: 100;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .serif-book {
-  font-family: 'Roboto Slab', serif;
   font-weight: 300;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .serif-regular {
-  font-family: 'Roboto Slab', serif;
   font-weight: 400;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .serif-bold {
-  font-family: 'Roboto Slab', serif;
   font-weight: 700;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 /* Elements */
 a {
@@ -425,8 +428,8 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Roboto Slab', serif;
   font-weight: 300;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 h1 {
   font-size: 32px;
@@ -737,8 +740,8 @@ table tr td:last-child {
   filter: alpha(opacity=80);
   padding: 18px 36px;
   margin: 0 8px;
-  font-family: 'Roboto Slab', serif;
   font-weight: 700;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
   text-transform: uppercase;
 }
 .hero-buttons.container-fluid .btn-hero.btn:hover {
@@ -766,8 +769,8 @@ table tr td:last-child {
   line-height: 18px;
 }
 .homepage-content.container-fluid .lead {
-  font-family: 'Roboto Slab', serif;
   font-weight: 400;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .homepage-content.container-fluid ul,
 .homepage-content.container-fluid ol {
@@ -811,8 +814,8 @@ table tr td:last-child {
 .homepage-footer.container-fluid .footer-nav li a {
   font-size: 18px;
   line-height: 36px;
-  font-family: 'Roboto Slab', serif;
   font-weight: 700;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .homepage-footer.container-fluid .footer-nav li a:hover {
   color: #569220;
@@ -830,8 +833,8 @@ table tr td:last-child {
 }
 .homepage-hero {
   overflow: hidden;
-  font-family: 'Roboto Slab', serif;
   font-weight: 700;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .homepage-hero .homepage-image {
   margin-bottom: 18px;
@@ -884,8 +887,8 @@ table tr td:last-child {
   font-size: 24px;
   line-height: 36px;
   margin: 9px 0;
-  font-family: 'Roboto Slab', serif;
   font-weight: 700;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .navbar .navbar-inner .navbar-text {
   color: #569220;
@@ -908,8 +911,8 @@ table tr td:last-child {
   line-height: 36px;
   overflow: hidden;
   padding: 0 18px;
-  font-family: 'Roboto Slab', serif;
   font-weight: 400;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .nav.nav-list li a:hover {
   background-color: #92c86a;
@@ -1144,8 +1147,8 @@ table tr td:last-child {
   color: #569220;
   font-size: 14px;
   line-height: 18px;
-  font-family: 'Roboto Slab', serif;
   font-weight: 400;
+  font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
 }
 .well.well-sidebar a:hover {
   text-decoration: none;
@@ -1274,7 +1277,7 @@ table tr td:last-child {
     min-width: 400px;
     overflow: auto;
     position: absolute;
-    width: 52.55%;
+    width: 55%;
     z-index: -1;
   }
   .float-view .content-page blockquote {
@@ -1331,7 +1334,7 @@ table tr td:last-child {
     margin-top: 0;
     min-width: 400px;
     padding-right: 18px;
-    width: 52.5%;
+    width: 55%;
   }
   .float-view .content-page p.toplink {
     background-color: transparent;
@@ -1372,7 +1375,7 @@ table tr td:last-child {
     margin-bottom: 18px;
     min-width: 400px;
     padding-right: 18px;
-    width: 52.5%;
+    width: 55%;
   }
   .float-view .content-page .page-header:before,
   .float-view .content-page ul:before,
@@ -1468,131 +1471,141 @@ table tr td:last-child {
   height: 24px;
   padding: 0 0 0 32px;
 }
-/* Code Highlighting */
-pre code {
+/* Date: 17.V.2011 Author: pumbur <pumbur@pumbur.net> */
+.hljs {
   display: block;
   padding: 0.5em;
 }
-pre code,
-pre .subst,
-pre .tag .title,
-pre .lisp .title,
-pre .clojure .built_in,
-pre .nginx .title {
-  color: #000000;
+.profile .hljs-header *,
+.ini .hljs-title,
+.nginx .hljs-title {
+  color: #000;
 }
-pre .string,
-pre .title,
-pre .constant,
-pre .parent,
-pre .tag .value,
-pre .rules .value,
-pre .rules .value .number,
-pre .preprocessor,
-pre .ruby .symbol,
-pre .ruby .symbol .string,
-pre .aggregate,
-pre .template_tag,
-pre .django .variable,
-pre .smalltalk .class,
-pre .addition,
-pre .flow,
-pre .stream,
-pre .bash .variable,
-pre .apache .tag,
-pre .apache .cbracket,
-pre .tex .command,
-pre .tex .special,
-pre .erlang_repl .function_or_atom,
-pre .markdown .header {
-  color: #e0ff00;
+.hljs-comment,
+.hljs-javadoc,
+.hljs-preprocessor,
+.hljs-preprocessor .hljs-title,
+.hljs-pragma,
+.hljs-shebang,
+.profile .hljs-summary,
+.diff,
+.hljs-pi,
+.hljs-doctype,
+.hljs-tag,
+.hljs-template_comment,
+.css .hljs-rules,
+.tex .hljs-special {
+  color: #910101;
 }
-pre .comment,
-pre .annotation,
-pre .template_comment,
-pre .diff .header,
-pre .chunk,
-pre .markdown .blockquote {
-  color: #c4e598;
+.hljs-string,
+.hljs-symbol,
+.diff .hljs-change,
+.hljs-regexp,
+.xml .hljs-attribute,
+.smalltalk .hljs-char,
+.xml .hljs-value,
+.ini .hljs-value,
+.clojure .hljs-attribute,
+.coffeescript .hljs-attribute {
+  color: #fc3;
 }
-pre .number,
-pre .date,
-pre .regexp,
-pre .literal,
-pre .smalltalk .symbol,
-pre .smalltalk .char,
-pre .go .constant,
-pre .change,
-pre .markdown .bullet,
-pre .markdown .link_url {
-  color: #097c4e;
+.hljs-number,
+.hljs-addition {
+  color: #00cc66;
 }
-pre .label,
-pre .javadoc,
-pre .ruby .string,
-pre .decorator,
-pre .filter .argument,
-pre .localvars,
-pre .array,
-pre .attr_selector,
-pre .important,
-pre .pseudo,
-pre .pi,
-pre .doctype,
-pre .deletion,
-pre .envvar,
-pre .shebang,
-pre .apache .sqbracket,
-pre .nginx .built_in,
-pre .tex .formula,
-pre .erlang_repl .reserved,
-pre .prompt,
-pre .markdown .link_label,
-pre .vhdl .attribute,
-pre .clojure .attribute,
-pre .coffeescript .property {
-  color: #022e99;
+.hljs-built_in,
+.hljs-literal,
+.vhdl .hljs-typename,
+.go .hljs-constant,
+.go .hljs-typename,
+.ini .hljs-keyword,
+.lua .hljs-title,
+.perl .hljs-variable,
+.php .hljs-variable,
+.mel .hljs-variable,
+.django .hljs-variable,
+.css .funtion,
+.smalltalk .method,
+.hljs-hexcolor,
+.hljs-important,
+.hljs-flow,
+.hljs-inheritance,
+.parser3 .hljs-variable {
+  color: #32AAEE;
 }
-pre .keyword,
-pre .id,
-pre .phpdoc,
-pre .title,
-pre .built_in,
-pre .aggregate,
-pre .css .tag,
-pre .javadoctag,
-pre .phpdoc,
-pre .yardoctag,
-pre .smalltalk .class,
-pre .winutils,
-pre .bash .variable,
-pre .apache .tag,
-pre .go .typename,
-pre .tex .command,
-pre .markdown .strong,
-pre .request,
-pre .status {
+.hljs-keyword,
+.hljs-tag .hljs-title,
+.css .hljs-tag,
+.css .hljs-class,
+.css .hljs-id,
+.css .hljs-pseudo,
+.css .hljs-attr_selector,
+.lisp .hljs-title,
+.clojure .hljs-built_in,
+.hljs-winutils,
+.tex .hljs-command,
+.hljs-request,
+.hljs-status {
+  color: #bb1166;
+}
+.hljs-sub,
+.hljs-title,
+.ruby .hljs-constant,
+.vala .hljs-constant,
+.hljs-parent,
+.hljs-deletion,
+.hljs-template_tag,
+.css .hljs-keyword,
+.objectivec .hljs-class .hljs-id,
+.smalltalk .hljs-class,
+.lisp .hljs-keyword,
+.apache .hljs-tag,
+.nginx .hljs-variable,
+.hljs-envvar,
+.bash .hljs-variable,
+.go .hljs-built_in,
+.vbscript .hljs-built_in,
+.lua .hljs-built_in,
+.rsl .hljs-built_in,
+.tail,
+.avrasm .hljs-label,
+.tex .hljs-formula,
+.tex .hljs-formula * {
+  color: #d65d12;
+}
+.hljs-yardoctag,
+.hljs-phpdoc,
+.profile .hljs-header,
+.ini .hljs-title,
+.apache .hljs-tag,
+.parser3 .hljs-title {
   font-weight: bold;
 }
-pre .markdown .emphasis {
-  font-style: italic;
+.coffeescript .javascript,
+.javascript .xml,
+.tex .hljs-formula,
+.xml .javascript,
+.xml .vbscript,
+.xml .css,
+.xml .hljs-cdata {
+  opacity: 0.6;
 }
-pre .nginx .built_in {
-  font-weight: normal;
-}
-pre .coffeescript .javascript,
-pre .javascript .xml,
-pre .tex .formula,
-pre .xml .javascript,
-pre .xml .vbscript,
-pre .xml .css,
-pre .xml .cdata {
-  -khtml-opacity: 0.5;
-  -moz-opacity: 0.5;
-  -webkit-opacity: 0.5;
-  opacity: 0.5;
-  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(opacity=50);
-  filter: alpha(opacity=50);
+.hljs,
+.javascript,
+.css,
+.xml,
+.hljs-subst,
+.diff .hljs-chunk,
+.css .hljs-value,
+.css .hljs-attribute,
+.lisp .hljs-string,
+.lisp .hljs-number,
+.tail .hljs-params,
+.hljs-container,
+.haskell *,
+.erlang *,
+.erlang_repl * {
+  color: #000;
 }
 /* Plack debug */
 #plDebug #plDebugToolbarHandle {

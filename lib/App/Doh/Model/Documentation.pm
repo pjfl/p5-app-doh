@@ -83,9 +83,8 @@ sub file_delete {
 
    my $node     = $self->_find_node( $req->locale, [ @{ $req->args } ] )
       or throw 'Cannot find document tree node to delete';
-   my $path     = $node->{path}; $path->unlink; $self->root_mtime->touch;
+   my $rel_path = $self->_delete_and_prune( $node->{path} );
    my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
-   my $rel_path = $path->abs2rel( $self->config->file_root );
    my $message  = [ 'File [_1] deleted by [_2]', $rel_path, $req->username ];
 
    return { redirect => { location => $location, message => $message } };
@@ -164,16 +163,16 @@ sub navigation {
    my ($self, $req) = @_; state $cache //= {};
 
    my $locale = $self->config->locale; # Always index config default language
-   my $tree   = $self->_localised_tree( $locale )->{tree};
    my $lang   = __extract_lang( $locale );
    my @ids    = @{ $req->args };
    my $wanted = join '/', @ids;
    my $list   = $cache->{ $lang.$wanted };
+   my $mtime  = $self->_localised_tree( $locale )->{tree}->{_mtime};
 
-   (not $list or $tree->{_mtime} > $list->{mtime})
+   (not $list or $mtime > $list->{mtime})
       and $cache->{ $lang.$wanted } = $list
          = { items => $self->_build_nav_list( $locale, \@ids, $wanted ),
-             mtime => $tree->{_mtime}, };
+             mtime => $mtime, };
 
    return $list->{items};
 }
@@ -279,6 +278,18 @@ sub _build_nav_list {
    }
 
    return \@nav;
+}
+
+sub _delete_and_prune {
+   my ($self, $path) = @_; my $dir = $path->parent;
+
+   $path->exists and $path->unlink;
+
+   while ($dir->is_empty) { $dir->rmdir; $dir = $dir->parent }
+
+   $self->root_mtime->touch;
+
+   return $path->abs2rel( $self->config->file_root );
 }
 
 sub _docs_url {
