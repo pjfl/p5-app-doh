@@ -16,6 +16,12 @@
    -khtml-box-sizing: content-box; -moz-box-sizing: content-box;
    -webkit-box-sizing: content-box; box-sizing: content-box;
 }
+.header-default {
+   font-family: "Helvetica Neue", Helvetica, Verdana, tahoma, arial, sans-serif;
+}
+.mono-default {
+   font-family: "Andale Mono", monaco, "Courier New", courier, monospace;
+}
 .opacity(@opacity: 0.5) {
    -khtml-opacity: @opacity; -moz-opacity: @opacity;
    -webkit-opacity: @opacity; opacity: @opacity;
@@ -23,6 +29,16 @@
    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
    filter: ~"alpha(opacity=@{opperc})";
 }
+.sans-default {
+   font-family: Verdana, "Lucida Sans", tahoma, arial, sans-serif;
+}
+.serif-default {
+   font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
+}
+.serif-light   { font-weight: 100; .serif-default; }
+.serif-book    { font-weight: 300; .serif-default; }
+.serif-regular { font-weight: 400; .serif-default; }
+.serif-bold    { font-weight: 700; .serif-default; }
 
 /*  Elements - Reset styling */
 a, abbr, acronym, address, article, aside, audio, b, big, blockquote,
@@ -65,27 +81,21 @@ b, caption, dt, legend, strong, th, thead { font-weight: bold; }
 big { font-size: 1.8em; line-height: 1em; }
 blockquote { margin: 1em 36px; }
 body {
-   font-family: Verdana, "Lucida Sans", tahoma, arial, sans-serif;
    font-size: 62.5%; font-weight: normal; height: 100%; line-height: 1.8em;
-   max-height: 100%; overflow: hidden; /* 10 18 */
+   max-height: 100%; overflow: hidden; .sans-default;
 }
 br { clear: left; }
 button, input, select { cursor: pointer; line-height: normal; }
 button[disabled], html input[disabled] { cursor: default; }
 canvas { margin: 0; }
 caption { margin: 9px; }
-code, kbd, pre, samp, tt, var {
-   font-family: "Andale Mono", monaco, "Courier New", courier, monospace;
-}
+code, kbd, pre, samp, tt, var { .mono-default; }
 del { text-decoration: line-through; }
 dl, ol, ul { margin-bottom: 18px; }
 dfn { font-style: italic; }
 fieldset { border: 1px solid; margin-bottom: 18px; padding: 6px; }
 form { display: block; overflow: auto; }
-h1, h2, h3, h4, h5, h6 {
-   font-family: "Helvetica Neue", Helvetica, Verdana, tahoma, arial, sans-serif;
-   font-weight: normal;
-}
+h1, h2, h3, h4, h5, h6 { font-weight: normal; .header-default; }
 h1 { font-size: 3.6em; line-height: 1em;     margin: 0.5em    0; } /* 36 36 */
 h2 { font-size: 3.2em; line-height: 1.125em; margin: 0.5625em 0; } /* 32 36 */
 h3 { font-size: 2.8em; line-height: 1.286em; margin: 0.6428em 0; } /* 28 36 */
@@ -114,21 +124,12 @@ tfoot { font-style: italic; }
 th { padding: 3px 6px; }
 ul { list-style-position: outside; list-style-type: disc; }
 
-/* Application styling */
-.serif-default {
-   font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
-}
-.serif-light   { font-weight: 100; .serif-default; }
-.serif-book    { font-weight: 300; .serif-default; }
-.serif-regular { font-weight: 400; .serif-default; }
-.serif-bold    { font-weight: 700; .serif-default; }
-
-/* Elements */
+/* Application styling - Elements */
 a     { color: @contrast; text-decoration: none; }
 a:focus, a:hover { color: @text; }
 body  { background-color: @light; color: @text; }
 code  { color: @light; }
-h1, h2, h3, h4, h5, h6 { .serif-book }
+h1, h2, h3, h4, h5, h6 { .serif-book; }
 h1 { font-size: 32px; line-height: 36px; }
 h2 { font-size: 28px; line-height: 36px; }
 h3 { font-size: 24px; line-height: 36px; }
@@ -150,6 +151,12 @@ table tr th:last-child, table tr td:last-child {
 .article-tree, .content-area { height: 100%; overflow: auto; }
 .article-tree .collapse { direction: ltr; }
 .btn { display: inline-block; text-align: center; vertical-align: middle; }
+.btn.btn-browse, .btn.btn-submit {
+   background-color: @sidebar-hover; border: @dark 1px solid;
+   .border-radius; color: @dark; font-size: 16px; line-height: 18px;
+   margin: 4px 0 4px;
+}
+.btn.btn-browse { padding: 4px 8px 4px; }
 .btn.btn-sidebar {
   background-color: @sidebar-hover; border: none; padding: 9px 9px;
 }
@@ -160,10 +167,7 @@ table tr th:last-child, table tr td:last-child {
 }
 .btn.btn-sidebar:hover { background-color: @dark; }
 .btn.btn-sidebar:hover .icon-bar { background-color: @light; }
-.btn.btn-submit {
-   background-color: @sidebar-hover; border: @dark 1px solid;
-   .border-radius; color: @dark; padding: 5px 9px 4px;
-}
+.btn.btn-submit { padding: 2px 8px 2px; .sans-default; }
 .columns { height: 100%; }
 .columns .left-column {
    background-color: @sidebar-background; margin-left: 0;
@@ -198,7 +202,7 @@ table tr th:last-child, table tr td:last-child {
 .dialog {
    background-color: @sidebar-background; border: 1px solid;
    border-color: @lines; .border-radius; .box-shadow;
-   max-width: 40%; padding: 9px;
+   max-width: 50%; padding: 8px;
 }
 .dialog-body { position: relative; }
 .dialog-body form { vertical-align: middle; }
@@ -213,15 +217,11 @@ table tr th:last-child, table tr td:last-child {
    display: inline-block; float: left; position: relative;
 }
 .dialog-title {
-    color: @light; display: block; font-size: 18px; line-height: 18px;
+   color: @light; display: block; font-size: 18px; line-height: 18px;
+   margin-bottom: 18px;
 }
-.editor {
-   font-family: "Andale Mono", monaco, "Courier New", courier, monospace;
-   font-size: 16px; line-height: 18px;
-}
-.expanding_area {
-   margin-bottom: 18px; overflow: hidden; position: relative;
-}
+.editor { font-size: 16px; line-height: 18px; .mono-default; }
+.expanding_area { margin-bottom: 18px; overflow: hidden; position: relative; }
 .expanding_area > textarea, .expanding_spacer, .expanding_spacer > span {
    white-space: pre-wrap; word-wrap: break-word;
 }
@@ -260,9 +260,7 @@ table tr th:last-child, table tr td:last-child {
 .hidden { display: none; }
 .homepage-content.container-fluid,
 .homepage-footer.container-fluid { font-size: 14px; line-height: 18px; }
-.homepage-content.container-fluid .lead {
-   .serif-regular;
-}
+.homepage-content.container-fluid .lead { .serif-regular; }
 .homepage-content.container-fluid ul,
 .homepage-content.container-fluid ol { margin: 0 0 18px 0; padding: 18px 0; }
 .homepage-content.container-fluid ul li,
@@ -294,15 +292,11 @@ table tr th:last-child, table tr td:last-child {
 .homepage-footer.container-fluid .twitter { margin-top: 36px; }
 .homepage-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .homepage-hero { background-color: @light; color: @dark; }
-.homepage-hero {
-    overflow: hidden; .serif-bold;
-}
+.homepage-hero { overflow: hidden; .serif-bold; }
 .homepage-hero .homepage-image { margin-bottom: 18px; max-height: 475px; }
 .homepage-hero .text-center h2 { margin: 18px auto; text-align: center; }
 .lead { font-size: 18px; line-height: 36px; }
-.navbar {
-   .box-shadow; height: 54px; width: auto; z-index: 200;
-}
+.navbar { .box-shadow; height: 54px; width: auto; z-index: 200; }
 .navbar-fixed-top { left: 0; position: fixed; right: 0; top: 0; }
 .navbar-static-top .container, .navbar-fixed-top .container,
 .navbar-fixed-bottom .container { width: 940px; }
@@ -353,9 +347,10 @@ table tr th:last-child, table tr td:last-child {
 .page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }
 .pathname {
-   border: 2px inset; .border-box; font-size: 16px; line-height: 18px;
-   margin: 4px 0; min-width: 400px; padding: 3px 9px; vertical-align: middle;
+   border: 2px inset; .border-box; font-size: 15px; line-height: 18px;
+   margin: 4px 0; min-width: 400px; padding: 3px 7px; vertical-align: middle;
 }
+.pathname[disabled] { color: @dark; }
 .pod dd p { width: auto; }
 .pod dt { clear: left; }
 .pod dt a, .pod li a { display: block; font-size: 14px; line-height: 18px; }
@@ -413,6 +408,10 @@ table tr th:last-child, table tr td:last-child {
    color: Yellow; display: block; font-size: 16px; line-height: 18px;
    padding: 8px 16px 4px 16px;
 }
+.upload-file { margin: 9px; overflow: hidden; position: relative; }
+.upload-file .upload {
+   cursor: pointer; .opacity( 0 ); position: absolute; top: 0; right: 0;
+}
 .well { min-height: 18px }
 .well.well-sidebar {
    margin-bottom: 18px; padding-left: 18px; padding-right: 18px;
@@ -453,9 +452,7 @@ table tr th:last-child, table tr td:last-child {
    .columns .left-column, .columns .right-column {
       height: auto; padding-top: 0; width: 100% !important;
    }
-   .columns .right-column .content-page {
-      padding-right: 220px !important;
-   }
+   .columns .right-column .content-page { padding-right: 220px !important; }
    .hero-buttons.container-fluid .btn-hero.btn {
       display: block; margin-bottom: 10px;
    }
@@ -510,7 +507,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page p.toplink {
       background-color: transparent; margin-bottom: 0; margin-top: -23px;
       text-align: right;
-  }
+   }
    .float-view .content-page > article > pre {
       border: none; border-left: 5px solid @contrast; clear: right;
       float: left; margin: 0 0 9px 0;
@@ -599,47 +596,9 @@ table tr th:last-child, table tr td:last-child {
    height: 24px; padding: 0 0 0 32px;
 }
 
-/* Date: 17.V.2011 Author: pumbur <pumbur@pumbur.net> */
+/* Highlight.js theme Date: 17.V.2011 Author: pumbur <pumbur@pumbur.net> */
 
 .hljs { display: block; padding: 0.5em; }
-
-.profile .hljs-header *, .ini .hljs-title,
-.nginx .hljs-title { color: #000; }
-
-.hljs-comment, .hljs-javadoc, .hljs-preprocessor,
-.hljs-preprocessor .hljs-title, .hljs-pragma, .hljs-shebang,
-.profile .hljs-summary, .diff, .hljs-pi, .hljs-doctype, .hljs-tag,
-.hljs-template_comment, .css .hljs-rules,
-.tex .hljs-special { color: #910101; }
-
-.hljs-string, .hljs-symbol, .diff .hljs-change, .hljs-regexp,
-.xml .hljs-attribute, .smalltalk .hljs-char, .xml .hljs-value,
-.ini .hljs-value, .clojure .hljs-attribute,
-.coffeescript .hljs-attribute { color: #fc3; }
-
-.hljs-number, .hljs-addition { color: #00cc66; }
-
-.hljs-built_in, .hljs-literal, .vhdl .hljs-typename, .go .hljs-constant,
-.go .hljs-typename, .ini .hljs-keyword, .lua .hljs-title,
-.perl .hljs-variable, .php .hljs-variable, .mel .hljs-variable,
-.django .hljs-variable, .css .funtion, .smalltalk .method,
-.hljs-hexcolor, .hljs-important, .hljs-flow, .hljs-inheritance,
-.parser3 .hljs-variable { color: #32AAEE; }
-
-.hljs-keyword, .hljs-tag .hljs-title, .css .hljs-tag, .css .hljs-class,
-.css .hljs-id, .css .hljs-pseudo, .css .hljs-attr_selector,
-.lisp .hljs-title, .clojure .hljs-built_in, .hljs-winutils,
-.tex .hljs-command, .hljs-request,
-.hljs-status { color: #bb1166; }
-
-.hljs-sub, .hljs-title, .ruby .hljs-constant, .vala .hljs-constant,
-.hljs-parent, .hljs-deletion, .hljs-template_tag, .css .hljs-keyword,
-.objectivec .hljs-class .hljs-id, .smalltalk .hljs-class,
-.lisp .hljs-keyword, .apache .hljs-tag, .nginx .hljs-variable,
-.hljs-envvar, .bash .hljs-variable, .go .hljs-built_in,
-.vbscript .hljs-built_in, .lua .hljs-built_in, .rsl .hljs-built_in,
-.tail, .avrasm .hljs-label, .tex .hljs-formula,
-.tex .hljs-formula * { color: #d65d12; }
 
 .hljs-yardoctag, .hljs-phpdoc, .profile .hljs-header, .ini .hljs-title,
 .apache .hljs-tag, .parser3 .hljs-title { font-weight: bold; }
@@ -648,10 +607,48 @@ table tr th:last-child, table tr td:last-child {
 .xml .javascript, .xml .vbscript, .xml .css,
 .xml .hljs-cdata { opacity: 0.6; }
 
+.profile .hljs-header *, .ini .hljs-title,
+.nginx .hljs-title { color: @hljs-header; }
+
+.hljs-comment, .hljs-javadoc, .hljs-preprocessor,
+.hljs-preprocessor .hljs-title, .hljs-pragma, .hljs-shebang,
+.profile .hljs-summary, .diff, .hljs-pi, .hljs-doctype, .hljs-tag,
+.hljs-template_comment, .css .hljs-rules,
+.tex .hljs-special { color: @hljs-comment; }
+
+.hljs-string, .hljs-symbol, .diff .hljs-change, .hljs-regexp,
+.xml .hljs-attribute, .smalltalk .hljs-char, .xml .hljs-value,
+.ini .hljs-value, .clojure .hljs-attribute,
+.coffeescript .hljs-attribute { color: @hljs-string; }
+
+.hljs-number, .hljs-addition { color: @hljs-number; }
+
+.hljs-built_in, .hljs-literal, .vhdl .hljs-typename, .go .hljs-constant,
+.go .hljs-typename, .ini .hljs-keyword, .lua .hljs-title,
+.perl .hljs-variable, .php .hljs-variable, .mel .hljs-variable,
+.django .hljs-variable, .css .funtion, .smalltalk .method,
+.hljs-hexcolor, .hljs-important, .hljs-flow, .hljs-inheritance,
+.parser3 .hljs-variable { color: @hljs-builtin; }
+
+.hljs-keyword, .hljs-tag .hljs-title, .css .hljs-tag, .css .hljs-class,
+.css .hljs-id, .css .hljs-pseudo, .css .hljs-attr_selector,
+.lisp .hljs-title, .clojure .hljs-built_in, .hljs-winutils,
+.tex .hljs-command, .hljs-request,
+.hljs-status { color: @hljs-keyword; }
+
+.hljs-sub, .hljs-title, .ruby .hljs-constant, .vala .hljs-constant,
+.hljs-parent, .hljs-deletion, .hljs-template_tag, .css .hljs-keyword,
+.objectivec .hljs-class .hljs-id, .smalltalk .hljs-class,
+.lisp .hljs-keyword, .apache .hljs-tag, .nginx .hljs-variable,
+.hljs-envvar, .bash .hljs-variable, .go .hljs-built_in,
+.vbscript .hljs-built_in, .lua .hljs-built_in, .rsl .hljs-built_in,
+.tail, .avrasm .hljs-label, .tex .hljs-formula,
+.tex .hljs-formula * { color: @hljs-sub; }
+
 .hljs, .javascript, .css, .xml, .hljs-subst, .diff .hljs-chunk,
 .css .hljs-value, .css .hljs-attribute, .lisp .hljs-string,
 .lisp .hljs-number, .tail .hljs-params, .hljs-container,
-.haskell *, .erlang *, .erlang_repl * { color: #000; }
+.haskell *, .erlang *, .erlang_repl * { color: @hljs-text; }
 
 /* Plack debug */
 #plDebug #plDebugToolbarHandle {

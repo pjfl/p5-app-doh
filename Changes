@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added file upload to asset directory
           - Updated highlight.js and colour scheme
           - Fixed output from Pod::Xhtml. Indexes work
           - Navigation uses new iterator. No more hidden state

@@ -6,6 +6,7 @@ use namespace::sweep;
 use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( first_char throw trim );
+use File::DataClass::IO;
 use File::DataClass::Types qw( HashRef Int Path Str );
 use Unexpected::Functions  qw( Unspecified );
 
@@ -189,7 +190,7 @@ sub rename_file {
    my $new_node = $self->_get_file_paths( $req );
 
    $new_node->{path}->assert_filepath;
-   $node->{path}->close->move( $new_node->{path} );
+   $node->{path}->close->move( $new_node->{path} ); __prune( $node->{path} );
    $self->root_mtime->touch;
 
    my $location = $req->uri_for( $new_node->{url} );
@@ -209,6 +210,41 @@ sub rename_file_form {
    my $stash = $self->get_stash( $req, $page );
 
    $stash->{template} = 'rename-file';
+   return $stash;
+}
+
+sub upload_file {
+   my ($self, $req) = @_; my $conf = $self->config;
+
+   $req->username ne 'unknown' or throw 'Update not authorised';
+
+   my $upload = $req->args->[ 0 ] or throw 'No upload object';
+
+   $upload and not $upload->is_upload and throw $upload->reason;
+   $upload->size > $conf->max_asset_size
+      and throw error => 'File [_1] size [_2] too big',
+                 args => [ $upload->filename, $upload->size ];
+
+   my $path = $conf->assetdir->catfile( $upload->filename );
+
+   io( $upload->path )->copy( $path->assert_filepath );
+
+   my $rel_path = $path->abs2rel( $self->config->assetdir );
+   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
+   my $message  = [ 'File [_1] uploaded by [_2]', $rel_path, $req->username ];
+
+   return { redirect => { location => $location, message => $message } };
+}
+
+sub upload_file_form {
+   my ($self, $req) = @_;
+
+   my $page  = {
+      meta       => { id => __get_or_throw( $req->params, 'id' ) },
+      literal_js => __copy_element_value(), };
+   my $stash = $self->get_stash( $req, $page );
+
+   $stash->{template} = 'upload-file';
    return $stash;
 }
 
@@ -281,11 +317,9 @@ sub _build_nav_list {
 }
 
 sub _delete_and_prune {
-   my ($self, $path) = @_; my $dir = $path->parent;
+   my ($self, $path) = @_;
 
-   $path->exists and $path->unlink;
-
-   while ($dir->is_empty) { $dir->rmdir; $dir = $dir->parent }
+   $path->exists and $path->unlink; __prune( $path );
 
    $self->root_mtime->touch;
 
@@ -406,6 +440,11 @@ sub _not_found {
 }
 
 # Private functions
+sub __copy_element_value {
+   return [ "\$( 'upload-btn' ).addEvent( 'change', function( ev ) {",
+            "   ev.stop(); \$( 'upload-path' ).value = this.value } )", ];
+}
+
 sub __extract_lang {
    my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
 }
@@ -436,6 +475,15 @@ sub __make_tuple {
 
    return [ 0, $node && $node->{type} eq 'folder'
                ? [ __sorted_keys( $node->{tree} ) ] : [], $node, ];
+}
+
+sub __prune {
+   my $path = shift; my $dir = $path->parent;
+
+   # TODO: The empty call is deprecated in favour of is_empty
+   while ($dir->exists and $dir->empty) { $dir->rmdir; $dir = $dir->parent }
+
+   return $dir;
 }
 
 sub __set_element_focus {

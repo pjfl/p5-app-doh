@@ -3,6 +3,7 @@ package App::Doh::Daemon;
 use namespace::sweep;
 
 use Moo;
+use App::Doh;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( get_user throw );
 use Class::Usul::Options;
@@ -14,6 +15,8 @@ use Scalar::Util           qw( blessed );
 use Unexpected::Functions  qw( Unspecified );
 
 extends q(Class::Usul::Programs);
+
+our $VERSION = $App::Doh::VERSION;
 
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';

@@ -10,6 +10,7 @@ use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
                                Object SimpleStr );
 use Encode                 qw( decode );
 use HTTP::Body;
+use Scalar::Util           qw( blessed );
 use URI::http;
 use URI::https;
 
@@ -24,12 +25,12 @@ has 'body'     => is => 'lazy', isa => Object;
 has 'domain'   => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub { (split m{ : }mx, $_[ 0 ]->host)[ 0 ] };
 
+has 'env'      => is => 'ro',   isa => HashRef, default => sub { {} };
+
 has 'host'     => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub {
       my $env  =  $_[ 0 ]->env;
          $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
-
-has 'env'      => is => 'ro',   isa => HashRef, default => sub { {} };
 
 has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr;
 
@@ -67,7 +68,10 @@ around 'BUILDARGS' => sub {
    $attr->{builder} = $builder;
    $attr->{env    } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{params } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-   $attr->{args   } = [ split m{ / }mx, trim $args[ 0 ] || NUL ];
+
+   if (blessed $args[ 0 ]) { $attr->{args} = [ $args[ 0 ] ] }
+   else { $attr->{args} = [ split m{ / }mx, trim $args[ 0 ] || NUL ] }
+
    return $attr;
 };
 
@@ -225,11 +229,16 @@ An L<HTTP::Body> object constructed from the current request
 
 =item C<domain>
 
-A non empty simple string which is the domain of the request
+A non empty simple string which is the domain of the request. The value of
+C<host> but without the port number
 
 =item C<env>
 
 A hash reference, the L<Plack> request environment
+
+=item C<host>
+
+The domain name and port number of the request
 
 =item C<locale>
 
@@ -252,6 +261,10 @@ The query parameters from the current request
 =item C<scheme>
 
 The HTTP protocol used in the request. Defaults to C<http>
+
+=item C<script>
+
+The request path
 
 =item C<session>
 

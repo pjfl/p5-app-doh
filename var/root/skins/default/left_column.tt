@@ -94,6 +94,12 @@
                               name="_method" type="submit"
                              value="delete">[% text %]</button></span>
                </form>
+[%    title = hint _ ' ~ ' _ loc( 'Upload an asset file' ) -%]
+[%    text  = loc( 'Upload' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="upload-file">[% text %]</a></span>
+               <br>
 [% END -%]
 [% IF config.links.0 -%]
 [%    FOREACH link = config.links -%]

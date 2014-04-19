@@ -24,6 +24,7 @@ t/ipc_srlock*
 var/logs
 var/run
 var/tmp
+var/root/assets
 var/root/css
 var/root/docs/.mtime
 var/root/docs/de

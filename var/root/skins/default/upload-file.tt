@@ -1,0 +1,11 @@
+<form action="[% uri_for( 'upload' ) %]?auth=1"
+     enctype="multipart/form-data" method="post" name="upload-file">
+   <input class="pathname" id="upload-path"
+      placeholder="Choose File" disabled="disabled">
+   <div class="upload-file btn btn-browse">
+      <span>[% loc( 'Browse' ) %]</span><br>
+      <input class="upload" id="upload-btn" name="file" type="file">
+   </div>
+   <button class="btn btn-submit" name="_method" type="submit"
+           value="upload">[% loc( 'Upload' ) %]</button>
+</form>

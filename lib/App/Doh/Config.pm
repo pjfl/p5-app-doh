@@ -6,10 +6,17 @@ use Moo;
 use Class::Usul::Constants;
 use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
-                               NonZeroPositiveInt SimpleStr );
+                               NonZeroPositiveInt Path SimpleStr );
 use Sys::Hostname          qw( hostname );
 
 extends q(Class::Usul::Config::Programs);
+
+has 'assets'           => is => 'ro',   isa => NonEmptySimpleStr,
+   default             => 'assets/',
+
+has 'assetdir'         => is => 'lazy', isa => Path,
+   builder             => sub { $_[ 0 ]->root->catfile( $_[ 0 ]->assets ) },
+   coerce              => Path->coercion;
 
 has 'author'           => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Dave';
@@ -21,7 +28,7 @@ has 'code_blocks'      => is => 'ro',   isa => Int, default => 1;
 has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
 has 'common_links'     => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( css help_url images js less ) ] };
+   builder             => sub { [ qw( assets css help_url images js less ) ] };
 
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'css/';
@@ -68,6 +75,8 @@ has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'less/';
 
 has 'links'            => is => 'lazy', isa => ArrayRef, init_arg => undef;
+
+has 'max_asset_size'   => is => 'ro',   isa => Int, default => 4_194_304;
 
 has 'mount_point'      => is => 'ro',   isa => NonEmptySimpleStr,
    default             => '/';
@@ -164,6 +173,16 @@ Defines the following attributes;
 
 =over 3
 
+=item C<assets>
+
+A non empty simple string that defaults to F<assets/>. Relative URI path
+that locates the assets files uploaded by users
+
+=item C<assetdir>
+
+Defaults to F<var/root/assets>. Path object for the directory
+containing user uploaded files
+
 =item C<author>
 
 A non empty simple string that defaults to C<Dave>. The HTML meta attributes
@@ -188,7 +207,7 @@ creates a custom colour scheme for the project
 
 =item C<common_links>
 
-An array reference that defaults to C<[ css help_url images less js ]>.
+An array reference that defaults to C<[ assets css help_url images less js ]>.
 The application pre-calculates URIs for these static directories for use
 in the HTML templates
 
@@ -228,9 +247,8 @@ view mode
 
 =item C<font>
 
-A simple string that defaults to
-C<http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100>. The
-default font used to display text
+A simple string that defaults to null. The default font used to
+display text headings
 
 =item C<google_analytics>
 
@@ -268,6 +286,10 @@ A lazily evaluated array reference of hashes created automatically from the
 hash reference in the configuration file. Each hash has a single
 key / value pair, the link name and it's URI. The links are displayed in
 the navigation panel and the footer in the default templates
+
+=item C<max_asset_size>
+
+Integer defaults to 4Mb. Maximum size in bytes of the file upload
 
 =item C<mount_point>
 

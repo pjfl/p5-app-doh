@@ -87,7 +87,8 @@ around 'to_psgi_app' => sub {
             vary_user_agent => TRUE;
          # TODO: User Plack::Middleware::Static::Minifier
          enable 'Static',
-            path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
+            path => qr{ \A / (assets | css | img | js | less) }mx,
+            root => $conf->root;
          enable "LogDispatch", logger => $logger;
          enable 'Session::Cookie',
             httponly => TRUE,          path        => $point,
@@ -117,6 +118,12 @@ sub dispatch_request {
    sub (GET  + /rename + ?*) {
       return shift->_execute( qw( xml  docs rename_file_form ), @_ );
    },
+   sub (POST + /upload + *file~ + ?*) {
+      return shift->_execute( qw( html docs upload_file ), @_ );
+   },
+   sub (GET  + /upload + ?*) {
+      return shift->_execute( qw( xml  docs upload_file_form ), @_ );
+   },
    sub (POST + / | /** + ?*) {
       return shift->_execute( qw( html docs file_action ), @_ );
    },
@@ -133,7 +140,7 @@ sub _execute {
       my $req = App::Doh::Request->new( $self->usul, @args );
 
       $method =~ m{ _action \z }mx
-         and $method = $self->_modify_action( $req, $method );
+         and $method = $self->_tunnel_action( $req, $method );
 
       my $stash = $self->models->{ $model }->$method( $req );
 
@@ -155,7 +162,7 @@ sub _internal_server_error {
    return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $msg ] ];
 }
 
-sub _modify_action {
+sub _tunnel_action {
    my ($self, $req, $method) = @_;
 
    my $action = $req->body->param->{_method} || NUL;

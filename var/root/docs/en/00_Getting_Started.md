@@ -42,7 +42,7 @@ installed.
 
 **Requirements:**
 
-* Perl 5.12.0 or above
+* Perl 5.10.1 or above
 
 If you don't already have it, bootstrap
 [App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
@@ -66,7 +66,7 @@ If that fails run it again with the --force option
 
    cpanm --force git:...
 
-Although this is a simple application it is composed of many CPAN
+Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,
 installation may take a while to complete. The flip side is that there are no
 external dependencies like Node.io or Grunt to install.
@@ -316,6 +316,10 @@ directories in the file path will be automatically created.
 
 The `Delete` link will prompt for confirmation before deleting the markdown
 file. Empty directories will be removed.
+
+The `Upload` link lets you select a file to upload. The uploaded file appears
+in the `var/root/assets` directory. It can be referenced from a template
+using `[\% links.assets %\]your-asset.jpg`
 
 ## Generating a set of static files
 

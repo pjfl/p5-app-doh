@@ -162,10 +162,11 @@ var Behaviour = new Class( {
 
       $$( '.aj-nav' ).each( function( el ) {
          el.addEvent( 'click', function( ev ) {
-            ev.stop();
-            this.getParent().getParent().getSiblings().getElements( 'ul' )
-                .each( function( list ) { list.dissolve() } );
-            this.getParent().getNext().reveal();
+            ev.stop(); var parent = this.getParent();
+
+            parent.getParent().getSiblings().getElements( 'ul' )
+                  .each( function( list ) { list.dissolve() } );
+            parent.getNext().reveal();
          } );
       } );
 

@@ -1,9 +1,9 @@
 package App::Doh::CLI;
 
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 44 $ =~ /\d+/gmx );
 
 use Moo;
+use App::Doh;
 use App::Doh::Model::Documentation;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( throw );
@@ -11,6 +11,8 @@ use Class::Usul::Types     qw( Object );
 use File::DataClass::IO;
 
 extends q(Class::Usul::Programs);
+
+our $VERSION = $App::Doh::VERSION;
 
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';
@@ -54,8 +56,9 @@ sub _copy_assets {
       __deep_copy( $root->catdir( $conf->css ), $dest );
    }
 
+   __deep_copy( $root->catdir( $conf->assets ), $dest );
    __deep_copy( $root->catdir( $conf->images ), $dest, $unwanted_images );
-   __deep_copy( $root->catdir( $conf->js     ), $dest, $unwanted_js     );
+   __deep_copy( $root->catdir( $conf->js     ), $dest, $unwanted_js );
    return;
 }
 
