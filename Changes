@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Fixed cache invalidation
           - Added make_css method to ::CLI
           - Added file upload to asset directory
           - Updated highlight.js and colour scheme

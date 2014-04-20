@@ -34,8 +34,9 @@ hence [Mootools](http://mootools.net/) not jQuery.
 
 ## Installation
 
-The App-Doh repository contains meta data that lists the CPAN modules used by
-the application. Modern Perl CPAN distribution installers (like
+The [App-Doh repository](http://github.com/pjfl/p5-app-doh) contains meta data
+that lists the CPAN modules used by the application. Modern Perl CPAN
+distribution installers (like
 [App::cpanminus](https://metacpan.org/module/App::cpanminus)) use this
 information to install the required dependencies when this application is
 installed.

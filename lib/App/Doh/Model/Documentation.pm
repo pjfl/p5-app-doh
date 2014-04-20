@@ -47,7 +47,7 @@ sub create_file {
    my $path     = $node->{path};
 
    $path->assert_filepath->println( $content )->close;
-   $self->root_mtime->touch( $path->stat->{mtime} );
+   $self->_invalidate_cache( $path->stat->{mtime} );
 
    my $location = $req->uri_for( $node->{url} );
    my $rel_path = $path->abs2rel( $self->config->file_root );
@@ -160,22 +160,32 @@ sub locales {
    return grep { first_char $_ ne '_' } keys %{ $_[ 0 ]->docs_tree };
 }
 
-sub navigation {
-   my ($self, $req) = @_; state $cache //= {};
+{  my $cache //= {};
 
-   my $locale = $self->config->locale; # Always index config default language
-   my $lang   = __extract_lang( $locale );
-   my @ids    = @{ $req->args };
-   my $wanted = join '/', @ids;
-   my $list   = $cache->{ $lang.$wanted };
-   my $mtime  = $self->_localised_tree( $locale )->{tree}->{_mtime};
+   sub _invalidate_cache {
+      my ($self, $mtime) = @_; $cache = {};
 
-   (not $list or $mtime > $list->{mtime})
-      and $cache->{ $lang.$wanted } = $list
-         = { items => $self->_build_nav_list( $locale, \@ids, $wanted ),
-             mtime => $mtime, };
+      $self->root_mtime->touch( $mtime );
+      return;
+   }
 
-   return $list->{items};
+   sub navigation {
+      my ($self, $req) = @_;
+
+      my $locale = $self->config->locale; # Always index config default language
+      my $lang   = __extract_lang( $locale );
+      my @ids    = @{ $req->args };
+      my $wanted = join '/', @ids;
+      my $list   = $cache->{ $lang.$wanted };
+      my $mtime  = $self->_localised_tree( $locale )->{tree}->{_mtime};
+
+      (not $list or $mtime > $list->{mtime})
+         and $cache->{ $lang.$wanted } = $list
+            = { items => $self->_build_nav_list( $locale, \@ids, $wanted ),
+                mtime => $mtime, };
+
+      return $list->{items};
+   }
 }
 
 sub rename_file {
@@ -191,7 +201,7 @@ sub rename_file {
 
    $new_node->{path}->assert_filepath;
    $node->{path}->close->move( $new_node->{path} ); __prune( $node->{path} );
-   $self->root_mtime->touch;
+   $self->_invalidate_cache;
 
    my $location = $req->uri_for( $new_node->{url} );
    my $rel_path = $node->{path}->abs2rel( $self->config->file_root );
@@ -250,11 +260,11 @@ sub upload_file_form {
 
 # Private methods
 sub _build_docs_tree {
-   my ($self, $dir, $level, $url_base, $title) = @_; my $tree = {};
+   my ($self, $dir, $level, $order, $url_base, $title) = @_;
 
-   my $max_mtime = 0; my $no_index = $self->no_index; state $order //= 0;
+   my $max_mtime = 0; my $no_index = $self->no_index; my $tree = {};
 
-   $dir //= $self->config->file_root; $level //= 0; $level++;
+   $dir //= $self->config->file_root; $level //= 0; $level++; $order //= 0;
 
    $url_base //= NUL; $title //= NUL;
 
@@ -280,8 +290,8 @@ sub _build_docs_tree {
       $path->is_dir or next;
       $node->{type} = 'folder';
       $node->{tree} = $level > 1 # Skip the language code directories
-                    ? $self->_build_docs_tree( $path, $level, $url, $name )
-                    : $self->_build_docs_tree( $path, $level, NUL,  NUL   );
+                ? $self->_build_docs_tree( $path, $level, $order, $url, $name )
+                : $self->_build_docs_tree( $path, $level, $order, NUL,  NUL   );
       $node->{tree}->{_mtime} > $max_mtime
          and $max_mtime = $node->{tree}->{_mtime};
    }
@@ -321,7 +331,7 @@ sub _delete_and_prune {
 
    $path->exists and $path->unlink; __prune( $path );
 
-   $self->root_mtime->touch;
+   $self->_invalidate_cache;
 
    return $path->abs2rel( $self->config->file_root );
 }
