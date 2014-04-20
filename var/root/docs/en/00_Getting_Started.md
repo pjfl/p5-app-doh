@@ -275,6 +275,13 @@ The national flag on the right of the title bar indicates the language of the
 file being displayed or edited. Adding `?use_flags=0` to a URI will turn the
 flags off and display a language code instead.
 
+Text within the application can be translated into other languages by
+creating GNU Gettext portable object files. The path is
+`var/locale/<language_code>/LC_MESSAGES` and the two file names are
+`default.po` and `server.po`. Messages in the `default.po` are common to all
+programs in the application. Creating English translation files allows the
+terse error messages to be replaced with more user friendly ones.
+
 ### Directory structure:
 
    ├── docs/
@@ -320,6 +327,16 @@ file. Empty directories will be removed.
 The `Upload` link lets you select a file to upload. The uploaded file appears
 in the `var/root/assets` directory. It can be referenced from a template
 using `[\% links.assets %\]your-asset.jpg`
+
+## Generating CSS from Less
+
+Only the green theme is precompiled, if you want the other colour themes then
+install Node, Lessc, CSS::LESS, and then create the other CSS files
+
+   apt-get install node npm
+   npm install -g less
+   cpanm CSS::LESS
+   bin/doh-cli make_css
 
 ## Generating a set of static files
 

@@ -30,6 +30,8 @@ has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
 has 'common_links'     => is => 'ro',   isa => ArrayRef,
    builder             => sub { [ qw( assets css help_url images js less ) ] };
 
+has 'compress_css'     => is => 'ro',   isa => Bool, default => TRUE;
+
 has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'css/';
 
@@ -110,6 +112,9 @@ has 'template'         => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'theme'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'green';
+
+has 'themes'           => is => 'ro',   isa => ArrayRef,
+   builder             => sub { [ qw( blue green navy red ) ] };
 
 has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
    default             => 'Documentation';
@@ -210,6 +215,10 @@ creates a custom colour scheme for the project
 An array reference that defaults to C<[ assets css help_url images less js ]>.
 The application pre-calculates URIs for these static directories for use
 in the HTML templates
+
+=item C<compress_css>
+
+Boolean default to true. Should the C<make_css> method compress it's output
 
 =item C<css>
 
@@ -346,6 +355,10 @@ L<Template::Toolkit> template used to render the HTML response page
 
 A non empty simple string that defaults to C<green>. The name of the
 default colour scheme
+
+=item C<themes>
+
+The list of predefined colour schemes
 
 =item C<title>
 

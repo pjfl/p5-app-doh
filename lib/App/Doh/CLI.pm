@@ -9,6 +9,7 @@ use Class::Usul::Constants;
 use Class::Usul::Functions qw( throw );
 use Class::Usul::Types     qw( Object );
 use File::DataClass::IO;
+use Unexpected::Types      qw( LoadableClass );
 
 extends q(Class::Usul::Programs);
 
@@ -17,11 +18,40 @@ our $VERSION = $App::Doh::VERSION;
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';
 
-has 'model' => is => 'lazy', isa => Object, builder => sub {
-   App::Doh::Model::Documentation->new( builder => $_[ 0 ] );
+has 'less'       => is => 'lazy', isa => Object, builder => sub {
+   my $self = shift;
+   my $conf = $self->config;
+   my $incd = $conf->root->catdir( 'less' );
+
+   return $self->less_class->new( compress      => $conf->compress_css,
+                                  include_paths => [ "${incd}" ],
+                                  tmp_path      => $conf->tempdir, );
+};
+
+has 'less_class' => is => 'lazy', isa => LoadableClass,
+   default       => 'CSS::LESS';
+
+has 'model'      => is => 'lazy', isa => Object, builder => sub {
+   return App::Doh::Model::Documentation->new( builder => $_[ 0 ] );
 };
 
 # Public methods
+sub make_css : method {
+   my $self = shift;
+   my $conf = $self->config;
+   my $cssd = $conf->root->catdir( 'css' );
+
+   for my $theme (@{ $conf->themes }) {
+      my $path = $conf->root->catfile( 'less', "theme-${theme}.less" );
+      my $css  = $self->less->compile( $path->all );
+
+      $self->info( "Writing ${theme} theme" );
+      $cssd->catfile( "theme-${theme}.css" )->println( $css );
+   }
+
+   return OK;
+}
+
 sub make_static : method {
    my $self = shift; my $dest = io( $self->next_argv // 'static' );
 

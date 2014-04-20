@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added make_css method to ::CLI
           - Added file upload to asset directory
           - Updated highlight.js and colour scheme
           - Fixed output from Pod::Xhtml. Indexes work

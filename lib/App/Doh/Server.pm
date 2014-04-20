@@ -85,7 +85,6 @@ around 'to_psgi_app' => sub {
             content_type    => [ qw( text/css text/html text/javascript
                                      application/javascript ) ],
             vary_user_agent => TRUE;
-         # TODO: User Plack::Middleware::Static::Minifier
          enable 'Static',
             path => qr{ \A / (assets | css | img | js | less) }mx,
             root => $conf->root;
