@@ -86,7 +86,7 @@ sub _copy_assets {
       __deep_copy( $root->catdir( $conf->css ), $dest );
    }
 
-   __deep_copy( $root->catdir( $conf->assets ), $dest );
+   __deep_copy( $conf->file_root->catdir( $conf->assets ), $dest );
    __deep_copy( $root->catdir( $conf->images ), $dest, $unwanted_images );
    __deep_copy( $root->catdir( $conf->js     ), $dest, $unwanted_js );
    return;

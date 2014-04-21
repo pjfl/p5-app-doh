@@ -86,8 +86,11 @@ around 'to_psgi_app' => sub {
                                      application/javascript ) ],
             vary_user_agent => TRUE;
          enable 'Static',
-            path => qr{ \A / (assets | css | img | js | less) }mx,
+            path => qr{ \A / (css | img | js | less) }mx,
             root => $conf->root;
+         enable 'Static',
+            path => qr{ \A / assets }mx, pass_through => TRUE,
+            root => $conf->file_root;
          enable "LogDispatch", logger => $logger;
          enable 'Session::Cookie',
             httponly => TRUE,          path        => $point,
@@ -102,26 +105,14 @@ around 'to_psgi_app' => sub {
 
 # Public methods
 sub dispatch_request {
-   sub (POST + /create + ?*) {
-      return shift->_execute( qw( html docs create_file ), @_ );
+   sub (POST + /assets + *file~ + ?*) {
+      return shift->_execute( qw( html docs file_upload ), @_ );
    },
-   sub (GET  + /create + ?*) {
-      return shift->_execute( qw( xml  docs create_file_form ), @_ );
+   sub (GET  + /dialog + ?*) {
+      return shift->_execute( qw( xml  docs dialog ), @_ );
    },
-   sub (GET  + /help | /help/** + ?*) {
+   sub (GET  + /pod | /pod/** + ?*) {
       return shift->_execute( qw( html help content_from_pod ), @_ );
-   },
-   sub (POST + /rename + ?*) {
-      return shift->_execute( qw( html docs rename_file ), @_ );
-   },
-   sub (GET  + /rename + ?*) {
-      return shift->_execute( qw( xml  docs rename_file_form ), @_ );
-   },
-   sub (POST + /upload + *file~ + ?*) {
-      return shift->_execute( qw( html docs upload_file ), @_ );
-   },
-   sub (GET  + /upload + ?*) {
-      return shift->_execute( qw( xml  docs upload_file_form ), @_ );
    },
    sub (POST + / | /** + ?*) {
       return shift->_execute( qw( html docs file_action ), @_ );
@@ -161,17 +152,6 @@ sub _internal_server_error {
    return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $msg ] ];
 }
 
-sub _tunnel_action {
-   my ($self, $req, $method) = @_;
-
-   my $action = $req->body->param->{_method} || NUL;
-
-   $action and $action = lc "_${action}" and $action =~ s{ \s }{_}gmx;
-   $method =~ s{ _action \z }{$action}mx;
-
-   return $method;
-}
-
 sub _redirect {
    my ($self, $req, $stash) = @_;
 
@@ -183,6 +163,17 @@ sub _redirect {
             and $self->log->info( $req->loc_default( @{ $message } ) );
 
    return [ $code, [ 'Location', $redirect->{location} ], [] ];
+}
+
+sub _tunnel_action {
+   my ($self, $req, $method) = @_;
+
+   my $action = $req->body->param->{_method} // NUL;
+
+   $action and $action = lc "_${action}" and $action =~ s{ \s }{_}gmx;
+   $method =~ s{ _action \z }{$action}mx;
+
+   return $method;
 }
 
 # Private functions

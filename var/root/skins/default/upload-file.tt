@@ -1,4 +1,4 @@
-<form action="[% uri_for( 'upload' ) %]?auth=1"
+<form action="[% uri_for( 'assets' ) %]?auth=1"
      enctype="multipart/form-data" method="post" name="upload-file">
    <input class="pathname" id="upload-path"
       placeholder="Choose File" disabled="disabled">

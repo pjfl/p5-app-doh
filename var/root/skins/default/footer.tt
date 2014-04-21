@@ -11,27 +11,28 @@
 [% IF ! page.editing && page.mode != 'static' -%]
       behaviour.config.anchors[ 'create-file' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'create' ) %]?auth=1', {
-                name : 'create_file', title: '[% loc( 'Create File' ) %]' } ] };
+             args    : [ '[% uri_for( 'dialog' ) %]?auth=1&name=create', {
+                name : 'create_file',
+                title: '[% loc( 'Create File' ) %]' } ] };
       behaviour.config.anchors[ 'delete-file' ]
          = { method  : 'confirmSubmit',
              args    : [ 'delete',
                 '[% loc( 'Are you sure you want to delete this file?' ) %]' ] };
       behaviour.config.anchors[ 'rename-file' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'rename' ) %]?auth=1', {
+             args    : [ '[% uri_for( 'dialog' ) %]?auth=1&name=rename', {
                 name : 'rename_file',
                 title: '[% loc( 'Rename File' ) %]',
                 value: '[% page.url %]' } ] };
       behaviour.config.anchors[ 'upload-file' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'upload' ) %]?auth=1', {
+             args    : [ '[% uri_for( 'dialog' ) %]?auth=1&name=upload', {
                 name : 'upload_file',
                 title: '[% loc( 'Upload File' ) %]',
                 value: '[% page.url %]' } ] };
 [% END -%]
    </script>
-[% IF config.google_analytics -%]
+[% IF config.analytics -%]
    <script>
       ( function( w, d, t, s, f) {
            w[ 'GoogleAnalyticsObject' ] = f;
@@ -43,7 +44,7 @@
            m.parentNode.insertBefore( e, m );
         } )( window, document, 'script',
                 '//www.google-analytics.com/analytics.js', 'ga' );
-      ga( 'create', '[% config.google_analytics %]', '[% req.domain %]' );
+      ga( 'create', '[% config.analytics %]', '[% req.domain %]' );
       ga( 'send', 'pageview' );
    </script>
 [% END -%]

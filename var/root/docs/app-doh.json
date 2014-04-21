@@ -1,8 +1,8 @@
 {
+   "analytics": "UA-XXXXXXXX-XX",
    "description": "An Easy Way To Document A Project Using Markdown",
    "float": true,
    "font": "http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100",
-   "google_analytics": "UA-XXXXXXXX-XX",
    "links": {
       "Built Using Perl": "http://www.perl.org",
       "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",

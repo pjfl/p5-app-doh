@@ -11,123 +11,123 @@ use Sys::Hostname          qw( hostname );
 
 extends q(Class::Usul::Config::Programs);
 
-has 'assets'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'assets/',
+has 'analytics'       => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'assetdir'         => is => 'lazy', isa => Path,
-   builder             => sub { $_[ 0 ]->root->catfile( $_[ 0 ]->assets ) },
-   coerce              => Path->coercion;
+has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'assets/',
 
-has 'author'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'Dave';
+has 'assetdir'        => is => 'lazy', isa => Path,
+   builder            => sub { $_[ 0 ]->file_root->catfile( $_[ 0 ]->assets ) },
+   coerce             => Path->coercion;
 
-has 'brand'            => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'author'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'Dave';
 
-has 'code_blocks'      => is => 'ro',   isa => Int, default => 1;
+has 'brand'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'colours'          => is => 'lazy', isa => ArrayRef, init_arg => undef;
+has 'code_blocks'     => is => 'ro',   isa => Int, default => 1;
 
-has 'common_links'     => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( assets css help_url images js less ) ] };
+has 'colours'         => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
-has 'compress_css'     => is => 'ro',   isa => Bool, default => TRUE;
+has 'common_links'    => is => 'ro',   isa => ArrayRef,
+   builder            => sub { [ qw( assets css help_url images js less ) ] };
 
-has 'css'              => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'css/';
+has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 
-has 'default_content'  => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'Page intentionally created blank';
+has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'css/';
 
-has 'description'      => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'default_content' => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'Page intentionally created blank';
 
-has 'docs_path'        => is => 'lazy', isa => Directory,
-   builder             => sub { $_[ 0 ]->root->catdir( 'docs' ) },
-   coerce              => Directory->coercion;
+has 'description'     => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'extensions'       => is => 'ro',   isa => HashRef,
-   builder             => sub { { markdown => [ qw( md mkdn )   ],
-                                  pod      => [ qw( pl pm pod ) ], } };
+has 'docs_path'       => is => 'lazy', isa => Directory,
+   builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) },
+   coerce             => Directory->coercion;
 
-has 'file_root'        => is => 'lazy', isa => Directory,
-   builder             => sub { $_[ 0 ]->docs_path },
-   coerce              => Directory->coercion;
+has 'extensions'      => is => 'ro',   isa => HashRef,
+   builder            => sub { { markdown => [ qw( md mkdn )   ],
+                                 pod      => [ qw( pl pm pod ) ], } };
 
-has 'float'            => is => 'ro',   isa => Bool, default => TRUE;
+has 'file_root'       => is => 'lazy', isa => Directory,
+   builder            => sub { $_[ 0 ]->docs_path },
+   coerce             => Directory->coercion;
 
-has 'font'             => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'float'           => is => 'ro',   isa => Bool, default => TRUE;
 
-has 'google_analytics' => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'font'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'help_url'         => is => 'ro',   isa => SimpleStr, default => 'help';
+has 'help_url'        => is => 'ro',   isa => SimpleStr, default => 'pod';
 
-has 'images'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'img/';
+has 'images'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'img/';
 
-has 'js'               => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'js/';
+has 'js'              => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'js/';
 
-has 'keywords'         => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'keywords'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'languages'        => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
-   builder             => sub {
+has 'languages'       => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
+   builder            => sub {
       [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ];
    };
 
-has 'less'             => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'less/';
+has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'less/';
 
-has 'links'            => is => 'lazy', isa => ArrayRef, init_arg => undef;
+has 'links'           => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
-has 'max_asset_size'   => is => 'ro',   isa => Int, default => 4_194_304;
+has 'max_asset_size'  => is => 'ro',   isa => Int, default => 4_194_304;
 
-has 'mount_point'      => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => '/';
+has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => '/';
 
-has 'no_index'         => is => 'ro',   isa => ArrayRef,
-   builder             => sub {
-      [ qw( .git .htpasswd .mtime .svn app-doh.json ) ] };
+has 'no_index'        => is => 'ro',   isa => ArrayRef,
+   builder            => sub {
+      [ qw( .git .htpasswd .mtime .svn app-doh.json assets ) ] };
 
-has 'port'             => is => 'lazy', isa => NonZeroPositiveInt,
-   default             => 8085;
+has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
+   default            => 8085;
 
-has 'preferences'      => is => 'ro',   isa => ArrayRef,
-   builder             => sub {
+has 'preferences'     => is => 'ro',   isa => ArrayRef,
+   builder            => sub {
       [ qw( code_blocks float skin theme use_flags ) ] };
 
-has 'projects'         => is => 'ro',   isa => HashRef,   default => sub { {} };
+has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
 
-has 'repo_url'         => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'secret'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => hostname;
+has 'secret'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => hostname;
 
-has 'server'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'Starman';
+has 'server'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'Starman';
 
-has 'skin'             => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'default';
+has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'default';
 
-has 'template'         => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'index';
+has 'template'        => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'index';
 
-has 'theme'            => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'green';
+has 'theme'           => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'green';
 
-has 'themes'           => is => 'ro',   isa => ArrayRef,
-   builder             => sub { [ qw( blue green navy red ) ] };
+has 'themes'          => is => 'ro',   isa => ArrayRef,
+   builder            => sub { [ qw( blue green navy red ) ] };
 
-has 'title'            => is => 'ro',   isa => NonEmptySimpleStr,
-   default             => 'Documentation';
+has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'Documentation';
 
-has 'twitter'          => is => 'ro',   isa => ArrayRef, builder => sub { [] };
+has 'twitter'         => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
-has 'use_flags'        => is => 'ro',   isa => Bool, default => TRUE;
+has 'use_flags'       => is => 'ro',   isa => Bool, default => TRUE;
 
-has '_colours'         => is => 'ro',   isa => HashRef,
-   builder             => sub { {} }, init_arg => 'colours';
+has '_colours'        => is => 'ro',   isa => HashRef,
+   builder            => sub { {} }, init_arg => 'colours';
 
-has '_links'           => is => 'ro',   isa => HashRef,
-   builder             => sub { {} }, init_arg => 'links';
+has '_links'          => is => 'ro',   isa => HashRef,
+   builder            => sub { {} }, init_arg => 'links';
 
 # Private methods
 sub _build_colours {
@@ -177,6 +177,11 @@ by the value in the configuration file
 Defines the following attributes;
 
 =over 3
+
+=item C<analytics>
+
+A simple string that defaults to null. Unique Google Analytics registration
+code
 
 =item C<assets>
 
@@ -259,14 +264,9 @@ view mode
 A simple string that defaults to null. The default font used to
 display text headings
 
-=item C<google_analytics>
-
-A simple string that defaults to null. Unique Google Analytics registration
-code
-
 =item C<help_url>
 
-A simple string that defaults to C<help>. The partial URI path which locates
+A simple string that defaults to C<pod>. The partial URI path which locates
 this POD when rendered as HTML and served by this application
 
 =item C<images>

@@ -253,10 +253,10 @@ Include custom links in the sidebar.
    }
 
 ### Google Analytics:
-This will embed the google analytics tracking code.
+This will embed the Google Analytics tracking code.
 
    {
-      "google_analytics": "UA-XXXXXXXXX-XX"
+      "analytics": "UA-XXXXXXXXX-XX"
    }
 
 
