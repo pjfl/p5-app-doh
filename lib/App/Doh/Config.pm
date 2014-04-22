@@ -40,6 +40,9 @@ has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
 has 'default_content' => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Page intentionally created blank';
 
+has 'default_skin'    => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'default';
+
 has 'description'     => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'docs_path'       => is => 'lazy', isa => Directory,
@@ -233,6 +236,11 @@ that locates the static CSS files
 =item C<default_content>
 
 The string of text that is the content of any new markdown files
+
+=item C<default_skin>
+
+Simple string that default to F<default>. The name of the default template
+directory
 
 =item C<description>
 

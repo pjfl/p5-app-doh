@@ -240,20 +240,19 @@ sub save_file_action {
 sub search_file_action {
    my ($self, $req) = @_;
 
-   my $root  = $self->config->file_root;
-   my $query = __get_or_throw( $req->params, 'query' );
-   my $path  = $root->catdir( __extract_lang( $req->locale ) );
-   my $res   = $self->ipc->run_cmd( [ 'ack', $query, $path->pathname ] );
-   my @res   = ( map    { [ split m{ : }mx, $_, 3 ] }
-                 split m{ \n }mx, $res->stdout );
-   $self->usul->dumper( \@res );
-   my $node  = {};
-   my $url   = $req->uri_for( $self->_docs_url( $req->locale ) );
-   my $page  = {
-      content      => join "\n", map { join SPC, @{ $_ } } @res,
+   my $root   = $self->config->file_root;
+   # TODO: Sanitize user input
+   my $query  = __get_or_throw( $req->params, 'query' );
+   my $langd  = $root->catdir( __extract_lang( $req->locale ) );
+   my $res    = $self->ipc->run_cmd( [ 'ack', $query, $langd->pathname ] );
+   my @tuples = __prepare_search_results( $req, $langd, $res->stdout );
+   my $node   = {};
+   my $url    = $req->uri_for( $self->_docs_url( $req->locale ) );
+   my $page   = {
+      content      => (join "\n", map { '['.$_->[ 0 ].']('.$_->[ 1 ].') '.$_->[ 2 ].'  ' } @tuples),
       docs_url     => $url,
       editing      => FALSE,
-      format       => 'text',
+      format       => 'markdown',
       header       => 'Search Results',
       homepage_url => $url,
       mode         => $req->params->{mode} // 'online',
@@ -443,13 +442,11 @@ sub _localised_tree {
 sub _new_node {
    my ($self, $locale, $param) = @_;
 
-   my $pathname =  __get_or_throw( $param, 'pathname' );
-      $pathname !~ m{ \. [m][k]?[d][n]? \z }mx and $pathname .= '.md';
-   my @filepath =  map { __make_id_from( $_ ) }
-   my @pathname =  map { s{ [ ] }{_}gmx; $_   }
-                   map { trim $_              } split m{ / }mx, $pathname;
+   my $pathname =  __append_suffix( __get_or_throw( $param, 'pathname' ) );
+   my @pathname =  __prepare_path( $pathname );
+   my @filepath =  map { __make_id_from( $_ ) } @pathname;
+   my $url      =  join '/', @filepath;
    my $id       =  pop @filepath;
-   my $url      =  join '/', @filepath, $id;
    my $lang     =  __extract_lang( $locale );
    my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
    my $parent   =  $self->_find_node( $locale, [ @filepath ] );
@@ -482,6 +479,14 @@ sub _not_found {
 }
 
 # Private functions
+sub __append_suffix {
+   my $path = shift;
+
+   $path !~ m{ \. [m][k]?[d][n]? \z }mx and $path .= '.md';
+
+   return $path;
+}
+
 sub __copy_element_value {
    return [ "\$( 'upload-btn' ).addEvent( 'change', function( ev ) {",
             "   ev.stop(); \$( 'upload-path' ).value = this.value } )", ];
@@ -526,6 +531,28 @@ sub __make_tuple {
 
    return [ 0, $node && $node->{type} eq 'folder'
                ? [ __sorted_keys( $node->{tree} ) ] : [], $node, ];
+}
+
+sub __prepare_path {
+   return (map { s{ [ ] }{_}gmx; $_ }
+           map { trim $_            } split m{ / }mx, $_[ 0 ]);
+}
+
+sub __prepare_search_results {
+   my ($req, $langd, $results) = @_;
+
+   my @tuples = map { [ split m{ : }mx, $_, 3 ] } split m{ \n }mx, $results;
+
+   for my $tuple (@tuples) {
+      my @pathname = __prepare_path( io( $tuple->[ 0 ] )->abs2rel( $langd ) );
+      my @filepath = map { __make_id_from( $_ ) } @pathname;
+      my $pathname = join '/', @filepath;
+      my $label    = $pathname; $label =~ s{_}{ }gmx; $label =~ s{/}{ / }gmx;
+
+      $tuple->[ 0 ] = $label; $tuple->[ 1 ] = $req->uri_for( $pathname );
+   }
+
+   return @tuples;
 }
 
 sub __prune {

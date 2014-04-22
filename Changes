@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added text searching using App::Ack
           - Renaming skins to templates
           - Moved asset directory under docs path
           - Fixed cache invalidation

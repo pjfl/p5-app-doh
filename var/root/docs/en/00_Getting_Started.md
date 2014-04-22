@@ -70,7 +70,7 @@ If that fails run it again with the --force option
 Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,
 installation may take a while to complete. The flip side is that there are no
-external dependencies like Node.io or Grunt to install.
+external dependencies like Node.js or Grunt to install.
 
 By default the development server will run at:
 [http://localhost:5000](http://localhost:5000) and can be started in the
@@ -326,8 +326,9 @@ The `Delete` link will prompt for confirmation before deleting the markdown
 file. Empty directories will be removed.
 
 The `Upload` link lets you select a file to upload. The uploaded file appears
-in the `var/root/assets` directory. It can be referenced from a template
-using `[\% links.assets %\]your-asset.jpg`
+in the `var/root/docs/assets` directory. It can be referenced from a template
+using `[\% links.assets %\]your-asset.jpg`, or from markdown as
+`/assets/your-asset.jpg`
 
 ## Generating CSS from Less
 
@@ -343,6 +344,7 @@ install Node, Lessc, CSS::LESS as root:
    make install
    # Node installed with broken permissions which I had to fix at this point
    npm install -g less
+   # And when you finally have a working lessc command
    cpanm --force CSS::LESS
 
 Then create the other CSS files with (not as root):
