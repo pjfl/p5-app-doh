@@ -279,7 +279,7 @@ flags off and display a language code instead.
 Text within the application can be translated into other languages by
 creating GNU Gettext portable object files. The path is
 `var/locale/<language_code>/LC_MESSAGES` and the two file names are
-`default.po` and `server.po`. Messages in the `default.po` are common to all
+`default.po` and `app_doh.po`. Messages in the `default.po` are common to all
 programs in the application. Creating English translation files allows the
 terse error messages to be replaced with more user friendly ones.
 
@@ -332,11 +332,22 @@ using `[\% links.assets %\]your-asset.jpg`
 ## Generating CSS from Less
 
 Only the green theme is precompiled, if you want the other colour themes then
-install Node, Lessc, CSS::LESS, and then create the other CSS files
+install Node, Lessc, CSS::LESS as root:
 
-   apt-get install node npm
+   apt-get update
+   apt-get install git-core curl build-essential openssl libssl-dev
+   git clone https://github.com/joyent/node.git
+   cd node
+   ./configure --openssl-libpath=/usr/lib/ssl
+   make
+   make install
+   # Node installed with broken permissions which I had to fix at this point
    npm install -g less
-   cpanm CSS::LESS
+   cpanm --force CSS::LESS
+
+Then create the other CSS files with (not as root):
+
+   cd App-Doh
    bin/doh-cli make_css
 
 ## Generating a set of static files

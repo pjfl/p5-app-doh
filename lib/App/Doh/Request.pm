@@ -34,6 +34,11 @@ has 'host'     => is => 'lazy', isa => NonEmptySimpleStr,
 
 has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr;
 
+has 'method'   => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub {
+         $_[ 0 ]->body->param->{_method}
+      || $_[ 0 ]->params->{_method} || 'not_found' };
+
 has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
 has 'path'     => is => 'lazy', isa => SimpleStr,
@@ -244,6 +249,11 @@ The domain name and port number of the request
 
 The language requested by the client. Defaults to the C<LANG> constant
 C<en> (for English)
+
+=item C<method>
+
+The C<_method> attribute from the body of a post or from the query parameters
+in the event of a get request
 
 =item C<params>
 

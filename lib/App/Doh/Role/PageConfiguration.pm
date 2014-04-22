@@ -9,9 +9,9 @@ requires qw( config load_page );
 
 # Construction
 around 'load_page' => sub {
-   my ($orig, $self, $req) = @_; my $page = $orig->( $self, $req );
+   my ($orig, $self, $req, @args) = @_;
 
-   my $conf = $self->config;
+   my $page = $orig->( $self, $req, @args ); my $conf = $self->config;
 
    $page->{ $_ } = $conf->$_() for (qw( author description keywords ));
 

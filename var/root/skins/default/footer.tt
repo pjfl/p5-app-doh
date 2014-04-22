@@ -24,6 +24,11 @@
                 name : 'rename_file',
                 title: '[% loc( 'Rename File' ) %]',
                 value: '[% page.url %]' } ] };
+      behaviour.config.anchors[ 'search-file' ]
+         = { method  : 'modalDialog',
+             args    : [ '[% uri_for( 'dialog' ) %]?name=search', {
+                name : 'search-file',
+                title: '[% loc( 'Search Documents' ) %]' } ] };
       behaviour.config.anchors[ 'upload-file' ]
          = { method  : 'modalDialog',
              args    : [ '[% uri_for( 'dialog' ) %]?auth=1&name=upload', {

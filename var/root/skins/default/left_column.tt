@@ -66,6 +66,12 @@
             <div class="well well-sidebar">
 [% IF ! page.editing && page.mode != 'static' -%]
 [%    hint  = loc( 'Hint' ) -%]
+[%    title = hint _ ' ~ ' _ loc( 'Search for text in markdown files' ) -%]
+[%    text  = loc( 'Search' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="search-file">[% text %]</a></span>
+               <br>
 [%    title = hint _ ' ~ ' _ loc( 'Create a new markdown file' ) -%]
 [%    text  = loc( 'Create' ) -%]
                <span class="tips" title="[% title %]">
@@ -92,7 +98,7 @@
                   <span class="tips" title="[% title %]">
                      <button class="btn btn-subit fade submit" id="delete-file"
                               name="_method" type="submit"
-                             value="delete">[% text %]</button></span>
+                             value="delete_file">[% text %]</button></span>
                </form>
 [%    title = hint _ ' ~ ' _ loc( 'Upload an asset file' ) -%]
 [%    text  = loc( 'Upload' ) -%]

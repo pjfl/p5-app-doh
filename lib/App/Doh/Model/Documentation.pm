@@ -6,8 +6,9 @@ use namespace::sweep;
 use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( first_char throw trim );
+use Class::Usul::IPC;
 use File::DataClass::IO;
-use File::DataClass::Types qw( HashRef Int Path Str );
+use File::DataClass::Types qw( HashRef Int Object Path Str );
 use Unexpected::Functions  qw( Unspecified );
 
 extends q(App::Doh::Model);
@@ -24,6 +25,9 @@ has 'root_mtime' => is => 'lazy', isa => Path, coerce => Path->coercion,
 
 has 'type_map'   => is => 'lazy', isa => HashRef, builder => sub { {} };
 
+has 'ipc'        => is => 'lazy', isa => Object,
+   builder       => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
+
 # Public methods
 sub content_from_file {
    my ($self, $req) = @_; my $ids = $req->{args};
@@ -35,6 +39,25 @@ sub content_from_file {
                       ? 'documentation' : undef;
 
    return $stash;
+}
+
+sub create_file_action {
+   my ($self, $req) = @_;
+
+   $req->username ne 'unknown' or throw 'File creation not authorised';
+
+   my $content  = $req->loc( $self->config->default_content );
+   my $new_node = $self->_new_node( $req->locale, $req->body->param );
+   my $path     = $new_node->{path};
+
+   $path->assert_filepath->println( $content )->close;
+   $self->_invalidate_cache( $path->stat->{mtime} );
+
+   my $location = $req->uri_for( $new_node->{url} );
+   my $rel_path = $path->abs2rel( $self->config->file_root );
+   my $message  = [ 'File [_1] created by [_2]', $rel_path, $req->username ];
+
+   return { redirect => { location => $location, message => $message } };
 }
 
 sub dialog {
@@ -50,6 +73,9 @@ sub dialog {
       $page->{literal_js} = __set_element_focus( "${name}-file", 'pathname' );
       $page->{old_path  } = __get_or_throw( $req->params, 'val' );
    }
+   elsif ($name eq 'search') {
+      $page->{literal_js} = __set_element_focus( "${name}-file", 'query' );
+   }
    elsif ($name eq 'upload') {
       $page->{literal_js} = __copy_element_value();
    }
@@ -60,35 +86,7 @@ sub dialog {
    return $stash;
 }
 
-sub docs_tree {
-   my $self = shift; state $cache //= $self->_build_docs_tree;
-
-   $self->root_mtime->stat->{mtime} > $cache->{_mtime}
-      and $cache = $self->_build_docs_tree;
-
-   return $cache;
-}
-
-sub file_create {
-   my ($self, $req) = @_;
-
-   $req->username ne 'unknown' or throw 'File creation not authorised';
-
-   my $node     = $self->_get_file_paths( $req );
-   my $content  = $req->loc( $self->config->default_content );
-   my $path     = $node->{path};
-
-   $path->assert_filepath->println( $content )->close;
-   $self->_invalidate_cache( $path->stat->{mtime} );
-
-   my $location = $req->uri_for( $node->{url} );
-   my $rel_path = $path->abs2rel( $self->config->file_root );
-   my $message  = [ 'File [_1] created by [_2]', $rel_path, $req->username ];
-
-   return { redirect => { location => $location, message => $message } };
-}
-
-sub file_delete {
+sub delete_file_action {
    my ($self, $req) = @_;
 
    $req->username ne 'unknown' or throw 'Delete not authorised';
@@ -102,67 +100,13 @@ sub file_delete {
    return { redirect => { location => $location, message => $message } };
 }
 
-sub file_rename {
-   my ($self, $req) = @_;
+sub docs_tree {
+   my $self = shift; state $cache //= $self->_build_docs_tree;
 
-   $req->username ne 'unknown' or throw 'File creation not authorised';
+   $self->root_mtime->stat->{mtime} > $cache->{_mtime}
+      and $cache = $self->_build_docs_tree;
 
-   my $param    = $req->body->param;
-   my $old_path = [ split m{ / }mx, __get_or_throw( $param, 'old_path' ) ];
-   my $node     = $self->_find_node( $req->locale, $old_path )
-      or throw 'Cannot find document tree node to rename';
-   my $new_node = $self->_get_file_paths( $req );
-
-   $new_node->{path}->assert_filepath;
-   $node->{path}->close->move( $new_node->{path} ); __prune( $node->{path} );
-   $self->_invalidate_cache;
-
-   my $location = $req->uri_for( $new_node->{url} );
-   my $rel_path = $node->{path}->abs2rel( $self->config->file_root );
-   my $message  = [ 'File [_1] renamed by [_2]', $rel_path, $req->username ];
-
-   return { redirect => { location => $location, message => $message } };
-}
-
-sub file_save {
-   my ($self, $req) = @_;
-
-   $req->username ne 'unknown' or throw 'Update not authorised';
-
-   my $node     =  $self->_find_node( $req->locale, [ @{ $req->args } ] )
-      or throw 'Cannot find document tree node to update';
-   my $content  =  __get_or_throw( $req->body->param, 'content' );
-      $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
-   my $path     =  $node->{path}; $path->println( $content ); $path->close;
-   my $rel_path =  $path->abs2rel( $self->config->file_root );
-   my $message  =  [ 'File [_1] updated by [_2]', $rel_path, $req->username ];
-
-   $node->{mtime} = $path->stat->{mtime};
-
-   return { redirect => { location => $req->uri, message => $message } };
-}
-
-sub file_upload {
-   my ($self, $req) = @_; my $conf = $self->config;
-
-   my $upload = $req->args->[ 0 ] or throw 'No upload object';
-
-   $req->username ne 'unknown' or throw 'Update not authorised';
-
-   $upload and not $upload->is_upload and throw $upload->reason;
-   $upload->size > $conf->max_asset_size
-      and throw error => 'File [_1] size [_2] too big',
-                 args => [ $upload->filename, $upload->size ];
-
-   my $path = $conf->assetdir->catfile( $upload->filename );
-
-   io( $upload->path )->copy( $path->assert_filepath );
-
-   my $rel_path = $path->abs2rel( $self->config->assetdir );
-   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
-   my $message  = [ 'File [_1] uploaded by [_2]', $rel_path, $req->username ];
-
-   return { redirect => { location => $location, message => $message } };
+   return $cache;
 }
 
 sub iterator {
@@ -189,7 +133,7 @@ sub iterator {
 }
 
 sub load_page {
-   my ($self, $req) = @_;
+   my ($self, $req, $page) = @_; defined $page and return $page;
 
    for my $locale ($req->locale, $self->config->locale) {
       my $node = $self->_find_node( $locale, [ @{ $req->args } ] );
@@ -240,6 +184,110 @@ sub locales {
 
       return $list->{items};
    }
+}
+
+sub not_found_action {
+   my ($self, $req) = @_;
+
+   my $stash = $self->get_stash( $req, $self->load_page
+                                 ( $req, $self->_not_found( $req ) ) );
+
+   $stash->{nav     } = $self->navigation( $req );
+   $stash->{template} = 'documentation';
+   return $stash;
+}
+
+sub rename_file_action {
+   my ($self, $req) = @_;
+
+   $req->username ne 'unknown' or throw 'File creation not authorised';
+
+   my $param    = $req->body->param;
+   my $old_path = [ split m{ / }mx, __get_or_throw( $param, 'old_path' ) ];
+   my $node     = $self->_find_node( $req->locale, $old_path )
+      or throw 'Cannot find document tree node to rename';
+   my $new_node = $self->_new_node( $req->locale, $param );
+
+   $new_node->{path}->assert_filepath;
+   $node->{path}->close->move( $new_node->{path} ); __prune( $node->{path} );
+   $self->_invalidate_cache;
+
+   my $location = $req->uri_for( $new_node->{url} );
+   my $rel_path = $node->{path}->abs2rel( $self->config->file_root );
+   my $message  = [ 'File [_1] renamed by [_2]', $rel_path, $req->username ];
+
+   return { redirect => { location => $location, message => $message } };
+}
+
+sub save_file_action {
+   my ($self, $req) = @_;
+
+   $req->username ne 'unknown' or throw 'Update not authorised';
+
+   my $node     =  $self->_find_node( $req->locale, [ @{ $req->args } ] )
+      or throw 'Cannot find document tree node to update';
+   my $content  =  __defined_or_throw( $req->body->param, 'content' );
+      $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
+   my $path     =  $node->{path}; $path->println( $content ); $path->close;
+   my $rel_path =  $path->abs2rel( $self->config->file_root );
+   my $message  =  [ 'File [_1] updated by [_2]', $rel_path, $req->username ];
+
+   $node->{mtime} = $path->stat->{mtime};
+
+   return { redirect => { location => $req->uri, message => $message } };
+}
+
+sub search_file_action {
+   my ($self, $req) = @_;
+
+   my $root  = $self->config->file_root;
+   my $query = __get_or_throw( $req->params, 'query' );
+   my $path  = $root->catdir( __extract_lang( $req->locale ) );
+   my $res   = $self->ipc->run_cmd( [ 'ack', $query, $path->pathname ] );
+   my @res   = ( map    { [ split m{ : }mx, $_, 3 ] }
+                 split m{ \n }mx, $res->stdout );
+   $self->usul->dumper( \@res );
+   my $node  = {};
+   my $url   = $req->uri_for( $self->_docs_url( $req->locale ) );
+   my $page  = {
+      content      => join "\n", map { join SPC, @{ $_ } } @res,
+      docs_url     => $url,
+      editing      => FALSE,
+      format       => 'text',
+      header       => 'Search Results',
+      homepage_url => $url,
+      mode         => $req->params->{mode} // 'online',
+      mtime        => $node->{mtime},
+      title        => ucfirst $node->{name},
+      url          => $node->{url}, };
+   my $stash = $self->get_stash( $req, $self->load_page( $req, $page ) );
+
+   $stash->{nav     } = $self->navigation( $req );
+   $stash->{template} = 'documentation';
+   return $stash;
+}
+
+sub upload_file_action {
+   my ($self, $req) = @_; my $conf = $self->config;
+
+   my $upload = $req->args->[ 0 ] or throw 'No upload object';
+
+   $req->username ne 'unknown' or throw 'Update not authorised';
+
+   $upload and not $upload->is_upload and throw $upload->reason;
+   $upload->size > $conf->max_asset_size
+      and throw error => 'File [_1] size [_2] too big',
+                 args => [ $upload->filename, $upload->size ];
+
+   my $path = $conf->assetdir->catfile( $upload->filename );
+
+   io( $upload->path )->copy( $path->assert_filepath );
+
+   my $rel_path = $path->abs2rel( $self->config->assetdir );
+   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
+   my $message  = [ 'File [_1] uploaded by [_2]', $rel_path, $req->username ];
+
+   return { redirect => { location => $location, message => $message } };
 }
 
 # Private methods
@@ -363,30 +411,6 @@ sub _find_node {
    return $tree;
 }
 
-sub _get_file_paths {
-   my ($self, $req) = @_;
-
-   my $pathname =  __get_or_throw( $req->body->param, 'pathname' );
-      $pathname or throw class => Unspecified, args => [ 'pathname' ];
-      $pathname !~ m{ \. [m][k]?[d][n]? \z }mx and $pathname .= '.md';
-   my @filepath =  map { __make_id_from( $_ ) }
-   my @pathname =  map { s{ [ ] }{_}gmx; $_   }
-                   map { trim $_              } split m{ / }mx, $pathname;
-   my $id       =  pop @filepath;
-   my $url      =  join '/', @filepath, $id;
-   my $lang     =  __extract_lang( $req->locale );
-   my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
-   my $parent   =  $self->_find_node( $req->locale, [ @filepath ] );
-
-   $parent and $parent->{type} eq 'folder'
-      and exists $parent->{tree}->{ $id }
-      and $parent->{tree}->{ $id }->{path} eq $path
-      and throw error => 'Path [_1] already exists',
-                 args => [ join '/', $lang, @pathname ];
-
-   return { path => $path, url => $url, };
-}
-
 sub _get_format {
    my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
 
@@ -416,6 +440,29 @@ sub _localised_tree {
    return $tree->{ LANG() };
 }
 
+sub _new_node {
+   my ($self, $locale, $param) = @_;
+
+   my $pathname =  __get_or_throw( $param, 'pathname' );
+      $pathname !~ m{ \. [m][k]?[d][n]? \z }mx and $pathname .= '.md';
+   my @filepath =  map { __make_id_from( $_ ) }
+   my @pathname =  map { s{ [ ] }{_}gmx; $_   }
+                   map { trim $_              } split m{ / }mx, $pathname;
+   my $id       =  pop @filepath;
+   my $url      =  join '/', @filepath, $id;
+   my $lang     =  __extract_lang( $locale );
+   my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
+   my $parent   =  $self->_find_node( $locale, [ @filepath ] );
+
+   $parent and $parent->{type} eq 'folder'
+      and exists $parent->{tree}->{ $id }
+      and $parent->{tree}->{ $id }->{path} eq $path
+      and throw error => 'Path [_1] already exists',
+                 args => [ join '/', $lang, @pathname ];
+
+   return { path => $path, url => $url, };
+}
+
 sub _not_found {
    my ($self, $req) = @_;
 
@@ -440,6 +487,15 @@ sub __copy_element_value {
             "   ev.stop(); \$( 'upload-path' ).value = this.value } )", ];
 }
 
+sub __defined_or_throw {
+   my ($params, $name) = @_;
+
+   defined (my $param = $params->{ $name })
+      or throw class => Unspecified, args => [ $name ];
+
+   return $param;
+}
+
 sub __extract_lang {
    my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
 }
@@ -447,7 +503,7 @@ sub __extract_lang {
 sub __get_or_throw {
    my ($params, $name) = @_;
 
-   defined (my $param = $params->{ $name })
+   my $param = __defined_or_throw( $params, $name )
       or throw class => Unspecified, args => [ $name ];
 
    return $param;

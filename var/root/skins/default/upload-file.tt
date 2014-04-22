@@ -7,5 +7,5 @@
       <input class="upload" id="upload-btn" name="file" type="file">
    </div>
    <button class="btn btn-submit" name="_method" type="submit"
-           value="upload">[% loc( 'Upload' ) %]</button>
+           value="upload_file">[% loc( 'Upload' ) %]</button>
 </form>

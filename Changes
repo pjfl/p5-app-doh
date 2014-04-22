@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Renaming skins to templates
           - Moved asset directory under docs path
           - Fixed cache invalidation
           - Added make_css method to ::CLI

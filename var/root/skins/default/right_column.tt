@@ -29,7 +29,7 @@
                              name="content">[% page.content | html %]</textarea>
                      <br>
                      <button class="btn btn-submit" name="_method" type="submit"
-                             value="save">[% loc( 'Save' ) %]</button>
+                             value="save_file">[% loc( 'Save' ) %]</button>
                   </form>
                </div>
 [%    ELSE -%]

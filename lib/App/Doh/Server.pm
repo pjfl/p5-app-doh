@@ -49,7 +49,8 @@ sub BUILD { # Take the hit at application startup not on first request
 sub _build__usul {
    my $self   = shift;
    my $myconf = $self->config;
-   my $attr   = { config => {}, config_class => $self->config_class, };
+   my $attr   = { config => {}, config_class => $self->config_class,
+                  debug  => $ENV{DOH_SERVER_DEBUG}, };
    my $conf   = $attr->{config};
 
    $conf->{appclass} = $self->appclass;
@@ -106,7 +107,7 @@ around 'to_psgi_app' => sub {
 # Public methods
 sub dispatch_request {
    sub (POST + /assets + *file~ + ?*) {
-      return shift->_execute( qw( html docs file_upload ), @_ );
+      return shift->_execute( qw( html docs upload_file ), @_ );
    },
    sub (GET  + /dialog + ?*) {
       return shift->_execute( qw( xml  docs dialog ), @_ );
@@ -114,8 +115,11 @@ sub dispatch_request {
    sub (GET  + /pod | /pod/** + ?*) {
       return shift->_execute( qw( html help content_from_pod ), @_ );
    },
+   sub (GET  + /search + ?*) {
+      return shift->_execute( qw( html docs from_request ), @_ );
+   },
    sub (POST + / | /** + ?*) {
-      return shift->_execute( qw( html docs file_action ), @_ );
+      return shift->_execute( qw( html docs from_request ), @_ );
    },
    sub (GET  + / | /** + ?*) {
       return shift->_execute( qw( html docs content_from_file ), @_ );
@@ -129,8 +133,7 @@ sub _execute {
    try {
       my $req = App::Doh::Request->new( $self->usul, @args );
 
-      $method =~ m{ _action \z }mx
-         and $method = $self->_tunnel_action( $req, $method );
+      $method eq 'from_request' and $method = $req->method.'_action';
 
       my $stash = $self->models->{ $model }->$method( $req );
 
@@ -163,17 +166,6 @@ sub _redirect {
             and $self->log->info( $req->loc_default( @{ $message } ) );
 
    return [ $code, [ 'Location', $redirect->{location} ], [] ];
-}
-
-sub _tunnel_action {
-   my ($self, $req, $method) = @_;
-
-   my $action = $req->body->param->{_method} // NUL;
-
-   $action and $action = lc "_${action}" and $action =~ s{ \s }{_}gmx;
-   $method =~ s{ _action \z }{$action}mx;
-
-   return $method;
 }
 
 # Private functions
