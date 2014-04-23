@@ -14,7 +14,7 @@ with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
 # Public attributes
-has 'navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
+has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
    my $self     = shift;
    my $appclass = $self->config->appclass;
    my $help_url = $self->config->help_url;
@@ -34,6 +34,22 @@ has 'navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
    return \@nav;
 };
 
+# Construction
+around 'load_page' => sub {
+   my ($orig, $self, $req, @args) = @_;
+
+   my $title = $req->loc( 'Help' );
+   my $want  = $req->args->[ 0 ] || $self->config->appclass;
+   my $page  = {
+      content      => io( find_source( $want ) || $req->args->[ 0 ] ),
+      format       => 'pod',
+      header       => "${title} - ${want}",
+      title        => $title,
+      url          => 'https://metacpan.org/module/%s', };
+
+   return $orig->( $self, $req, $page );
+};
+
 # Public methods
 sub content_from_pod {
    my ($self, $req) = @_;
@@ -45,17 +61,8 @@ sub content_from_pod {
    return $stash;
 }
 
-sub load_page {
-   my ($self, $req) = @_;
-
-   my $title = $req->loc( 'Help' );
-   my $want  = $req->args->[ 0 ] || $self->config->appclass;
-
-   return { content => io( find_source( $want ) || $req->args->[ 0 ] ),
-            format  => 'pod',
-            header  => "${title} - ${want}",
-            title   => $title,
-            url     => 'https://metacpan.org/module/%s', };
+sub navigation {
+   return $_[ 0 ]->_navigation;
 }
 
 1;

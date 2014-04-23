@@ -59,6 +59,7 @@ audio, canvas, video { display: inline-block; }
 audio:not([controls]) { display: none; height: 0; }
 blockquote p:before, blockquote p:after, q:before, q:after { content: ''; }
 blockquote, q { quotes: "" ""; }
+button::-moz-focus-inner { border: 0; margin: -1px; padding: 0; }
 del, ins { text-decoration: none; }
 hr { border: 0; }
 input { margin: 0; }
@@ -167,7 +168,7 @@ table tr th:last-child, table tr td:last-child {
 }
 .btn.btn-sidebar:hover { background-color: @dark; }
 .btn.btn-sidebar:hover .icon-bar { background-color: @light; }
-.btn.btn-submit { padding: 2px 8px 2px; .sans-default; }
+.btn.btn-submit { padding: 4px 8px; .sans-default; }
 .columns { height: 100%; }
 .columns .left-column {
    background-color: @sidebar-background; margin-left: 0;
@@ -421,7 +422,6 @@ table tr th:last-child, table tr td:last-child {
    color: @light; font-size: 14px; line-height: 18px; .serif-regular;
 }
 .well.well-sidebar a:hover { text-decoration: none; }
-.well.well-sidebar button { margin-left: -3px; }
 .well.well-sidebar .twitter hr {
    border-bottom: none; margin-left: -20px; margin-right: -20px;
 }

@@ -9,6 +9,7 @@ use Class::Usul::Functions qw( first_char throw trim );
 use Class::Usul::IPC;
 use File::DataClass::IO;
 use File::DataClass::Types qw( HashRef Int Object Path Str );
+use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND );
 use Unexpected::Functions  qw( Unspecified );
 
 extends q(App::Doh::Model);
@@ -27,6 +28,23 @@ has 'type_map'   => is => 'lazy', isa => HashRef, builder => sub { {} };
 
 has 'ipc'        => is => 'lazy', isa => Object,
    builder       => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
+
+# Construction
+around 'load_page' => sub {
+   my ($orig, $self, $req, @args) = @_; my $conf = $self->config;
+
+   $args[ 0 ] and return $orig->( $self, $req, $args[ 0 ] );
+
+   for my $locale ($req->locale, $conf->locale) {
+      my $node = $self->_find_node( $locale, [ @{ $req->args } ] );
+
+      ($node and $node->{type} eq 'file') or next;
+
+      return $orig->( $self, $req, $self->_make_page( $req, $locale, $node ) );
+   }
+
+   return $orig->( $self, $req, $self->_not_found( $req ) );
+};
 
 # Public methods
 sub content_from_file {
@@ -132,30 +150,6 @@ sub iterator {
    };
 }
 
-sub load_page {
-   my ($self, $req, $page) = @_; defined $page and return $page;
-
-   for my $locale ($req->locale, $self->config->locale) {
-      my $node = $self->_find_node( $locale, [ @{ $req->args } ] );
-      my $url  = $req->uri_for( $self->_docs_url( $locale ) );
-      my $home = $node ? $url : $req->uri_for( NUL );
-
-      $node and $node->{type} eq 'file' and return {
-         content      => $node->{path},
-         docs_url     => $url,
-         editing      => $req->params->{edit} // FALSE,
-         format       => $node->{format},
-         header       => $node->{title},
-         homepage_url => $home,
-         mode         => $req->params->{mode} // 'online',
-         mtime        => $node->{mtime},
-         title        => ucfirst $node->{name},
-         url          => $node->{url}, };
-   }
-
-   return $self->_not_found( $req );
-}
-
 sub locales {
    return grep { first_char $_ ne '_' } keys %{ $_[ 0 ]->docs_tree };
 }
@@ -184,17 +178,6 @@ sub locales {
 
       return $list->{items};
    }
-}
-
-sub not_found_action {
-   my ($self, $req) = @_;
-
-   my $stash = $self->get_stash( $req, $self->load_page
-                                 ( $req, $self->_not_found( $req ) ) );
-
-   $stash->{nav     } = $self->navigation( $req );
-   $stash->{template} = 'documentation';
-   return $stash;
 }
 
 sub rename_file_action {
@@ -245,28 +228,15 @@ sub search_file_action {
    my $query  = __get_or_throw( $req->params, 'query' );
    my $langd  = $root->catdir( __extract_lang( $req->locale ) );
    my $res    = $self->ipc->run_cmd( [ 'ack', $query, $langd->pathname ] );
-   my @tuples = __prepare_search_results( $req, $langd, $res->stdout );
-   my $node   = {};
-   my $url    = $req->uri_for( $self->_docs_url( $req->locale ) );
-   my $page   = {
-      content      => (join "\n", map { '['.$_->[ 0 ].']('.$_->[ 1 ].') '.$_->[ 2 ].'  ' } @tuples),
-      docs_url     => $url,
-      editing      => FALSE,
-      format       => 'markdown',
-      header       => 'Search Results',
-      homepage_url => $url,
-      mode         => $req->params->{mode} // 'online',
-      mtime        => $node->{mtime},
-      title        => ucfirst $node->{name},
-      url          => $node->{url}, };
-   my $stash = $self->get_stash( $req, $self->load_page( $req, $page ) );
+   my $page   = $self->_search_results( $req, $langd, $res->stdout );
+   my $stash  = $self->get_stash( $req, $self->load_page( $req, $page ) );
 
    $stash->{nav     } = $self->navigation( $req );
    $stash->{template} = 'documentation';
    return $stash;
 }
 
-sub upload_file_action {
+sub upload_file {
    my ($self, $req) = @_; my $conf = $self->config;
 
    my $upload = $req->args->[ 0 ] or throw 'No upload object';
@@ -439,6 +409,18 @@ sub _localised_tree {
    return $tree->{ LANG() };
 }
 
+sub _make_page {
+   my ($self, $req, $locale, $node) = @_;
+
+   return { content  => $node->{path  },
+            docs_url => $req->uri_for( $self->_docs_url( $locale ) ),
+            format   => $node->{format},
+            header   => $node->{title },
+            mtime    => $node->{mtime },
+            title    => ucfirst $node->{name},
+            url      => $node->{url   }, };
+}
+
 sub _new_node {
    my ($self, $locale, $param) = @_;
 
@@ -463,19 +445,33 @@ sub _new_node {
 sub _not_found {
    my ($self, $req) = @_;
 
-   my $home    = $req->uri_for( NUL );
+   my $rv      = HTTP_NOT_FOUND;
    my $title   = $req->loc( 'Not found' );
    my $content = '> '.$req->loc( "Oh no. That page doesn't exist" )
-                 ."\n\n    Code 404\n\n";
+                 ."\n\n    Code: ${rv}\n\n";
 
-   return { content      => $content,
-            docs_url     => $home,
-            editing      => FALSE,
-            format       => 'markdown',
-            header       => $title,
-            homepage_url => $home,
-            mtime        => time,
-            title        => $title, };
+   return { content  => $content,
+            docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
+            format   => 'markdown',
+            header   => $title,
+            mtime    => time,
+            title    => $title, };
+}
+
+sub _search_results {
+   my ($self, $req, $langd, $results) = @_;
+
+   my $title   = $req->loc( 'Search Results' );
+   my @tuples  = __prepare_search_results( $req, $langd, $results );
+   my $content = join "\n",
+      map { '['.$_->[ 0 ].']('.$_->[ 1 ].') '.$_->[ 2 ].'  ' } @tuples;
+
+   return { content  => $content,
+            docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
+            format   => 'markdown',
+            header   => $title,
+            mtime    => time,
+            title    => $title, };
 }
 
 # Private functions
@@ -496,7 +492,8 @@ sub __defined_or_throw {
    my ($params, $name) = @_;
 
    defined (my $param = $params->{ $name })
-      or throw class => Unspecified, args => [ $name ];
+      or throw class => Unspecified, args => [ $name ],
+                  rv => HTTP_EXPECTATION_FAILED;
 
    return $param;
 }
@@ -509,7 +506,8 @@ sub __get_or_throw {
    my ($params, $name) = @_;
 
    my $param = __defined_or_throw( $params, $name )
-      or throw class => Unspecified, args => [ $name ];
+      or throw class => Unspecified, args => [ $name ],
+                  rv => HTTP_EXPECTATION_FAILED;
 
    return $param;
 }
@@ -546,10 +544,10 @@ sub __prepare_search_results {
    for my $tuple (@tuples) {
       my @pathname = __prepare_path( io( $tuple->[ 0 ] )->abs2rel( $langd ) );
       my @filepath = map { __make_id_from( $_ ) } @pathname;
-      my $pathname = join '/', @filepath;
-      my $label    = $pathname; $label =~ s{_}{ }gmx; $label =~ s{/}{ / }gmx;
+      my $actionp  = join '/', @filepath;
+      my $name     = __make_name_from( $actionp ); $name =~ s{/}{ / }gmx;
 
-      $tuple->[ 0 ] = $label; $tuple->[ 1 ] = $req->uri_for( $pathname );
+      $tuple->[ 0 ] = $name; $tuple->[ 1 ] = $req->uri_for( $actionp );
    }
 
    return @tuples;

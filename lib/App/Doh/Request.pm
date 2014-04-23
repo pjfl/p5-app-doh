@@ -71,11 +71,11 @@ around 'BUILDARGS' => sub {
    my ($orig, $self, $builder, @args) = @_; my $attr = {};
 
    $attr->{builder} = $builder;
-   $attr->{env    } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-   $attr->{params } = ($args[ 0 ] && is_hashref $args[ -1 ]) ? pop @args : {};
-
-   if (blessed $args[ 0 ]) { $attr->{args} = [ $args[ 0 ] ] }
-   else { $attr->{args} = [ split m{ / }mx, trim $args[ 0 ] || NUL ] }
+   $attr->{env    } = (is_hashref $args[ -1 ]) ? pop @args : {};
+   $attr->{params } = (is_hashref $args[ -1 ]) ? pop @args : {};
+   $attr->{args   } = (defined $args[ 0 ] && blessed $args[ 0 ])
+                    ? [ $args[ 0 ] ]
+                    : [ split m{ / }mx, trim $args[ 0 ] || NUL ];
 
    return $attr;
 };

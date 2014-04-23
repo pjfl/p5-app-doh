@@ -20,6 +20,7 @@ great looking documentation in a developer friendly way.
 * Markdown editor and file management
 * Multi-language support
 * Static site generator
+* Text searching
 
 ## Acknowledgements
 
@@ -333,7 +334,7 @@ using `[\% links.assets %\]your-asset.jpg`, or from markdown as
 ## Generating CSS from Less
 
 Only the green theme is precompiled, if you want the other colour themes then
-install Node, Lessc, CSS::LESS as root:
+install Node, Lessc, and CSS::LESS. As root:
 
    apt-get update
    apt-get install git-core curl build-essential openssl libssl-dev

@@ -9,9 +9,11 @@ use App::Doh::View::HTML;
 use App::Doh::View::XML;
 use Class::Usul;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( app_prefix find_apphome get_cfgfiles throw );
+use Class::Usul::Functions qw( app_prefix exception find_apphome
+                               get_cfgfiles throw );
 use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr Object );
-use HTTP::Status           qw( HTTP_FOUND HTTP_INTERNAL_SERVER_ERROR );
+use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
+                               HTTP_INTERNAL_SERVER_ERROR );
 use Plack::Builder;
 use Try::Tiny;
 use Web::Simple;
@@ -128,31 +130,23 @@ sub dispatch_request {
 
 # Private methods
 sub _execute {
-   my ($self, $view, $model, $method, @args) = @_; my $res;
+   my ($self, $view, $model, $method, @args) = @_;
+
+   my $req = App::Doh::Request->new( $self->usul, @args ); my $res;
 
    try {
-      my $req = App::Doh::Request->new( $self->usul, @args );
-
       $method eq 'from_request' and $method = $req->method.'_action';
 
-      my $stash = $self->models->{ $model }->$method( $req );
+      my $stash = $self->models->{ $model }->execute( $method, $req );
 
       exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
 
       $res or $res = $self->views->{ $view }->serialize( $req, $stash )
            or throw error => 'View [_1] returned false', args => [ $view ];
    }
-   catch { $res = $self->_internal_server_error( $_ ) };
+   catch { $res = $self->_render_exception( $view, $model, $req, $_ ) };
 
    return $res;
-}
-
-sub _internal_server_error {
-   my ($self, $e) = @_; my $msg = "${e}"; chomp $msg;
-
-   $self->log->error( $msg ); $msg = "Error: ${msg}\r\n";
-
-   return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $msg ] ];
 }
 
 sub _redirect {
@@ -168,7 +162,33 @@ sub _redirect {
    return [ $code, [ 'Location', $redirect->{location} ], [] ];
 }
 
+sub _render_exception {
+   my ($self, $view, $model, $req, $e) = @_; my $res;
+
+   my $msg = "${e}"; chomp $msg; $self->log->error( $msg );
+
+   $e->can( 'rv' ) or $e = exception error => $msg, rv => HTTP_BAD_REQUEST;
+
+   try {
+      my $stash = $self->models->{ $model }->exception_handler( $req, $e );
+
+      $res = $self->views->{ $view }->serialize( $req, $stash )
+          or throw error => 'View [_1] returned false', args => [ $view ];
+   }
+   catch { $res = __internal_server_error( $e, $_ ) };
+
+   return $res;
+}
+
 # Private functions
+sub __internal_server_error {
+   my ($e, $render_error) = @_;
+
+   my $message = "Original error: ${e}\r\nRendering error: ${render_error}";
+
+   return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
+}
+
 sub __plain_header {
    return [ 'Content-Type', 'text/plain' ];
 }
