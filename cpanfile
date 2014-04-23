@@ -1,3 +1,4 @@
+requires "App::Ack" => "2.12";
 requires "Class::Usul" => "v0.39.0";
 requires "Daemon::Control" => "0.000009";
 requires "File::DataClass" => "v0.34.0";
@@ -22,6 +23,7 @@ requires "Web::Simple" => "0.020";
 requires "XML::Simple" => "2.18";
 requires "namespace::sweep" => "0.006";
 requires "perl" => "5.010001";
+recommends "CSS::LESS" => "v0.0.3";
 
 on 'build' => sub {
   requires "Module::Build" => "0.4004";

@@ -52,13 +52,7 @@ around 'load_page' => sub {
 
 # Public methods
 sub content_from_pod {
-   my ($self, $req) = @_;
-
-   my $stash = $self->get_stash( $req, $self->load_page( $req ) );
-
-   $stash->{nav} = $self->navigation; $stash->{template} = 'documentation';
-
-   return $stash;
+   return $_[ 0 ]->get_stash( $_[ 1 ], $_[ 0 ]->load_page( $_[ 1 ] ) );
 }
 
 sub navigation {

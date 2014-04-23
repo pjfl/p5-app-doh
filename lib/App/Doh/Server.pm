@@ -117,8 +117,8 @@ sub dispatch_request {
    sub (GET  + /pod | /pod/** + ?*) {
       return shift->_execute( qw( html help content_from_pod ), @_ );
    },
-   sub (GET  + /search + ?*) {
-      return shift->_execute( qw( html docs from_request ), @_ );
+   sub (GET  + /search-results + ?*) {
+      return shift->_execute( qw( html docs search_file ), @_ );
    },
    sub (POST + / | /** + ?*) {
       return shift->_execute( qw( html docs from_request ), @_ );

@@ -20,6 +20,7 @@ great looking documentation in a developer friendly way.
 * Markdown editor and file management
 * Multi-language support
 * Static site generator
+* Text searching
 
 ## Acknowledgements
 
@@ -34,15 +35,16 @@ hence [Mootools](http://mootools.net/) not jQuery.
 
 ## Installation
 
-The App-Doh repository contains meta data that lists the CPAN modules used by
-the application. Modern Perl CPAN distribution installers (like
+The [App-Doh repository](http://github.com/pjfl/p5-app-doh) contains meta data
+that lists the CPAN modules used by the application. Modern Perl CPAN
+distribution installers (like
 [App::cpanminus](https://metacpan.org/module/App::cpanminus)) use this
 information to install the required dependencies when this application is
 installed.
 
 **Requirements:**
 
-* Perl 5.12.0 or above
+* Perl 5.10.1 or above
 
 If you don't already have it, bootstrap
 [App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
@@ -66,10 +68,10 @@ If that fails run it again with the --force option
 
    cpanm --force git:...
 
-Although this is a simple application it is composed of many CPAN
+Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,
 installation may take a while to complete. The flip side is that there are no
-external dependencies like Node.io or Grunt to install.
+external dependencies like Node.js or Grunt to install.
 
 By default the development server will run at:
 [http://localhost:5000](http://localhost:5000) and can be started in the
@@ -252,10 +254,10 @@ Include custom links in the sidebar.
    }
 
 ### Google Analytics:
-This will embed the google analytics tracking code.
+This will embed the Google Analytics tracking code.
 
    {
-      "google_analytics": "UA-XXXXXXXXX-XX"
+      "analytics": "UA-XXXXXXXXX-XX"
    }
 
 
@@ -274,6 +276,13 @@ to the default language, English.
 The national flag on the right of the title bar indicates the language of the
 file being displayed or edited. Adding `?use_flags=0` to a URI will turn the
 flags off and display a language code instead.
+
+Text within the application can be translated into other languages by
+creating GNU Gettext portable object files. The path is
+`var/locale/<language_code>/LC_MESSAGES` and the two file names are
+`default.po` and `app_doh.po`. Messages in the `default.po` are common to all
+programs in the application. Creating English translation files allows the
+terse error messages to be replaced with more user friendly ones.
 
 ### Directory structure:
 
@@ -316,6 +325,33 @@ directories in the file path will be automatically created.
 
 The `Delete` link will prompt for confirmation before deleting the markdown
 file. Empty directories will be removed.
+
+The `Upload` link lets you select a file to upload. The uploaded file appears
+in the `var/root/docs/assets` directory. It can be referenced from a template
+using `[\% links.assets %\]your-asset.jpg`, or from markdown as
+`/assets/your-asset.jpg`
+
+## Generating CSS from Less
+
+Only the green theme is precompiled, if you want the other colour themes then
+install Node, Lessc, and CSS::LESS. As root:
+
+   apt-get update
+   apt-get install git-core curl build-essential openssl libssl-dev
+   git clone https://github.com/joyent/node.git
+   cd node
+   ./configure --openssl-libpath=/usr/lib/ssl
+   make
+   make install
+   # Node installed with broken permissions which I had to fix at this point
+   npm install -g less
+   # And when you finally have a working lessc command
+   cpanm --force CSS::LESS
+
+Then create the other CSS files with (not as root):
+
+   cd App-Doh
+   bin/doh-cli make_css
 
 ## Generating a set of static files
 

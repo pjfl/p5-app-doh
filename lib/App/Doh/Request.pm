@@ -34,10 +34,12 @@ has 'host'     => is => 'lazy', isa => NonEmptySimpleStr,
 
 has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr;
 
+has 'locales'  => is => 'lazy', isa => ArrayRef;
+
 has 'method'   => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub {
-         $_[ 0 ]->body->param->{_method}
-      || $_[ 0 ]->params->{_method} || 'not_found' };
+         delete $_[ 0 ]->body->param->{_method}
+      || delete $_[ 0 ]->params->{_method} || 'not_found' };
 
 has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
@@ -80,6 +82,10 @@ around 'BUILDARGS' => sub {
    return $attr;
 };
 
+sub BUILD {
+   my $self = shift; $self->method; return;
+}
+
 sub _build_base {
    my $self = shift; my $params = $self->params; my $uri;
 
@@ -116,11 +122,21 @@ sub _build_locale {
       and is_member $locale,  $self->config->locales
       and return $locale;
 
-   for my $locale (@{ $self->_acceptable_locales }) {
+   for my $locale (@{ $self->locales }) {
       is_member $locale, $self->config->locales and return $locale;
    }
 
    return $self->config->locale;
+}
+
+sub _build_locales {
+   my $self = shift; my $lang = $self->env->{ 'HTTP_ACCEPT_LANGUAGE' } || NUL;
+
+   return [ map    { s{ _ \z }{}mx; $_ }
+            map    { join '_', $_->[ 0 ], uc $_->[ 1 ] }
+            map    { [ split m{ - }mx, $_ ] }
+            map    { ( split m{ ; }mx, $_ )[ 0 ] }
+            split m{ , }mx, lc $lang ];
 }
 
 sub _build_uri {
@@ -167,16 +183,6 @@ sub uri_for {
 }
 
 # Private methods
-sub _acceptable_locales {
-   my $self = shift; my $lang = $self->env->{ 'HTTP_ACCEPT_LANGUAGE' } || NUL;
-
-   return [ map    { s{ _ \z }{}mx; $_ }
-            map    { join '_', $_->[ 0 ], uc $_->[ 1 ] }
-            map    { [ split m{ - }mx, $_ ] }
-            map    { ( split m{ ; }mx, $_ )[ 0 ] }
-            split m{ , }mx, lc $lang ];
-}
-
 sub _localize {
    my ($self, $locale, $key, @args) = @_; my $car = $args[ 0 ];
 

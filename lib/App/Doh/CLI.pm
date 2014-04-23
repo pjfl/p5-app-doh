@@ -58,7 +58,7 @@ sub make_static : method {
    $dest->is_absolute or $dest = io( $dest->rel2abs( $self->config->root ) );
    $self->_copy_assets( $dest );
 
-   for my $locale ($self->model->locales) {
+   for my $locale ($self->model->locale) {
       $self->_make_localised_static( $dest, $locale );
    }
 

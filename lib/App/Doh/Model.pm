@@ -5,7 +5,7 @@ use namespace::sweep;
 use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Time qw( time2str );
-use HTTP::Status      qw( HTTP_OK );
+use HTTP::Status      qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util      qw( weaken );
 
 extends q(App::Doh);
@@ -13,18 +13,19 @@ extends q(App::Doh);
 sub exception_handler {
    my ($self, $req, $e) = @_;
 
-   my $title = $req->loc( 'Exception Handler' );
-   my $page  = $self->load_page( $req, {
-      content  => "${e}  \n   Code: ".$e->rv,
+   my $title   =  $req->loc( 'Exception Handler' );
+   my $filler  =  '&nbsp;' x 40;
+   my $page    =  {
+      content  => "${e}${filler}\n\n   Code: ".$e->rv,
       docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
       format   => 'markdown',
       header   => $title,
       mtime    => time,
-      title    => $title, } );
-   my $stash = $self->get_stash( $req, $page );
+      title    => $title, };
+   my $stash   =  $self->get_stash( $req, $self->load_page( $req, $page ) );
 
-   $stash->{nav     } = $self->navigation( $req );
-   $stash->{template} = 'documentation';
+   $stash->{code} = $e->rv >= HTTP_BAD_REQUEST ? $e->rv : HTTP_BAD_REQUEST;
+
    return $stash;
 }
 
@@ -37,6 +38,7 @@ sub get_stash {
 
    return { code     => HTTP_OK,
             loc      => sub { $req->loc( @_ ) },
+            nav      => $self->navigation( $req ),
             page     => $page,
             req      => $req,
             time2str => sub { time2str( $_[ 0 ], $_[ 1 ], $_[ 2 ] ) },
@@ -45,6 +47,10 @@ sub get_stash {
 
 sub load_page {
    my ($self, $req, $args) = @_; my $page = $args // {}; return $page;
+}
+
+sub navigation {
+   return [ { level => 0, name => 'Home', type => 'file', url => NUL } ];
 }
 
 1;

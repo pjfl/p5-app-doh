@@ -95,9 +95,11 @@ has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
 
 has 'preferences'     => is => 'ro',   isa => ArrayRef,
    builder            => sub {
-      [ qw( code_blocks float skin theme use_flags ) ] };
+      [ qw( code_blocks float query skin theme use_flags ) ] };
 
 has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
+
+has 'query'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -111,7 +113,7 @@ has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
 
 has 'template'        => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'index';
+   default            => 'documentation';
 
 has 'theme'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'green';

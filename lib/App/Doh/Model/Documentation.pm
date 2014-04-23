@@ -5,11 +5,14 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( first_char throw trim );
+use Class::Usul::Functions qw( first_char is_member throw trim );
 use Class::Usul::IPC;
 use File::DataClass::IO;
 use File::DataClass::Types qw( HashRef Int Object Path Str );
-use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND );
+use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
+                               HTTP_PRECONDITION_FAILED
+                               HTTP_REQUEST_ENTITY_TOO_LARGE
+                               HTTP_UNAUTHORIZED );
 use Unexpected::Functions  qw( Unspecified );
 
 extends q(App::Doh::Model);
@@ -35,7 +38,7 @@ around 'load_page' => sub {
 
    $args[ 0 ] and return $orig->( $self, $req, $args[ 0 ] );
 
-   for my $locale ($req->locale, $conf->locale) {
+   for my $locale ($req->locale, @{ $req->locales }, $conf->locale) {
       my $node = $self->_find_node( $locale, [ @{ $req->args } ] );
 
       ($node and $node->{type} eq 'file') or next;
@@ -52,9 +55,8 @@ sub content_from_file {
 
    my $stash = $self->get_stash( $req, $self->load_page( $req ) );
 
-   $stash->{nav     } = $self->navigation( $req );
-   $stash->{template} = defined $ids->[ 0 ] && $ids->[ 0 ] ne 'index'
-                      ? 'documentation' : undef;
+   (not defined $ids->[ 0 ] or $ids->[ 0 ] eq 'index')
+      and $stash->{template} = 'index';
 
    return $stash;
 }
@@ -62,7 +64,9 @@ sub content_from_file {
 sub create_file_action {
    my ($self, $req) = @_;
 
-   $req->username ne 'unknown' or throw 'File creation not authorised';
+   $req->username ne 'unknown'
+      or throw error => 'File creation not authorised',
+                  rv => HTTP_UNAUTHORIZED;
 
    my $content  = $req->loc( $self->config->default_content );
    my $new_node = $self->_new_node( $req->locale, $req->body->param );
@@ -107,10 +111,13 @@ sub dialog {
 sub delete_file_action {
    my ($self, $req) = @_;
 
-   $req->username ne 'unknown' or throw 'Delete not authorised';
+   $req->username ne 'unknown'
+      or throw error => 'File deletion not authorised',
+                  rv => HTTP_UNAUTHORIZED;
 
    my $node     = $self->_find_node( $req->locale, [ @{ $req->args } ] )
-      or throw 'Cannot find document tree node to delete';
+      or throw error => 'Cannot find document tree node to delete',
+                  rv => HTTP_NOT_FOUND;
    my $rel_path = $self->_delete_and_prune( $node->{path} );
    my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
    my $message  = [ 'File [_1] deleted by [_2]', $rel_path, $req->username ];
@@ -167,7 +174,10 @@ sub locales {
       my ($self, $req) = @_;
 
       my $locale = $self->config->locale; # Always index config default language
-      my $mtime  = $self->_localised_tree( $locale )->{tree}->{_mtime};
+      my $node   = $self->_localised_tree( $locale )
+         or throw error => 'No document tree for default locale [_1]',
+                   args => [ $locale ], rv => HTTP_NOT_FOUND;
+      my $mtime  = $node->{tree}->{_mtime};
       my $wanted = join '/', my @ids = @{ $req->args };
       my $list   = $cache->{ $wanted };
 
@@ -183,12 +193,15 @@ sub locales {
 sub rename_file_action {
    my ($self, $req) = @_;
 
-   $req->username ne 'unknown' or throw 'File creation not authorised';
+   $req->username ne 'unknown'
+      or throw error => 'File renaming not authorised',
+                  rv => HTTP_UNAUTHORIZED;
 
    my $param    = $req->body->param;
    my $old_path = [ split m{ / }mx, __get_or_throw( $param, 'old_path' ) ];
    my $node     = $self->_find_node( $req->locale, $old_path )
-      or throw 'Cannot find document tree node to rename';
+      or throw error => 'Cannot find document tree node to rename',
+                  rv => HTTP_NOT_FOUND;
    my $new_node = $self->_new_node( $req->locale, $param );
 
    $new_node->{path}->assert_filepath;
@@ -205,11 +218,14 @@ sub rename_file_action {
 sub save_file_action {
    my ($self, $req) = @_;
 
-   $req->username ne 'unknown' or throw 'Update not authorised';
+   $req->username ne 'unknown'
+      or throw error => 'File updating not authorised',
+                  rv => HTTP_UNAUTHORIZED;
 
    my $node     =  $self->_find_node( $req->locale, [ @{ $req->args } ] )
-      or throw 'Cannot find document tree node to update';
-   my $content  =  __defined_or_throw( $req->body->param, 'content' );
+      or throw error => 'Cannot find document tree node to update',
+                  rv => HTTP_NOT_FOUND;
+   my $content  =  __get_defined_or_throw( $req->body->param, 'content' );
       $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
    my $path     =  $node->{path}; $path->println( $content ); $path->close;
    my $rel_path =  $path->abs2rel( $self->config->file_root );
@@ -220,33 +236,30 @@ sub save_file_action {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-sub search_file_action {
+sub search_file {
    my ($self, $req) = @_;
 
-   my $root   = $self->config->file_root;
-   # TODO: Sanitize user input
-   my $query  = __get_or_throw( $req->params, 'query' );
-   my $langd  = $root->catdir( __extract_lang( $req->locale ) );
-   my $res    = $self->ipc->run_cmd( [ 'ack', $query, $langd->pathname ] );
-   my $page   = $self->_search_results( $req, $langd, $res->stdout );
-   my $stash  = $self->get_stash( $req, $self->load_page( $req, $page ) );
+   my $query = __get_sanitized_value( $req->params, 'query' );
+   my $page  = $self->_search_results( $req, $query );
 
-   $stash->{nav     } = $self->navigation( $req );
-   $stash->{template} = 'documentation';
-   return $stash;
+   return $self->get_stash( $req, $self->load_page( $req, $page ) );
 }
 
 sub upload_file {
    my ($self, $req) = @_; my $conf = $self->config;
 
-   my $upload = $req->args->[ 0 ] or throw 'No upload object';
+   my $upload = $req->args->[ 0 ]
+      or throw error => 'No upload object', rv => HTTP_EXPECTATION_FAILED;
 
-   $req->username ne 'unknown' or throw 'Update not authorised';
+   $req->username ne 'unknown'
+      or throw error => 'File uploading not authorised',
+                  rv => HTTP_UNAUTHORIZED;
 
    $upload and not $upload->is_upload and throw $upload->reason;
    $upload->size > $conf->max_asset_size
       and throw error => 'File [_1] size [_2] too big',
-                 args => [ $upload->filename, $upload->size ];
+                 args => [ $upload->filename, $upload->size ],
+                   rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
 
    my $path = $conf->assetdir->catfile( $upload->filename );
 
@@ -340,7 +353,10 @@ sub _delete_and_prune {
 sub _docs_url {
    my ($self, $locale) = @_; state $cache //= {};
 
-   my $mtime = $self->_localised_tree( $locale )->{tree}->{_mtime};
+   my $node  = $self->_localised_tree( $locale )
+      or throw error => 'No document tree for locale [_1]',
+                args => [ $locale ], rv => HTTP_NOT_FOUND;
+   my $mtime = $node->{tree}->{_mtime};
    my $lang  = __extract_lang( $locale );
    my $entry = $cache->{ $lang };
 
@@ -362,22 +378,24 @@ sub _find_docs_url {
       ."the /docs folder. Double check you have at least one file in the root\n"
       ."of the /docs folder. Also make sure you do not have any empty folders";
 
-   $self->log->fatal( $error );
+   $self->log->error( $error );
    return '/';
 }
 
 sub _find_node {
-   my ($self, $locale, $ids) = @_; my $tree = $self->_localised_tree( $locale );
+   my ($self, $locale, $ids) = @_;
+
+   my $node = $self->_localised_tree( $locale ) or return FALSE;
 
    $ids //= []; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
 
    for my $node_id (@{ $ids }) {
-      $tree->{type} eq 'folder' and $tree = $tree->{tree};
-      exists  $tree->{ $node_id } or return FALSE;
-      $tree = $tree->{ $node_id };
+      $node->{type} eq 'folder' and $node = $node->{tree};
+      exists  $node->{ $node_id } or return FALSE;
+      $node = $node->{ $node_id };
    }
 
-   return $tree;
+   return $node;
 }
 
 sub _get_format {
@@ -398,15 +416,17 @@ sub _get_tip_text {
 }
 
 sub _localised_tree {
-   my ($self, $locale) = @_;
+   my ($self, $locale) = @_; my $tree = $self->docs_tree;
 
-   my $lang = __extract_lang( $locale ); my $tree = $self->docs_tree;
+   exists $tree->{ $locale } and defined $tree->{ $locale }
+      and return $tree->{ $locale };
 
-   $lang and defined $tree->{ $lang } and return $tree->{ $lang };
-   $lang = __extract_lang( $self->config->locale );
-   $lang and defined $tree->{ $lang } and return $tree->{ $lang };
+   my $lang = __extract_lang( $locale );
 
-   return $tree->{ LANG() };
+   exists $tree->{ $lang } and defined $tree->{ $lang }
+      and return $tree->{ $lang };
+
+   return FALSE;
 }
 
 sub _make_page {
@@ -437,7 +457,8 @@ sub _new_node {
       and exists $parent->{tree}->{ $id }
       and $parent->{tree}->{ $id }->{path} eq $path
       and throw error => 'Path [_1] already exists',
-                 args => [ join '/', $lang, @pathname ];
+                 args => [ join '/', $lang, @pathname ],
+                   rv => HTTP_PRECONDITION_FAILED;
 
    return { path => $path, url => $url, };
 }
@@ -459,12 +480,19 @@ sub _not_found {
 }
 
 sub _search_results {
-   my ($self, $req, $langd, $results) = @_;
+   my ($self, $req, $query) = @_;
 
-   my $title   = $req->loc( 'Search Results' );
+   my $count   = 1;
+   my $root    = $self->config->file_root;
+   my $langd   = $root->catdir( __extract_lang( $req->locale ) );
+   my $resp    = $self->ipc->run_cmd
+               ( [ 'ack', $query, "${langd}" ], { expected_rv => 1 } );
+   my $results = $resp->rv == 1
+               ? $langd->catfile( $req->loc( 'Nothing found' ) ).'::'
+               : $resp->stdout;
    my @tuples  = __prepare_search_results( $req, $langd, $results );
-   my $content = join "\n",
-      map { '['.$_->[ 0 ].']('.$_->[ 1 ].') '.$_->[ 2 ].'  ' } @tuples;
+   my $content = join "\n\n", map { __result_line( $count++, $_ ) } @tuples;
+   my $title   = $req->loc( 'Search Results' );
 
    return { content  => $content,
             docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
@@ -488,28 +516,39 @@ sub __copy_element_value {
             "   ev.stop(); \$( 'upload-path' ).value = this.value } )", ];
 }
 
-sub __defined_or_throw {
+sub __extract_lang {
+   my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
+}
+
+sub __get_defined_or_throw {
    my ($params, $name) = @_;
 
-   defined (my $param = $params->{ $name })
+   defined (my $v = $params->{ $name })
       or throw class => Unspecified, args => [ $name ],
                   rv => HTTP_EXPECTATION_FAILED;
 
-   return $param;
-}
-
-sub __extract_lang {
-   my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
+   return $v;
 }
 
 sub __get_or_throw {
    my ($params, $name) = @_;
 
-   my $param = __defined_or_throw( $params, $name )
+   my $v = __get_defined_or_throw( $params, $name )
       or throw class => Unspecified, args => [ $name ],
                   rv => HTTP_EXPECTATION_FAILED;
 
-   return $param;
+   return $v;
+}
+
+sub __get_sanitized_value {
+   my ($params, $name) = @_;
+
+   my $v = __get_or_throw( $params, $name ); $v =~ s{ [;\$\`&\r\n] }{}gmx;
+
+   $v or throw class => Unspecified, args => [ $name ],
+                  rv => HTTP_EXPECTATION_FAILED;
+
+   return $v;
 }
 
 sub __make_id_from {
@@ -560,6 +599,11 @@ sub __prune {
    while ($dir->exists and $dir->empty) { $dir->rmdir; $dir = $dir->parent }
 
    return $dir;
+}
+
+sub __result_line {
+   return $_[ 0 ].'\. ['.$_[ 1 ]->[ 0 ].']('.$_[ 1 ]->[ 1 ].")\n\n"
+         .$_[ 1 ]->[ 2 ];
 }
 
 sub __set_element_focus {
