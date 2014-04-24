@@ -11,7 +11,6 @@ requires "Plack::Middleware::Auth::Htpasswd" => "0.02";
 requires "Plack::Middleware::Deflater" => "0.08";
 requires "Plack::Middleware::LogErrors" => "0.001";
 requires "Plack::Middleware::Session" => "0.21";
-requires "Pod::Perldoc" => "3.23";
 requires "Pod::Xhtml" => "1.61";
 requires "Starman" => "0.3000";
 requires "Template" => "2.22";
@@ -35,5 +34,6 @@ on 'build' => sub {
 
 on 'configure' => sub {
   requires "Module::Build" => "0.4004";
+  requires "Pod::Perldoc" => "3.14";
   requires "version" => "0.88";
 };

@@ -17,6 +17,7 @@ my $prereqs  = {
   },
   'configure_requires' => {
     'Module::Build' => '0.4004',
+    'Pod::Perldoc' => '3.14',
     'version' => '0.88'
   },
   'recommends' => {
@@ -37,7 +38,6 @@ my $prereqs  = {
     'Plack::Middleware::Deflater' => '0.08',
     'Plack::Middleware::LogErrors' => '0.001',
     'Plack::Middleware::Session' => '0.21',
-    'Pod::Perldoc' => '3.23',
     'Pod::Xhtml' => '1.61',
     'Starman' => '0.3000',
     'Template' => '2.22',
