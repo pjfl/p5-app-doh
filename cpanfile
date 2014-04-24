@@ -34,6 +34,6 @@ on 'build' => sub {
 
 on 'configure' => sub {
   requires "Module::Build" => "0.4004";
-  requires "Pod::Perldoc" => "3.14";
+  requires "Pod::Perldoc" => "3.23";
   requires "version" => "0.88";
 };

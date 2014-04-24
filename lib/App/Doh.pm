@@ -2,7 +2,7 @@ package App::Doh;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 62 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 63 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -37,7 +37,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.1.$Rev: 62 $ of L<App::Doh>
+This documents version v0.1.$Rev: 63 $ of L<App::Doh>
 
 =head1 Description
 

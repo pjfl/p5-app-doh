@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Changed install to run with notests since too much fail on CPAN
           - And we're done
           - Documentation updates
           - Debug set through environment variable

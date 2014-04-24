@@ -1,6 +1,7 @@
 **Doh** is a documentation generator that uses a simple folder structure and
-Markdown files to create custom documentation on the fly. It helps you create
-great looking documentation in a developer friendly way.
+[Markdown](http://daringfireball.net/projects/markdown/) files to create
+custom documentation on the fly. It helps you create great looking
+documentation in a developer friendly way.
 
 ## Features
 
@@ -49,47 +50,53 @@ installed.
 If you don't already have it, bootstrap
 [App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
 
-   curl -L http://cpanmin.us | perl - --sudo App::cpanminus
+   > curl -L http://cpanmin.us | perl - --sudo App::cpanminus
 
 Then install [local::lib](https://metacpan.org/module/local::lib) with:
 
-   cpanm --local-lib=~/App-Doh local::lib && \
+   > cpanm --notest --local-lib=~/App-Doh local::lib && \
       eval $(perl -I ~/App-Doh/lib/perl5/ -Mlocal::lib=~/App-Doh)
 
 The second statement sets environment variables to include the local Perl
 library. You can append the output of the perl command to your shell startup
-if you want to make it permanent
+if you want to make it permanent. Without the correct environment settings
+Perl will not be able to find the installed dependencies and the following
+will fail, badly.
 
 Install **App-Doh** with:
 
-   cpanm git://github.com/pjfl/p5-app-doh.git
-
-If that fails run it again with the --force option
-
-   cpanm --force git:...
+   > cpanm --notest git://github.com/pjfl/p5-app-doh.git
 
 Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,
 installation may take a while to complete. The flip side is that there are no
-external dependencies like Node.js or Grunt to install.
+external dependencies like Node.js or Grunt to install. Anyway you are
+advised to seek out sustenance whilst you wait for ack-2.12 to run it's tests.
+At the risk of installing broken modules (they are only going into a local
+library) you can skip the tests by running `cpanm` with the `--notest`
+option.
+
+If that fails run it again with the --force option
+
+   > cpanm --force git:...
 
 By default the development server will run at:
 [http://localhost:5000](http://localhost:5000) and can be started in the
 foreground with:
 
-   cd App-Doh
-   plackup bin/doh-server
+   > cd App-Doh
+   > plackup bin/doh-server
 
 To start the production server in the background listening on the default port
 8085 use:
 
-   doh-daemon start
+   > doh-daemon start
 
 The doh-daemon program provides normal SysV init script semantics.
 Additionally the daemon program will write an init script to standard output
 in response to the command:
 
-   doh-daemon get_init_file
+   > doh-daemon get_init_file
 
 ## Folders
 
@@ -336,29 +343,28 @@ using `[\% links.assets %\]your-asset.jpg`, or from markdown as
 Only the green theme is precompiled, if you want the other colour themes then
 install Node, Lessc, and CSS::LESS. As root:
 
-   apt-get update
-   apt-get install git-core curl build-essential openssl libssl-dev
-   git clone https://github.com/joyent/node.git
-   cd node
-   ./configure --openssl-libpath=/usr/lib/ssl
-   make
-   make install
+   > apt-get update
+   > apt-get install git-core curl build-essential openssl libssl-dev
+   > git clone https://github.com/joyent/node.git
+   > cd node
+   > ./configure --openssl-libpath=/usr/lib/ssl
+   > make
+   > make install
    # Node installed with broken permissions which I had to fix at this point
-   npm install -g less
-   # And when you finally have a working lessc command
-   cpanm --force CSS::LESS
+   > npm install -g less
 
-Then create the other CSS files with (not as root):
+Now you should have a working `lessc` command. Create the other CSS files with
+(not as root):
 
-   cd App-Doh
-   bin/doh-cli make_css
+   > cpanm --force CSS::LESS
+   > doh-cli make_css
 
 ## Generating a set of static files
 
 This command creates a static HTML version of the documentation in the
 `var/root/static` directory
 
-   bin/doh-cli make_static
+   > doh-cli make_static
 
 ## Support
 
@@ -369,5 +375,5 @@ If you need help using Doh, or have found a bug, please create an issue on the
 <a href="https://github.com/pjfl/p5-app-doh/issues" target="_blank">Github
 repo</a>.
 
-Please note that a Perl module failing to install is not an issue for *this*
-application.
+Please note that a Perl module failing to install is not an issue for
+*this* application.

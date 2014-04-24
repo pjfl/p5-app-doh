@@ -17,7 +17,7 @@ my $prereqs  = {
   },
   'configure_requires' => {
     'Module::Build' => '0.4004',
-    'Pod::Perldoc' => '3.14',
+    'Pod::Perldoc' => '3.23',
     'version' => '0.88'
   },
   'recommends' => {
