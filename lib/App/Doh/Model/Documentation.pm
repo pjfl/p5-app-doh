@@ -5,7 +5,7 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( first_char is_member throw trim );
+use Class::Usul::Functions qw( first_char is_arrayref is_member throw trim );
 use Class::Usul::IPC;
 use File::DataClass::IO;
 use File::DataClass::Types qw( HashRef Int Object Path Str );
@@ -13,6 +13,7 @@ use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
                                HTTP_REQUEST_ENTITY_TOO_LARGE
                                HTTP_UNAUTHORIZED );
+use Scalar::Util           qw( weaken );
 use Unexpected::Functions  qw( Unspecified );
 
 extends q(App::Doh::Model);
@@ -69,7 +70,8 @@ sub create_file_action {
                   rv => HTTP_UNAUTHORIZED;
 
    my $content  = $req->loc( $self->config->default_content );
-   my $new_node = $self->_new_node( $req->locale, $req->body->param );
+   my $params   = $self->_scrubber( $req->body->param );
+   my $new_node = $self->_new_node( $req->locale, $params );
    my $path     = $new_node->{path};
 
    $path->assert_filepath->println( $content )->close;
@@ -85,15 +87,16 @@ sub create_file_action {
 sub dialog {
    my ($self, $req) = @_;
 
-   my $name = __get_or_throw( $req->params, 'name' );
-   my $page = { meta => { id => __get_or_throw( $req->params, 'id' ) } };
+   my $params = $self->_scrubber( $req->params );
+   my $page   = { meta => { id => $params->( 'id' ) } };
+   my $name   = $params->( 'name' );
 
    if    ($name eq 'create') {
       $page->{literal_js} = __set_element_focus( "${name}-file", 'pathname' );
    }
    elsif ($name eq 'rename') {
       $page->{literal_js} = __set_element_focus( "${name}-file", 'pathname' );
-      $page->{old_path  } = __get_or_throw( $req->params, 'val' );
+      $page->{old_path  } = $params->( 'val' );
    }
    elsif ($name eq 'search') {
       $page->{literal_js} = __set_element_focus( "${name}-file", 'query' );
@@ -197,12 +200,12 @@ sub rename_file_action {
       or throw error => 'File renaming not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
-   my $param    = $req->body->param;
-   my $old_path = [ split m{ / }mx, __get_or_throw( $param, 'old_path' ) ];
+   my $params   = $self->_scrubber( $req->body->param );
+   my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
    my $node     = $self->_find_node( $req->locale, $old_path )
       or throw error => 'Cannot find document tree node to rename',
                   rv => HTTP_NOT_FOUND;
-   my $new_node = $self->_new_node( $req->locale, $param );
+   my $new_node = $self->_new_node( $req->locale, $params );
 
    $new_node->{path}->assert_filepath;
    $node->{path}->close->move( $new_node->{path} ); __prune( $node->{path} );
@@ -225,7 +228,7 @@ sub save_file_action {
    my $node     =  $self->_find_node( $req->locale, [ @{ $req->args } ] )
       or throw error => 'Cannot find document tree node to update',
                   rv => HTTP_NOT_FOUND;
-   my $content  =  __get_defined_or_throw( $req->body->param, 'content' );
+   my $content  =  __get_defined_query_value( $req->body->param, 'content' );
       $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
    my $path     =  $node->{path}; $path->println( $content ); $path->close;
    my $rel_path =  $path->abs2rel( $self->config->file_root );
@@ -236,11 +239,11 @@ sub save_file_action {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-sub search_file {
+sub search_document_tree {
    my ($self, $req) = @_;
 
-   my $query = __get_sanitized_value( $req->params, 'query' );
-   my $page  = $self->_search_results( $req, $query );
+   my $params = $self->_scrubber( $req->params );
+   my $page   = $self->_search_results( $req, $params->( 'query' ) );
 
    return $self->get_stash( $req, $self->load_page( $req, $page ) );
 }
@@ -249,7 +252,8 @@ sub upload_file {
    my ($self, $req) = @_; my $conf = $self->config;
 
    my $upload = $req->args->[ 0 ]
-      or throw error => 'No upload object', rv => HTTP_EXPECTATION_FAILED;
+      or throw class => Unspecified, args => [ 'upload object' ],
+                  rv => HTTP_EXPECTATION_FAILED;
 
    $req->username ne 'unknown'
       or throw error => 'File uploading not authorised',
@@ -442,15 +446,14 @@ sub _make_page {
 }
 
 sub _new_node {
-   my ($self, $locale, $param) = @_;
+   my ($self, $locale, $params) = @_;
 
-   my $pathname =  __append_suffix( __get_or_throw( $param, 'pathname' ) );
-   my @pathname =  __prepare_path( $pathname );
+   my $lang     =  __extract_lang( $locale );
+   my @pathname =  __prepare_path( __append_suffix( $params->( 'pathname' ) ) );
+   my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
    my @filepath =  map { __make_id_from( $_ ) } @pathname;
    my $url      =  join '/', @filepath;
    my $id       =  pop @filepath;
-   my $lang     =  __extract_lang( $locale );
-   my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
    my $parent   =  $self->_find_node( $locale, [ @filepath ] );
 
    $parent and $parent->{type} eq 'folder'
@@ -479,22 +482,31 @@ sub _not_found {
             title    => $title, };
 }
 
+sub _scrubber {
+   my ($self, $params) = @_; weaken( $params );
+
+   my $pattern = $self->config->scrubber;
+
+   return sub { __get_scrubbed_value( $pattern, $params, $_[ 0 ] ) };
+}
+
 sub _search_results {
    my ($self, $req, $query) = @_;
 
    my $count   = 1;
    my $root    = $self->config->file_root;
    my $langd   = $root->catdir( __extract_lang( $req->locale ) );
-   my $resp    = $self->ipc->run_cmd
-               ( [ 'ack', $query, "${langd}" ], { expected_rv => 1 } );
+   my $resp    = $self->ipc->run_cmd( [ 'ack', $query, "${langd}" ],
+                 { debug => $self->usul->debug, expected_rv => 1 } );
    my $results = $resp->rv == 1
                ? $langd->catfile( $req->loc( 'Nothing found' ) ).'::'
                : $resp->stdout;
    my @tuples  = __prepare_search_results( $req, $langd, $results );
    my $content = join "\n\n", map { __result_line( $count++, $_ ) } @tuples;
+   my $leader  = $req->loc( 'You searched for "[_1]"', $query )."\n\n";
    my $title   = $req->loc( 'Search Results' );
 
-   return { content  => $content,
+   return { content  => $leader.$content,
             docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
             format   => 'markdown',
             header   => $title,
@@ -520,30 +532,32 @@ sub __extract_lang {
    my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
 }
 
-sub __get_defined_or_throw {
+sub __get_defined_query_value {
    my ($params, $name) = @_;
 
    defined (my $v = $params->{ $name })
       or throw class => Unspecified, args => [ $name ],
                   rv => HTTP_EXPECTATION_FAILED;
 
+   is_arrayref $v and $v = $v->[ 0 ];
+
    return $v;
 }
 
-sub __get_or_throw {
+sub __get_query_value {
    my ($params, $name) = @_;
 
-   my $v = __get_defined_or_throw( $params, $name )
+   my $v = __get_defined_query_value( $params, $name )
       or throw class => Unspecified, args => [ $name ],
                   rv => HTTP_EXPECTATION_FAILED;
 
    return $v;
 }
 
-sub __get_sanitized_value {
-   my ($params, $name) = @_;
+sub __get_scrubbed_value {
+   my ($pattern, $params, $name) = @_;
 
-   my $v = __get_or_throw( $params, $name ); $v =~ s{ [;\$\`&\r\n] }{}gmx;
+   my $v = __get_query_value( $params, $name ); $v =~ s{ $pattern }{}gmx;
 
    $v or throw class => Unspecified, args => [ $name ],
                   rv => HTTP_EXPECTATION_FAILED;

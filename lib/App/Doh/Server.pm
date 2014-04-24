@@ -52,7 +52,7 @@ sub _build__usul {
    my $self   = shift;
    my $myconf = $self->config;
    my $attr   = { config => {}, config_class => $self->config_class,
-                  debug  => $ENV{DOH_SERVER_DEBUG}, };
+                  debug  => $ENV{DOH_DEBUG} // FALSE, };
    my $conf   = $attr->{config};
 
    $conf->{appclass} = $self->appclass;
@@ -64,8 +64,8 @@ sub _build__usul {
 
    $bootconf->inflate_paths( $bootconf->projects );
 
-   my $port    = $ENV{DOH_SERVER_PORT} || $bootconf->port;
-   my $docs    = $bootconf->projects->{ $port } || $bootconf->docs_path;
+   my $port    = $ENV{DOH_PORT} // $bootconf->port;
+   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 
    $conf->{cfgfiles } = get_cfgfiles $conf->{appclass}, $cfgdirs;
@@ -77,10 +77,7 @@ sub _build__usul {
 around 'to_psgi_app' => sub {
    my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
 
-   my $debug  = $ENV{PLACK_ENV} eq 'development' ? TRUE : FALSE;
-   my $conf   = $self->usul->config;
-   my $point  = $conf->mount_point;
-   my $logger = $self->usul->log;
+   my $conf = $self->usul->config; my $point = $conf->mount_point;
 
    builder {
       mount "${point}" => builder {
@@ -94,13 +91,13 @@ around 'to_psgi_app' => sub {
          enable 'Static',
             path => qr{ \A / assets }mx, pass_through => TRUE,
             root => $conf->file_root;
-         enable "LogDispatch", logger => $logger;
          enable 'Session::Cookie',
             httponly => TRUE,          path        => $point,
             secret   => $conf->secret, session_key => 'doh_session';
          enable '+App::Doh::Auth::Htpasswd',
             file_root => $conf->file_root, params => [ qw( auth edit ) ];
-         enable_if { $debug } 'Debug';
+         enable "LogDispatch", logger => $self->usul->log;
+         enable_if { $self->usul->debug } 'Debug';
          $app;
       };
    };
@@ -118,7 +115,7 @@ sub dispatch_request {
       return shift->_execute( qw( html help content_from_pod ), @_ );
    },
    sub (GET  + /search-results + ?*) {
-      return shift->_execute( qw( html docs search_file ), @_ );
+      return shift->_execute( qw( html docs search_document_tree ), @_ );
    },
    sub (POST + / | /** + ?*) {
       return shift->_execute( qw( html docs from_request ), @_ );
@@ -130,12 +127,15 @@ sub dispatch_request {
 
 # Private methods
 sub _execute {
-   my ($self, $view, $model, $method, @args) = @_;
+   my ($self, $view, $model, $method, @args) = @_; my ($req, $res);
 
-   my $req = App::Doh::Request->new( $self->usul, @args ); my $res;
+   try   { $req = App::Doh::Request->new( $self->usul, @args ) }
+   catch { $res = __internal_server_error( $_ ) };
+
+   $res and return $res;
 
    try {
-      $method eq 'from_request' and $method = $req->method.'_action';
+      $method eq 'from_request' and $method = $req->tunnel_method.'_action';
 
       my $stash = $self->models->{ $model }->execute( $method, $req );
 
@@ -182,9 +182,9 @@ sub _render_exception {
 
 # Private functions
 sub __internal_server_error {
-   my ($e, $render_error) = @_;
+   my ($e, $secondary_error) = @_; my $message = "${e}\r\n";
 
-   my $message = "Original error: ${e}\r\nRendering error: ${render_error}";
+   $secondary_error and $message .= "Secondary error: ${secondary_error}";
 
    return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
 }
@@ -252,7 +252,15 @@ stack
 
 =head1 Diagnostics
 
-None
+Exporting C<DOH_DEBUG> and setting it to true causes the development
+server to start logging at the debug level
+
+The development server can be started using
+
+   plackup bin/doh-server
+
+Starting the daemon with the C<-D> option will cause it to print debug
+information to the log file F<var/logs/daemon.log>
 
 =head1 Dependencies
 

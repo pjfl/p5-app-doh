@@ -6,7 +6,7 @@ use Moo;
 use Class::Usul::Constants;
 use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
-                               NonZeroPositiveInt Path SimpleStr );
+                               NonZeroPositiveInt Path SimpleStr Str );
 use Sys::Hostname          qw( hostname );
 
 extends q(Class::Usul::Config::Programs);
@@ -73,8 +73,8 @@ has 'keywords'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'languages'       => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub {
-      [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ];
-   };
+      [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ] },
+   init_arg           => undef;
 
 has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'less/';
@@ -102,6 +102,8 @@ has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
 has 'query'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'scrubber'        => is => 'ro',   isa => Str, default => '[;\$\`&\r\n]';
 
 has 'secret'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => hostname;
@@ -294,6 +296,11 @@ locates the static JavaScript files
 A simple string that defaults to null. The HTML meta attributes keyword
 list value
 
+=item C<languages>
+
+A array reference of string derived from the list of configuration locales
+The value is constructed on demand and has no initial argument
+
 =item C<less>
 
 A non empty simple string that defaults to F<less/>. Relative URI path that
@@ -345,6 +352,12 @@ directory
 
 A simple string that defaults to null. The URI of the source code repository
 for this project
+
+=item C<scrubber>
+
+A string used as a character class in a regular expression. These character
+are scrubber from user input so they cannot appear in any user supplied
+pathnames or query terms. Defaults to C<[;\$\`&\r\n]>
 
 =item C<server>
 

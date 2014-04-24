@@ -37,9 +37,7 @@ has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr;
 has 'locales'  => is => 'lazy', isa => ArrayRef;
 
 has 'method'   => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub {
-         delete $_[ 0 ]->body->param->{_method}
-      || delete $_[ 0 ]->params->{_method} || 'not_found' };
+   builder     => sub { lc $_[ 0 ]->env->{ 'REQUEST_METHOD' } };
 
 has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
@@ -63,6 +61,11 @@ has 'script'   => is => 'lazy', isa => SimpleStr,
 has 'session'  => is => 'lazy', isa => HashRef,
    builder     => sub { $_[ 0 ]->env->{ 'psgix.session' } // {} };
 
+has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub {
+         delete $_[ 0 ]->body->param->{_method}
+      || delete $_[ 0 ]->params->{_method} || 'not_found' };
+
 has 'uri'      => is => 'lazy', isa => Object;
 
 has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
@@ -70,9 +73,9 @@ has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
 
 # Construction
 around 'BUILDARGS' => sub {
-   my ($orig, $self, $builder, @args) = @_; my $attr = {};
+   my ($orig, $self, @args) = @_; my $attr = {};
 
-   $attr->{builder} = $builder;
+   $attr->{builder} = shift @args;
    $attr->{env    } = (is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{params } = (is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{args   } = (defined $args[ 0 ] && blessed $args[ 0 ])
@@ -83,7 +86,13 @@ around 'BUILDARGS' => sub {
 };
 
 sub BUILD {
-   my $self = shift; $self->method; return;
+   my $self = shift; $self->tunnel_method;
+
+   $self->log->debug( join SPC, (uc $self->method),
+                      $self->uri,
+                      ($self->username ne 'unknown' ? $self->username : NUL) );
+
+   return;
 }
 
 sub _build_base {

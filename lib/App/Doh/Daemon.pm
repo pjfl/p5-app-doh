@@ -104,7 +104,7 @@ sub stop : method {
 
 # Private methods
 sub _daemon {
-   my $self = shift; $PROGRAM_NAME = $self->app;
+   my $self = shift; $PROGRAM_NAME = $self->app; $ENV{DOH_DEBUG} = $self->debug;
 
    $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
 
@@ -115,7 +115,7 @@ sub _daemon {
 sub _get_listener_args {
    my $self   = shift;
    my $config = $self->config;
-   my $port   = $ENV{DOH_SERVER_PORT} = $self->port;
+   my $port   = $ENV{DOH_PORT} = $self->port;
    my $args   = {
       '--port'       => $port,
       '--server'     => $self->server,

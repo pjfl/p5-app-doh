@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Debug set through environment variable
           - Search remembers query term
           - Fixed Firefox secret button styling
           - Added text searching using App::Ack
