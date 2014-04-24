@@ -252,18 +252,20 @@ sub upload_file {
    my ($self, $req) = @_; my $conf = $self->config;
 
    my $upload = $req->args->[ 0 ]
-      or throw class => Unspecified, args => [ 'upload object' ],
-                  rv => HTTP_EXPECTATION_FAILED;
+      or  throw class => Unspecified, args => [ 'upload object' ],
+                   rv => HTTP_EXPECTATION_FAILED;
 
-   $req->username ne 'unknown'
-      or throw error => 'File uploading not authorised',
-                  rv => HTTP_UNAUTHORIZED;
+   $upload->is_upload
+      or  throw error => $upload->reason, rv => HTTP_EXPECTATION_FAILED;
 
-   $upload and not $upload->is_upload and throw $upload->reason;
    $upload->size > $conf->max_asset_size
       and throw error => 'File [_1] size [_2] too big',
                  args => [ $upload->filename, $upload->size ],
                    rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
+
+   $req->username ne 'unknown'
+      or  throw error => 'File uploading not authorised',
+                   rv => HTTP_UNAUTHORIZED;
 
    my $path = $conf->assetdir->catfile( $upload->filename );
 

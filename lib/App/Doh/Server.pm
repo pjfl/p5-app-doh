@@ -84,17 +84,16 @@ sub _build__usul {
 around 'to_psgi_app' => sub {
    my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
 
-   my $conf = $self->usul->config; my $point = $conf->mount_point;
+   my $conf  = $self->usul->config; my $point = $conf->mount_point;
+
+   my @types = qw( text/css text/html text/javascript application/javascript );
 
    builder {
       mount "${point}" => builder {
          enable 'Deflater',
-            content_type    => [ qw( text/css text/html text/javascript
-                                     application/javascript ) ],
-            vary_user_agent => TRUE;
+            content_type  => [ @types ], vary_user_agent => TRUE;
          enable 'Static',
-            path => qr{ \A / (css | img | js | less) }mx,
-            root => $conf->root;
+            path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
          enable 'Static',
             path => qr{ \A / assets }mx, pass_through => TRUE,
             root => $conf->file_root;
