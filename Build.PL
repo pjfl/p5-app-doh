@@ -20,10 +20,10 @@ my $prereqs  = {
     'version' => '0.88'
   },
   'recommends' => {
+    'App::Ack' => '2.12',
     'CSS::LESS' => 'v0.0.3'
   },
   'requires' => {
-    'App::Ack' => '2.12',
     'Class::Usul' => 'v0.39.0',
     'Daemon::Control' => '0.000009',
     'File::DataClass' => 'v0.34.0',
