@@ -181,6 +181,11 @@ by the value in the configuration file
 
 =head1 Configuration and Environment
 
+The configuartion file is, by default, in JSON format
+
+It is found by calling the L<find_apphome|Class::Usul::Functions/find_apphome>
+function
+
 Defines the following attributes;
 
 =over 3

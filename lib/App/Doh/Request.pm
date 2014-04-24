@@ -313,6 +313,10 @@ is anonymous
 Picks the request parameters and environment apart. Returns the hash reference
 used to instantiate the request object
 
+=head2 BUILD
+
+Logs the request at the debug level
+
 =head2 loc
 
    $localised_string = $self->loc( $key, @args );

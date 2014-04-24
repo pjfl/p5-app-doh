@@ -81,6 +81,7 @@ pre code,pre code span{white-space:pre-wrap}
 table{border-bottom:1px solid #adcb83;margin-bottom:17px}
 table tr th,table tr td{border-color:#adcb83 !important;border-left:1px solid #adcb83;border-top:1px solid #adcb83;line-height:18px;padding:6px;text-align:left;vertical-align:top}
 table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
+.app-thumbnail{margin-top:18px}
 .article-tree,.content-area{height:100%;overflow:auto}
 .article-tree .collapse{direction:ltr}
 .btn{display:inline-block;text-align:center;vertical-align:middle}
@@ -135,8 +136,8 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .hidden{display:none}
 .homepage-content.container-fluid,.homepage-footer.container-fluid{font-size:14px;line-height:18px}
 .homepage-content.container-fluid .lead{font-weight:400;font-family:"Roboto Slab","Times New Roman","Times","serif"}
-.homepage-content.container-fluid ul,.homepage-content.container-fluid ol{margin:0 0 18px 0;padding:18px 0}
-.homepage-content.container-fluid ul li,.homepage-content.container-fluid ol li{list-style:none;padding-bottom:6px}
+.homepage-content.container-fluid ol,.homepage-content.container-fluid ul{margin:18px 0;padding:0}
+.homepage-content.container-fluid ol li,.homepage-content.container-fluid ul li{list-style:none;padding-bottom:6px}
 .homepage-content.container-fluid ul li:before,.homepage-content.container-fluid ol li:before{border:3px solid transparent;border-left:3px solid #569220;content:'';display:block;float:left;height:0;margin:6px;width:0}
 .homepage-content.container-fluid{background-color:#fff;overflow:hidden;min-height:72px;padding:36px 0}
 .homepage-footer.container-fluid{background-color:#000;min-height:72px;overflow:hidden;padding-top:0}

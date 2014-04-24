@@ -45,7 +45,14 @@ has '_usul'   => is => 'lazy', isa => BaseType,
 
 # Construction
 sub BUILD { # Take the hit at application startup not on first request
-   $_[ 0 ]->models->{docs}->docs_tree; return;
+   my $self = shift; $self->models->{docs}->docs_tree;
+
+   my $ver    = $App::Doh::VERSION;
+   my $server = ucfirst $ENV{PLACK_ENV} // NUL;
+   my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
+
+   $self->log->info( $server.' Server started v'.$ver.$port );
+   return;
 }
 
 sub _build__usul {
@@ -240,6 +247,8 @@ A non empty simple string the defaults to C<App::Doh::Config>
 Calls the documentation model at application start time. Means that the
 startup time is longer but the response time for the first request is
 shorter
+
+Log the server startup event
 
 =head2 dispatch_request
 

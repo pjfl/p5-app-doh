@@ -1,28 +1,35 @@
 <p class="lead">
-	<strong>Doh</strong> is a documentation generator that uses a simple folder structure and Markdown files to create custom documentation on the fly. It helps you create great looking documentation in a developer friendly way.
+   <strong>Doh</strong> is a documentation generator that uses a
+   simple folder structure and Markdown files to create custom
+   documentation on the fly. It helps you create great looking
+   documentation in a developer friendly way.
 </p>
 
 <hr class="subtle"/>
 <h3>Features</h3>
 <hr class="subtle"/>
 
-<img alt="[application thumbnail]" class="app-thumbnail pull-right"
-     src="[% links.images %]app-thumbs.png">
+<div class="app-thumbnail pull-right">
+   <img alt="[application thumbnail]" src="[% links.images %]app-thumbs.png">
+</div>
 
-* 100% Mobile Responsive
-* Supports GitHub Flavored Markdown
-* Auto created homepage/landing page
-* Auto Syntax Highlighting
-* Auto Generated Navigation
-* 4 Built-In colour themes or roll your own
-* Functional, Flat Design Style
-* Shareable/Linkable SEO Friendly URLs
+* 100% Mobile responsive
+* Supports GitHub flavored markdown
+* Automatically created home / landing page
+* Automatic syntax highlighting
+* Automatically generated navigation
+* 4 Built-in colour themes or roll your own
+* Functional, flat design style
+* Shareable / linkable SEO friendly URLs
 * Bootstrap classes on the markup
-* No Build Step
-* Git/SVN Friendly
-* Google Analytics
+* No build step
+* Git / SVN friendly
+* Google analytics
 * Optional code float layout
-* Markdown editor
+* Markdown editor and file management
+* Multi-language support
+* Static site generator
+* Text searching
 
 <div class="clear"></div>
 <hr class="subtle"/>
