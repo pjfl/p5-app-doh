@@ -36,8 +36,8 @@ has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr;
 
 has 'locales'  => is => 'lazy', isa => ArrayRef;
 
-has 'method'   => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub { lc $_[ 0 ]->env->{ 'REQUEST_METHOD' } };
+has 'method'   => is => 'lazy', isa => SimpleStr,
+   builder     => sub { lc $_[ 0 ]->env->{ 'REQUEST_METHOD' } // NUL };
 
 has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
