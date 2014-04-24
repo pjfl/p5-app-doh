@@ -329,7 +329,7 @@ file. Empty directories will be removed.
 The `Upload` link lets you select a file to upload. The uploaded file appears
 in the `var/root/docs/assets` directory. It can be referenced from a template
 using `[\% links.assets %\]your-asset.jpg`, or from markdown as
-`/assets/your-asset.jpg`
+`[\%links.assets%\]your-asset.jpg` (no spaces).
 
 ## Generating CSS from Less
 
