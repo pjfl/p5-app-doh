@@ -447,13 +447,13 @@ sub _make_page {
 sub _new_node {
    my ($self, $locale, $params) = @_;
 
-   my $lang     =  __extract_lang( $locale );
-   my @pathname =  __prepare_path( __append_suffix( $params->( 'pathname' ) ) );
-   my $path     =  $self->config->file_root->catfile( $lang, @pathname )->utf8;
-   my @filepath =  map { __make_id_from( $_ ) } @pathname;
-   my $url      =  join '/', @filepath;
-   my $id       =  pop @filepath;
-   my $parent   =  $self->_find_node( $locale, [ @filepath ] );
+   my $lang     = __extract_lang( $locale );
+   my @pathname = __prepare_path( __append_suffix( $params->( 'pathname' ) ) );
+   my $path     = $self->config->file_root->catfile( $lang, @pathname )->utf8;
+   my @filepath = map { __make_id_from( $_ ) } @pathname;
+   my $url      = join '/', @filepath;
+   my $id       = pop @filepath;
+   my $parent   = $self->_find_node( $locale, [ @filepath ] );
 
    $parent and $parent->{type} eq 'folder'
       and exists $parent->{tree}->{ $id }

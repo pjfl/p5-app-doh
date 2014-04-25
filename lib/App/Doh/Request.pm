@@ -317,8 +317,7 @@ C<en> (for English)
 
 =item C<method>
 
-The C<_method> attribute from the body of a post or from the query parameters
-in the event of a get request
+The HTTP request method. Lower cased
 
 =item C<params>
 
@@ -345,6 +344,11 @@ The request path
 
 Stores the user preferences. A hash reference
 
+=item C<tunnel_method>
+
+The C<_method> attribute from the body of a post or from the query parameters
+in the event of a get request
+
 =item C<uri>
 
 The URI of the current request. Does not include the query parameters
@@ -367,6 +371,21 @@ used to instantiate the request object
 
 Logs the request at the debug level
 
+=head2 body_params
+
+   $code_ref = $self->body_params;
+
+Returns a code reference which when called with a body parameter name returns
+the body parameter value after first scrubbing it of "dodgy" characters. Throws
+if the value is undefined or tainted
+
+=head2 body_value
+
+   $value = $self->body_value( $name );
+
+Returns the named body value, throws if the value is not defined. Returns the
+first value if the body contains more than one
+
 =head2 loc
 
    $localised_string = $self->loc( $key, @args );
@@ -378,6 +397,14 @@ the request in a future release
 =head2 loc_default
 
 Like the C<loc> method but always translates to the default language
+
+=head2 query_params
+
+   $code_ref = $self->query_params;
+
+Returns a code reference which when called with a query parameter name returns
+the query parameter value after first scrubbing it of "dodgy" characters. Throws
+if the value is undefined or tainted
 
 =head2 uri_for
 
