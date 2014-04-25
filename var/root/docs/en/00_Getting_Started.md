@@ -6,7 +6,7 @@ documentation in a developer friendly way.
 ## Features
 
 * 100% Mobile responsive
-* Supports GitHub flavored markdown
+* Supports the official flavour of markdown
 * Automatically created home / landing page
 * Automatic syntax highlighting
 * Automatically generated navigation

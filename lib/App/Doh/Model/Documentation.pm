@@ -5,15 +5,14 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( first_char is_arrayref is_member throw trim );
+use Class::Usul::Functions qw( first_char throw trim );
 use Class::Usul::IPC;
 use File::DataClass::IO;
-use File::DataClass::Types qw( HashRef Int Object Path Str );
+use File::DataClass::Types qw( HashRef Object Path Str );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
                                HTTP_REQUEST_ENTITY_TOO_LARGE
                                HTTP_UNAUTHORIZED );
-use Scalar::Util           qw( weaken );
 use Unexpected::Functions  qw( Unspecified );
 
 extends q(App::Doh::Model);
@@ -69,9 +68,8 @@ sub create_file_action {
       or throw error => 'File creation not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
+   my $new_node = $self->_new_node( $req->locale, $req->body_params );
    my $content  = $req->loc( $self->config->default_content );
-   my $params   = $self->_scrubber( $req->body->param );
-   my $new_node = $self->_new_node( $req->locale, $params );
    my $path     = $new_node->{path};
 
    $path->assert_filepath->println( $content )->close;
@@ -87,7 +85,7 @@ sub create_file_action {
 sub dialog {
    my ($self, $req) = @_;
 
-   my $params = $self->_scrubber( $req->params );
+   my $params = $req->query_params;
    my $page   = { meta => { id => $params->( 'id' ) } };
    my $name   = $params->( 'name' );
 
@@ -200,7 +198,7 @@ sub rename_file_action {
       or throw error => 'File renaming not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
-   my $params   = $self->_scrubber( $req->body->param );
+   my $params   = $req->body_params;
    my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
    my $node     = $self->_find_node( $req->locale, $old_path )
       or throw error => 'Cannot find document tree node to rename',
@@ -228,7 +226,7 @@ sub save_file_action {
    my $node     =  $self->_find_node( $req->locale, [ @{ $req->args } ] )
       or throw error => 'Cannot find document tree node to update',
                   rv => HTTP_NOT_FOUND;
-   my $content  =  __get_defined_query_value( $req->body->param, 'content' );
+   my $content  =  $req->body_value( 'content' );
       $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
    my $path     =  $node->{path}; $path->println( $content ); $path->close;
    my $rel_path =  $path->abs2rel( $self->config->file_root );
@@ -242,8 +240,7 @@ sub save_file_action {
 sub search_document_tree {
    my ($self, $req) = @_;
 
-   my $params = $self->_scrubber( $req->params );
-   my $page   = $self->_search_results( $req, $params->( 'query' ) );
+   my $page = $self->_search_results( $req, $req->query_params->( 'query' ) );
 
    return $self->get_stash( $req, $self->load_page( $req, $page ) );
 }
@@ -484,14 +481,6 @@ sub _not_found {
             title    => $title, };
 }
 
-sub _scrubber {
-   my ($self, $params) = @_; weaken( $params );
-
-   my $pattern = $self->config->scrubber;
-
-   return sub { __get_scrubbed_value( $pattern, $params, $_[ 0 ] ) };
-}
-
 sub _search_results {
    my ($self, $req, $query) = @_;
 
@@ -532,39 +521,6 @@ sub __copy_element_value {
 
 sub __extract_lang {
    my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
-}
-
-sub __get_defined_query_value {
-   my ($params, $name) = @_;
-
-   defined (my $v = $params->{ $name })
-      or throw class => Unspecified, args => [ $name ],
-                  rv => HTTP_EXPECTATION_FAILED;
-
-   is_arrayref $v and $v = $v->[ 0 ];
-
-   return $v;
-}
-
-sub __get_query_value {
-   my ($params, $name) = @_;
-
-   my $v = __get_defined_query_value( $params, $name )
-      or throw class => Unspecified, args => [ $name ],
-                  rv => HTTP_EXPECTATION_FAILED;
-
-   return $v;
-}
-
-sub __get_scrubbed_value {
-   my ($pattern, $params, $name) = @_;
-
-   my $v = __get_query_value( $params, $name ); $v =~ s{ $pattern }{}gmx;
-
-   $v or throw class => Unspecified, args => [ $name ],
-                  rv => HTTP_EXPECTATION_FAILED;
-
-   return $v;
 }
 
 sub __make_id_from {

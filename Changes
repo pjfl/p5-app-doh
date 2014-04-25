@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Moved input scrubbing function to the Request object
+
 0.2.1     2014-04-25 13:29:02
           - Bumped version for release
           - Changed install to run with notests since too much fail on CPAN

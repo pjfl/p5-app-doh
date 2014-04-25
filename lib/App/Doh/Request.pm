@@ -5,12 +5,14 @@ use namespace::sweep;
 use Moo;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
-                               is_member trim );
+                               is_member throw trim );
 use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
                                Object SimpleStr );
 use Encode                 qw( decode );
 use HTTP::Body;
-use Scalar::Util           qw( blessed );
+use HTTP::Status           qw( HTTP_EXPECTATION_FAILED );
+use Scalar::Util           qw( blessed weaken );
+use Unexpected::Functions  qw( Unspecified );
 use URI::http;
 use URI::https;
 
@@ -160,6 +162,18 @@ sub _build_uri {
 }
 
 # Public methods
+sub body_params {
+   my $self = shift; my $pattern = $self->config->scrubber;
+
+   my $params = $self->body->param; weaken( $params );
+
+   return sub { __get_scrubbed_value( $pattern, $params, $_[ 0 ] ) };
+}
+
+sub body_value {
+   return __get_defined_value( $_[ 0 ]->body->param, $_[ 1 ] );
+}
+
 sub loc {
    my ($self, $key, @args) = @_;
 
@@ -170,6 +184,14 @@ sub loc_default {
    my ($self, $key, @args) = @_;
 
    return $self->_localize( $self->config->locale, $key, @args );
+}
+
+sub query_params {
+   my $self = shift; my $pattern = $self->config->scrubber;
+
+   my $params = $self->params; weaken( $params );
+
+   return sub { __get_scrubbed_value( $pattern, $params, $_[ 0 ] ) };
 }
 
 sub uri_for {
@@ -202,6 +224,34 @@ sub _localize {
    $args->{locale      } ||= $locale;
 
    return $self->localize( $key, $args );
+}
+
+# Private functions
+sub __get_defined_value {
+   my ($params, $name) = @_;
+
+   defined (my $v = $params->{ $name })
+      or throw class => Unspecified, args => [ $name ],
+                  rv => HTTP_EXPECTATION_FAILED;
+
+   is_arrayref $v and $v = $v->[ 0 ];
+
+   return $v;
+}
+
+sub __get_scrubbed_value {
+   my ($pattern, $params, $name) = @_;
+
+   my $v = __get_defined_value( $params, $name )
+      or throw class => Unspecified, args => [ $name ],
+                  rv => HTTP_EXPECTATION_FAILED;
+
+   $v =~ s{ $pattern }{}gmx;
+
+   $v or throw class => Unspecified, args => [ $name ],
+                  rv => HTTP_EXPECTATION_FAILED;
+
+   return $v;
 }
 
 1;
