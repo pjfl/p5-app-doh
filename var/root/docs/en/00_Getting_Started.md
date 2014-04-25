@@ -30,8 +30,10 @@ I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it said
 
 ## Differences
 
-I exchanged the PHP for [Perl](http://www.perl.org). Not a fan of Bootstrap so
-that went also. Prefer class based inheritance when JavaScript programming
+I exchanged the PHP for modern [Perl](http://www.perl.org), [Moo](https://metacpan.org/module/Moo),
+[Plack](https://metacpan.org/module/Plack), and
+[Web::Simple](https://metacpan.org/module/Web::Simple). Not a fan of Bootstrap
+so that went also. Prefer class based inheritance when JavaScript programming
 hence [Mootools](http://mootools.net/) not jQuery.
 
 ## Installation
