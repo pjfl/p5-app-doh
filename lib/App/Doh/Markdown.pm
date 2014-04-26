@@ -8,8 +8,8 @@ sub _DoCodeBlocks { # Add support for triple graves
    my ($self, $text) = @_;
 
    $text =~ s{
-      (?:\n```.*\n|\n\n|\A)
-         ( #
+      (?:(?:\n```(.*)\n)|\n\n|\A)
+         (
            (?:
             (?:[ ]{$self->{tab_width}} | \t)
             .*\n+
@@ -17,13 +17,14 @@ sub _DoCodeBlocks { # Add support for triple graves
            )
          (^```|(?=^[ ]{0,$self->{tab_width}}\S)|\Z)
       }{
-         my $codeblock = $1; my $result;
+         my $class = $1 || q(); my $codeblock = $2; my $result;
 
          $codeblock = $self->_EncodeCode( $self->_Outdent( $codeblock ) );
          $codeblock = $self->_Detab( $codeblock );
          $codeblock =~ s/\A\n+//;
          $codeblock =~ s/\n+\z//;
-         $result = "\n\n<pre><code>${codeblock}\n</code></pre>\n\n";
+         $class and $class = " class=\"${class}\"";
+         $result = "\n\n<pre><code${class}>${codeblock}\n</code></pre>\n\n";
          $result;
       }egmx;
 

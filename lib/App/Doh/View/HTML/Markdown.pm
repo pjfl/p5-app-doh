@@ -12,8 +12,8 @@ extends q(App::Doh);
 has 'extensions' => is => 'lazy', isa => ArrayRef,
    builder       => sub { $_[ 0 ]->config->extensions->{markdown} };
 
-has 'tm'         => is => 'lazy', isa => Object,
-   builder       => sub { App::Doh::Markdown->new( tab_width => 3 ) };
+has 'tm'         => is => 'lazy', isa => Object, builder => sub {
+   App::Doh::Markdown->new( tab_width => $_[ 0 ]->config->mdn_tab_width ) };
 
 sub serialize {
    my ($self, $req, $page) = @_; my $content = $page->{content};

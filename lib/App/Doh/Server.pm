@@ -44,21 +44,24 @@ has '_usul'   => is => 'lazy', isa => BaseType,
    handles    => [ 'log' ], reader => 'usul';
 
 # Construction
-sub BUILD { # Take the hit at application startup not on first request
-   my $self = shift; $self->models->{docs}->docs_tree;
-
+sub BUILD {
+   my $self   = shift;
    my $ver    = $App::Doh::VERSION;
    my $server = ucfirst $ENV{PLACK_ENV} // NUL;
    my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
 
    $self->log->info( $server.' Server started v'.$ver.$port );
+   # Take the hit at application startup not on first request
+   $self->models->{docs}->docs_tree;
+   $self->log->debug( 'Document tree loaded' );
    return;
 }
 
 sub _build__usul {
    my $self   = shift;
    my $myconf = $self->config;
-   my $attr   = { config => {}, config_class => $self->config_class,
+   my $attr   = { config => {},
+                  config_class => $self->config_class,
                   debug  => $ENV{DOH_DEBUG} // FALSE, };
    my $conf   = $attr->{config};
 

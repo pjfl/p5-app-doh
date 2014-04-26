@@ -81,6 +81,8 @@ has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'links'           => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
+has 'mdn_tab_width'   => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
+
 has 'max_asset_size'  => is => 'ro',   isa => Int, default => 4_194_304;
 
 has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
@@ -317,6 +319,11 @@ A lazily evaluated array reference of hashes created automatically from the
 hash reference in the configuration file. Each hash has a single
 key / value pair, the link name and it's URI. The links are displayed in
 the navigation panel and the footer in the default templates
+
+=item C<mdn_tab_width>
+
+Non zero positive integer defaults to 3. The number of spaces required to
+indent a code block in the markdown class
 
 =item C<max_asset_size>
 
