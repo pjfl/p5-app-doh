@@ -53,13 +53,13 @@ installed.
 If you don't already have it, bootstrap
 [App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
 
-```bash
+```shell
    curl -L http://cpanmin.us | perl - --sudo App::cpanminus
 ```
 
 Then install [local::lib](https://metacpan.org/module/local::lib) with:
 
-```bash
+```shell
    cpanm --notest --local-lib=~/App-Doh local::lib && \
       eval $(perl -I ~/App-Doh/lib/perl5/ -Mlocal::lib=~/App-Doh)
 ```
@@ -72,7 +72,7 @@ will fail, badly.
 
 Install **App-Doh** with:
 
-```bash
+```shell
    cpanm --notest git://github.com/pjfl/p5-app-doh.git
 ```
 
@@ -87,7 +87,7 @@ option.
 
 If that fails run it again with the --force option
 
-```bash
+```shell
    cpanm --force git:...
 ```
 
@@ -95,7 +95,7 @@ By default the development server will run at:
 [http://localhost:5000](http://localhost:5000) and can be started in the
 foreground with:
 
-```bash
+```shell
    cd App-Doh
    plackup bin/doh-server
 ```
@@ -103,7 +103,7 @@ foreground with:
 To start the production server in the background listening on the default port
 8085 use:
 
-```bash
+```shell
    doh-daemon start
 ```
 
@@ -111,7 +111,7 @@ The doh-daemon program provides normal SysV init script semantics.
 Additionally the daemon program will write an init script to standard output
 in response to the command:
 
-```bash
+```shell
    doh-daemon get_init_file
 ```
 
@@ -383,7 +383,7 @@ using `[\% links.assets %\]your-asset.jpg`, or from markdown as
 Only the green theme is precompiled, if you want the other colour themes then
 install Node, Lessc, and CSS::LESS. As root:
 
-```bash
+```shell
    apt-get update
    apt-get install git-core curl build-essential openssl libssl-dev
    git clone https://github.com/joyent/node.git
@@ -398,7 +398,7 @@ install Node, Lessc, and CSS::LESS. As root:
 Now you should have a working `lessc` command. Create the other CSS files with
 (not as root):
 
-```bash
+```shell
    cpanm --force CSS::LESS
    doh-cli make_css
 ```
@@ -408,7 +408,7 @@ Now you should have a working `lessc` command. Create the other CSS files with
 This command creates a static HTML version of the documentation in the
 `var/root/static` directory
 
-```bash
+```shell
    doh-cli make_static
 ```
 
