@@ -2,7 +2,7 @@ package App::Doh;
 
 use 5.010001;
 use namespace::sweep;
-use version; our $VERSION = qv( sprintf '0.2.%d', q$Rev: 7 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.2.%d', q$Rev: 8 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants;
@@ -37,7 +37,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.2.$Rev: 7 $ of L<App::Doh>
+This documents version v0.2.$Rev: 8 $ of L<App::Doh>
 
 =head1 Description
 
@@ -57,6 +57,16 @@ The request object F<App::Doh::Request> represents all that is now about the
 current request
 
 F<App::Doh::Server> is the L<Web::Simple> based application server
+
+Defines these attributes;
+
+=over 3
+
+=item C<usul>
+
+An instance of L<Class::Usul>
+
+=back
 
 =head1 Subroutines/Methods
 

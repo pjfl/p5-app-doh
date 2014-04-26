@@ -41,13 +41,17 @@ peter
 flanigan
 API
 BUILDARGS
+cli
 doh
 filename
+inline
 JavaScript
+JSON
 loc
 microformat
 microformats
 middleware
+pathnames
 Plack
 pre
 PSGI

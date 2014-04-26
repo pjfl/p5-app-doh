@@ -176,12 +176,12 @@ App::Doh::Config - Defines the configuration file options and their defaults
 =head1 Description
 
 Each of the attributes defined here, plus the ones inherited from
-L<Class::Usul::Config::Programs>, can have their default value overriden
+L<Class::Usul::Config::Programs>, can have their default value overridden
 by the value in the configuration file
 
 =head1 Configuration and Environment
 
-The configuartion file is, by default, in JSON format
+The configuration file is, by default, in JSON format
 
 It is found by calling the L<find_apphome|Class::Usul::Functions/find_apphome>
 function
@@ -353,6 +353,10 @@ projects. Multiple servers can be started on different port numbers each
 with their document root and local configuration file in that document root
 directory
 
+=item C<query>
+
+Default search string
+
 =item C<repo_url>
 
 A simple string that defaults to null. The URI of the source code repository
@@ -363,6 +367,10 @@ for this project
 A string used as a character class in a regular expression. These character
 are scrubber from user input so they cannot appear in any user supplied
 pathnames or query terms. Defaults to C<[;\$\`&\r\n]>
+
+=item C<secret>
+
+Used to encrypt the session cookie
 
 =item C<server>
 

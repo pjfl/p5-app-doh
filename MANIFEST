@@ -32,7 +32,6 @@ lib/App/Doh/app-doh.json
 t/01always_pass.t
 t/02pod.t
 t/03podcoverage.t
-t/04critic.t
 t/05kwalitee.t
 t/06yaml.t
 t/07podspelling.t
