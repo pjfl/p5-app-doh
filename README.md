@@ -30,7 +30,8 @@ I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it said
 
 ## Differences
 
-I exchanged the PHP for modern [Perl](http://www.perl.org), [Moo](https://metacpan.org/module/Moo),
+I exchanged the PHP for modern
+[Perl](http://www.perl.org), [Moo](https://metacpan.org/module/Moo),
 [Plack](https://metacpan.org/module/Plack), and
 [Web::Simple](https://metacpan.org/module/Web::Simple). Not a fan of Bootstrap
 so that went also. Prefer class based inheritance when JavaScript programming
@@ -52,12 +53,16 @@ installed.
 If you don't already have it, bootstrap
 [App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
 
-   > curl -L http://cpanmin.us | perl - --sudo App::cpanminus
+```bash
+   curl -L http://cpanmin.us | perl - --sudo App::cpanminus
+```
 
 Then install [local::lib](https://metacpan.org/module/local::lib) with:
 
-   > cpanm --notest --local-lib=~/App-Doh local::lib && \
-   >    eval $(perl -I ~/App-Doh/lib/perl5/ -Mlocal::lib=~/App-Doh)
+```bash
+   cpanm --notest --local-lib=~/App-Doh local::lib && \
+      eval $(perl -I ~/App-Doh/lib/perl5/ -Mlocal::lib=~/App-Doh)
+```
 
 The second statement sets environment variables to include the local Perl
 library. You can append the output of the perl command to your shell startup
@@ -67,7 +72,9 @@ will fail, badly.
 
 Install **App-Doh** with:
 
-   > cpanm --notest git://github.com/pjfl/p5-app-doh.git
+```bash
+   cpanm --notest git://github.com/pjfl/p5-app-doh.git
+```
 
 Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,
@@ -80,25 +87,33 @@ option.
 
 If that fails run it again with the --force option
 
-   > cpanm --force git:...
+```bash
+   cpanm --force git:...
+```
 
 By default the development server will run at:
 [http://localhost:5000](http://localhost:5000) and can be started in the
 foreground with:
 
-   > cd App-Doh
-   > plackup bin/doh-server
+```bash
+   cd App-Doh
+   plackup bin/doh-server
+```
 
 To start the production server in the background listening on the default port
 8085 use:
 
-   > doh-daemon start
+```bash
+   doh-daemon start
+```
 
 The doh-daemon program provides normal SysV init script semantics.
 Additionally the daemon program will write an init script to standard output
 in response to the command:
 
-   > doh-daemon get_init_file
+```bash
+   doh-daemon get_init_file
+```
 
 ## Folders
 
@@ -368,28 +383,34 @@ using `[\% links.assets %\]your-asset.jpg`, or from markdown as
 Only the green theme is precompiled, if you want the other colour themes then
 install Node, Lessc, and CSS::LESS. As root:
 
-   > apt-get update
-   > apt-get install git-core curl build-essential openssl libssl-dev
-   > git clone https://github.com/joyent/node.git
-   > cd node
-   > ./configure --openssl-libpath=/usr/lib/ssl
-   > make
-   > make install
-   > # Node installed with broken permissions which I had to fix at this point
-   > npm install -g less
+```bash
+   apt-get update
+   apt-get install git-core curl build-essential openssl libssl-dev
+   git clone https://github.com/joyent/node.git
+   cd node
+   ./configure --openssl-libpath=/usr/lib/ssl
+   make
+   make install
+   # Node installed with broken permissions which I had to fix at this point
+   npm install -g less
+```
 
 Now you should have a working `lessc` command. Create the other CSS files with
 (not as root):
 
-   > cpanm --force CSS::LESS
-   > doh-cli make_css
+```bash
+   cpanm --force CSS::LESS
+   doh-cli make_css
+```
 
 ## Generating a set of static files
 
 This command creates a static HTML version of the documentation in the
 `var/root/static` directory
 
-   > doh-cli make_static
+```bash
+   doh-cli make_static
+```
 
 ## Support
 
