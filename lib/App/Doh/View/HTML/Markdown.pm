@@ -3,9 +3,9 @@ package App::Doh::View::HTML::Markdown;
 use namespace::sweep;
 
 use Moo;
+use App::Doh::Markdown;
 use Class::Usul::Types qw( ArrayRef Object );
 use Scalar::Util       qw( blessed );
-use Text::Markdown;
 
 extends q(App::Doh);
 
@@ -13,12 +13,12 @@ has 'extensions' => is => 'lazy', isa => ArrayRef,
    builder       => sub { $_[ 0 ]->config->extensions->{markdown} };
 
 has 'tm'         => is => 'lazy', isa => Object,
-   builder       => sub { Text::Markdown->new( tab_width => 3 ) };
+   builder       => sub { App::Doh::Markdown->new( tab_width => 3 ) };
 
 sub serialize {
    my ($self, $req, $page) = @_; my $content = $page->{content};
 
-   my $markdown =  blessed $content ? $content->all : $content;
+   my $markdown = blessed $content ? $content->all : $content;
 
    return $page->{editing} ? $markdown : $self->tm->markdown( $markdown );
 }

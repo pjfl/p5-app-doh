@@ -1,0 +1,41 @@
+package App::Doh::Markdown;
+
+use strict;
+use warnings;
+use parent 'Text::MultiMarkdown';
+
+sub _DoCodeBlocks { # Add support for triple graves
+   my ($self, $text) = @_;
+
+   $text =~ s{
+      (?:\n```.*\n|\n\n|\A)
+         ( #
+           (?:
+            (?:[ ]{$self->{tab_width}} | \t)
+            .*\n+
+            )+
+           )
+         (^```|(?=^[ ]{0,$self->{tab_width}}\S)|\Z)
+      }{
+         my $codeblock = $1; my $result;
+
+         $codeblock = $self->_EncodeCode( $self->_Outdent( $codeblock ) );
+         $codeblock = $self->_Detab( $codeblock );
+         $codeblock =~ s/\A\n+//;
+         $codeblock =~ s/\n+\z//;
+         $result = "\n\n<pre><code>${codeblock}\n</code></pre>\n\n";
+         $result;
+      }egmx;
+
+   return $text;
+}
+
+1;
+
+__END__
+
+# Local Variables:
+# mode: perl
+# tab-width: 3
+# End:
+# vim: expandtab shiftwidth=3:

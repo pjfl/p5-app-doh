@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added support for triple grave in Markdown
           - Moved input scrubbing function to the Request object
 
 0.2.1     2014-04-25 13:29:02

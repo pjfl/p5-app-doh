@@ -14,6 +14,7 @@ lib/App/Doh/Auth/Htpasswd.pm
 lib/App/Doh/CLI.pm
 lib/App/Doh/Config.pm
 lib/App/Doh/Daemon.pm
+lib/App/Doh/Markdown.pm
 lib/App/Doh/Model.pm
 lib/App/Doh/Model/Documentation.pm
 lib/App/Doh/Model/Help.pm
@@ -36,7 +37,6 @@ t/05kwalitee.t
 t/06yaml.t
 t/07podspelling.t
 t/10test_script.t
-var/root/css/highlight.css
 var/root/css/theme-blue.css
 var/root/css/theme-green.css
 var/root/css/theme-navy.css
