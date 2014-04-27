@@ -22,15 +22,17 @@
 [%    IF page.editing -%]
                <br>
                <div class="container">
-                  <form action="[% links.req_uri %]?edit=1"
-                       enctype="application/x-www-form-urlencoded"
-                        method="post" name="edit">
-                     <textarea class="editor autosize" id="markdown-editor"
+                  <div class="unbounded container">
+                     <form action="[% links.req_uri %]?edit=1"
+                          enctype="application/x-www-form-urlencoded"
+                           method="post" name="edit">
+                        <textarea class="editor autosize" id="markdown-editor"
                              name="content">[% page.content | html %]</textarea>
-                     <br>
-                     <button class="btn btn-submit" name="_method" type="submit"
+                        <br>
+                        <button class="btn btn-submit" name="_method" type="submit"
                              value="save_file">[% loc( 'Save' ) %]</button>
-                  </form>
+                     </form>
+                  </div>
                </div>
 [%    ELSE -%]
             [% page.content | eval %]

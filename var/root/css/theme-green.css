@@ -91,7 +91,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .columns .right-column.span9{margin-left:0;width:76.4866%}
 .columns .right-column.span9p5{margin-left:0}
 .columns .right-column .content-page{background-color:#fff;float:left;max-width:100%;min-height:100%;padding:9px 18px 9px 18px;position:relative}
-.container{float:left;overflow:hidden;position:relative}
+.container{overflow:hidden;position:relative}
 .container img{border:0 none;height:auto;max-width:100%}
 .container-center{margin-left:auto;margin-right:auto;max-width:940px}
 .container-fluid{margin:0 auto;padding-top:54px}
@@ -197,6 +197,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .tips-mark0{border:9px solid;border-color:transparent transparent #adcb83 #adcb83;content:' ';height:0;left:16px;position:absolute;top:-18px;width:0}
 .tips-mark1{border:7px solid;border-color:transparent transparent #92c86a #92c86a;content:' ';height:0;left:18px;position:absolute;width:0;top:-14px}
 .tips-term{color:Yellow;display:block;font-size:16px;line-height:18px;padding:8px 16px 4px 16px}
+.unbounded{overflow-x:auto}
 .upload-file{margin:9px;overflow:hidden;position:relative}
 .upload-file .upload{cursor:pointer;-khtml-opacity:0;-moz-opacity:0;-webkit-opacity:0;opacity:0;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);filter:alpha(opacity=0);position:absolute;top:0;right:0}
 .well{min-height:18px}
