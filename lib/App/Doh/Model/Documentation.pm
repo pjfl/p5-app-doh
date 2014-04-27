@@ -135,6 +135,25 @@ sub docs_tree {
    return $cache;
 }
 
+sub generate_static_action {
+   my ($self, $req) = @_;
+
+   $req->username ne 'unknown'
+      or throw error => 'File deletion not authorised',
+                  rv => HTTP_UNAUTHORIZED;
+
+   my $cli = $self->config->binsdir->catfile( 'doh-cli' );
+   my $cmd = [ "${cli}", 'make_static' ];
+
+   $self->log->debug( $self->ipc->run_cmd( $cmd, { async => TRUE } )->out );
+
+   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
+   my $message  = [ 'Static page generation started in the background by [_1]',
+                    $req->username ];
+
+   return { redirect => { location => $location, message => $message } };
+}
+
 sub iterator {
    my ($self, $locale) = @_;
 

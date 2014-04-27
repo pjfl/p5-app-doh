@@ -90,9 +90,11 @@ around 'BUILDARGS' => sub {
 sub BUILD {
    my $self = shift; $self->tunnel_method;
 
-   $self->log->debug( join SPC, (uc $self->method),
-                      $self->uri,
-                      ($self->username ne 'unknown' ? $self->username : NUL) );
+   my $mode = $self->params->{mode} // 'online';
+
+   $mode ne 'static' and $self->log->debug
+      ( join SPC, (uc $self->method), $self->uri,
+        ($self->username ne 'unknown' ? $self->username : NUL) );
 
    return;
 }
@@ -199,8 +201,8 @@ sub uri_for {
 
    $args and defined $args->[ 0 ] and $path = join '/', $path, @{ $args };
 
-   if (exists $params->{mode} and $params->{mode} eq 'static'
-          and '/' ne substr $path, -1, 1) {
+   if (exists $params->{mode}
+          and $params->{mode} eq 'static' and '/' ne substr $path, -1, 1) {
       $path or $path = 'index';
       $path = $self->base.$self->locale."/${path}.html";
    }

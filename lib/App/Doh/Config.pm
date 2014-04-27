@@ -116,6 +116,9 @@ has 'server'          => is => 'ro',   isa => NonEmptySimpleStr,
 has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
 
+has 'static'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'static';
+
 has 'template'        => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'documentation';
 
@@ -388,6 +391,11 @@ name to load when the documentation server is started in production mode
 
 A non empty simple string that defaults to C<default>. The name of the default
 skin used to theme the appearance of the application
+
+=item C<static>
+
+The default name for the sub-directory of the C<root> directory that will
+contain the static HTML pages. Defaults to C<static>
 
 =item C<template>
 

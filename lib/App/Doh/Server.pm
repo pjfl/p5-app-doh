@@ -50,10 +50,10 @@ sub BUILD {
    my $server = ucfirst $ENV{PLACK_ENV} // NUL;
    my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
 
-   $self->log->info( $server.' Server started v'.$ver.$port );
+   $port and $self->log->info( $server.' Server started v'.$ver.$port );
    # Take the hit at application startup not on first request
    $self->models->{docs}->docs_tree;
-   $self->log->debug( 'Document tree loaded' );
+   $port and $self->log->debug( 'Document tree loaded' );
    return;
 }
 
@@ -96,7 +96,9 @@ around 'to_psgi_app' => sub {
          enable 'Deflater',
             content_type  => [ @types ], vary_user_agent => TRUE;
          enable 'Static',
-            path => qr{ \A / (css | img | js | less | static) }mx,
+            path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
+         enable 'Static',
+            path => qr{ \A / static }mx, pass_through => TRUE,
             root => $conf->root;
          enable 'Static',
             path => qr{ \A / assets }mx, pass_through => TRUE,
