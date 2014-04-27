@@ -84,7 +84,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .btn.btn-sidebar:hover .icon-bar{background-color:#569220}
 .btn.btn-submit{padding:4px 8px;font-family:Verdana,"Lucida Sans",tahoma,arial,sans-serif}
 .columns{height:100%}
-.columns .left-column{background-color:#f5f5f6;margin-left:0}
+.columns .left-column{background-color:#f5f5f6;border-bottom:1px solid #adcb83;margin-left:0}
 .columns .left-column.span2p5{direction:rtl;overflow-x:hidden}
 .columns .left-column.span3{width:23.4043%}
 .columns .right-column{border-left:1px solid #adcb83}
@@ -197,7 +197,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .tips-mark0{border:9px solid;border-color:transparent transparent #adcb83 #adcb83;content:' ';height:0;left:16px;position:absolute;top:-18px;width:0}
 .tips-mark1{border:7px solid;border-color:transparent transparent #92c86a #92c86a;content:' ';height:0;left:18px;position:absolute;width:0;top:-14px}
 .tips-term{color:Yellow;display:block;font-size:16px;line-height:18px;padding:8px 16px 4px 16px}
-.unbounded{overflow-x:auto}
+.unbounded-x{overflow-x:auto}
 .upload-file{margin:9px;overflow:hidden;position:relative}
 .upload-file .upload{cursor:pointer;-khtml-opacity:0;-moz-opacity:0;-webkit-opacity:0;opacity:0;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);filter:alpha(opacity=0);position:absolute;top:0;right:0}
 .well{min-height:18px}

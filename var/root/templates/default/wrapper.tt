@@ -2,8 +2,7 @@
 <!doctype html>
 <html lang="[% page.language %]">
 <head>
-   <title>[% config.title %] - [% page.title %]</title>
-   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <meta charset="utf-8">
    <meta name="description" content="[% page.description %]">
    <meta name="keywords" content="[% page.keywords %]">
    <meta name="author" content="[% page.author %]">
@@ -31,6 +30,7 @@
    <link href="[% links.css %]theme-[% prefs.theme %].css"
           rel="stylesheet" type="text/css">
 [%    END -%]
+   <title>[% config.title %] - [% page.title %]</title>
 </head>
 <body>
    [% content -%]

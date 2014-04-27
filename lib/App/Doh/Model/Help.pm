@@ -14,13 +14,18 @@ with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
 # Public attributes
+has 'excluding'   => is => 'ro',   isa => ArrayRef,
+   builder        => sub { [ qw( Auth Markdown Model Role View ) ] };
+
+# Private attributes
 has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
    my $self     = shift;
    my $appclass = $self->config->appclass;
    my $help_url = $self->config->help_url;
   (my $path     = find_source( $appclass )) =~ s{ \.pm }{}mx;
    my $io       = io( $path )->filter( sub { m{ (?: \.pm | \.pod ) \z }mx } );
-   my $paths    = [ NUL, grep { not m{ \A (?: Auth | Model | Role | View ) }mx }
+   my $exclude  = join ' | ', @{ $self->excluding };
+   my $paths    = [ NUL, grep { not m{ \A (?: $exclude ) }mx }
                          map  { $_->abs2rel( $path ) } $io->deep->all_files ];
    my $classes  = [ map { s{ (?: :: | \.pm ) \z }{}mx; $_ }
                     map { s{ [/] }{::}gmx; "${appclass}::${_}" } @{ $paths } ];

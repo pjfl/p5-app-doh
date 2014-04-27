@@ -168,7 +168,8 @@ table tr th:last-child, table tr td:last-child {
 .btn.btn-submit { padding: 4px 8px; .sans-default; }
 .columns { height: 100%; }
 .columns .left-column {
-   background-color: @sidebar-background; margin-left: 0;
+   background-color: @sidebar-background; border-bottom: 1px solid @lines;
+   margin-left: 0;
 }
 .columns .left-column.span2p5 { direction: rtl; overflow-x: hidden; }
 .columns .left-column.span3 {  width: 23.4043%; }
@@ -407,7 +408,7 @@ table tr th:last-child, table tr td:last-child {
    color: Yellow; display: block; font-size: 16px; line-height: 18px;
    padding: 8px 16px 4px 16px;
 }
-.unbounded { overflow-x: auto; }
+.unbounded-x { overflow-x: auto; }
 .upload-file { margin: 9px; overflow: hidden; position: relative; }
 .upload-file .upload {
    cursor: pointer; .opacity( 0 ); position: absolute; top: 0; right: 0;

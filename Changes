@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Excluded Markdown class from POD help listing
           - Fixed CSS bug. Editor textarea back at full width
           - Just one word. Serve the static html through Plack server
           - Changed markdown class from bash to shell .md files
