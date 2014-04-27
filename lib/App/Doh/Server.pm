@@ -96,7 +96,8 @@ around 'to_psgi_app' => sub {
          enable 'Deflater',
             content_type  => [ @types ], vary_user_agent => TRUE;
          enable 'Static',
-            path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
+            path => qr{ \A / (css | img | js | less | static) }mx,
+            root => $conf->root;
          enable 'Static',
             path => qr{ \A / assets }mx, pass_through => TRUE,
             root => $conf->file_root;
@@ -159,11 +160,9 @@ sub _execute {
 }
 
 sub _redirect {
-   my ($self, $req, $stash) = @_;
+   my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
 
-   my $code     = $stash->{code    } || HTTP_FOUND;
-   my $redirect = $stash->{redirect};
-   my $message  = $redirect->{message};
+   my $redirect = $stash->{redirect}; my $message = $redirect->{message};
 
    $message and $req->session->{status_message} = $req->loc( @{ $message } )
             and $self->log->info( $req->loc_default( @{ $message } ) );

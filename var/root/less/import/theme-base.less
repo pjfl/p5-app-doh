@@ -1,26 +1,22 @@
 /* Mixins */
-.border-box {
-   -khtml-box-sizing: border-box; -moz-box-sizing: border-box;
-   -webkit-box-sizing: border-box; box-sizing: border-box;
-}
 .border-radius(@radius: 5px) {
    -khtml-border-radius: @radius; -moz-border-radius: @radius;
    -webkit-border-radius: @radius; border-radius: @radius;
+}
+.box-sizing(@model: border-box) {
+   -khtml-box-sizing: @model; -moz-box-sizing: @model;
+   -webkit-box-sizing: @model; box-sizing: @model;
 }
 .box-shadow(@depth: 5px) {
    -moz-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
    -webkit-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
    box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
 }
-.content-box {
-   -khtml-box-sizing: content-box; -moz-box-sizing: content-box;
-   -webkit-box-sizing: content-box; box-sizing: content-box;
+.header-default(@font: "Helvetica Neue") {
+   font-family: @font, Helvetica, Verdana, tahoma, arial, sans-serif;
 }
-.header-default {
-   font-family: "Helvetica Neue", Helvetica, Verdana, tahoma, arial, sans-serif;
-}
-.mono-default {
-   font-family: "Andale Mono", monaco, "Courier New", courier, monospace;
+.mono-default(@font: "Andale Mono") {
+   font-family: @font, monaco, "Courier New", courier, monospace;
 }
 .opacity(@opacity: 0.5) {
    -khtml-opacity: @opacity; -moz-opacity: @opacity;
@@ -29,16 +25,16 @@
    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
    filter: ~"alpha(opacity=@{opperc})";
 }
-.sans-default {
-   font-family: Verdana, "Lucida Sans", tahoma, arial, sans-serif;
+.sans-default(@font: Verdana) {
+   font-family: @font, "Lucida Sans", tahoma, arial, sans-serif;
 }
-.serif-default {
-   font-family: "Roboto Slab", "Times New Roman", "Times", "serif";
+.serif-default(@font: "Roboto Slab") {
+   font-family: @font, "Times New Roman", "Times", "serif";
 }
-.serif-light   { font-weight: 100; .serif-default; }
-.serif-book    { font-weight: 300; .serif-default; }
-.serif-regular { font-weight: 400; .serif-default; }
-.serif-bold    { font-weight: 700; .serif-default; }
+.serif-light(@weight: 100)   { font-weight: @weight; .serif-default; }
+.serif-book(@weight: 300)    { font-weight: @weight; .serif-default; }
+.serif-regular(@weight: 400) { font-weight: @weight; .serif-default; }
+.serif-bold(@weight: 700)    { font-weight: @weight; .serif-default; }
 
 /*  Elements - Reset styling */
 a, abbr, acronym, address, article, aside, audio, b, big, blockquote,
@@ -47,7 +43,7 @@ fieldset, figure, footer, form, h1, h2, h3, h4, h5, h6, header,
 hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu,
 nav, object, ol, p, pre, q, samp, section, small, span, strong, sub,
 sup, table, tbody, td, tfoot, th, thead, time, tr, tt, ul, var, video {
-   background: transparent; border: 0; .border-box; margin: 0; outline: 0;
+   background: transparent; border: 0; .box-sizing; margin: 0; outline: 0;
    padding: 0; text-align: left; vertical-align: baseline; white-space: normal;
 /* color: inherit; font-family: inherit; font-size: inherit;
    font-style: inherit; font-weight: inherit; */
@@ -104,7 +100,7 @@ h4 { font-size: 2.4em; line-height: 1.5em;   margin: 0.75em   0; } /* 24 36 */
 h5 { font-size: 2.0em; line-height: 1.8em;   margin: 0.9em    0; } /* 20 36 */
 h6 { font-size: 1.6em; line-height: 1.125em; margin: 0.5em    0; } /* 16 18 */
 hr {
-   border-bottom: 1px solid; border-top: 1px solid; .content-box;
+   border-bottom: 1px solid; border-top: 1px solid; .box-sizing(content-box);
    height: 0; margin: 8px 0; width: auto;
 }
 html { height: 100%; max-height: 100%; }
@@ -349,7 +345,7 @@ table tr th:last-child, table tr td:last-child {
 .page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }
 .pathname {
-   border: 2px inset; .border-box; .border-radius; font-size: 15px;
+   border: 2px inset; .border-radius; .box-sizing; font-size: 15px;
    line-height: 18px; margin: 4px 0; min-width: 400px; padding: 3px 7px;
    vertical-align: middle;
 }
@@ -451,6 +447,7 @@ table tr th:last-child, table tr td:last-child {
 }
 @media (max-width: 820px) {
    body { overflow-y: scroll; }
+   .collapse.in { display: none; }
    .columns .left-column, .columns .right-column {
       height: auto; padding-top: 0; width: 100% !important;
    }
@@ -498,9 +495,7 @@ table tr th:last-child, table tr td:last-child {
       margin-left: 18px; margin-right: 18px; width: auto;
    }
    .float-view .content-page ol li pre, .float-view .content-page ul li pre {
-      -khtml-box-sizing: border-box; -moz-box-sizing: border-box;
-      -webkit-box-sizing: border-box; box-sizing: border-box;
-      clear: left; float: left; margin-right: 18px; width: auto;
+      .box-sizing; clear: left; float: left; margin-right: 18px; width: auto;
    }
    .float-view .content-page p, .float-view .content-page .page-header {
       clear: left; float: left; margin-bottom: 18px; margin-top: 0;
