@@ -1,5 +1,5 @@
 ---
-name: index
+template: index
 ---
 <p class="lead">
    <strong>Doh</strong> is a documentation generator that uses a

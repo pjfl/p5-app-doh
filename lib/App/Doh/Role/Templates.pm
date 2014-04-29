@@ -38,8 +38,7 @@ sub render_template {
    my $conf     =  $stash->{config} = $self->config;
    my $skin     =  $stash->{skin  } = $prefs->{skin} // $conf->skin;
    my $meta     =  $stash->{page  }->{meta} // {};
-   my $template = ($meta->{name} // $stash->{template}
-                   // $conf->template).'.tt';
+   my $template = ($meta->{template} // $conf->template).'.tt';
    my $path     =  $self->templates->catdir( $skin )->catfile( $template );
 
    $path->exists or throw $req->loc( 'Path [_1] not found', $path );

@@ -92,8 +92,6 @@ has 'no_index'        => is => 'ro',   isa => ArrayRef,
    builder            => sub {
       [ qw( .git .htpasswd .mtime .svn app-doh.json assets ) ] };
 
-has 'page_meta'       => is => 'ro',   isa => HashRef,   default => sub { {} };
-
 has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
    default            => 8085;
 
@@ -343,11 +341,6 @@ which the application is mounted
 
 An array reference that defaults to C<[ .git .svn cgi-bin doh.json ]>. List of
 files and directories under the document root to ignore
-
-=item C<page_meta>
-
-Hash reference loaded from the configuration file. Keyed by partial URL it is
-accessable from the templates using the key C<< page.meta.<attribute_name> >>
 
 =item C<port>
 

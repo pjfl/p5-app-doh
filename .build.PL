@@ -1,3 +1,4 @@
+# Build.PL is generated - do not edit
 use strict;
 use warnings;
 

@@ -79,8 +79,9 @@ sub dialog {
    my ($self, $req) = @_;
 
    my $params = $req->query_params;
-   my $page   = { meta => { id => $params->( 'id' ) } };
    my $name   = $params->( 'name' );
+   my $page   = { meta => { id       => $params->( 'id' ),
+                            template => "${name}-file", }, };
 
    if    ($name eq 'create') {
       $page->{literal_js} = __set_element_focus( "${name}-file", 'pathname' );
@@ -96,10 +97,7 @@ sub dialog {
       $page->{literal_js} = __copy_element_value();
    }
 
-   my $stash = $self->get_stash( $req, $page );
-
-   $stash->{template} = "${name}-file";
-   return $stash;
+   return $self->get_stash( $req, $page );
 }
 
 sub delete_file_action {
@@ -307,7 +305,6 @@ sub _build_docs_tree {
          format      => $self->_get_format( $path->pathname ),
          id          => $id,
          level       => $level,
-         meta        => $self->config->page_meta->{ $url },
          mtime       => $mtime,
          name        => $name,
          path        => $path->utf8,
