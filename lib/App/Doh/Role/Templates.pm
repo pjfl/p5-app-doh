@@ -14,6 +14,9 @@ requires qw( config );
 has 'encoder'      => is => 'lazy', isa => Object, builder => sub {
    my $self        =  shift;
    my $args        =  {
+      COMPILE_DIR  => $self->config->tempdir->catdir( 'ttc' ),
+      COMPILE_EXT  => 'c',
+      ENCODING     => 'utf8',
       RELATIVE     => TRUE,
       INCLUDE_PATH => [ $self->templates->pathname ],
       WRAPPER      => catfile( $self->config->default_skin, 'wrapper.tt' ), };
@@ -31,10 +34,12 @@ sub render_template {
    my ($self, $req, $stash) = @_;
 
    my $html     =  NUL;
-   my $prefs    =  $stash->{prefs   } // {};
-   my $conf     =  $stash->{config  } = $self->config;
-   my $skin     =  $stash->{skin    } = $prefs->{skin} // $conf->skin;
-   my $template = ($stash->{template} //= $conf->template).'.tt';
+   my $prefs    =  $stash->{prefs } // {};
+   my $conf     =  $stash->{config} = $self->config;
+   my $skin     =  $stash->{skin  } = $prefs->{skin} // $conf->skin;
+   my $meta     =  $stash->{page  }->{meta} // {};
+   my $template = ($meta->{name} // $stash->{template}
+                   // $conf->template).'.tt';
    my $path     =  $self->templates->catdir( $skin )->catfile( $template );
 
    $path->exists or throw $req->loc( 'Path [_1] not found', $path );

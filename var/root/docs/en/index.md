@@ -1,3 +1,6 @@
+---
+name: index
+---
 <p class="lead">
    <strong>Doh</strong> is a documentation generator that uses a
    simple folder structure and Markdown files to create custom

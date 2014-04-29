@@ -6,7 +6,7 @@ documentation in a developer friendly way.
 ## Features
 
 * 100% Mobile responsive
-* Supports the official flavour of markdown
+* Supports an extended flavour of multi-markdown
 * Automatically created home / landing page
 * Automatic syntax highlighting
 * Automatically generated navigation

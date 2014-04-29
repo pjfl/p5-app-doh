@@ -1,4 +1,4 @@
-[% INCLUDE default/navbar.tt -%]
+[% INCLUDE 'default/navbar.tt' -%]
 <!-- Index -->
 <div class="container-fluid fluid-height wrapper">
    <div class="row-fluid columns content-area">
@@ -75,4 +75,4 @@
       </div>
    </div>
 </div>
-[% INCLUDE default/footer.tt -%]
+[% INCLUDE 'default/footer.tt' -%]

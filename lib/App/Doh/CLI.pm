@@ -55,6 +55,7 @@ sub make_css : method {
 sub make_static : method {
    my $self = shift; my $dest = io( $self->next_argv // $self->config->static );
 
+   $ENV{DOH_MAKE_STATIC} = TRUE;
    $self->log->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io( $dest->rel2abs( $self->config->root ) );
    $self->_copy_assets( $dest );

@@ -49,11 +49,12 @@ sub BUILD {
    my $ver    = $App::Doh::VERSION;
    my $server = ucfirst $ENV{PLACK_ENV} // NUL;
    my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
+   my $static = !!$ENV{DOH_MAKE_STATIC};
 
-   $port and $self->log->info( $server.' Server started v'.$ver.$port );
+   $static or $self->log->info( $server.' Server started v'.$ver.$port );
    # Take the hit at application startup not on first request
    $self->models->{docs}->docs_tree;
-   $port and $self->log->debug( 'Document tree loaded' );
+   $static or $self->log->debug( 'Document tree loaded' );
    return;
 }
 

@@ -222,7 +222,7 @@ sub _localize {
    my $args = (is_hashref $car) ? { %{ $car } }
             : { params => (is_arrayref $car) ? $car : [ @args ] };
 
-   $args->{domain_names} ||= [ DEFAULT_L10N_DOMAIN, $self->config->name ];
+   $args->{domain_names} ||= [ $self->config->name ];
    $args->{locale      } ||= $locale;
 
    return $self->localize( $key, $args );

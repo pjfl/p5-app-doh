@@ -51,14 +51,7 @@ around 'load_page' => sub {
 
 # Public methods
 sub content_from_file {
-   my ($self, $req) = @_; my $ids = $req->{args};
-
-   my $stash = $self->get_stash( $req, $self->load_page( $req ) );
-
-   (not defined $ids->[ 0 ] or $ids->[ 0 ] eq 'index')
-      and $stash->{template} = 'index';
-
-   return $stash;
+   return $_[ 0 ]->get_stash( $_[ 1 ], $_[ 0 ]->load_page( $_[ 1 ] ) );
 }
 
 sub create_file_action {
@@ -314,6 +307,7 @@ sub _build_docs_tree {
          format      => $self->_get_format( $path->pathname ),
          id          => $id,
          level       => $level,
+         meta        => $self->config->page_meta->{ $url },
          mtime       => $mtime,
          name        => $name,
          path        => $path->utf8,
@@ -458,6 +452,7 @@ sub _make_page {
             docs_url => $req->uri_for( $self->_docs_url( $locale ) ),
             format   => $node->{format},
             header   => $node->{title },
+            meta     => $node->{meta  },
             mtime    => $node->{mtime },
             title    => ucfirst $node->{name},
             url      => $node->{url   }, };
