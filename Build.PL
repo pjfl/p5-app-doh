@@ -47,6 +47,7 @@ my $prereqs  = {
     'Unexpected' => 'v0.22.0',
     'Web::Simple' => '0.020',
     'XML::Simple' => '2.18',
+    'YAML::Tiny' => '1.62',
     'namespace::sweep' => '0.006',
     'perl' => '5.010001'
   },

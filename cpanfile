@@ -21,6 +21,7 @@ requires "URI" => "1.60";
 requires "Unexpected" => "v0.22.0";
 requires "Web::Simple" => "0.020";
 requires "XML::Simple" => "2.18";
+requires "YAML::Tiny" => "1.62";
 requires "namespace::sweep" => "0.006";
 requires "perl" => "5.010001";
 recommends "CSS::LESS" => "v0.0.3";

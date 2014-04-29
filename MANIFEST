@@ -36,6 +36,7 @@ t/05kwalitee.t
 t/06yaml.t
 t/07podspelling.t
 t/10test_script.t
+var/locale/en/LC_MESSAGES/app_doh.po
 var/root/css/theme-blue.css
 var/root/css/theme-green.css
 var/root/css/theme-navy.css
@@ -73,10 +74,10 @@ var/root/templates/default/create-file.tt
 var/root/templates/default/documentation.tt
 var/root/templates/default/footer.tt
 var/root/templates/default/index.tt
-var/root/templates/default/left_column.tt
+var/root/templates/default/left-column.tt
 var/root/templates/default/navbar.tt
 var/root/templates/default/rename-file.tt
-var/root/templates/default/right_column.tt
+var/root/templates/default/right-column.tt
 var/root/templates/default/search-file.tt
 var/root/templates/default/upload-file.tt
 var/root/templates/default/wrapper.tt

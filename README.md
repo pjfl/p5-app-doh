@@ -107,7 +107,7 @@ To start the production server in the background listening on the default port
    doh-daemon start
 ```
 
-The doh-daemon program provides normal SysV init script semantics.
+The `doh-daemon` program provides normal SysV init script semantics.
 Additionally the daemon program will write an init script to standard output
 in response to the command:
 
