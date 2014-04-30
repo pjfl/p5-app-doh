@@ -229,29 +229,29 @@ sub _localize {
 }
 
 # Private functions
+sub __defined_or_throw {
+   defined $_[ 1 ] or throw class => Unspecified, args => [ $_[ 0 ] ],
+                               rv => HTTP_EXPECTATION_FAILED;
+   return $_[ 1 ];
+}
+
 sub __get_defined_value {
    my ($params, $name) = @_;
 
-   defined (my $v = $params->{ $name })
-      or throw class => Unspecified, args => [ $name ],
-                  rv => HTTP_EXPECTATION_FAILED;
+   my $v = __defined_or_throw( $name, $params->{ $name } );
 
    is_arrayref $v and $v = $v->[ 0 ];
 
-   return $v;
+   return __defined_or_throw( $name, $v );
 }
 
 sub __get_scrubbed_value {
    my ($pattern, $params, $name) = @_;
 
-   my $v = __get_defined_value( $params, $name )
-      or throw class => Unspecified, args => [ $name ],
-                  rv => HTTP_EXPECTATION_FAILED;
+   my $v = __get_defined_value( $params, $name ); $v =~ s{ $pattern }{}gmx;
 
-   $v =~ s{ $pattern }{}gmx;
-
-   $v or throw class => Unspecified, args => [ $name ],
-                  rv => HTTP_EXPECTATION_FAILED;
+   length $v or throw class => Unspecified, args => [ $name ],
+                         rv => HTTP_EXPECTATION_FAILED;
 
    return $v;
 }

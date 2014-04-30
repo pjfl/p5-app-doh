@@ -17,14 +17,13 @@ sub exception_handler {
    my $filler  =  '&nbsp;' x 40;
    my $page    =  {
       content  => "${e}${filler}\n\n   Code: ".$e->rv,
-      docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
       format   => 'markdown',
       header   => $title,
       mtime    => time,
       title    => $title, };
    my $stash   =  $self->get_stash( $req, $self->load_page( $req, $page ) );
 
-   $stash->{code} = $e->rv >= HTTP_BAD_REQUEST ? $e->rv : HTTP_BAD_REQUEST;
+   $stash->{code} = $e->rv >= HTTP_OK ? $e->rv : HTTP_BAD_REQUEST;
 
    return $stash;
 }

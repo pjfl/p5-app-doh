@@ -12,10 +12,10 @@
    -webkit-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
    box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
 }
-.header-default(@font: "Helvetica Neue") {
+.header-font(@font: "Helvetica Neue") {
    font-family: @font, Helvetica, Verdana, tahoma, arial, sans-serif;
 }
-.mono-default(@font: "Andale Mono") {
+.mono-font(@font: "Andale Mono") {
    font-family: @font, monaco, "Courier New", courier, monospace;
 }
 .opacity(@opacity: 0.5) {
@@ -25,16 +25,16 @@
    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
    filter: ~"alpha(opacity=@{opperc})";
 }
-.sans-default(@font: Verdana) {
+.sans-font(@font: Verdana) {
    font-family: @font, "Lucida Sans", tahoma, arial, sans-serif;
 }
-.serif-default(@font: "Roboto Slab") {
+.serif-font(@font: "Roboto Slab") {
    font-family: @font, "Times New Roman", "Times", "serif";
 }
-.serif-light(@weight: 100)   { font-weight: @weight; .serif-default; }
-.serif-book(@weight: 300)    { font-weight: @weight; .serif-default; }
-.serif-regular(@weight: 400) { font-weight: @weight; .serif-default; }
-.serif-bold(@weight: 700)    { font-weight: @weight; .serif-default; }
+.serif-light(@weight: 100)   { font-weight: @weight; .serif-font; }
+.serif-book(@weight: 300)    { font-weight: @weight; .serif-font; }
+.serif-regular(@weight: 400) { font-weight: @weight; .serif-font; }
+.serif-bold(@weight: 700)    { font-weight: @weight; .serif-font; }
 
 /*  Elements - Reset styling */
 a, abbr, acronym, address, article, aside, audio, b, big, blockquote,
@@ -79,20 +79,20 @@ big { font-size: 1.8em; line-height: 1em; }
 blockquote { margin: 1em 36px; }
 body {
    font-size: 62.5%; font-weight: normal; height: 100%; line-height: 1.8em;
-   max-height: 100%; overflow: hidden; .sans-default;
+   max-height: 100%; overflow: hidden; .sans-font;
 }
 br { clear: left; }
 button, input, select { cursor: pointer; line-height: normal; }
 button[disabled], html input[disabled] { cursor: default; }
 canvas { margin: 0; }
 caption { margin: 9px; }
-code, kbd, pre, samp, tt, var { .mono-default; }
+code, kbd, pre, samp, tt, var { .mono-font; }
 del { text-decoration: line-through; }
 dl, ol, ul { margin-bottom: 18px; }
 dfn { font-style: italic; }
 fieldset { border: 1px solid; margin-bottom: 18px; padding: 6px; }
 form { display: block; overflow: auto; }
-h1, h2, h3, h4, h5, h6 { font-weight: normal; .header-default; }
+h1, h2, h3, h4, h5, h6 { font-weight: normal; .header-font; }
 h1 { font-size: 3.6em; line-height: 1em;     margin: 0.5em    0; } /* 36 36 */
 h2 { font-size: 3.2em; line-height: 1.125em; margin: 0.5625em 0; } /* 32 36 */
 h3 { font-size: 2.8em; line-height: 1.286em; margin: 0.6428em 0; } /* 28 36 */
@@ -166,7 +166,7 @@ table tr th:last-child, table tr td:last-child {
 }
 .btn.btn-sidebar:hover { background-color: @dark; }
 .btn.btn-sidebar:hover .icon-bar { background-color: @light; }
-.btn.btn-submit { padding: 4px 8px; .sans-default; }
+.btn.btn-submit { padding: 4px 8px; .sans-font; }
 .columns { height: 100%; }
 .columns .left-column {
    background-color: @sidebar-background; border-bottom: 1px solid @lines;
@@ -220,7 +220,7 @@ table tr th:last-child, table tr td:last-child {
    color: @light; display: block; font-size: 18px; line-height: 18px;
    margin-bottom: 18px;
 }
-.editor { font-size: 16px; line-height: 18px; .mono-default; }
+.editor { font-size: 16px; line-height: 18px; .mono-font; }
 .expanding_area { margin-bottom: 18px; overflow: hidden; position: relative; }
 .expanding_area > textarea, .expanding_spacer, .expanding_spacer > span {
    white-space: pre-wrap; word-wrap: break-word;

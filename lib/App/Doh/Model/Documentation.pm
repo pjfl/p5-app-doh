@@ -34,7 +34,17 @@ has 'ipc'        => is => 'lazy', isa => Object,
 
 # Construction
 around 'load_page' => sub {
-   my ($orig, $self, $req, @args) = @_; my $conf = $self->config;
+   my ($orig, $self, $req, @args) = @_;
+
+   my $page = $self->_load_localised_page( $orig, $req, @args );
+
+   $page->{docs_url} //= $self->docs_url( $req );
+
+   return $page;
+};
+
+sub _load_localised_page {
+   my ($self, $orig, $req, @args) = @_; my $conf = $self->config;
 
    $args[ 0 ] and return $orig->( $self, $req, $args[ 0 ] );
 
@@ -47,7 +57,7 @@ around 'load_page' => sub {
    }
 
    return $orig->( $self, $req, $self->_not_found( $req ) );
-};
+}
 
 # Public methods
 sub content_from_file {
@@ -111,8 +121,8 @@ sub delete_file_action {
       or throw error => 'Cannot find document tree node to delete',
                   rv => HTTP_NOT_FOUND;
    my $rel_path = $self->_delete_and_prune( $node->{path} );
-   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
    my $message  = [ 'File [_1] deleted by [_2]', $rel_path, $req->username ];
+   my $location = $self->docs_url( $req );
 
    return { redirect => { location => $location, message => $message } };
 }
@@ -124,6 +134,10 @@ sub docs_tree {
       and $cache = $self->_build_docs_tree;
 
    return $cache;
+}
+
+sub docs_url {
+   return $_[ 1 ]->uri_for( $_[ 0 ]->_docs_url( $_[ 2 ] // $_[ 1 ]->locale ) );
 }
 
 sub generate_static_action {
@@ -138,7 +152,7 @@ sub generate_static_action {
 
    $self->log->debug( $self->ipc->run_cmd( $cmd, { async => TRUE } )->out );
 
-   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
+   my $location = $self->docs_url( $req );
    my $message  = [ 'Static page generation started in the background by [_1]',
                     $req->username ];
 
@@ -279,8 +293,8 @@ sub upload_file {
    io( $upload->path )->copy( $path->assert_filepath );
 
    my $rel_path = $path->abs2rel( $self->config->assetdir );
-   my $location = $req->uri_for( $self->_docs_url( $req->locale ) );
    my $message  = [ 'File [_1] uploaded by [_2]', $rel_path, $req->username ];
+   my $location = $self->docs_url( $req );
 
    return { redirect => { location => $location, message => $message } };
 }
@@ -446,7 +460,7 @@ sub _make_page {
    my ($self, $req, $locale, $node) = @_;
 
    return { content  => $node->{path  },
-            docs_url => $req->uri_for( $self->_docs_url( $locale ) ),
+            docs_url => $self->docs_url( $req, $locale ),
             format   => $node->{format},
             header   => $node->{title },
             meta     => $node->{meta  },
@@ -485,7 +499,6 @@ sub _not_found {
                  ."\n\n    Code: ${rv}\n\n";
 
    return { content  => $content,
-            docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
             format   => 'markdown',
             header   => $title,
             mtime    => time,
@@ -509,7 +522,6 @@ sub _search_results {
    my $title   = $req->loc( 'Search Results' );
 
    return { content  => $leader.$content,
-            docs_url => $req->uri_for( $self->_docs_url( $req->locale ) ),
             format   => 'markdown',
             header   => $title,
             mtime    => time,
@@ -535,15 +547,15 @@ sub __extract_lang {
 }
 
 sub __make_id_from {
-   my $text = shift;
+   my $text = shift; $text =~ s{ \A \d+ [_\-] }{}mx;
 
-   $text =~ s{ \A \d+ [_] }{}mx; $text =~ s{ \. [a-zA-Z0-9_\+]+ \z }{}mx;
+   $text =~ s{ [_] }{-}gmx; $text =~ s{ \. [a-zA-Z0-9_\+]+ \z }{}mx;
 
    return $text;
 }
 
 sub __make_name_from {
-   my $text = shift; $text =~ s{ [_] }{ }gmx; return $text;
+   my $text = shift; $text =~ s{ [_\-] }{ }gmx; return $text;
 }
 
 sub __make_tuple {
@@ -554,7 +566,7 @@ sub __make_tuple {
 }
 
 sub __prepare_path {
-   return (map { s{ [ ] }{_}gmx; $_ }
+   return (map { s{ [ ] }{-}gmx; $_ }
            map { trim $_            } split m{ / }mx, $_[ 0 ]);
 }
 

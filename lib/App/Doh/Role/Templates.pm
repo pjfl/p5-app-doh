@@ -33,7 +33,7 @@ has 'templates'    => is => 'lazy', isa => Directory,
 sub render_template {
    my ($self, $req, $stash) = @_;
 
-   my $html     =  NUL;
+   my $result   =  NUL;
    my $prefs    =  $stash->{prefs } // {};
    my $conf     =  $stash->{config} = $self->config;
    my $skin     =  $stash->{skin  } = $prefs->{skin} // $conf->skin;
@@ -42,10 +42,10 @@ sub render_template {
    my $path     =  $self->templates->catdir( $skin )->catfile( $template );
 
    $path->exists or throw $req->loc( 'Path [_1] not found', $path );
-   $self->encoder->process( catfile( $skin, $template ), $stash, \$html )
+   $self->encoder->process( catfile( $skin, $template ), $stash, \$result )
       or throw $self->encoder->error;
 
-   return $html;
+   return $result;
 }
 
 1;
