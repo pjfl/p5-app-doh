@@ -4,11 +4,14 @@ use namespace::sweep;
 
 use Moo;
 use Class::Usul::Constants;
-use Class::Usul::Time qw( time2str );
-use HTTP::Status      qw( HTTP_BAD_REQUEST HTTP_OK );
-use Scalar::Util      qw( weaken );
+use Class::Usul::Time  qw( time2str );
+use Class::Usul::Types qw( HashRef );
+use HTTP::Status       qw( HTTP_BAD_REQUEST HTTP_OK );
+use Scalar::Util       qw( weaken );
 
 extends q(App::Doh);
+
+has 'type_map' => is => 'lazy', isa => HashRef, builder => sub { {} };
 
 sub exception_handler {
    my ($self, $req, $e) = @_;
@@ -37,7 +40,7 @@ sub get_stash {
 
    return { code     => HTTP_OK,
             loc      => sub { $req->loc( @_ ) },
-            nav      => $self->navigation( $req ),
+            nav      => $self->navigation( $req, $page ),
             page     => $page,
             req      => $req,
             time2str => sub { time2str( $_[ 0 ], $_[ 1 ], $_[ 2 ] ) },

@@ -17,7 +17,7 @@ around 'load_page' => sub {
 
    $page->{application_version} = $App::Doh::VERSION;
    $page->{editing            } = $req->params->{edit} // FALSE;
-   $page->{homepage_url       } = $req->uri_for( NUL );
+   $page->{homepage_url       } = $req->base;
    $page->{language           } = (split m{ _ }mx, $req->locale)[ 0 ];
    $page->{mode               } = $req->params->{mode} // 'online';
    $page->{status_message     } = delete $req->session->{status_message} // NUL;

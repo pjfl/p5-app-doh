@@ -4,6 +4,7 @@ use namespace::sweep;
 
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
+use App::Doh::Model::Posts;
 use App::Doh::Request;
 use App::Doh::View::HTML;
 use App::Doh::View::XML;
@@ -32,6 +33,9 @@ has '_models' => is => 'lazy', isa => HashRef[Object], reader => 'models',
          ( builder  => $_[ 0 ]->usul,
            type_map => $_[ 0 ]->views->{html}->type_map ),
       'help'  => App::Doh::Model::Help->new( builder => $_[ 0 ]->usul ),
+      'posts' => App::Doh::Model::Posts->new
+         ( builder  => $_[ 0 ]->usul,
+           type_map => $_[ 0 ]->views->{html}->type_map ),
    } };
 
 has '_views'  => is => 'lazy', isa => HashRef[Object], reader => 'views',
@@ -53,7 +57,8 @@ sub BUILD {
 
    $static or $self->log->info( $server.' Server started v'.$ver.$port );
    # Take the hit at application startup not on first request
-   $self->models->{docs}->docs_tree;
+   $self->models->{docs }->docs_tree;
+   $self->models->{posts}->posts;
    $static or $self->log->debug( 'Document tree loaded' );
    return;
 }
@@ -119,22 +124,25 @@ around 'to_psgi_app' => sub {
 # Public methods
 sub dispatch_request {
    sub (POST + /assets + *file~ + ?*) {
-      return shift->_execute( qw( html docs upload_file ), @_ );
+      return shift->_execute( qw( html docs  upload_file ), @_ );
    },
    sub (GET  + /dialog + ?*) {
-      return shift->_execute( qw( xml  docs dialog ), @_ );
+      return shift->_execute( qw( xml  docs  dialog ), @_ );
    },
    sub (GET  + /pod | /pod/** + ?*) {
-      return shift->_execute( qw( html help content_from_pod ), @_ );
+      return shift->_execute( qw( html help  content_from_pod ), @_ );
+   },
+   sub (GET  + /posts | /posts/** + ?*) {
+      return shift->_execute( qw( html posts content_from_file ), @_ );
    },
    sub (GET  + /search-results + ?*) {
-      return shift->_execute( qw( html docs search_document_tree ), @_ );
+      return shift->_execute( qw( html docs  search_document_tree ), @_ );
    },
    sub (POST + / | /** + ?*) {
-      return shift->_execute( qw( html docs from_request ), @_ );
+      return shift->_execute( qw( html docs  from_request ), @_ );
    },
    sub (GET  + / | /** + ?*) {
-      return shift->_execute( qw( html docs content_from_file ), @_ );
+      return shift->_execute( qw( html docs  content_from_file ), @_ );
    };
 }
 

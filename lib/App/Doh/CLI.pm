@@ -4,6 +4,7 @@ use namespace::sweep;
 
 use Moo;
 use App::Doh;
+use App::Doh::Functions    qw( iterator );
 use App::Doh::Model::Documentation;
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( throw );
@@ -97,10 +98,10 @@ sub _copy_assets {
 sub _make_localised_static {
    my ($self, $dest, $locale) = @_; my $conf = $self->config;
 
-   my $iter = $self->model->iterator( $locale );
+   my $iter = iterator( $self->model->localised_tree( $locale ) );
 
    while (my $node = $iter->()) {
-      $node->{type} eq 'file' or next;
+      $node->{type} eq 'folder' and next;
 
       my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
       my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];

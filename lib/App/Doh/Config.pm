@@ -90,7 +90,7 @@ has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'no_index'        => is => 'ro',   isa => ArrayRef,
    builder            => sub {
-      [ qw( .git .htpasswd .mtime .svn app-doh.json assets ) ] };
+   [ qw( \.docs$ \.git$ \.htpasswd$ \.json$ \.posts$ \.svn$ assets posts ) ] };
 
 has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
    default            => 8085;

@@ -1,14 +1,16 @@
 package App::Doh::Model::Documentation;
 
-use 5.010001;
+use feature 'state';
 use namespace::sweep;
 
 use Moo;
+use App::Doh::Functions    qw( build_tree extract_lang iterator localise_tree
+                               make_id_from make_name_from mtime );
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( first_char throw trim );
 use Class::Usul::IPC;
 use File::DataClass::IO;
-use File::DataClass::Types qw( HashRef Object Path Str );
+use File::DataClass::Types qw( Object Path );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
                                HTTP_REQUEST_ENTITY_TOO_LARGE
@@ -21,49 +23,37 @@ with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
 # Public attributes
-has 'no_index'   => is => 'lazy', isa => Str,
-   builder       => sub { join '|', @{ $_[ 0 ]->config->no_index } };
-
-has 'root_mtime' => is => 'lazy', isa => Path, coerce => Path->coercion,
-   builder       => sub { $_[ 0 ]->config->file_root->catfile( '.mtime' ) };
-
-has 'type_map'   => is => 'lazy', isa => HashRef, builder => sub { {} };
-
 has 'ipc'        => is => 'lazy', isa => Object,
    builder       => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
+
+has 'root_mtime' => is => 'lazy', isa => Path, coerce => Path->coercion,
+   builder       => sub { $_[ 0 ]->config->file_root->catfile( '.docs' ) };
+
+with q(App::Doh::Role::PageLoading);
 
 # Construction
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $page = $self->_load_localised_page( $orig, $req, @args );
+   my $page = $self->load_localised_page( $orig, $req, @args );
 
    $page->{docs_url} //= $self->docs_url( $req );
+   $page->{wanted  } //= join '/', @{ $req->args };
 
    return $page;
 };
 
-sub _load_localised_page {
-   my ($self, $orig, $req, @args) = @_; my $conf = $self->config;
+around 'make_page' => sub {
+   my ($orig, $self, $node, $req, $locale) = @_;
 
-   $args[ 0 ] and return $orig->( $self, $req, $args[ 0 ] );
+   my $page = $orig->( $self, $node, $req, $locale );
 
-   for my $locale ($req->locale, @{ $req->locales }, $conf->locale) {
-      my $node = $self->_find_node( $locale, [ @{ $req->args } ] );
+   $page->{docs_url} = $self->docs_url( $req, $locale );
 
-      ($node and $node->{type} eq 'file') or next;
-
-      return $orig->( $self, $req, $self->_make_page( $req, $locale, $node ) );
-   }
-
-   return $orig->( $self, $req, $self->_not_found( $req ) );
-}
+   return $page;
+};
 
 # Public methods
-sub content_from_file {
-   return $_[ 0 ]->get_stash( $_[ 1 ], $_[ 0 ]->load_page( $_[ 1 ] ) );
-}
-
 sub create_file_action {
    my ($self, $req) = @_;
 
@@ -76,7 +66,7 @@ sub create_file_action {
    my $path     = $new_node->{path};
 
    $path->assert_filepath->println( $content )->close;
-   $self->_invalidate_cache( $path->stat->{mtime} );
+   $self->invalidate_cache( $path->stat->{mtime} );
 
    my $location = $req->uri_for( $new_node->{url} );
    my $rel_path = $path->abs2rel( $self->config->file_root );
@@ -117,7 +107,7 @@ sub delete_file_action {
       or throw error => 'File deletion not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
-   my $node     = $self->_find_node( $req->locale, [ @{ $req->args } ] )
+   my $node     = $self->find_node( $req->locale, [ @{ $req->args } ] )
       or throw error => 'Cannot find document tree node to delete',
                   rv => HTTP_NOT_FOUND;
    my $rel_path = $self->_delete_and_prune( $node->{path} );
@@ -128,10 +118,17 @@ sub delete_file_action {
 }
 
 sub docs_tree {
-   my $self = shift; state $cache //= $self->_build_docs_tree;
+   my $self = shift; state $cache; my $filesys = $self->root_mtime;
 
-   $self->root_mtime->stat->{mtime} > $cache->{_mtime}
-      and $cache = $self->_build_docs_tree;
+   if (not defined $cache or $filesys->stat->{mtime} > $cache->{_mtime}) {
+      my $conf     = $self->config;
+      my $no_index = join '|', @{ $conf->no_index };
+      my $root     = io( $conf->file_root );
+      my $dir      = $root->filter( sub { not m{ (?: $no_index ) }mx } );
+
+      $cache = build_tree( $self->type_map, $dir );
+      $filesys->touch( $cache->{_mtime} );
+   }
 
    return $cache;
 }
@@ -159,60 +156,12 @@ sub generate_static_action {
    return { redirect => { location => $location, message => $message } };
 }
 
-sub iterator {
-   my ($self, $locale) = @_;
-
-   my @folders = ( __make_tuple( $self->_localised_tree( $locale ) ) );
-
-   return sub {
-      while (my $tuple = $folders[ 0 ]) {
-         while (defined (my $k = $tuple->[ 1 ]->[ $tuple->[ 0 ]++ ])) {
-            my $node = $tuple->[ 2 ]->{tree}->{ $k };
-
-            $node->{type} eq 'folder'
-               and unshift @folders, __make_tuple( $node );
-
-            return $node;
-         }
-
-         shift @folders;
-      }
-
-      return;
-   };
-}
-
 sub locales {
    return grep { first_char $_ ne '_' } keys %{ $_[ 0 ]->docs_tree };
 }
 
-{  my $cache //= {};
-
-   sub _invalidate_cache {
-      my ($self, $mtime) = @_; $cache = {};
-
-      $self->root_mtime->touch( $mtime );
-      return;
-   }
-
-   sub navigation {
-      my ($self, $req) = @_;
-
-      my $locale = $self->config->locale; # Always index config default language
-      my $node   = $self->_localised_tree( $locale )
-         or throw error => 'No document tree for default locale [_1]',
-                   args => [ $locale ], rv => HTTP_NOT_FOUND;
-      my $mtime  = $node->{tree}->{_mtime};
-      my $wanted = join '/', my @ids = @{ $req->args };
-      my $list   = $cache->{ $wanted };
-
-      (not $list or $mtime > $list->{mtime})
-         and $cache->{ $wanted } = $list
-            = { items => $self->_build_nav_list( $locale, \@ids, $wanted ),
-                mtime => $mtime, };
-
-      return $list->{items};
-   }
+sub localised_tree {
+   return localise_tree $_[ 0 ]->docs_tree, $_[ 1 ];
 }
 
 sub rename_file_action {
@@ -224,14 +173,14 @@ sub rename_file_action {
 
    my $params   = $req->body_params;
    my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
-   my $node     = $self->_find_node( $req->locale, $old_path )
+   my $node     = $self->find_node( $req->locale, $old_path )
       or throw error => 'Cannot find document tree node to rename',
                   rv => HTTP_NOT_FOUND;
    my $new_node = $self->_new_node( $req->locale, $params );
 
    $new_node->{path}->assert_filepath;
    $node->{path}->close->move( $new_node->{path} ); __prune( $node->{path} );
-   $self->_invalidate_cache;
+   $self->invalidate_cache;
 
    my $location = $req->uri_for( $new_node->{url} );
    my $rel_path = $node->{path}->abs2rel( $self->config->file_root );
@@ -247,7 +196,7 @@ sub save_file_action {
       or throw error => 'File updating not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
-   my $node     =  $self->_find_node( $req->locale, [ @{ $req->args } ] )
+   my $node     =  $self->find_node( $req->locale, [ @{ $req->args } ] )
       or throw error => 'Cannot find document tree node to update',
                   rv => HTTP_NOT_FOUND;
    my $content  =  $req->body_value( 'content' );
@@ -300,79 +249,12 @@ sub upload_file {
 }
 
 # Private methods
-sub _build_docs_tree {
-   my ($self, $dir, $level, $order, $url_base, $title) = @_;
-
-   my $max_mtime = 0; my $no_index = $self->no_index; my $tree = {};
-
-   $dir //= $self->config->file_root; $level //= 0; $level++;
-
-   $order //= 0; $url_base //= NUL; $title //= NUL;
-
-   for my $path ($dir->filter( sub { not m{ (?: $no_index ) }mx } )->all) {
-      my $id         =  __make_id_from  ( $path->filename );
-      my $name       =  __make_name_from( $id );
-      my $url        =  $url_base ? "${url_base}/${id}"  : $id;
-      my $full_title =  $title    ? "${title} - ${name}" : $name;
-      my $mtime      =  $path->stat->{mtime};
-      my $node       =  $tree->{ $id } = {
-         format      => $self->_get_format( $path->pathname ),
-         id          => $id,
-         level       => $level,
-         mtime       => $mtime,
-         name        => $name,
-         path        => $path->utf8,
-         title       => $full_title,
-         type        => 'file',
-         url         => $url,
-         _order      => $order++, };
-
-      $path->is_file and $mtime > $max_mtime and $max_mtime = $mtime;
-      $path->is_dir or next;
-      $node->{type} = 'folder';
-      $node->{tree} = $level > 1 # Skip the language code directories
-                ? $self->_build_docs_tree( $path, $level, $order, $url, $name )
-                : $self->_build_docs_tree( $path, $level, $order, NUL,  NUL   );
-      $node->{tree}->{_mtime} > $max_mtime
-         and $max_mtime = $node->{tree}->{_mtime};
-   }
-
-   $level == 1 and $self->root_mtime->touch( $max_mtime );
-   $tree->{_mtime} = $max_mtime;
-   return $tree;
-}
-
-sub _build_nav_list {
-   my ($self, $locale, $ids, $wanted) = @_;
-
-   my $iter = $self->iterator( $locale ); my @nav = ();
-
-   while (defined (my $node = $iter->())) {
-      $node->{id} eq 'index' and next;
-
-      my $link = { level => $node->{level} - 2,
-                   name  => $node->{name},
-                   tip   => $self->_get_tip_text( $node ),
-                   type  => $node->{type},
-                   url   => $node->{type} eq 'folder' ? '#' : $node->{url}, };
-
-      if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
-         $link->{class} = $node->{url} eq $wanted ? 'active' : 'open';
-         shift @{ $ids };
-      }
-
-      push @nav, $link;
-   }
-
-   return \@nav;
-}
-
 sub _delete_and_prune {
    my ($self, $path) = @_;
 
    $path->exists and $path->unlink; __prune( $path );
 
-   $self->_invalidate_cache;
+   $self->invalidate_cache;
 
    return $path->abs2rel( $self->config->file_root );
 }
@@ -380,24 +262,26 @@ sub _delete_and_prune {
 sub _docs_url {
    my ($self, $locale) = @_; state $cache //= {};
 
-   my $node  = $self->_localised_tree( $locale )
+   my $node  = $self->localised_tree( $locale )
       or throw error => 'No document tree for locale [_1]',
                 args => [ $locale ], rv => HTTP_NOT_FOUND;
-   my $mtime = $node->{tree}->{_mtime};
-   my $lang  = __extract_lang( $locale );
+   my $mtime = mtime $node;
+   my $lang  = extract_lang $locale;
    my $entry = $cache->{ $lang };
 
    (not $entry or $mtime > $entry->{mtime}) and $cache->{ $lang } = $entry
-      = { mtime => $mtime, url => $self->_find_docs_url( $locale ), };
+      = { mtime => $mtime, url => $self->_find_first_url( $locale ), };
 
    return $entry->{url};
 }
 
-sub _find_docs_url {
-   my ($self, $locale) = @_; my $iter = $self->iterator( $locale );
+sub _find_first_url {
+   my ($self, $locale) = @_;
+
+   my $iter = iterator( $self->localised_tree( $locale ) );
 
    while (defined (my $node = $iter->())) {
-      $node->{type} eq 'file' and $node->{id} ne 'index'
+      $node->{type} ne 'folder' and $node->{id} ne 'index'
          and return $node->{url};
    }
 
@@ -409,76 +293,16 @@ sub _find_docs_url {
    return '/';
 }
 
-sub _find_node {
-   my ($self, $locale, $ids) = @_;
-
-   my $node = $self->_localised_tree( $locale ) or return FALSE;
-
-   $ids //= []; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
-
-   for my $node_id (@{ $ids }) {
-      $node->{type} eq 'folder' and $node = $node->{tree};
-      exists  $node->{ $node_id } or return FALSE;
-      $node = $node->{ $node_id };
-   }
-
-   return $node;
-}
-
-sub _get_format {
-   my ($self, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
-
-   return $self->type_map->{ $extn } || 'text';
-}
-
-sub _get_tip_text {
-   my ($self, $node) = @_;
-
-   my $text = $node->{path}->abs2rel( $self->config->file_root );
-
-   $text =~ s{ \A [a-z]+ / }{}mx;
-   $text =~ s{ [/] }{ / }gmx;
-   $text =~ s{ \. .+ \z }{}mx;
-   return $text;
-}
-
-sub _localised_tree {
-   my ($self, $locale) = @_; my $tree = $self->docs_tree;
-
-   exists $tree->{ $locale } and defined $tree->{ $locale }
-      and return $tree->{ $locale };
-
-   my $lang = __extract_lang( $locale );
-
-   exists $tree->{ $lang } and defined $tree->{ $lang }
-      and return $tree->{ $lang };
-
-   return FALSE;
-}
-
-sub _make_page {
-   my ($self, $req, $locale, $node) = @_;
-
-   return { content  => $node->{path  },
-            docs_url => $self->docs_url( $req, $locale ),
-            format   => $node->{format},
-            header   => $node->{title },
-            meta     => $node->{meta  },
-            mtime    => $node->{mtime },
-            title    => ucfirst $node->{name},
-            url      => $node->{url   }, };
-}
-
 sub _new_node {
    my ($self, $locale, $params) = @_;
 
-   my $lang     = __extract_lang( $locale );
+   my $lang     = extract_lang $locale;
    my @pathname = __prepare_path( __append_suffix( $params->( 'pathname' ) ) );
    my $path     = $self->config->file_root->catfile( $lang, @pathname )->utf8;
-   my @filepath = map { __make_id_from( $_ ) } @pathname;
+   my @filepath = map { make_id_from( $_ )->[ 0 ] } @pathname;
    my $url      = join '/', @filepath;
    my $id       = pop @filepath;
-   my $parent   = $self->_find_node( $locale, [ @filepath ] );
+   my $parent   = $self->find_node( $locale, [ @filepath ] );
 
    $parent and $parent->{type} eq 'folder'
       and exists $parent->{tree}->{ $id }
@@ -490,27 +314,12 @@ sub _new_node {
    return { path => $path, url => $url, };
 }
 
-sub _not_found {
-   my ($self, $req) = @_;
-
-   my $rv      = HTTP_NOT_FOUND;
-   my $title   = $req->loc( 'Not found' );
-   my $content = '> '.$req->loc( "Oh no. That page doesn't exist" )
-                 ."\n\n    Code: ${rv}\n\n";
-
-   return { content  => $content,
-            format   => 'markdown',
-            header   => $title,
-            mtime    => time,
-            title    => $title, };
-}
-
 sub _search_results {
    my ($self, $req, $query) = @_;
 
    my $count   = 1;
    my $root    = $self->config->file_root;
-   my $langd   = $root->catdir( __extract_lang( $req->locale ) );
+   my $langd   = $root->catdir( extract_lang $req->locale );
    my $resp    = $self->ipc->run_cmd( [ 'ack', $query, "${langd}" ],
                  { debug => $self->usul->debug, expected_rv => 1 } );
    my $results = $resp->rv == 1
@@ -542,31 +351,8 @@ sub __copy_element_value {
             "   ev.stop(); \$( 'upload-path' ).value = this.value } )", ];
 }
 
-sub __extract_lang {
-   my $locale = shift; return $locale ? (split m{ _ }mx, $locale)[ 0 ] : LANG;
-}
-
-sub __make_id_from {
-   my $text = shift; $text =~ s{ \A \d+ [_\-] }{}mx;
-
-   $text =~ s{ [_] }{-}gmx; $text =~ s{ \. [a-zA-Z0-9_\+]+ \z }{}mx;
-
-   return $text;
-}
-
-sub __make_name_from {
-   my $text = shift; $text =~ s{ [_\-] }{ }gmx; return $text;
-}
-
-sub __make_tuple {
-   my $node = shift;
-
-   return [ 0, $node && $node->{type} eq 'folder'
-               ? [ __sorted_keys( $node->{tree} ) ] : [], $node, ];
-}
-
 sub __prepare_path {
-   return (map { s{ [ ] }{-}gmx; $_ }
+   return (map { s{ [ ] }{_}gmx; $_ }
            map { trim $_            } split m{ / }mx, $_[ 0 ]);
 }
 
@@ -577,9 +363,9 @@ sub __prepare_search_results {
 
    for my $tuple (@tuples) {
       my @pathname = __prepare_path( io( $tuple->[ 0 ] )->abs2rel( $langd ) );
-      my @filepath = map { __make_id_from( $_ ) } @pathname;
+      my @filepath = map { make_id_from( $_ )->[ 0 ] } @pathname;
       my $actionp  = join '/', @filepath;
-      my $name     = __make_name_from( $actionp ); $name =~ s{/}{ / }gmx;
+      my $name     = make_name_from $actionp; $name =~ s{/}{ / }gmx;
 
       $tuple->[ 0 ] = $name; $tuple->[ 1 ] = $req->uri_for( $actionp );
    }
@@ -607,13 +393,6 @@ sub __set_element_focus {
    return [ "var form = document.forms[ '${form}' ];",
             "var f    = function() { form.${name}.focus() };",
             "f.delay( 100 );" ];
-}
-
-sub __sorted_keys {
-   my $node = shift;
-
-   return ( sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
-            grep { first_char $_ ne '_' } keys %{ $node } );
 }
 
 1;

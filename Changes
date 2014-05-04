@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added Posts model. Created Functions and Role::PageLoading
           - Added metadata to markdown files
           - Added generate and view static links
           - Excluded Markdown class from POD help listing
