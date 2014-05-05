@@ -35,7 +35,7 @@ with q(App::Doh::Role::PageLoading);
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $page = $self->load_localised_page( $orig, $req, @args );
+   my $page = $orig->( $self, $req, @args );
 
    $page->{docs_url} //= $self->docs_url( $req );
    $page->{wanted  } //= join '/', @{ $req->args };

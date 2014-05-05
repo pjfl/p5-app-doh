@@ -31,6 +31,8 @@
 [% END -%]
                   <a class="btn btn-primary btn-hero"
                       href="[% page.docs_url %]">View Documentation</a>
+                  <a class="btn btn-primary btn-hero"
+                      href="[% uri_for( 'posts' ) %]">View Posts</a>
                </div>
             </div>
          </div>

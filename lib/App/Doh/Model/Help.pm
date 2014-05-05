@@ -15,7 +15,16 @@ with    q(App::Doh::Role::Preferences);
 
 # Public attributes
 has 'excluding'   => is => 'ro',   isa => ArrayRef,
-   builder        => sub { [ qw( Auth Markdown Model Role View ) ] };
+   builder        => sub { [ qw( Auth Functions Markdown Model Role View ) ] };
+
+# Construction
+around 'get_stash' => sub {
+   my ($orig, $self, @args) = @_; my $stash = $orig->( $self, @args );
+
+   $stash->{nav} = $self->_navigation;
+
+   return $stash;
+};
 
 # Private attributes
 has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
@@ -58,10 +67,6 @@ around 'load_page' => sub {
 # Public methods
 sub content_from_pod {
    return $_[ 0 ]->get_stash( $_[ 1 ], $_[ 0 ]->load_page( $_[ 1 ] ) );
-}
-
-sub navigation {
-   return $_[ 0 ]->_navigation;
 }
 
 1;

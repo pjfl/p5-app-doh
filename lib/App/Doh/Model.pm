@@ -40,7 +40,6 @@ sub get_stash {
 
    return { code     => HTTP_OK,
             loc      => sub { $req->loc( @_ ) },
-            nav      => $self->navigation( $req, $page ),
             page     => $page,
             req      => $req,
             time2str => sub { time2str( $_[ 0 ], $_[ 1 ], $_[ 2 ] ) },
@@ -49,10 +48,6 @@ sub get_stash {
 
 sub load_page {
    my ($self, $req, $args) = @_; my $page = $args // {}; return $page;
-}
-
-sub navigation {
-   return [ { level => 0, name => 'Home', type => 'file', url => NUL } ];
 }
 
 1;

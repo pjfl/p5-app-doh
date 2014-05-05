@@ -4,8 +4,7 @@ use feature 'state';
 use namespace::sweep;
 
 use Moo;
-use App::Doh::Functions    qw( build_navigation_list build_tree localise_tree
-                               mtime );
+use App::Doh::Functions    qw( build_tree localise_tree mtime );
 use Class::Usul::Constants;
 use Class::Usul::Functions qw( throw );
 use File::DataClass::Types qw( Path Str );
@@ -24,7 +23,7 @@ with q(App::Doh::Role::PageLoading);
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $page = $self->load_localised_page( $orig, $req, @args );
+   my $page = $orig->( $self, $req, @args );
 
    # TODO: Set docs_url?
    $page->{wanted} //= join '/', 'posts', @{ $req->args };
@@ -41,16 +40,17 @@ sub posts {
 
    if (not defined $cache or $filesys->stat->{mtime} > $cache->{_mtime}) {
       my $max_mtime = 0;
+      my $postd     = 'posts';
       my $conf      = $self->config;
-      my $no_index  = join '|', grep { not m{ posts }mx } @{ $conf->no_index };
+      my $no_index  = join '|', grep { not m{ $postd }mx } @{ $conf->no_index };
 
       for my $locale (@{ $conf->locales }) {
-         my $dir = $conf->file_root->catdir( $locale, 'posts' )
+         my $dir = $conf->file_root->catdir( $locale, $postd )
                         ->filter( sub { not m{ (?: $no_index ) }mx } );
 
          $dir->exists or next; my $lcache = $cache->{ $locale } //= {};
 
-         $lcache->{tree} = build_tree( $self->type_map, $dir, 1, 0, 'posts' );
+         $lcache->{tree} = build_tree( $self->type_map, $dir, 1, 0, $postd );
          $lcache->{type} = 'folder';
 
          my $mtime = mtime $lcache; $mtime > $max_mtime and $max_mtime = $mtime;

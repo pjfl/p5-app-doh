@@ -10,6 +10,31 @@ use Moo::Role;
 
 requires qw( config get_stash load_page localised_tree root_mtime );
 
+# Construction
+around 'get_stash' => sub {
+   my ($orig, $self, @args) = @_; my $stash = $orig->( $self, @args );
+
+   $stash->{nav} = $self->navigation( @args );
+
+   return $stash;
+};
+
+around 'load_page' => sub {
+   my ($orig, $self, $req, @args) = @_;
+
+   $args[ 0 ] and return $orig->( $self, $req, $args[ 0 ] );
+
+   for my $locale ($req->locale, @{ $req->locales }, $self->config->locale) {
+      my $node = $self->find_node( $locale, [ @{ $req->args } ] );
+
+      ($node and $node->{type} ne 'folder') or next;
+
+      return $orig->( $self, $req, $self->make_page( $node, $req, $locale ) );
+   }
+
+   return $orig->( $self, $req, $self->not_found( $req ) );
+};
+
 # Public methods
 sub content_from_file {
    return $_[ 0 ]->get_stash( $_[ 1 ], $_[ 0 ]->load_page( $_[ 1 ] ) );
@@ -31,22 +56,6 @@ sub find_node {
    return $node;
 }
 
-sub load_localised_page {
-   my ($self, $orig, $req, @args) = @_; my $conf = $self->config;
-
-   $args[ 0 ] and return $orig->( $self, $req, $args[ 0 ] );
-
-   for my $locale ($req->locale, @{ $req->locales }, $conf->locale) {
-      my $node = $self->find_node( $locale, [ @{ $req->args } ] );
-
-      ($node and $node->{type} ne 'folder') or next;
-
-      return $orig->( $self, $req, $self->make_page( $node, $req, $locale ) );
-   }
-
-   return $orig->( $self, $req, $self->not_found( $req ) );
-}
-
 {  my $cache //= {};
 
    sub invalidate_cache {
@@ -64,7 +73,7 @@ sub load_localised_page {
       my $node   = $self->localised_tree( $locale )
          or throw error => 'No document tree for default locale [_1]',
                    args => [ $locale ], rv => HTTP_NOT_FOUND;
-      my $wanted = $page->{wanted};
+      my $wanted = $page->{wanted} // NUL;
       my @ids    = @{ $req->args };
       my $nav    = $cache->{ $wanted };
 
@@ -78,13 +87,13 @@ sub load_localised_page {
 }
 
 sub make_page {
-   return { content  => $_[ 1 ]->{path  },
-            format   => $_[ 1 ]->{format},
-            header   => $_[ 1 ]->{title },
-            meta     => $_[ 1 ]->{meta  },
-            mtime    => $_[ 1 ]->{mtime },
-            title    => ucfirst $_[ 1 ]->{name},
-            url      => $_[ 1 ]->{url   }, };
+   return { content => $_[ 1 ]->{path  },
+            format  => $_[ 1 ]->{format},
+            header  => $_[ 1 ]->{title },
+            meta    => $_[ 1 ]->{meta  },
+            mtime   => $_[ 1 ]->{mtime },
+            title   => ucfirst $_[ 1 ]->{name},
+            url     => $_[ 1 ]->{url   }, };
 }
 
 sub not_found {
@@ -95,11 +104,11 @@ sub not_found {
    my $content = '> '.$req->loc( "Oh no. That page doesn't exist" )
                  ."\n\n    Code: ${rv}\n\n";
 
-   return { content  => $content,
-            format   => 'markdown',
-            header   => $title,
-            mtime    => time,
-            title    => $title, };
+   return { content => $content,
+            format  => 'markdown',
+            header  => $title,
+            mtime   => time,
+            title   => $title, };
 }
 
 1;
