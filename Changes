@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Updated metadata
           - Can create CSS one theme at a time
           - Post lists working
           - Refactored get_stash load_page and navigation model calls
