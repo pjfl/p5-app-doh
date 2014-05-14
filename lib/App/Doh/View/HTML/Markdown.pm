@@ -24,10 +24,13 @@ sub serialize {
 
    my $markdown = blessed $content ? $content->all : $content;
 
-   my ($yaml) = $markdown =~ m{ \A --- $ ( .* ) ^ --- $ }msx;
-                $markdown =~ s{ \A --- $ ( .* ) ^ --- $ }{}msx;
+   my $yaml; $markdown =~ s{ \A --- $ ( .* ) ^ --- $ }{}msx and $yaml = $1;
 
-   $yaml and $page->{meta} = $self->yt->read_string( $yaml )->[ 0 ];
+   if ($yaml) {
+      my $data = $self->yt->read_string( $yaml )->[ 0 ];
+
+      $page->{ $_ } = $data->{ $_ } for (keys %{ $data });
+   }
 
    return $page->{editing} ? $markdown : $self->tm->markdown( $markdown );
 }

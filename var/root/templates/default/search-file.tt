@@ -1,3 +1,4 @@
+<!-- Search File -->
 <form action="[% links.base_uri %]search-results"
      enctype="application/x-www-form-urlencoded"
       method="get" name="search-file">

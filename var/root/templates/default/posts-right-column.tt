@@ -1,24 +1,10 @@
-      <!-- Right Column -->
+      <!-- Posts Right Column -->
 [% col_class = ''; IF prefs.float; col_class = 'float-view'; END -%]
       <div class="right-column [% col_class %] content-area span9p5">
          <div class="content-page">
 [% IF page.format == 'html' -%]
             <article>
-[%    IF page.header -%]
-               <div class="page-header">
-                  <h1>[% page.header %]</h1>
-[%       IF page.mtime %]
-                  <span class="pull-left">
-                     [%- time2str( '%A, %B %e, %Y', page.mtime ) %]</span>
-                  <span class="pull-right">
-                     [%- time2str( '%l:%M %p', page.mtime ) %]</span>
-[%       END -%]
-[%       IF page.status_message -%]
-                  <div class="container">
-                     [% page.status_message %]</div>
-[%       END -%]
-               </div>
-[%    END -%]
+[%    INCLUDE 'default/header.tt' -%]
 [%    IF page.editing -%]
                <br>
                <div class="unbounded-x container">

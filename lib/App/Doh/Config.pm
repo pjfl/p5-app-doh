@@ -90,10 +90,13 @@ has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'no_index'        => is => 'ro',   isa => ArrayRef,
    builder            => sub {
-   [ qw( \.docs$ \.git$ \.htpasswd$ \.json$ \.posts$ \.svn$ assets posts ) ] };
+      [ qw( \.git$ \.htpasswd$ \.json$ \.mtime$ \.svn$ assets$ posts$ ) ] };
 
 has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
    default            => 8085;
+
+has 'posts'           => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'posts';
 
 has 'preferences'     => is => 'ro',   isa => ArrayRef,
    builder            => sub {
@@ -104,6 +107,9 @@ has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
 has 'query'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'root_mtime'      => is => 'lazy', isa => Path, coerce => Path->coercion,
+   builder            => sub { $_[ 0 ]->file_root->catfile( '.mtime' ) };
 
 has 'scrubber'        => is => 'ro',   isa => Str, default => '[;\$\`&\r\n]';
 
@@ -348,6 +354,12 @@ A lazily evaluated non zero positive integer that defaults to 8085. This
 is the port number that the documentation server will listen on by default
 when started by the control daemon
 
+=item C<posts>
+
+A non empty simple string the defaults to F<posts>.  The directory
+name where dated markdown files are created in category
+directories. These are the blogs posts or news articles
+
 =item C<preferences>
 
 An array reference that defaults to
@@ -371,6 +383,12 @@ Default search string
 
 A simple string that defaults to null. The URI of the source code repository
 for this project
+
+=item C<root_mtime>
+
+Path object for the document tree modification time file. The indexing program
+touches this file setting it to modification time of the most recently changed
+file in the document tree
 
 =item C<scrubber>
 

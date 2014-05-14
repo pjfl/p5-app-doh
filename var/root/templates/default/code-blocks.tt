@@ -1,0 +1,19 @@
+      <!-- Code Blocks -->
+      <div class="well well-sidebar">
+         <form action="[% links.req_uri %]"
+              enctype="application/x-www-form-urlencoded"
+               method="get" name="preferences">
+            <input name="mode" type="hidden" value="[% page.mode %]">
+            <select id="code_blocks" name="code_blocks">
+               <option [% IF prefs.code_blocks == 1;
+                             'selected="selected"'; ELSE; ''; END %]
+                  value="1">[% loc( 'Show Code Blocks' ) %]</option>
+               <option [% IF prefs.code_blocks == 2;
+                             'selected="selected"'; ELSE; ''; END %]
+                  value="2">[% loc( 'Show Code Blocks Inline' ) %]</option>
+               <option [% IF prefs.code_blocks == 3;
+                             'selected="selected"'; ELSE; ''; END %]
+                  value="3">[% loc( 'Hide Code Blocks' ) %]</option>
+            </select>
+         </form>
+      </div>

@@ -23,7 +23,7 @@ my $self  = App::Doh::Server->new;
 my $model = $self->models->{docs};
 my $tree  = $model->docs_tree;
 
-ok exists $tree->{en}->{tree}->{Getting_Started}, 'Creates docs tree';
+ok exists $tree->{en}->{tree}->{ 'Getting-Started' }, 'Creates docs tree';
 
 my $req   = App::Doh::Request->new( $self->usul, 'Getting_Started' );
 my $stash = $model->get_stash( $req );

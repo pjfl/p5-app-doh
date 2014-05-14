@@ -1,3 +1,4 @@
+<!-- Rename File -->
 <form action="[% links.base_uri %]?auth=1"
      enctype="application/x-www-form-urlencoded"
       method="post" name="rename-file">

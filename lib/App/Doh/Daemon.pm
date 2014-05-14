@@ -122,6 +122,10 @@ sub _get_listener_args {
       '--access-log' => $config->logsdir->catfile( "access_${port}.log" ),
       '--app'        => $config->binsdir->catfile( $self->app ), };
 
+   for my $k (keys %{ $self->options }) {
+      $args->{ "--${k}" } = $self->options->{ $k };
+   }
+
    return %{ $args };
 }
 

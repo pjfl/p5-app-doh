@@ -1,0 +1,37 @@
+      <!-- Posts List -->
+[% col_class = ''; IF prefs.float; col_class = 'float-view'; END -%]
+      <div class="right-column [% col_class %] content-area span9p5">
+         <div class="content-page">
+            <article>
+[% INCLUDE 'default/header.tt' -%]
+[% depth = 0 -%]
+               <ul class="posts post-list">
+[% FOREACH node = nav -%]
+[%    WHILE node.depth < depth; depth = depth - 1 -%]
+                  </ul>
+               </li>
+[%    END -%]
+[%    IF show_node( node, page.wanted, page.wanted_depth ) -%]
+               <li class="[% node.class %]">
+[%       uri = uri_for( node.url ) -%]
+[%       IF node.type == 'folder'; depth = depth + 1 -%]
+[%         linkWithTips( uri, 'folder', node.name, 'Folder Path', node.tip ) -%]
+                  &nbsp;([% node.fcount -%])
+                  <ul class="posts post-list">
+[%       ELSE -%]
+[%         linkWithTips( uri, '', node.name, 'File Path', node.tip ) -%]
+                  <br>
+                  <span class="sub-text">
+[%-        time2str( '%A, %B %e, %Y', str2time( node.prefix ) ) -%]</span>
+               </li>
+[%       END -%]
+[%    END -%]
+[% END -%]
+[% WHILE depth > 0; depth = depth - 1 -%]
+                  </ul>
+               </li>
+[% END -%]
+               </ul>
+            </article>
+         </div>
+      </div>

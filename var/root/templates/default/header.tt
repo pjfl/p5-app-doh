@@ -1,0 +1,16 @@
+[% IF page.header -%]
+               <!-- Header -->
+               <div class="page-header">
+                  <h1>[% page.header %]</h1>
+[%    IF page.mtime %]
+                  <span class="pull-left">
+                     [%- time2str( '%A, %B %e, %Y', page.mtime ) %]</span>
+                  <span class="pull-right">
+                     [%- time2str( '%l:%M %p', page.mtime ) %]</span>
+[%    END -%]
+[%    IF page.status_message -%]
+                  <div class="container">
+                     [% page.status_message %]</div>
+[%    END -%]
+               </div>
+[% END -%]

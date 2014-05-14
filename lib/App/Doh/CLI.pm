@@ -38,17 +38,12 @@ has 'model'      => is => 'lazy', isa => Object, builder => sub {
 
 # Public methods
 sub make_css : method {
-   my $self = shift;
-   my $conf = $self->config;
-   my $cssd = $conf->root->catdir( 'css' );
+   my $self  = shift;
+   my $conf  = $self->config;
+   my $cssd  = $conf->root->catdir( 'css' );
 
-   for my $theme (@{ $conf->themes }) {
-      my $path = $conf->root->catfile( 'less', "theme-${theme}.less" );
-      my $css  = $self->less->compile( $path->all );
-
-      $self->info( "Writing ${theme} theme" );
-      $cssd->catfile( "theme-${theme}.css" )->println( $css );
-   }
+   if (my $theme = $self->next_argv) { $self->_write_theme( $cssd, $theme ) }
+   else { $self->_write_theme( $cssd, $_ ) for (@{ $conf->themes }) }
 
    return OK;
 }
@@ -77,8 +72,10 @@ sub _copy_assets {
    my ($unwanted_images, $unwanted_js, $unwanted_less);
 
    if ($conf->colours->[ 0 ]) {
-      $unwanted_images = qr{ favicon \- (?: blue|green|navy|red ) }mx;
-      $unwanted_less   = qr{ theme   \- (?: blue|green|navy|red ) }mx;
+      my $themes = join '|', @{ $conf->themes };
+
+      $unwanted_images = qr{ favicon \- (?: $themes ) }mx;
+      $unwanted_less   = qr{ theme   \- (?: $themes ) }mx;
 
       __deep_copy( $root->catdir( $conf->less ), $dest, $unwanted_less );
    }
@@ -115,6 +112,18 @@ sub _make_localised_static {
    return;
 }
 
+sub _write_theme {
+   my ($self, $cssd, $theme) = @_;
+
+   my $conf = $self->config;
+   my $path = $conf->root->catfile( 'less', "theme-${theme}.less" );
+   my $css  = $self->less->compile( $path->all );
+
+   $self->info( "Writing ${theme} theme" );
+   $cssd->catfile( "theme-${theme}.css" )->println( $css );
+   return;
+}
+
 # Private functions
 sub __deep_copy {
    my ($src, $dest, $excluding) = @_; $excluding //= qr{ NUL() }mx;
@@ -137,7 +146,7 @@ __END__
 
 =pod
 
-=encoding utf8
+=encoding utf-8
 
 =head1 Name
 
@@ -169,9 +178,10 @@ A reference to the L<App::Doh::Model::Documentation> object
 
 =head2 make_css - Compile CSS files from LESS files
 
-   bin/doh-cli make_css
+   bin/doh-cli make_css [theme]
 
-Creates CSS files under F<var/root/css> one for each colour theme
+Creates CSS files under F<var/root/css> one for each colour theme. If a colour
+theme name is supplied only the C<LESS> for that theme is compiled
 
 =head2 make_static - Make a static HTML copy of the documentation
 

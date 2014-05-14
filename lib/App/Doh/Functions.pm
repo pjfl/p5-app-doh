@@ -1,14 +1,16 @@
 package App::Doh::Functions;
 
+use 5.010001;
 use strict;
 use warnings;
 use parent 'Exporter::Tiny';
 
 use Class::Usul::Constants;
-use Class::Usul::Functions qw( first_char );
+use Class::Usul::Functions qw( first_char is_arrayref is_hashref );
 
-our @EXPORT_OK = qw( build_navigation_list build_tree extract_lang iterator
-                     localise_tree make_id_from make_name_from mtime );
+our @EXPORT_OK = qw( build_navigation_list build_tree clone extract_lang
+                     iterator localise_tree make_id_from make_name_from mtime
+                     show_node );
 
 sub build_navigation_list ($$$$) {
    my ($root, $tree, $ids, $wanted) = @_;
@@ -16,17 +18,14 @@ sub build_navigation_list ($$$$) {
    my $iter = iterator( $tree ); my @nav = ();
 
    while (defined (my $node = $iter->())) {
-      $node->{id} eq 'index' and next;
+      $node->{id} eq 'index' and next; my $link = clone( $node );
 
-      my $link = { level  => $node->{level} - 2,
-                   name   => $node->{name},
-                   prefix => $node->{prefix},
-                   tip    => __get_tip_text( $root, $node ),
-                   type   => $node->{type},
-                   url    => $node->{type} eq 'folder' ? '#' : $node->{url}, };
+      $link->{class}  = $node->{type} eq 'folder' ? 'folder-link' : 'file-link';
+      $link->{depth} -= 2;
+      $link->{tip  }  = __get_tip_text( $root, $node );
 
       if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
-         $link->{class} = $node->{url} eq $wanted ? 'active' : 'open';
+         $link->{class} .= $node->{url} eq $wanted ? ' active' : ' open';
          shift @{ $ids };
       }
 
@@ -37,43 +36,54 @@ sub build_navigation_list ($$$$) {
 }
 
 sub build_tree {
-   my ($map, $dir, $level, $order, $url_base, $title) = @_;
+   my ($map, $dir, $depth, $order, $url_base, $parent) = @_;
 
-   $level //= 0; $level++; $order //= 0; $url_base //= NUL; $title //= NUL;
+   $depth //= 0; $depth++; $order //= 0; $url_base //= NUL; $parent //= NUL;
 
-   my $max_mtime = 0; my $tree = {};
+   my $fcount = 0; my $max_mtime = 0; my $tree = {};
 
    for my $path ($dir->all) {
       my ($id, $pref) =  @{ make_id_from( $path->filename ) };
       my  $name       =  make_name_from( $id );
-      my  $url        =  $url_base ? "${url_base}/${id}"  : $id;
-      my  $full_title =  $title    ? "${title} - ${name}" : $name;
+      my  $url        =  $url_base ? "${url_base}/${id}"   : $id;
+      my  $header     =  $parent   ? "${parent} - ${name}" : $name;
       my  $mtime      =  $path->stat->{mtime};
       my  $node       =  $tree->{ $id } = {
+          depth       => $depth,
           format      => __extension2format( $map, $path->pathname ),
+          header      => $header,
           id          => $id,
-          level       => $level,
           mtime       => $mtime,
           name        => $name,
           path        => $path->utf8,
           prefix      => $pref,
-          title       => $full_title,
+          title       => ucfirst $name,
           type        => 'file',
           url         => $url,
           _order      => $order++, };
 
-      $path->is_file and $mtime > $max_mtime and $max_mtime = $mtime;
+      $path->is_file and ++$fcount and $mtime > $max_mtime
+                                   and $max_mtime = $mtime;
       $path->is_dir or next;
-      $node->{type} = 'folder';
-      $node->{tree} = $level > 1 # Skip the language code directories
-                ? build_tree( $map, $path, $level, $order, $url, $name )
-                : build_tree( $map, $path, $level, $order, NUL,  NUL   );
-      $node->{tree}->{_mtime} > $max_mtime
-         and $max_mtime = $node->{tree}->{_mtime};
+      $node->{type} =  'folder';
+      $node->{tree} =  $depth > 1 # Skip the language code directories
+                    ?  build_tree( $map, $path, $depth, $order, $url, $name )
+                    :  build_tree( $map, $path, $depth, $order, NUL,  NUL   );
+      mtime( $node ) > $max_mtime and $max_mtime = mtime( $node );
+      $fcount += $node->{fcount} = $node->{tree}->{_fcount};
    }
 
-   $tree->{_mtime} = $max_mtime;
+   $tree->{_fcount} = $fcount; $tree->{_mtime} = $max_mtime;
+
    return $tree;
+}
+
+sub clone (;$) {
+   my $v = shift;
+
+   is_arrayref $v and return [ @{ $v // [] } ];
+   is_hashref  $v and return { %{ $v // {} } };
+   return $v;
 }
 
 sub extract_lang ($) {
@@ -135,6 +145,15 @@ sub mtime ($) {
    return $_[ 0 ]->{tree}->{_mtime};
 }
 
+sub show_node ($;$$) {
+   my ($node, $wanted, $wanted_depth) = @_;
+
+   $wanted //= NUL; $wanted_depth //= 0;
+
+   return $node->{depth} >= $wanted_depth
+       && $node->{url  } =~ m{ \A $wanted }mx ? TRUE : FALSE;
+}
+
 # Private functions
 sub __extension2format {
    my ($map, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
@@ -145,9 +164,9 @@ sub __extension2format {
 sub __get_tip_text {
    my ($root, $node) = @_; my $text = $node->{path}->abs2rel( $root );
 
-   $text =~ s{ \A [a-z]+ / }{}mx;
-   $text =~ s{ [/] }{ / }gmx;
-   $text =~ s{ \. .+ \z }{}mx;
+   $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ \. .+ \z }{}mx;
+   $text =~ s{ [/] }{ / }gmx;     $text =~ s{ [_] }{ }gmx;
+
    return $text;
 }
 

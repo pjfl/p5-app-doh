@@ -1,0 +1,58 @@
+[% IF ! page.editing && page.mode != 'static' -%]
+            <!-- Editing Links -->
+            <div class="well well-sidebar">
+[%    hint  = loc( 'Hint' ) -%]
+[%    title = hint _ ' ~ ' _ loc( 'Search for text in markdown files' ) -%]
+[%    text  = loc( 'Search' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="search-file">[% text %]</a></span>
+               <br>
+[%    title = hint _ ' ~ ' _ loc( 'Create a new markdown file' ) -%]
+[%    text  = loc( 'Create' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="create-file">[% text %]</a></span>
+               <br>
+[%    title = hint _ ' ~ ' _ loc( 'Rename this markdown file' ) -%]
+[%    text  = loc( 'Rename' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="rename-file">[% text %]</a></span>
+               <br>
+[%    title = hint _ ' ~ ' _ loc( 'Upload an asset file' ) -%]
+[%    text  = loc( 'Upload' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="windows fade" href="#"
+                        id="upload-file">[% text %]</a></span>
+               <br>
+[%    title = hint _ ' ~ ' _ loc( 'Edit the markdown for this page' ) -%]
+[%    text  = loc( 'Edit' ) -%]
+               <span class="tips" title="[% title %]">
+                  <a class="fade"
+                      href="[% links.req_uri %]?edit=1">[% text %]</a></span>
+               <br>
+               <form action="[% links.req_uri %]?auth=1"
+                    enctype="application/x-www-form-urlencoded"
+                     method="post" name="markdown">
+[%    title = hint _ ' ~ ' _ loc( 'Delete this markdown file' ) -%]
+[%    text  = loc( 'Delete' ) %]
+                  <span class="tips" title="[% title %]">
+                     <button class="btn fade submit" id="delete-file"
+                              name="_method" type="submit"
+                             value="delete_file">[% text %]</button></span>
+                  <br>
+[%    title = hint _ ' ~ ' _ loc( 'Generate the static pages' ) -%]
+[%    text  = loc( 'Generate' ) %]
+                  <span class="tips" title="[% title %]">
+                     <button class="btn fade submit" id="generate-static"
+                              name="_method" type="submit"
+                             value="generate_static">[% text %]</button></span>
+               </form>
+[%    href  = links.base_uri _ 'static/' _ page.language _ '/index.html' %]
+[%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
+[%    text  = loc( 'View Static' ) %]
+               <span class="tips" title="[% title %]">
+                  <a class="fade" href="[% href %]">[% text%]</a></span>
+            </div>
+[% END -%]

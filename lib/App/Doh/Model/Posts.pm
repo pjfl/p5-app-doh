@@ -13,20 +13,24 @@ use HTTP::Status           qw( HTTP_NOT_FOUND );
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
+with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
-
-has 'root_mtime' => is => 'lazy', isa => Path, coerce => Path->coercion,
-   builder       => sub { $_[ 0 ]->config->file_root->catfile( '.posts' ) };
-
-with q(App::Doh::Role::PageLoading);
 
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
    my $page = $orig->( $self, $req, @args );
 
-   # TODO: Set docs_url?
-   $page->{wanted} //= join '/', 'posts', @{ $req->args };
+   $page->{template    } //= 'posts';
+   $page->{wanted      }   = join '/', $self->config->posts, @{ $req->args };
+   $page->{wanted_depth}   = () = @{ $req->args };
+   return $page;
+};
+
+around 'make_page' => sub {
+   my ($orig, $self, @args) = @_; my $page = $orig->( $self, @args );
+
+   $page->{type} eq 'folder' and $page->{template} = 'posts-index';
 
    return $page;
 };
@@ -36,16 +40,17 @@ sub localised_tree {
 }
 
 sub posts {
-   my $self = shift; state $cache; my $filesys = $self->root_mtime;
+   my $self = shift; state $cache; my $filesys = $self->config->root_mtime;
 
    if (not defined $cache or $filesys->stat->{mtime} > $cache->{_mtime}) {
-      my $max_mtime = 0;
-      my $postd     = 'posts';
+      my $max_mtime = defined $cache->{_mtime} ? $cache->{_mtime} : 0;
       my $conf      = $self->config;
+      my $postd     = $conf->posts;
       my $no_index  = join '|', grep { not m{ $postd }mx } @{ $conf->no_index };
 
       for my $locale (@{ $conf->locales }) {
-         my $dir = $conf->file_root->catdir( $locale, $postd )
+         my $dir = $conf->file_root
+                        ->catdir( $locale, $postd, { reverse => TRUE } )
                         ->filter( sub { not m{ (?: $no_index ) }mx } );
 
          $dir->exists or next; my $lcache = $cache->{ $locale } //= {};

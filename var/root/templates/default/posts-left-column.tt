@@ -1,0 +1,41 @@
+      <!-- Posts Left Column -->
+      <div class="left-column article-tree span2p5">
+         <!-- For Mobile -->
+         <div class="responsive-collapse">
+            <button class="btn btn-sidebar collapse-bar"
+                       id="menu-spinner-button" type="button">
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+            </button>
+         </div>
+         <div id="sub-nav-collapse" class="collapse in">
+[% depth = 0 -%]
+            <ul class="nav nav-list">
+               <li>
+[% uri = uri_for( config.posts ); tip = loc( 'Landing page' ) -%]
+[% linkWithTips( uri, 'folder', loc( 'Posts' ), 'Hint', tip ) -%]
+               </li>
+[% FOREACH node = nav -%]
+[%    WHILE node.depth < depth; depth = depth - 1 -%]
+               </ul>
+            </li>
+[%    END -%]
+[%    IF node.type == 'folder'; depth = depth + 1 -%]
+            <li class="[% node.class %]">
+[%       uri = uri_for( node.url ) -%]
+[%       linkWithTips( uri, 'folder', node.name, 'Folder Path', node.tip ) -%]
+               <ul class="nav nav-list">
+[%    END -%]
+[% END -%]
+[% WHILE depth > 0; depth = depth - 1 -%]
+               </ul>
+            </li>
+[% END -%]
+            </ul>
+            <!-- Links -->
+[% INCLUDE 'default/editing-links.tt' -%]
+[% INCLUDE 'default/config-links.tt' -%]
+[% INCLUDE 'default/social-links.tt' -%]
+         </div>
+      </div>

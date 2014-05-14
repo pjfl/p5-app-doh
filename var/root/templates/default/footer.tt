@@ -53,3 +53,4 @@
       ga( 'send', 'pageview' );
    </script>
 [% END -%]
+<!-- End of application templates -->

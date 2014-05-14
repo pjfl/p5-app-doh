@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Can create CSS one theme at a time
+          - Post lists working
+          - Refactored get_stash load_page and navigation model calls
           - Added Posts model. Created Functions and Role::PageLoading
           - Added metadata to markdown files
           - Added generate and view static links

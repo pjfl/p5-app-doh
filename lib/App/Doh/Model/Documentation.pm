@@ -10,7 +10,7 @@ use Class::Usul::Constants;
 use Class::Usul::Functions qw( first_char throw trim );
 use Class::Usul::IPC;
 use File::DataClass::IO;
-use File::DataClass::Types qw( Object Path );
+use File::DataClass::Types qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
                                HTTP_REQUEST_ENTITY_TOO_LARGE
@@ -20,16 +20,12 @@ use Unexpected::Functions  qw( Unspecified );
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
+with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
 
 # Public attributes
-has 'ipc'        => is => 'lazy', isa => Object,
-   builder       => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
-
-has 'root_mtime' => is => 'lazy', isa => Path, coerce => Path->coercion,
-   builder       => sub { $_[ 0 ]->config->file_root->catfile( '.docs' ) };
-
-with q(App::Doh::Role::PageLoading);
+has 'ipc'  => is => 'lazy', isa => Object,
+   builder => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
 # Construction
 around 'load_page' => sub {
@@ -38,15 +34,14 @@ around 'load_page' => sub {
    my $page = $orig->( $self, $req, @args );
 
    $page->{docs_url} //= $self->docs_url( $req );
-   $page->{wanted  } //= join '/', @{ $req->args };
 
    return $page;
 };
 
 around 'make_page' => sub {
-   my ($orig, $self, $node, $req, $locale) = @_;
+   my ($orig, $self, $req, $node, $locale) = @_;
 
-   my $page = $orig->( $self, $node, $req, $locale );
+   my $page = $orig->( $self, $req, $node, $locale );
 
    $page->{docs_url} = $self->docs_url( $req, $locale );
 
@@ -80,8 +75,9 @@ sub dialog {
 
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
-   my $page   = { meta => { id       => $params->( 'id' ),
-                            template => "${name}-file", }, };
+   my $stash  = $self->get_stash( $req );
+   my $page   = $stash->{page} = { meta     => { id => $params->( 'id' ), },
+                                   template => "${name}-file", };
 
    if    ($name eq 'create') {
       $page->{literal_js} = __set_element_focus( "${name}-file", 'pathname' );
@@ -97,7 +93,7 @@ sub dialog {
       $page->{literal_js} = __copy_element_value();
    }
 
-   return $self->get_stash( $req, $page );
+   return $stash;
 }
 
 sub delete_file_action {
@@ -118,7 +114,7 @@ sub delete_file_action {
 }
 
 sub docs_tree {
-   my $self = shift; state $cache; my $filesys = $self->root_mtime;
+   my $self = shift; state $cache; my $filesys = $self->config->root_mtime;
 
    if (not defined $cache or $filesys->stat->{mtime} > $cache->{_mtime}) {
       my $conf     = $self->config;
@@ -211,11 +207,12 @@ sub save_file_action {
 }
 
 sub search_document_tree {
-   my ($self, $req) = @_;
+   my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
-   my $page = $self->_search_results( $req, $req->query_params->( 'query' ) );
+   $stash->{page} = $self->load_page ( $req, $self->_search_results( $req ) );
+   $stash->{nav } = $self->navigation( $req, $stash );
 
-   return $self->get_stash( $req, $self->load_page( $req, $page ) );
+   return $stash;
 }
 
 sub upload_file {
@@ -267,12 +264,12 @@ sub _docs_url {
                 args => [ $locale ], rv => HTTP_NOT_FOUND;
    my $mtime = mtime $node;
    my $lang  = extract_lang $locale;
-   my $entry = $cache->{ $lang };
+   my $tuple = $cache->{ $lang };
 
-   (not $entry or $mtime > $entry->{mtime}) and $cache->{ $lang } = $entry
-      = { mtime => $mtime, url => $self->_find_first_url( $locale ), };
+   (not $tuple or $mtime > $tuple->[ 0 ]) and $cache->{ $lang }
+      = $tuple = [ $mtime, $self->_find_first_url( $locale ) ];
 
-   return $entry->{url};
+   return $tuple->[ 1 ];
 }
 
 sub _find_first_url {
@@ -315,10 +312,11 @@ sub _new_node {
 }
 
 sub _search_results {
-   my ($self, $req, $query) = @_;
+   my ($self, $req) = @_;
 
    my $count   = 1;
    my $root    = $self->config->file_root;
+   my $query   = $req->query_params->( 'query' );
    my $langd   = $root->catdir( extract_lang $req->locale );
    my $resp    = $self->ipc->run_cmd( [ 'ack', $query, "${langd}" ],
                  { debug => $self->usul->debug, expected_rv => 1 } );
@@ -330,11 +328,11 @@ sub _search_results {
    my $leader  = $req->loc( 'You searched for "[_1]"', $query )."\n\n";
    my $title   = $req->loc( 'Search Results' );
 
-   return { content  => $leader.$content,
-            format   => 'markdown',
-            header   => $title,
-            mtime    => time,
-            title    => $title, };
+   return { content => $leader.$content,
+            format  => 'markdown',
+            header  => $title,
+            mtime   => time,
+            title   => $title, };
 }
 
 # Private functions
@@ -376,14 +374,13 @@ sub __prepare_search_results {
 sub __prune {
    my $path = shift; my $dir = $path->parent;
 
-   # TODO: The empty call is deprecated in favour of is_empty
-   while ($dir->exists and $dir->empty) { $dir->rmdir; $dir = $dir->parent }
+   while ($dir->exists and $dir->is_empty) { $dir->rmdir; $dir = $dir->parent }
 
    return $dir;
 }
 
 sub __result_line {
-   return $_[ 0 ].'\. ['.$_[ 1 ]->[ 0 ].']('.$_[ 1 ]->[ 1 ].")\n\n"
+   return $_[ 0 ].'\. ['.$_[ 1 ]->[ 0 ].']('.$_[ 1 ]->[ 1 ].")\n\n> "
          .$_[ 1 ]->[ 2 ];
 }
 

@@ -130,10 +130,10 @@ sub dispatch_request {
       return shift->_execute( qw( xml  docs  dialog ), @_ );
    },
    sub (GET  + /pod | /pod/** + ?*) {
-      return shift->_execute( qw( html help  content_from_pod ), @_ );
+      return shift->_execute( qw( html help  get_content ), @_ );
    },
    sub (GET  + /posts | /posts/** + ?*) {
-      return shift->_execute( qw( html posts content_from_file ), @_ );
+      return shift->_execute( qw( html posts get_content ), @_ );
    },
    sub (GET  + /search-results + ?*) {
       return shift->_execute( qw( html docs  search_document_tree ), @_ );
@@ -142,7 +142,7 @@ sub dispatch_request {
       return shift->_execute( qw( html docs  from_request ), @_ );
    },
    sub (GET  + / | /** + ?*) {
-      return shift->_execute( qw( html docs  content_from_file ), @_ );
+      return shift->_execute( qw( html docs  get_content ), @_ );
    };
 }
 

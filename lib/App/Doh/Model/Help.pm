@@ -17,15 +17,6 @@ with    q(App::Doh::Role::Preferences);
 has 'excluding'   => is => 'ro',   isa => ArrayRef,
    builder        => sub { [ qw( Auth Functions Markdown Model Role View ) ] };
 
-# Construction
-around 'get_stash' => sub {
-   my ($orig, $self, @args) = @_; my $stash = $orig->( $self, @args );
-
-   $stash->{nav} = $self->_navigation;
-
-   return $stash;
-};
-
 # Private attributes
 has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
    my $self     = shift;
@@ -38,10 +29,10 @@ has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
                          map  { $_->abs2rel( $path ) } $io->deep->all_files ];
    my $classes  = [ map { s{ (?: :: | \.pm ) \z }{}mx; $_ }
                     map { s{ [/] }{::}gmx; "${appclass}::${_}" } @{ $paths } ];
-   my @nav      = ( { level => 0, name => 'Home', type => 'file', url => NUL });
+   my @nav      = ();
 
    for my $class (@{ $classes }) {
-      push @nav, { level => 0, name => $class, type => 'file',
+      push @nav, { depth => 0, name => $class, type => 'file',
                    url   => "${help_url}/${class}" };
    }
 
@@ -52,21 +43,21 @@ has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $title = $req->loc( 'Help' );
-   my $want  = $req->args->[ 0 ] || $self->config->appclass;
-   my $page  = {
-      content      => io( find_source( $want ) || $req->args->[ 0 ] ),
-      format       => 'pod',
-      header       => "${title} - ${want}",
-      title        => $title,
-      url          => 'https://metacpan.org/module/%s', };
+   my $title  =  $req->loc( 'Help' );
+   my $want   =  $req->args->[ 0 ] || $self->config->appclass;
+   my $page   =  {
+      content => io( find_source( $want ) || $req->args->[ 0 ] ),
+      format  => 'pod',
+      header  => "${title} - ${want}",
+      title   => $title,
+      url     => 'https://metacpan.org/module/%s', };
 
    return $orig->( $self, $req, $page );
 };
 
 # Public methods
-sub content_from_pod {
-   return $_[ 0 ]->get_stash( $_[ 1 ], $_[ 0 ]->load_page( $_[ 1 ] ) );
+sub navigation {
+   return $_[ 0 ]->_navigation;
 }
 
 1;

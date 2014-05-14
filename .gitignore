@@ -25,8 +25,7 @@ var/logs
 var/run
 var/tmp
 var/root/css
-var/root/docs/.docs
-var/root/docs/.posts
+var/root/docs/.mtime
 var/root/docs/assets
 var/root/docs/de
 var/root/docs/en/01_Examples/03_Another_Level/

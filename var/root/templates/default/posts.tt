@@ -9,7 +9,7 @@
    [% fadingLink( href, class, content ) -%]
 [% END -%]
 [% INCLUDE 'default/navbar.tt' -%]
-   <!-- Documentation -->
+   <!-- Posts -->
 [% IF config.repo_url -%]
    <a href="[% config.repo_url %]" target="_blank"
       id="github-ribbon" class="github-ribbon">
@@ -17,8 +17,8 @@
 [% END -%]
    <div class="container-fluid fluid-height wrapper">
       <div class="row-fluid columns content">
-[% INCLUDE 'default/docs-left-column.tt' -%]
-[% INCLUDE 'default/docs-right-column.tt' -%]
+[% INCLUDE 'default/posts-left-column.tt' -%]
+[% INCLUDE 'default/posts-right-column.tt' -%]
       </div>
    </div>
 [% INCLUDE 'default/footer.tt' -%]

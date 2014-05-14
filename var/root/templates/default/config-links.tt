@@ -1,0 +1,10 @@
+[% IF config.links.0 -%]
+            <!-- Configuration Links -->
+            <div class="well well-sidebar">
+[%    FOREACH link = config.links -%]
+               <a class="fade" href="[% link.url | eval %]" target="_blank">
+                  [% link.name | eval %]</a>
+               <br>
+[%    END -%]
+            </div>
+[% END -%]
