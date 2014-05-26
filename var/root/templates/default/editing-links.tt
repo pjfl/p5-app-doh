@@ -53,6 +53,6 @@
 [%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
 [%    text  = loc( 'View Static' ) %]
                <span class="tips" title="[% title %]">
-                  <a class="fade" href="[% href %]">[% text%]</a></span>
+                  <a class="fade" href="[% href %]">[% text %]</a></span>
             </div>
 [% END -%]

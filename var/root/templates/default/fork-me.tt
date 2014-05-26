@@ -1,0 +1,6 @@
+   <!-- Fork me -->
+[% IF config.repo_url -%]
+   <a href="[% config.repo_url %]" target="_blank"
+      id="github-ribbon" class="github-ribbon">
+      <img alt="Fork me on GitHub" src="[% links.images %]fork-me.png"></a>
+[% END -%]

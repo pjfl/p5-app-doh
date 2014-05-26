@@ -3,7 +3,7 @@ package App::Doh::Model::Help;
 use namespace::sweep;
 
 use Moo;
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( NUL );
 use Class::Usul::Functions qw( find_source );
 use Class::Usul::Types     qw( ArrayRef );
 use File::DataClass::IO;

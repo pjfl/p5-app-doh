@@ -2,7 +2,7 @@ package App::Doh::Role::Templates;
 
 use namespace::sweep;
 
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( EXCEPTION_CLASS NUL TRUE );
 use Class::Usul::Functions qw( throw );
 use File::DataClass::Types qw( Directory NonEmptySimpleStr Object );
 use File::Spec::Functions  qw( catfile );

@@ -9,7 +9,7 @@ use App::Doh::Request;
 use App::Doh::View::HTML;
 use App::Doh::View::XML;
 use Class::Usul;
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix exception find_apphome
                                get_cfgfiles throw );
 use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr Object );
@@ -65,7 +65,7 @@ sub BUILD {
 
 sub _build__usul {
    my $self   = shift;
-   my $myconf = $self->config;
+   my $wsconf = $self->config;
    my $attr   = { config => {},
                   config_class => $self->config_class,
                   debug  => $ENV{DOH_DEBUG} // FALSE, };
@@ -73,7 +73,7 @@ sub _build__usul {
 
    $conf->{appclass} = $self->appclass;
    $conf->{name    } = app_prefix   $conf->{appclass};
-   $conf->{home    } = find_apphome $conf->{appclass}, $myconf->{home};
+   $conf->{home    } = find_apphome $conf->{appclass}, $wsconf->{home};
    $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home};
 
    my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;

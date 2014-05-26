@@ -3,8 +3,8 @@ package App::Doh::View::HTML::Pod;
 use namespace::sweep;
 
 use Moo;
-use Class::Usul::Constants;
-use Class::Usul::Types qw( ArrayRef NonEmptySimpleStr Object Str );
+use Class::Usul::Constants qw( TRUE );
+use Class::Usul::Types     qw( ArrayRef NonEmptySimpleStr Object Str );
 use HTML::Accessors;
 use Pod::Hyperlink::BounceURL;
 use Pod::Xhtml;

@@ -1,4 +1,5 @@
 ---
+keywords: static site generator
 template: index
 ---
 <p class="lead">

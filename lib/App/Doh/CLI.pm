@@ -6,10 +6,11 @@ use Moo;
 use App::Doh;
 use App::Doh::Functions    qw( iterator );
 use App::Doh::Model::Documentation;
-use Class::Usul::Constants;
+use App::Doh::Model::Posts;
+use Class::Usul::Constants qw( EXCEPTION_CLASS NUL OK TRUE );
 use Class::Usul::Functions qw( throw );
-use Class::Usul::Types     qw( Object );
-use File::DataClass::IO;
+use Class::Usul::Types     qw( HashRef Object );
+use File::DataClass::IO    qw( io );
 use Unexpected::Types      qw( LoadableClass );
 
 extends q(Class::Usul::Programs);
@@ -19,7 +20,7 @@ our $VERSION = $App::Doh::VERSION;
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';
 
-has 'less'       => is => 'lazy', isa => Object, builder => sub {
+has 'less'  => is => 'lazy', isa => Object, builder => sub {
    my $self = shift;
    my $conf = $self->config;
    my $incd = $conf->root->catdir( 'less' );
@@ -32,9 +33,9 @@ has 'less'       => is => 'lazy', isa => Object, builder => sub {
 has 'less_class' => is => 'lazy', isa => LoadableClass,
    default       => 'CSS::LESS';
 
-has 'model'      => is => 'lazy', isa => Object, builder => sub {
-   return App::Doh::Model::Documentation->new( builder => $_[ 0 ] );
-};
+has 'models' => is => 'lazy', isa => HashRef[Object], builder => sub {
+   { 'docs'  => App::Doh::Model::Documentation->new( builder => $_[ 0 ] ),
+     'posts' => App::Doh::Model::Posts->new( builder => $_[ 0 ] ), } };
 
 # Public methods
 sub make_css : method {
@@ -56,8 +57,12 @@ sub make_static : method {
    $dest->is_absolute or $dest = io( $dest->rel2abs( $self->config->root ) );
    $self->_copy_assets( $dest );
 
-   for my $locale ($self->model->locales) {
-      $self->_make_localised_static( $dest, $locale );
+   for my $locale ($self->models->{docs}->locales) {
+      my $tree = $self->models->{docs}->localised_tree( $locale );
+
+      $self->_make_localised_static( $tree, $dest, $locale );
+      $tree = $self->models->{posts}->localised_tree( $locale );
+      $self->_make_localised_static( $tree, $dest, $locale );
    }
 
    return OK;
@@ -93,9 +98,9 @@ sub _copy_assets {
 }
 
 sub _make_localised_static {
-   my ($self, $dest, $locale) = @_; my $conf = $self->config;
+   my ($self, $tree, $dest, $locale) = @_;
 
-   my $iter = iterator( $self->model->localised_tree( $locale ) );
+   my $conf = $self->config; my $iter = iterator( $tree );
 
    while (my $node = $iter->()) {
       $node->{type} eq 'folder' and next;
@@ -105,7 +110,7 @@ sub _make_localised_static {
       my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
       my $path = io( [ $dest, @path ] )->assert_filepath;
 
-      $self->info( 'Writing '.$node->{url} );
+      $self->info( 'Writing '.$locale.'/'.$node->{url} );
       $path->print( $self->run_cmd( $cmd )->stdout );
    }
 

@@ -3,7 +3,8 @@ package App::Doh::Request;
 use namespace::sweep;
 
 use Moo;
-use Class::Usul::Constants;
+use App::Doh::Functions    qw( extract_lang );
+use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                is_member throw trim );
 use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
@@ -33,6 +34,9 @@ has 'host'     => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub {
       my $env  =  $_[ 0 ]->env;
          $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
+
+has 'language' => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub { extract_lang $_[ 0 ]->locale };
 
 has 'locale'   => is => 'lazy', isa => NonEmptySimpleStr;
 
@@ -88,7 +92,7 @@ around 'BUILDARGS' => sub {
 };
 
 sub BUILD {
-   my $self = shift; $self->tunnel_method;
+   my $self = shift; $self->tunnel_method; # Coz it's destructive
 
    my $mode = $self->params->{mode} // 'online';
 
@@ -169,7 +173,7 @@ sub body_params {
 
    my $params = $self->body->param; weaken( $params );
 
-   return sub { __get_scrubbed_value( $pattern, $params, $_[ 0 ] ) };
+   return sub { __get_scrubbed_value( $pattern, $params, @_ ) };
 }
 
 sub body_value {
@@ -193,7 +197,7 @@ sub query_params {
 
    my $params = $self->params; weaken( $params );
 
-   return sub { __get_scrubbed_value( $pattern, $params, $_[ 0 ] ) };
+   return sub { __get_scrubbed_value( $pattern, $params, @_ ) };
 }
 
 sub uri_for {
@@ -246,9 +250,11 @@ sub __get_defined_value {
 }
 
 sub __get_scrubbed_value {
-   my ($pattern, $params, $name) = @_;
+   my ($pattern, $params, $name, $opts) = @_;
 
    my $v = __get_defined_value( $params, $name ); $v =~ s{ $pattern }{}gmx;
+
+   exists $opts->{allow_null} and $opts->{allow_null} and return $v;
 
    length $v or throw class => Unspecified, args => [ $name ],
                          rv => HTTP_EXPECTATION_FAILED;

@@ -2,8 +2,8 @@ package App::Doh::Role::PageConfiguration;
 
 use namespace::sweep;
 
-use App::Doh::Functions qw( extract_lang );
-use Class::Usul::Constants;
+use App::Doh::Functions    qw( extract_lang );
+use Class::Usul::Constants qw( FALSE NUL );
 use Moo::Role;
 
 requires qw( config load_page );
@@ -20,10 +20,11 @@ around 'load_page' => sub {
    $page->{wanted             } //= join '/', @{ $req->args };
    $page->{application_version}   = $App::Doh::VERSION;
    $page->{editing            }   = $req->params->{edit} // FALSE;
-   $page->{homepage_url       }   = $req->base;
    $page->{language           }   = extract_lang $page->{locale};
    $page->{mode               }   = $req->params->{mode} // 'online';
    $page->{status_message     }   = delete $sess->{status_message} // NUL;
+   $page->{homepage_url       }   = $page->{mode} eq 'online'
+                                  ? $req->base : $req->uri_for( 'index' );
 
    return $page;
 };

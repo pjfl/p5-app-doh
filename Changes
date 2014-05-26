@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Debugging static posts
+          - Added Deutche PO file
           - Updated metadata
           - Can create CSS one theme at a time
           - Post lists working

@@ -3,7 +3,7 @@ package App::Doh::Role::PageLoading;
 use namespace::sweep;
 
 use App::Doh::Functions    qw( build_navigation_list clone mtime );
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo::Role;
@@ -19,7 +19,7 @@ around 'load_page' => sub {
    for my $locale ($req->locale, @{ $req->locales }, $self->config->locale) {
       $seen{ $locale } and next; $seen{ $locale } = TRUE;
 
-      my $node = $self->find_node( $locale, [ @{ $req->args } ] ) or next;
+      my $node = $self->find_node( $locale, $req->args ) or next;
 
       return $orig->( $self, $req, $self->make_page( $req, $node, $locale ) );
    }
@@ -29,11 +29,10 @@ around 'load_page' => sub {
 
 # Public methods
 sub find_node {
-   my ($self, $locale, $ids) = @_;
+   my ($self, $locale, $args) = @_;
 
    my $node = $self->localised_tree( $locale ) or return FALSE;
-
-   $ids //= []; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
+   my $ids  = [ @{ $args } ]; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
 
    for my $node_id (@{ $ids }) {
       $node->{type} eq 'folder' and $node = $node->{tree};
@@ -76,9 +75,11 @@ sub find_node {
 }
 
 sub make_page {
-   my ($self, $req, $node, $locale) = @_; my $page = clone $node;
+   my ($self, $req, $node, $locale) = @_;
 
-   $page->{content} = delete $page->{path}; $page->{locale} = $locale;
+   my $page = clone $node; $page->{content} = delete $page->{path};
+
+   $page->{locale} = $locale;
 
    return $page;
 }

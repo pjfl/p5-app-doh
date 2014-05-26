@@ -1,4 +1,5 @@
 [% INCLUDE 'default/navbar.tt' -%]
+[% INCLUDE 'default/fork-me.tt' -%]
 <!-- Index -->
 <div class="container-fluid fluid-height wrapper">
    <div class="row-fluid columns content-area">
@@ -7,7 +8,7 @@
 [% IF config.description -%]
             <div class="row">
                <div class="text-center span12">
-                  <h2>[% config.description %]</h2>
+                  <h2>[% loc( config.description ) %]</h2>
                </div>
             </div>
 [% END -%]
@@ -25,14 +26,42 @@
          <div class="container-center">
             <div class="row">
                <div class="text-center span12">
-[% IF config.repo_url -%]
-                  <a class="btn btn-secondary btn-hero"
-                      href="[% config.repo_url %]">View Repository</a>
+[% hint = loc( 'Hint' ) -%]
+[% IF config.repo_url && page.mode != 'static' -%]
+[%    title = hint _ ' ~ ' _ loc( 'Public source code repository' ) -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-secondary btn-hero"
+                         href="[% config.repo_url %]">[% loc( 'Repository' ) %]
+                     </a>
+                  </span>
 [% END -%]
-                  <a class="btn btn-primary btn-hero"
-                      href="[% page.docs_url %]">View Documentation</a>
-                  <a class="btn btn-primary btn-hero"
-                      href="[% uri_for( 'posts' ) %]">View Posts</a>
+[% title = hint _ ' ~ ' _ loc( 'Documentation tree' ) -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-primary btn-hero"
+                         href="[% page.docs_url %]">[% loc( 'Documentation' ) %]
+                     </a>
+                  </span>
+[% title = hint _ ' ~ ' _ loc( 'Posts, blogs, and news articles' ) -%]
+[% IF page.mode != 'static'; href = uri_for( config.posts ); ELSE -%]
+[%    href = uri_for( config.posts _ '/index' ) -%]
+[% END -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-primary btn-hero"
+                         href="[% href %]">[% loc( 'Posts' ) %]</a>
+                  </span>
+[% IF page.mode != 'static' -%]
+[%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
+[%    href  = uri_for( 'static/' _ page.language _ '/index.html' ) -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-primary btn-hero"
+                         href="[% href %]">[% loc( 'Static' ) %]</a>
+                  </span>
+[%    title = hint _ ' ~ ' _ loc( 'Help pages for the application' ) -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-secondary btn-hero"
+                         href="[% links.help_url %]">[% loc( 'Help' ) %]</a>
+                  </span>
+[% END -%]
                </div>
             </div>
          </div>

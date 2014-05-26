@@ -17,3 +17,6 @@ msgstr ""
 
 msgid "Hint"
 msgstr "Helpful Hint"
+
+msgid "Site Description"
+msgstr "An Easy Way To Document A Project Using Markdown"

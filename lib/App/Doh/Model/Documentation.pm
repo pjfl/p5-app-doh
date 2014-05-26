@@ -6,7 +6,7 @@ use namespace::sweep;
 use Moo;
 use App::Doh::Functions    qw( build_tree extract_lang iterator localise_tree
                                make_id_from make_name_from mtime );
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( first_char throw trim );
 use Class::Usul::IPC;
 use File::DataClass::IO;
@@ -103,7 +103,7 @@ sub delete_file_action {
       or throw error => 'File deletion not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
-   my $node     = $self->find_node( $req->locale, [ @{ $req->args } ] )
+   my $node     = $self->find_node( $req->locale, $req->args )
       or throw error => 'Cannot find document tree node to delete',
                   rv => HTTP_NOT_FOUND;
    my $rel_path = $self->_delete_and_prune( $node->{path} );
@@ -192,7 +192,7 @@ sub save_file_action {
       or throw error => 'File updating not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
-   my $node     =  $self->find_node( $req->locale, [ @{ $req->args } ] )
+   my $node     =  $self->find_node( $req->locale, $req->args )
       or throw error => 'Cannot find document tree node to update',
                   rv => HTTP_NOT_FOUND;
    my $content  =  $req->body_value( 'content' );
@@ -299,7 +299,7 @@ sub _new_node {
    my @filepath = map { make_id_from( $_ )->[ 0 ] } @pathname;
    my $url      = join '/', @filepath;
    my $id       = pop @filepath;
-   my $parent   = $self->find_node( $locale, [ @filepath ] );
+   my $parent   = $self->find_node( $locale, \@filepath );
 
    $parent and $parent->{type} eq 'folder'
       and exists $parent->{tree}->{ $id }

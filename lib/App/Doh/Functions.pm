@@ -1,11 +1,11 @@
 package App::Doh::Functions;
 
-use 5.010001;
+use 5.010_001;
 use strict;
 use warnings;
 use parent 'Exporter::Tiny';
 
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( FALSE LANG NUL TRUE );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref );
 
 our @EXPORT_OK = qw( build_navigation_list build_tree clone extract_lang
@@ -69,8 +69,8 @@ sub build_tree {
       $node->{tree} =  $depth > 1 # Skip the language code directories
                     ?  build_tree( $map, $path, $depth, $order, $url, $name )
                     :  build_tree( $map, $path, $depth, $order, NUL,  NUL   );
-      mtime( $node ) > $max_mtime and $max_mtime = mtime( $node );
       $fcount += $node->{fcount} = $node->{tree}->{_fcount};
+      mtime( $node ) > $max_mtime and $max_mtime = mtime( $node );
    }
 
    $tree->{_fcount} = $fcount; $tree->{_mtime} = $max_mtime;

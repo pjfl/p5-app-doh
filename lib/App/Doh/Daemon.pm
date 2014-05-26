@@ -4,7 +4,7 @@ use namespace::sweep;
 
 use Moo;
 use App::Doh;
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( EXCEPTION_CLASS OK TRUE );
 use Class::Usul::Functions qw( get_user throw );
 use Class::Usul::Options;
 use Class::Usul::Types     qw( NonEmptySimpleStr NonZeroPositiveInt Object );

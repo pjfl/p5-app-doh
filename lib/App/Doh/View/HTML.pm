@@ -3,8 +3,8 @@ package App::Doh::View::HTML;
 use namespace::sweep;
 
 use Moo;
-use Class::Usul::Constants;
-use Encode;
+use Class::Usul::Constants qw( TRUE );
+use Encode                 qw( encode );
 use File::DataClass::Types qw( Directory HashRef Object );
 use Module::Pluggable::Object;
 
@@ -39,7 +39,7 @@ has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
    return $map;
 };
 
-# Construction
+# Public methods
 sub serialize {
    my ($self, $req, $stash) = @_;
 

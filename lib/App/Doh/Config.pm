@@ -3,13 +3,16 @@ package App::Doh::Config;
 use namespace::sweep;
 
 use Moo;
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( NUL TRUE );
 use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
                                NonZeroPositiveInt Path SimpleStr Str );
 use Sys::Hostname          qw( hostname );
+use Type::Utils            qw( enum );
 
 extends q(Class::Usul::Config::Programs);
+
+my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
 
 has 'analytics'       => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -25,7 +28,7 @@ has 'author'          => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'brand'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'code_blocks'     => is => 'ro',   isa => Int, default => 1;
+has 'code_blocks'     => is => 'ro',   isa => $BLOCK_MODES, default => 1;
 
 has 'colours'         => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
@@ -43,7 +46,8 @@ has 'default_content' => is => 'ro',   isa => NonEmptySimpleStr,
 has 'default_skin'    => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
 
-has 'description'     => is => 'ro',   isa => SimpleStr, default => NUL;
+has 'description'     => is => 'ro',   isa => SimpleStr,
+   default            => 'Site Description';
 
 has 'docs_path'       => is => 'lazy', isa => Directory,
    builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) },

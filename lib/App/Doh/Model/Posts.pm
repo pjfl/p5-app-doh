@@ -5,7 +5,7 @@ use namespace::sweep;
 
 use Moo;
 use App::Doh::Functions    qw( build_tree localise_tree mtime );
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Functions qw( throw );
 use File::DataClass::Types qw( Path Str );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
@@ -16,6 +16,7 @@ with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
 
+# Construction
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
@@ -35,6 +36,7 @@ around 'make_page' => sub {
    return $page;
 };
 
+# Public methods
 sub localised_tree {
    return localise_tree $_[ 0 ]->posts, $_[ 1 ];
 }

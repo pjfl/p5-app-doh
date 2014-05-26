@@ -9,12 +9,8 @@
    [% fadingLink( href, class, content ) -%]
 [% END -%]
 [% INCLUDE 'default/navbar.tt' -%]
+[% INCLUDE 'default/fork-me.tt' -%]
    <!-- Posts Index -->
-[% IF config.repo_url -%]
-   <a href="[% config.repo_url %]" target="_blank"
-      id="github-ribbon" class="github-ribbon">
-      <img alt="Fork me on GitHub" src="[% links.images %]fork-me.png"></a>
-[% END -%]
    <div class="container-fluid fluid-height wrapper">
       <div class="row-fluid columns content">
 [% INCLUDE 'default/posts-left-column.tt' -%]

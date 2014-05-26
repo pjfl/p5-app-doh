@@ -1052,6 +1052,22 @@ var WindowUtils = new Class( {
          else this.customLogFn = opt.customLogFn;
       }
 
+      [ 'log', 'warn' ].each( function( method ) {
+         var old = console[ method ];
+
+         console[ method ] = function() {
+            var stack = ( new Error() ).stack.split( /\n/ );
+
+            // Chrome includes a single "Error" line, FF doesn't.
+            if (stack[ 0 ].indexOf( 'Error' ) === 0) stack = stack.slice( 1 );
+
+            var args = [].slice.apply( arguments )
+                               .concat( [ stack[ 3 ].trim() ] );
+
+            return old.apply( console, args );
+         };
+      } );
+
       if (opt.target == 'top') this.placeOnTop();
 
       this.dialogs = [];
@@ -1065,8 +1081,6 @@ var WindowUtils = new Class( {
 
    logger: function( message ) {
       if (this.options.quiet) return;
-
-      message = 'formwidgets.js: ' + message;
 
       if (this.customLogFn) { this.customLogFn( message ) }
       else if (window.console && window.console.log) {

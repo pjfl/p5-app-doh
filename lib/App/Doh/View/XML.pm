@@ -3,9 +3,9 @@ package App::Doh::View::XML;
 use namespace::sweep;
 
 use Moo;
-use Class::Usul::Constants;
-use Class::Usul::Types qw( Object );
-use Encode             qw( encode );
+use Class::Usul::Constants qw( TRUE );
+use Class::Usul::Types     qw( Object );
+use Encode                 qw( encode );
 use XML::Simple;
 
 extends q(App::Doh);

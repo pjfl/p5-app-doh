@@ -3,7 +3,7 @@
 <html lang="[% page.language %]">
 <head>
    <meta charset="utf-8">
-   <meta name="description" content="[% page.description %]">
+   <meta name="description" content="[% loc( page.description ) %]">
    <meta name="keywords" content="[% page.keywords %]">
    <meta name="author" content="[% page.author %]">
    <meta name="generator" content="Doh v[% page.application_version %]">
