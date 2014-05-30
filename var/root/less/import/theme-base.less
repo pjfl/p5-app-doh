@@ -188,7 +188,7 @@ table tr th:last-child, table tr td:last-child {
 .container-fluid { margin: 0 auto; padding-top: 54px; }
 .container-fluid.fluid-height { height: 100%; }
 .content-page article {
-   max-width: 600px; min-width: 400px; padding-bottom: 18px;
+   max-width: 400px; min-width: 400px; padding-bottom: 18px;
 }
 .content-page > article > pre { font-weight: 700; padding: 9px; }
 .content-page blockquote { margin-top: 0; margin-bottom: 0; }
@@ -471,6 +471,11 @@ table tr th:last-child, table tr td:last-child {
    .homepage-footer.container-fluid { padding: 0 20px; }
    .responsive-collapse { display: block !important; }
 }
+@media (min-width: 820px){
+   .content-page article {
+      max-width: 600px;
+   }
+}
 @media (max-width: 1149px) {
    .pod > div { overflow: hidden; position: relative; }
 }
@@ -609,7 +614,6 @@ table tr th:last-child, table tr td:last-child {
 }
 
 /* Highlight.js theme Date: 17.V.2011 Author: pumbur <pumbur@pumbur.net> */
-
 .hljs { display: block; padding: 0.5em; }
 
 .hljs-yardoctag, .hljs-phpdoc, .profile .hljs-header, .ini .hljs-title,

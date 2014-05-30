@@ -199,6 +199,13 @@ var Behaviour = new Class( {
       this.submit       = new SubmitUtils( {
          context        : this,
          formName       : opt.formName } );
+      this.headroom     = new Headroom( {
+         classes        : {
+            pinned      : 'navbar-fixed-top' },
+         context        : this,
+         offset         : 108,
+         selector       : '.navbar',
+         tolerance      : 10 } );
       this.replacements = new Replacements( { context: this } );
       this.linkFade     = new LinkFader( { context: this } );
       this.tips         = new Tips( {
@@ -266,6 +273,32 @@ var Behaviour = new Class( {
    }
 } );
 
+var Debouncer = new Class( {
+   initialize: function( cb ) {
+      this.callback    = cb;
+      this.rafCallback = this._update.bind( this );
+      this.ticking     = false;
+
+      window.requestAnimationFrame = window.requestAnimationFrame
+                                  || window.webkitRequestAnimationFrame
+                                  || window.mozRequestAnimationFrame;
+   },
+
+   handleEvent: function() {
+      this._requestTick();
+   },
+
+   _requestTick: function() {
+      if (!this.ticking) {
+         this.ticking = true; requestAnimationFrame( this.rafCallback );
+      }
+   },
+
+   _update: function() {
+      this.callback && this.callback(); this.ticking = false;
+   }
+} );
+
 var Dialog = new Class( {
    Implements: [ Options ],
 
@@ -325,6 +358,120 @@ var Dialog = new Class( {
       ev = new DOMEvent( ev ); ev.stop();
 
       if (this.visible && (ev.key == 'esc')) this.hide();
+   }
+} );
+
+var Headroom = new Class( {
+   Implements: [ Options ],
+
+   options       : {
+      classes    : {
+         notTop  : 'headroom-not-top',
+         pinned  : 'headroom-pinned',
+         top     : 'headroom-top',
+         unpinned: 'headroom-unpinned'
+      },
+      offset     : 0,
+      selector   : '.headroom',
+      tolerance  : 0
+   },
+
+   initialize: function( options ) {
+      this.aroundSetOptions( options ); this.props = {}; this.build();
+   },
+
+   attach: function( el ) {
+      if (! el.id) el.id = String.uniqueID();
+
+      var debouncer = new Debouncer( function () {
+         this.update( el.id ) }.bind( this ) );
+
+      var attacher = function() {
+         this.props[ el.id ].prevScrollY = window.getScroll().y;
+         window.addEvent( 'scroll', debouncer.handleEvent.bind( debouncer ) );
+      };
+
+      this.props[ el.id ] = { debouncer: debouncer, prevScrollY: 0 };
+      attacher.delay( 100, this );
+   },
+
+   isOutOfBounds: function( scrollY ) {
+      var pastTop = scrollY < 0;
+      var pastBot = scrollY + window.getSize().y > document.getScrollSize().y;
+
+      return pastTop || pastBot;
+   },
+
+   notTop: function( el ) {
+      var opts = this.options, classes = opts.classes;
+
+      if (!el.hasClass( classes.notTop )) {
+         el.addClass( classes.notTop ); el.removeClass( classes.top );
+         opts.onNotTop && opts.onNotTop.call( this );
+      }
+   },
+
+   pin: function( el ) {
+      var opts = this.options, classes = opts.classes;
+
+      if (el.hasClass( classes.unpinned )) {
+         el.removeClass( classes.unpinned ); el.addClass( classes.pinned );
+         opts.onPin && opts.onPin.call( this );
+      }
+   },
+
+   shouldPin: function( id, currentScrollY ) {
+      var prevScrollY = this.props[ id ].prevScrollY;
+      var outOfBand   = this.toleranceExceeded( prevScrollY, currentScrollY );
+      var scrollingUp = currentScrollY <  prevScrollY;
+      var pastOffset  = currentScrollY <= this.options.offset;
+
+      return (scrollingUp && outOfBand) || pastOffset;
+   },
+
+   shouldUnpin: function( id, currentScrollY ) {
+      var prevScrollY   = this.props[ id ].prevScrollY;
+      var outOfBand     = this.toleranceExceeded( prevScrollY, currentScrollY );
+      var scrollingDown = currentScrollY >  prevScrollY;
+      var pastOffset    = currentScrollY >= this.options.offset;
+
+      return scrollingDown && pastOffset && outOfBand;
+   },
+
+   toleranceExceeded: function( prevScrollY, currentScrollY ) {
+      return Math.abs( currentScrollY - prevScrollY ) >= this.options.tolerance;
+   },
+
+   top: function( el ) {
+      var opts = this.options, classes = opts.classes;
+
+      if (!el.hasClass( classes.top )) {
+         el.addClass( classes.top ); el.removeClass( classes.notTop );
+         opts.onTop && opts.onTop.call( this );
+      }
+   },
+
+   unpin: function( el ) {
+      var opts = this.options, classes = opts.classes;
+
+      if (el.hasClass( classes.pinned ) || !el.hasClass( classes.unpinned )) {
+         el.addClass( classes.unpinned ); el.removeClass( classes.pinned );
+         opts.onUnpin && opts.onUnpin.call( this );
+      }
+   },
+
+   update: function( id ) {
+      var el = $( id ), currentScrollY = window.getScroll().y;
+
+      if (this.isOutOfBounds( currentScrollY )) return;
+
+      if (currentScrollY <= this.options.offset ) this.top( el );
+      else this.notTop( el );
+
+      if (this.shouldUnpin( id, currentScrollY )) { this.unpin( el ); }
+      else if (this.shouldPin( id, currentScrollY )) { this.pin( el ); }
+
+      this.props[ id ].prevScrollY = currentScrollY;
    }
 } );
 

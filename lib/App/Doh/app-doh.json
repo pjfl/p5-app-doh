@@ -1,4 +1,5 @@
 {
    "brand": "app.png",
-   "mount_point": "/"
+   "mount_point": "/",
+   "repo_url": "https://github.com/pjfl/p5-app-doh.git"
 }
