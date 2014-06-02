@@ -2,6 +2,7 @@ package App::Doh::Server;
 
 use namespace::sweep;
 
+use App::Doh::Controller::Root;
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
 use App::Doh::Model::Posts;
@@ -12,7 +13,8 @@ use Class::Usul;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix exception find_apphome
                                get_cfgfiles throw );
-use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr Object );
+use Class::Usul::Types     qw( ArrayRef BaseType HashRef
+                               NonEmptySimpleStr Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
                                HTTP_INTERNAL_SERVER_ERROR );
 use Plack::Builder;
@@ -27,6 +29,11 @@ has 'config_class' => is => 'ro', isa => NonEmptySimpleStr,
    default         => 'App::Doh::Config';
 
 # Private attributes
+has '_controllers' => is => 'lazy', isa => ArrayRef[Object],
+   reader     => 'controllers', builder => sub { [
+      App::Doh::Controller::Root->new,
+   ] };
+
 has '_models' => is => 'lazy', isa => HashRef[Object], reader => 'models',
    builder    => sub { {
       'docs'  => App::Doh::Model::Documentation->new
@@ -123,31 +130,10 @@ around 'to_psgi_app' => sub {
 
 # Public methods
 sub dispatch_request {
-   sub (POST + /assets + *file~ + ?*) {
-      return shift->_execute( qw( html docs  upload_file ), @_ );
-   },
-   sub (GET  + /dialog + ?*) {
-      return shift->_execute( qw( xml  docs  dialog ), @_ );
-   },
-   sub (GET  + /pod | /pod/** + ?*) {
-      return shift->_execute( qw( html help  get_content ), @_ );
-   },
-   sub (GET  + /posts | /posts/** + ?*) {
-      return shift->_execute( qw( html posts get_content ), @_ );
-   },
-   sub (GET  + /search-results + ?*) {
-      return shift->_execute( qw( html docs  search_document_tree ), @_ );
-   },
-   sub (POST + / | /** + ?*) {
-      return shift->_execute( qw( html docs  from_request ), @_ );
-   },
-   sub (GET  + / | /** + ?*) {
-      return shift->_execute( qw( html docs  get_content ), @_ );
-   };
+   return map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
 }
 
-# Private methods
-sub _execute {
+sub execute {
    my ($self, $view, $model, $method, @args) = @_; my ($req, $res);
 
    try   { $req = App::Doh::Request->new( $self->usul, @args ) }
@@ -170,6 +156,7 @@ sub _execute {
    return $res;
 }
 
+# Private methods
 sub _redirect {
    my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
 
@@ -254,7 +241,7 @@ A non empty simple string the defaults to C<App::Doh::Config>
 
 =head1 Subroutines/Methods
 
-=head2 BUILD
+=head2 C<BUILD>
 
 Calls the documentation model at application start time. Means that the
 startup time is longer but the response time for the first request is
@@ -262,14 +249,24 @@ shorter
 
 Log the server startup event
 
-=head2 dispatch_request
+=head2 C<dispatch_request>
 
 The L<Web::Simple> API method used to dispatch requests
 
-=head2 to_psgi_app
+=head2 C<execute>
 
-Sets the application mount point and pushes some middleware into the Plack
-stack
+   $plack_response = $self->execute( $view, $model, $method, @args );
+
+Each of the L</dispatch_request> methods calls this which in turn
+calls the model and then the view. Wraps the model and view calls in a
+C<try> / C<catch> block and renders an exception page if those calls
+fail. Creates an L<App::Doh::Request> object which it passes into the
+model and view methods calls
+
+=head2 C<to_psgi_app>
+
+Sets the application mount point and pushes some middleware into the
+L<Plack> stack
 
 =head1 Diagnostics
 

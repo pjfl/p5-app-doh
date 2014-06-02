@@ -14,7 +14,7 @@ with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
 # Public attributes
-has 'excluding'   => is => 'ro',   isa => ArrayRef,
+has 'excluding'   => is => 'ro', isa => ArrayRef,
    builder        => sub { [ qw( Auth Functions Markdown Model Role View ) ] };
 
 # Private attributes

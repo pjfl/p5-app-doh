@@ -28,22 +28,22 @@ has 'ipc'  => is => 'lazy', isa => Object,
    builder => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
 # Construction
+around 'get_page' => sub {
+   my ($orig, $self, $req, $node, $locale) = @_;
+
+   my $page = $orig->( $self, $req, $node, $locale );
+
+   $page->{docs_url} = $self->docs_url( $req, $locale );
+
+   return $page;
+};
+
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
    my $page = $orig->( $self, $req, @args );
 
    $page->{docs_url} //= $self->docs_url( $req );
-
-   return $page;
-};
-
-around 'make_page' => sub {
-   my ($orig, $self, $req, $node, $locale) = @_;
-
-   my $page = $orig->( $self, $req, $node, $locale );
-
-   $page->{docs_url} = $self->docs_url( $req, $locale );
 
    return $page;
 };

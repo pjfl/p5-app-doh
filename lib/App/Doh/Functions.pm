@@ -18,11 +18,13 @@ sub build_navigation_list ($$$$) {
    my $iter = iterator( $tree ); my @nav = ();
 
    while (defined (my $node = $iter->())) {
-      $node->{id} eq 'index' and next; my $link = clone( $node );
+      $node->{id} eq 'index' and next;
+
+      my $link = clone( $node ); delete $link->{tree};
 
       $link->{class}  = $node->{type} eq 'folder' ? 'folder-link' : 'file-link';
-      $link->{depth} -= 2;
       $link->{tip  }  = __get_tip_text( $root, $node );
+      $link->{depth} -= 2;
 
       if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
          $link->{class} .= $node->{url} eq $wanted ? ' active' : ' open';

@@ -5,10 +5,13 @@ use namespace::sweep;
 use App::Doh::Functions    qw( build_navigation_list clone mtime );
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
+use Class::Usul::Types     qw( HashRef );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo::Role;
 
 requires qw( config get_stash load_page localised_tree );
+
+has 'type_map' => is => 'lazy', isa => HashRef, builder => sub { {} };
 
 # Construction
 around 'load_page' => sub {
@@ -21,7 +24,7 @@ around 'load_page' => sub {
 
       my $node = $self->find_node( $locale, $req->args ) or next;
 
-      return $orig->( $self, $req, $self->make_page( $req, $node, $locale ) );
+      return $orig->( $self, $req, $self->get_page( $req, $node, $locale ) );
    }
 
    return $orig->( $self, $req, $self->not_found( $req ) );
@@ -41,6 +44,16 @@ sub find_node {
    }
 
    return $node;
+}
+
+sub get_page {
+   my ($self, $req, $node, $locale) = @_;
+
+   my $page = clone $node; $page->{content} = delete $page->{path};
+
+   $page->{locale} = $locale;
+
+   return $page;
 }
 
 {  my $cache //= {};
@@ -69,19 +82,9 @@ sub find_node {
          and $nav = $cache->{ $wanted }
             = { list  => build_navigation_list( $root, $node, \@ids, $wanted ),
                 mtime => mtime( $node ), };
-
+      $self->usul->dumper( $nav );
       return $nav->{list};
    }
-}
-
-sub make_page {
-   my ($self, $req, $node, $locale) = @_;
-
-   my $page = clone $node; $page->{content} = delete $page->{path};
-
-   $page->{locale} = $locale;
-
-   return $page;
 }
 
 sub not_found {

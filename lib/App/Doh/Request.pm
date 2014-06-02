@@ -370,16 +370,16 @@ is anonymous
 
 =head1 Subroutines/Methods
 
-=head2 BUILDARGS
+=head2 C<BUILDARGS>
 
 Picks the request parameters and environment apart. Returns the hash reference
 used to instantiate the request object
 
-=head2 BUILD
+=head2 C<BUILD>
 
 Logs the request at the debug level
 
-=head2 body_params
+=head2 C<body_params>
 
    $code_ref = $self->body_params;
 
@@ -387,14 +387,14 @@ Returns a code reference which when called with a body parameter name returns
 the body parameter value after first scrubbing it of "dodgy" characters. Throws
 if the value is undefined or tainted
 
-=head2 body_value
+=head2 C<body_value>
 
    $value = $self->body_value( $name );
 
 Returns the named body value, throws if the value is not defined. Returns the
 first value if the body contains more than one
 
-=head2 loc
+=head2 C<loc>
 
    $localised_string = $self->loc( $key, @args );
 
@@ -402,11 +402,11 @@ Translates C<$key> into the required language and substitutes the bind values.
 The C<locale> is currently set in configuration but will be extracted from
 the request in a future release
 
-=head2 loc_default
+=head2 C<loc_default>
 
 Like the C<loc> method but always translates to the default language
 
-=head2 query_params
+=head2 C<query_params>
 
    $code_ref = $self->query_params;
 
@@ -414,7 +414,7 @@ Returns a code reference which when called with a query parameter name returns
 the query parameter value after first scrubbing it of "dodgy" characters. Throws
 if the value is undefined or tainted
 
-=head2 uri_for
+=head2 C<uri_for>
 
    $uri_obj = $self->uri_for( $partial_uri_path, $args, $query_params );
 

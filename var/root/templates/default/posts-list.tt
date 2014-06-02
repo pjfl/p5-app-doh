@@ -4,30 +4,32 @@
          <div class="content-page">
             <article>
 [% INCLUDE 'default/header.tt' -%]
-[% depth = 0 -%]
+[% depth = page.wanted_depth -%]
                <ul class="posts post-list">
 [% FOREACH node = nav -%]
-[%    WHILE node.depth < depth; depth = depth - 1 -%]
+[%    IF node.depth >= page.wanted_depth -%]
+[%       WHILE node.depth < depth; depth = depth - 1 -%]
                   </ul>
                </li>
-[%    END -%]
-[%    IF show_node( node, page.wanted, page.wanted_depth ) -%]
+[%       END -%]
+[%       IF show_node( node, page.wanted, page.wanted_depth ) -%]
                <li class="[% node.class %]">
-[%       uri = uri_for( node.url ) -%]
-[%       IF node.type == 'folder'; depth = depth + 1 -%]
+[%          uri = uri_for( node.url ) -%]
+[%          IF node.type == 'folder'; depth = depth + 1 -%]
 [%         linkWithTips( uri, 'folder', node.name, 'Folder Path', node.tip ) -%]
                   &nbsp;([% node.fcount -%])
                   <ul class="posts post-list">
-[%       ELSE -%]
-[%         linkWithTips( uri, '', node.name, 'File Path', node.tip ) -%]
+[%          ELSE -%]
+[%             linkWithTips( uri, '', node.name, 'File Path', node.tip ) -%]
                   <br>
                   <span class="sub-text">
-[%-        time2str( '%A, %B %e, %Y', str2time( node.prefix ) ) -%]</span>
+[%-            time2str( '%A, %B %e, %Y', str2time( node.prefix ) ) -%]</span>
                </li>
+[%          END -%]
 [%       END -%]
 [%    END -%]
 [% END -%]
-[% WHILE depth > 0; depth = depth - 1 -%]
+[% WHILE depth > page.wanted_depth; depth = depth - 1 -%]
                   </ul>
                </li>
 [% END -%]

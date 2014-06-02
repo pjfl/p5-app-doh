@@ -1,5 +1,5 @@
 <!-- Search File -->
-<form action="[% links.base_uri %]search-results"
+<form action="[% links.base_uri %]search"
      enctype="application/x-www-form-urlencoded"
       method="get" name="search-file">
    <input  class="pathname" name="query"

@@ -181,14 +181,14 @@ A reference to the L<App::Doh::Model::Documentation> object
 
 =head1 Subroutines/Methods
 
-=head2 make_css - Compile CSS files from LESS files
+=head2 C<make_css> - Compile CSS files from LESS files
 
    bin/doh-cli make_css [theme]
 
 Creates CSS files under F<var/root/css> one for each colour theme. If a colour
 theme name is supplied only the C<LESS> for that theme is compiled
 
-=head2 make_static - Make a static HTML copy of the documentation
+=head2 C<make_static> - Make a static HTML copy of the documentation
 
    bin/doh-cli make_static
 

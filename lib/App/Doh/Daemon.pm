@@ -187,33 +187,33 @@ The name of the L<Plack> engine used by the server
 
 Defines the following methods
 
-=head2 get_init_file - Dump SYSV initialisation script to stdout
+=head2 C<get_init_file> - Dump SYSV initialisation script to stdout
 
 Dump the SYSV initialisation script to stdout
 
-=head2 restart - Restart the server
+=head2 C<restart> - Restart the server
 
 Restart the server
 
-=head2 run - Call the requested method
+=head2 C<run> - Call the requested method
 
 Validates some L<Daemon::Control> attribute values and then calls the
 same method in the parent class which, in turn, calls the requested
 method in a try / catch block
 
-=head2 show_warnings - Show server warnings
+=head2 C<show_warnings> - Show server warnings
 
 Show server warnings
 
-=head2 start - Start the server
+=head2 C<start> - Start the server
 
 Start the server
 
-=head2 status - Show the current server status
+=head2 C<status> - Show the current server status
 
 Show the current server status
 
-=head2 stop - Stop the server
+=head2 C<stop> - Stop the server
 
 Stop the server
 

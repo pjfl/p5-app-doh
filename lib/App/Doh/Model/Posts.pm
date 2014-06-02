@@ -17,6 +17,14 @@ with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
 
 # Construction
+around 'get_page' => sub {
+   my ($orig, $self, @args) = @_; my $page = $orig->( $self, @args );
+
+   $page->{type} eq 'folder' and $page->{template} = 'posts-index';
+
+   return $page;
+};
+
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
@@ -25,14 +33,6 @@ around 'load_page' => sub {
    $page->{template    } //= 'posts';
    $page->{wanted      }   = join '/', $self->config->posts, @{ $req->args };
    $page->{wanted_depth}   = () = @{ $req->args };
-   return $page;
-};
-
-around 'make_page' => sub {
-   my ($orig, $self, @args) = @_; my $page = $orig->( $self, @args );
-
-   $page->{type} eq 'folder' and $page->{template} = 'posts-index';
-
    return $page;
 };
 

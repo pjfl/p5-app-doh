@@ -6,13 +6,10 @@ use Moo;
 use App::Doh::Functions    qw( show_node );
 use Class::Usul::Constants qw( NUL );
 use Class::Usul::Time      qw( str2time time2str );
-use Class::Usul::Types     qw( HashRef );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( weaken );
 
 extends q(App::Doh);
-
-has 'type_map' => is => 'lazy', isa => HashRef, builder => sub { {} };
 
 sub exception_handler {
    my ($self, $req, $e) = @_;
