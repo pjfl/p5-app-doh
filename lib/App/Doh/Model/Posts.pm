@@ -3,12 +3,12 @@ package App::Doh::Model::Posts;
 use feature 'state';
 use namespace::sweep;
 
-use Moo;
 use App::Doh::Functions    qw( build_tree localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Functions qw( throw );
 use File::DataClass::Types qw( Path Str );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
+use Moo;
 
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::CommonLinks);

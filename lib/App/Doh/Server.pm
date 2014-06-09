@@ -21,13 +21,6 @@ use Plack::Builder;
 use Try::Tiny;
 use Web::Simple;
 
-# Public attributes
-has 'appclass'     => is => 'ro', isa => NonEmptySimpleStr,
-   default         => 'App::Doh';
-
-has 'config_class' => is => 'ro', isa => NonEmptySimpleStr,
-   default         => 'App::Doh::Config';
-
 # Private attributes
 has '_controllers' => is => 'lazy', isa => ArrayRef[Object],
    reader     => 'controllers', builder => sub { [
@@ -55,48 +48,6 @@ has '_usul'   => is => 'lazy', isa => BaseType,
    handles    => [ 'log' ], reader => 'usul';
 
 # Construction
-sub BUILD {
-   my $self   = shift;
-   my $ver    = $App::Doh::VERSION;
-   my $server = ucfirst $ENV{PLACK_ENV} // NUL;
-   my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
-   my $static = !!$ENV{DOH_MAKE_STATIC};
-
-   $static or $self->log->info( $server.' Server started v'.$ver.$port );
-   # Take the hit at application startup not on first request
-   $self->models->{docs }->docs_tree;
-   $self->models->{posts}->posts;
-   $static or $self->log->debug( 'Document tree loaded' );
-   return;
-}
-
-sub _build__usul {
-   my $self   = shift;
-   my $wsconf = $self->config;
-   my $attr   = { config => {},
-                  config_class => $self->config_class,
-                  debug  => $ENV{DOH_DEBUG} // FALSE, };
-   my $conf   = $attr->{config};
-
-   $conf->{appclass} = $self->appclass;
-   $conf->{name    } = app_prefix   $conf->{appclass};
-   $conf->{home    } = find_apphome $conf->{appclass}, $wsconf->{home};
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home};
-
-   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
-
-   $bootconf->inflate_paths( $bootconf->projects );
-
-   my $port    = $ENV{DOH_PORT} // $bootconf->port;
-   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
-   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
-
-   $conf->{cfgfiles } = get_cfgfiles $conf->{appclass}, $cfgdirs;
-   $conf->{file_root} = $docs;
-
-   return Class::Usul->new( $attr );
-}
-
 around 'to_psgi_app' => sub {
    my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
 
@@ -127,6 +78,48 @@ around 'to_psgi_app' => sub {
       };
    };
 };
+
+sub BUILD {
+   my $self   = shift;
+   my $ver    = $App::Doh::VERSION;
+   my $server = ucfirst $ENV{PLACK_ENV} // NUL;
+   my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
+   my $static = !!$ENV{DOH_MAKE_STATIC};
+
+   $static or $self->log->info( $server.' Server started v'.$ver.$port );
+   # Take the hit at application startup not on first request
+   $self->models->{docs }->docs_tree;
+   $self->models->{posts}->posts;
+   $static or $self->log->debug( 'Document tree loaded' );
+   return;
+}
+
+sub _build__usul {
+   my $self   = shift;
+   my $wsconf = $self->config;
+   my $attr   = { config => {},
+                  config_class => 'App::Doh::Config',
+                  debug  => $ENV{DOH_DEBUG} // FALSE, };
+   my $conf   = $attr->{config};
+
+   $conf->{appclass} = 'App::Doh';
+   $conf->{name    } = app_prefix   $conf->{appclass};
+   $conf->{home    } = find_apphome $conf->{appclass}, $wsconf->{home};
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home};
+
+   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
+
+   $bootconf->inflate_paths( $bootconf->projects );
+
+   my $port    = $ENV{DOH_PORT} // $bootconf->port;
+   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
+   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
+
+   $conf->{cfgfiles } = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{file_root} = $docs;
+
+   return Class::Usul->new( $attr );
+}
 
 # Public methods
 sub dispatch_request {
@@ -225,19 +218,7 @@ Serves HTML pages generated from microformats like Markdown and POD
 
 =head1 Configuration and Environment
 
-Defines the following attributes;
-
-=over 3
-
-=item C<appclass>
-
-A non empty simple string the defaults to C<App::Doh>
-
-=item C<config_class>
-
-A non empty simple string the defaults to C<App::Doh::Config>
-
-=back
+Defines no attributes
 
 =head1 Subroutines/Methods
 

@@ -2,13 +2,13 @@ package App::Doh::Config;
 
 use namespace::sweep;
 
-use Moo;
 use Class::Usul::Constants qw( NUL TRUE );
 use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
                                NonZeroPositiveInt Path SimpleStr Str );
 use Sys::Hostname          qw( hostname );
 use Type::Utils            qw( enum );
+use Moo;
 
 extends q(Class::Usul::Config::Programs);
 

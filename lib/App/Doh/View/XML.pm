@@ -2,11 +2,11 @@ package App::Doh::View::XML;
 
 use namespace::sweep;
 
-use Moo;
 use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Types     qw( Object );
 use Encode                 qw( encode );
 use XML::Simple;
+use Moo;
 
 extends q(App::Doh);
 with    q(App::Doh::Role::Templates);

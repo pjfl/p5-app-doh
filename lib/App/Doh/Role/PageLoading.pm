@@ -82,7 +82,7 @@ sub get_page {
          and $nav = $cache->{ $wanted }
             = { list  => build_navigation_list( $root, $node, \@ids, $wanted ),
                 mtime => mtime( $node ), };
-      $self->usul->dumper( $nav );
+
       return $nav->{list};
    }
 }

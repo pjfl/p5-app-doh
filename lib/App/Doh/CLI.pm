@@ -2,7 +2,6 @@ package App::Doh::CLI;
 
 use namespace::sweep;
 
-use Moo;
 use App::Doh;
 use App::Doh::Functions    qw( iterator );
 use App::Doh::Model::Documentation;
@@ -12,6 +11,7 @@ use Class::Usul::Functions qw( throw );
 use Class::Usul::Types     qw( HashRef Object );
 use File::DataClass::IO    qw( io );
 use Unexpected::Types      qw( LoadableClass );
+use Moo;
 
 extends q(Class::Usul::Programs);
 
@@ -30,8 +30,7 @@ has 'less'  => is => 'lazy', isa => Object, builder => sub {
                                   tmp_path      => $conf->tempdir, );
 };
 
-has 'less_class' => is => 'lazy', isa => LoadableClass,
-   default       => 'CSS::LESS';
+has 'less_class' => is => 'lazy', isa => LoadableClass, default => 'CSS::LESS';
 
 has 'models' => is => 'lazy', isa => HashRef[Object], builder => sub {
    { 'docs'  => App::Doh::Model::Documentation->new( builder => $_[ 0 ] ),
@@ -39,9 +38,9 @@ has 'models' => is => 'lazy', isa => HashRef[Object], builder => sub {
 
 # Public methods
 sub make_css : method {
-   my $self  = shift;
-   my $conf  = $self->config;
-   my $cssd  = $conf->root->catdir( 'css' );
+   my $self = shift;
+   my $conf = $self->config;
+   my $cssd = $conf->root->catdir( 'css' );
 
    if (my $theme = $self->next_argv) { $self->_write_theme( $cssd, $theme ) }
    else { $self->_write_theme( $cssd, $_ ) for (@{ $conf->themes }) }
@@ -53,7 +52,7 @@ sub make_static : method {
    my $self = shift; my $dest = io( $self->next_argv // $self->config->static );
 
    $ENV{DOH_MAKE_STATIC} = TRUE;
-   $self->log->info( 'Generating static pages' );
+   $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io( $dest->rel2abs( $self->config->root ) );
    $self->_copy_assets( $dest );
 
@@ -110,7 +109,7 @@ sub _make_localised_static {
       my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
       my $path = io( [ $dest, @path ] )->assert_filepath;
 
-      $self->info( 'Writing '.$locale.'/'.$node->{url} );
+      $self->info( "Writing ${locale}/".$node->{url} );
       $path->print( $self->run_cmd( $cmd )->stdout );
    }
 

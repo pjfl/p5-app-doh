@@ -543,11 +543,11 @@ var LinkFader = new Class( {
 
          if (tc[ i ]-cc[ i ] > 0) { diff   = tc[ i ] - cc[ i ] }
          else                     { diff   = cc[ i ] - tc[ i ] }
-         if (diff  < change)      { change = diff }
+         if (diff    < change)    { change = diff }
          if (cc[ i ] > tc[ i ])   { nc     = cc[ i ] - change }
          if (cc[ i ] < tc[ i ])   { nc     = cc[ i ] + change }
-         if (nc    < 0)           { nc     = 0 }
-         if (nc    > 255)         { nc     = 255 }
+         if (nc      < 0)         { nc     = 0 }
+         if (nc      > 255)       { nc     = 255 }
 
          colour += nc;
       }
@@ -644,7 +644,7 @@ var Replacements = new Class( {
    build: function() {
       this.options.selector.each( function( selector ) {
          $$( selector ).each( function( el ) {
-            if (! el.id) { $uid( el ); el.id = el.type + el.uid }
+            if (! el.id) el.id = String.uniqueID();
 
             if (! this.collection.contains( el.id )) {
                this.collection.include( el.id ); this.createMarkup( el );

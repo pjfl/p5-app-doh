@@ -2,7 +2,6 @@ package App::Doh::Daemon;
 
 use namespace::sweep;
 
-use Moo;
 use App::Doh;
 use Class::Usul::Constants qw( EXCEPTION_CLASS OK TRUE );
 use Class::Usul::Functions qw( get_user throw );
@@ -13,6 +12,7 @@ use English                qw( -no_match_vars );
 use Plack::Runner;
 use Scalar::Util           qw( blessed );
 use Unexpected::Functions  qw( Unspecified );
+use Moo;
 
 extends q(Class::Usul::Programs);
 

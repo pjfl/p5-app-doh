@@ -3,7 +3,6 @@ package App::Doh::Model::Documentation;
 use feature 'state';
 use namespace::sweep;
 
-use Moo;
 use App::Doh::Functions    qw( build_tree extract_lang iterator localise_tree
                                make_id_from make_name_from mtime );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
@@ -16,6 +15,7 @@ use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_REQUEST_ENTITY_TOO_LARGE
                                HTTP_UNAUTHORIZED );
 use Unexpected::Functions  qw( Unspecified );
+use Moo;
 
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::CommonLinks);

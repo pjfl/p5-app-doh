@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Dropped appclass and config_class attrs from ::Server
           - Posts list indents / outdents correctly
           - Added JS navbar scroller
           - Debugging static posts
