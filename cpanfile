@@ -24,6 +24,7 @@ requires "XML::Simple" => "2.18";
 requires "YAML::Tiny" => "1.62";
 requires "namespace::sweep" => "0.006";
 requires "perl" => "5.010001";
+requires "strictures" => "1.004004";
 recommends "CSS::LESS" => "v0.0.3";
 
 on 'build' => sub {

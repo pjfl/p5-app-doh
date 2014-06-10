@@ -13,6 +13,7 @@ lib/App/Doh.pm
 lib/App/Doh/Auth/Htpasswd.pm
 lib/App/Doh/CLI.pm
 lib/App/Doh/Config.pm
+lib/App/Doh/Controller/Root.pm
 lib/App/Doh/Daemon.pm
 lib/App/Doh/Functions.pm
 lib/App/Doh/Markdown.pm
@@ -32,6 +33,7 @@ lib/App/Doh/View/HTML/Markdown.pm
 lib/App/Doh/View/HTML/Pod.pm
 lib/App/Doh/View/XML.pm
 lib/App/Doh/app-doh.json
+lib/strictures/defanged.pm
 t/01always_pass.t
 t/02pod.t
 t/03podcoverage.t
@@ -39,6 +41,7 @@ t/05kwalitee.t
 t/06yaml.t
 t/07podspelling.t
 t/10test_script.t
+var/locale/de/LC_MESSAGES/app_doh.po
 var/locale/en/LC_MESSAGES/app_doh.po
 var/root/css/theme-blue.css
 var/root/css/theme-green.css
@@ -89,6 +92,7 @@ var/root/templates/default/docs-right-column.tt
 var/root/templates/default/documentation.tt
 var/root/templates/default/editing-links.tt
 var/root/templates/default/footer.tt
+var/root/templates/default/fork-me.tt
 var/root/templates/default/header.tt
 var/root/templates/default/index.tt
 var/root/templates/default/navbar.tt

@@ -50,6 +50,12 @@ installed.
 
 * Perl 5.10.1 or above
 
+To find out if Perl is installed and which version; at a shell prompt type
+
+```shell
+   perl -v
+```
+
 If you don't already have it, bootstrap
 [App::cpanminus](https://metacpan.org/module/App::cpanminus) with:
 

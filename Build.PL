@@ -50,7 +50,8 @@ my $prereqs  = {
     'XML::Simple' => '2.18',
     'YAML::Tiny' => '1.62',
     'namespace::sweep' => '0.006',
-    'perl' => '5.010001'
+    'perl' => '5.010001',
+    'strictures' => '1.004004'
   },
 };
 
