@@ -1,7 +1,6 @@
 package App::Doh::Markdown;
 
-use strict;
-use warnings;
+use strictures;
 use parent 'Text::MultiMarkdown';
 
 sub _DoCodeBlocks { # Add support for triple graves

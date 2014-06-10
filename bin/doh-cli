@@ -18,15 +18,15 @@ __END__
 
 =head1 NAME
 
-doh-cli - One-line description of the programs purpose
+doh-cli - Command line interface to the Doh! application
 
 =head1 SYNOPSIS
 
 =over 3
 
-=item B<doh-cli> B<> I<>
+=item B<doh-cli> B<[options]> I<method>
 
-I<Command line description>
+Run the specified method with the given options
 
 =item B<doh-cli> B<-H> | B<-h> I<[method]> | B<-?>
 
@@ -40,13 +40,16 @@ Lists the methods available in this program
 
 =head1 DESCRIPTION
 
-I<Program description>
+Command line interface to the Doh! application. This wrapper exposes methods
+in the L<App::Doh::CLI> class
 
 =head1 REQUIRED ARGUMENTS
 
 =over 3
 
-=item I<>
+=item I<method>
+
+The name of the method to call in the L<App::Doh::CLI> class
 
 =back
 
@@ -76,7 +79,7 @@ Uses the constructor's C<appclass> attribute to locate a configuration file
 
 =over 3
 
-=item L<Class::Usul>
+=item L<App::Doh::CLI>
 
 =back
 

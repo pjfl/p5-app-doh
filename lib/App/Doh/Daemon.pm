@@ -5,7 +5,6 @@ use namespace::sweep;
 use App::Doh;
 use Class::Usul::Constants qw( EXCEPTION_CLASS OK TRUE );
 use Class::Usul::Functions qw( get_user throw );
-use Class::Usul::Options;
 use Class::Usul::Types     qw( NonEmptySimpleStr NonZeroPositiveInt Object );
 use Daemon::Control;
 use English                qw( -no_match_vars );
@@ -13,6 +12,7 @@ use Plack::Runner;
 use Scalar::Util           qw( blessed );
 use Unexpected::Functions  qw( Unspecified );
 use Moo;
+use Class::Usul::Options;
 
 extends q(Class::Usul::Programs);
 

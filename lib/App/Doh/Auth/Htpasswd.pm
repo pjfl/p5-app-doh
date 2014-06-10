@@ -1,7 +1,6 @@
 package App::Doh::Auth::Htpasswd;
 
-use strict;
-use warnings;
+use strictures;
 use parent 'Plack::Middleware::Auth::Htpasswd';
 
 use Class::Usul::Functions qw( throw );

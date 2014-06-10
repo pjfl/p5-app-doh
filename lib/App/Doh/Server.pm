@@ -95,17 +95,16 @@ sub BUILD {
 }
 
 sub _build__usul {
-   my $self   = shift;
-   my $wsconf = $self->config;
-   my $attr   = { config => {},
-                  config_class => 'App::Doh::Config',
-                  debug  => $ENV{DOH_DEBUG} // FALSE, };
-   my $conf   = $attr->{config};
+   my $self = shift;
+   my $attr = { config       => $self->config,
+                config_class => 'App::Doh::Config',
+                debug        => $ENV{DOH_DEBUG} // FALSE, };
+   my $conf = $attr->{config};
 
-   $conf->{appclass} = 'App::Doh';
-   $conf->{name    } = app_prefix   $conf->{appclass};
-   $conf->{home    } = find_apphome $conf->{appclass}, $wsconf->{home};
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass},   $conf->{home};
+   $conf->{appclass} //= 'App::Doh';
+   $conf->{name    } //= app_prefix   $conf->{appclass};
+   $conf->{home    }   = find_apphome $conf->{appclass}, $conf->{home};
+   $conf->{cfgfiles}   = get_cfgfiles $conf->{appclass}, $conf->{home};
 
    my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
 

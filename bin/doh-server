@@ -18,29 +18,26 @@ __END__
 
 =head1 NAME
 
-doh-server - One-line description of the programs purpose
+doh-server - PSGI Web Application
 
 =head1 SYNOPSIS
 
 =over 3
 
-=item B<doh-server> B</index>
+=item B<doh-server> B<[options]> I<[/index]>
 
-Command line access to the web application
+Command line access to the web application. Generates a static HTML
+page in response to each URI passed on the command line
 
 =back
 
 =head1 DESCRIPTION
 
-I<Program description>
+PSGI Web Application built using L<Plack> and L<Web::Simple>
 
 =head1 REQUIRED ARGUMENTS
 
-=over 3
-
-=item I<>
-
-=back
+None
 
 =head1 OPTIONS
 
@@ -68,7 +65,7 @@ Uses the constructor's C<appclass> attribute to locate a configuration file
 
 =over 3
 
-=item L<Class::Usul>
+=item L<App::Doh::Server>
 
 =back
 

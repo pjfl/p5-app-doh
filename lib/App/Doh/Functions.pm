@@ -1,8 +1,7 @@
 package App::Doh::Functions;
 
-use 5.010_001;
-use strict;
-use warnings;
+use 5.010001;
+use strictures;
 use parent 'Exporter::Tiny';
 
 use Class::Usul::Constants qw( FALSE LANG NUL TRUE );
