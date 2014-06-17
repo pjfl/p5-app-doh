@@ -10,7 +10,8 @@ use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
                                Object SimpleStr );
 use Encode                 qw( decode );
 use HTTP::Body;
-use HTTP::Status           qw( HTTP_EXPECTATION_FAILED );
+use HTTP::Status           qw( HTTP_EXPECTATION_FAILED
+                               HTTP_INTERNAL_SERVER_ERROR );
 use Scalar::Util           qw( blessed weaken );
 use Unexpected::Functions  qw( Unspecified );
 use URI::http;
@@ -177,19 +178,15 @@ sub body_params {
 }
 
 sub body_value {
-   return __get_defined_value( $_[ 0 ]->body->param, $_[ 1 ] );
+   my $self = shift; return __get_defined_value( $self->body->param, @_ );
 }
 
 sub loc {
-   my ($self, $key, @args) = @_;
-
-   return $self->_localize( $self->locale, $key, @args );
+   my $self = shift; return $self->_localize( $self->locale, @_ );
 }
 
 sub loc_default {
-   my ($self, $key, @args) = @_;
-
-   return $self->_localize( $self->config->locale, $key, @args );
+   my $self = shift; return $self->_localize( $self->config->locale, @_ );
 }
 
 sub query_params {
@@ -226,14 +223,15 @@ sub _localize {
    my $args = (is_hashref $car) ? { %{ $car } }
             : { params => (is_arrayref $car) ? $car : [ @args ] };
 
-   $args->{domain_names} ||= [ $self->config->name ];
-   $args->{locale      } ||= $locale;
+   $args->{locale} //= $locale;
 
    return $self->localize( $key, $args );
 }
 
 # Private functions
 sub __defined_or_throw {
+   defined $_[ 0 ] or throw class => Unspecified, args => [ 'parameter name' ],
+                               rv => HTTP_INTERNAL_SERVER_ERROR;
    defined $_[ 1 ] or throw class => Unspecified, args => [ $_[ 0 ] ],
                                rv => HTTP_EXPECTATION_FAILED;
    return $_[ 1 ];
@@ -250,15 +248,15 @@ sub __get_defined_value {
 }
 
 sub __get_scrubbed_value {
-   my ($pattern, $params, $name, $opts) = @_;
+   my ($pattern, $params, $name, $opts) = @_; $opts //= {};
 
-   my $v = __get_defined_value( $params, $name ); $v =~ s{ $pattern }{}gmx;
+   my $v = __get_defined_value( $params, $name );
 
-   exists $opts->{allow_null} and $opts->{allow_null} and return $v;
-
-   length $v or throw class => Unspecified, args => [ $name ],
-                         rv => HTTP_EXPECTATION_FAILED;
-
+   $pattern = $opts->{scrubber} // $pattern;
+   $pattern and $v =~ s{ $pattern }{}gmx;
+   $opts->{allow_null} or length $v
+      or throw class => Unspecified, args => [ $name ],
+                  rv => HTTP_EXPECTATION_FAILED;
    return $v;
 }
 

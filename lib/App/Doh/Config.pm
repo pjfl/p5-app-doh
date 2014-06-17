@@ -3,6 +3,7 @@ package App::Doh::Config;
 use namespace::sweep;
 
 use Class::Usul::Constants qw( NUL TRUE );
+use Class::Usul::Functions qw( app_prefix );
 use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
                                NonZeroPositiveInt Path SimpleStr Str );
@@ -115,7 +116,8 @@ has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
 has 'root_mtime'      => is => 'lazy', isa => Path, coerce => Path->coercion,
    builder            => sub { $_[ 0 ]->file_root->catfile( '.mtime' ) };
 
-has 'scrubber'        => is => 'ro',   isa => Str, default => '[;\$\`&\r\n]';
+has 'scrubber'        => is => 'ro',   isa => Str,
+   default            => '[^ +\-\./0-9A-Z\\_a-z~]';
 
 has 'secret'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => hostname;

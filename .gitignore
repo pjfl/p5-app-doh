@@ -28,9 +28,7 @@ var/root/css
 var/root/docs/.mtime
 var/root/docs/assets
 var/root/docs/de
-var/root/docs/en/01_Examples/03_Another_Level/
-var/root/docs/en/01_Examples/03_Test.md
-var/root/docs/en/01_Examples/06_Next_Level/
+var/root/docs/en/01_Examples/*
 var/root/docs/en/Projects
 var/root/docs/en/posts
 var/root/static

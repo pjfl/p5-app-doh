@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Refactored L10n domain names
           - Using strictures internally
           - Added strictures::defanged
           - Dropped appclass and config_class attrs from ::Server

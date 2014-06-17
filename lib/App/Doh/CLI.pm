@@ -6,11 +6,9 @@ use App::Doh;
 use App::Doh::Functions    qw( iterator );
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Posts;
-use Class::Usul::Constants qw( EXCEPTION_CLASS NUL OK TRUE );
-use Class::Usul::Functions qw( throw );
-use Class::Usul::Types     qw( HashRef Object );
-use File::DataClass::IO    qw( io );
-use Unexpected::Types      qw( LoadableClass );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL OK TRUE );
+use Class::Usul::Functions qw( app_prefix io throw );
+use Class::Usul::Types     qw( HashRef LoadableClass Object );
 use Moo;
 
 extends q(Class::Usul::Programs);
@@ -20,6 +18,7 @@ our $VERSION = $App::Doh::VERSION;
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';
 
+# Public attributes
 has 'less'  => is => 'lazy', isa => Object, builder => sub {
    my $self = shift;
    my $conf = $self->config;
@@ -35,6 +34,17 @@ has 'less_class' => is => 'lazy', isa => LoadableClass, default => 'CSS::LESS';
 has 'models' => is => 'lazy', isa => HashRef[Object], builder => sub {
    { 'docs'  => App::Doh::Model::Documentation->new( builder => $_[ 0 ] ),
      'posts' => App::Doh::Model::Posts->new( builder => $_[ 0 ] ), } };
+
+# Construction
+around 'BUILDARGS' => sub {
+   my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
+
+   my $conf = $attr->{config}; my $prefix = app_prefix $conf->{appclass};
+
+   $conf->{logfile        } = "__LOGSDIR(${prefix}.log)__";
+   $conf->{l10n_attributes}->{domains} = [ $prefix ];
+   return $attr;
+};
 
 # Public methods
 sub make_css : method {
@@ -59,9 +69,9 @@ sub make_static : method {
    for my $locale ($self->models->{docs}->locales) {
       my $tree = $self->models->{docs}->localised_tree( $locale );
 
-      $self->_make_localised_static( $tree, $dest, $locale );
+      $self->_make_localised_static( $tree, $dest, $locale, FALSE );
       $tree = $self->models->{posts}->localised_tree( $locale );
-      $self->_make_localised_static( $tree, $dest, $locale );
+      $self->_make_localised_static( $tree, $dest, $locale, TRUE );
    }
 
    return OK;
@@ -97,12 +107,12 @@ sub _copy_assets {
 }
 
 sub _make_localised_static {
-   my ($self, $tree, $dest, $locale) = @_;
+   my ($self, $tree, $dest, $locale, $make_dirs) = @_;
 
    my $conf = $self->config; my $iter = iterator( $tree );
 
    while (my $node = $iter->()) {
-      $node->{type} eq 'folder' and next;
+      not $make_dirs and $node->{type} eq 'folder' and next;
 
       my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
       my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
@@ -110,7 +120,7 @@ sub _make_localised_static {
       my $path = io( [ $dest, @path ] )->assert_filepath;
 
       $self->info( "Writing ${locale}/".$node->{url} );
-      $path->print( $self->run_cmd( $cmd )->stdout );
+      $self->run_cmd( $cmd, { debug => $self->debug, out => $path } );
    }
 
    return;
@@ -195,7 +205,7 @@ Creates static HTML pages under F<var/root/static>
 
 =head1 Diagnostics
 
-None
+Output is logged to the file F<var/logs/app_doh.log>
 
 =head1 Dependencies
 

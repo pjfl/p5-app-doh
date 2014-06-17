@@ -86,7 +86,7 @@ sub BUILD {
    my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
    my $static = !!$ENV{DOH_MAKE_STATIC};
 
-   $static or $self->log->info( $server.' Server started v'.$ver.$port );
+   $static or $self->log->info( "${server} Server started v${ver}${port}" );
    # Take the hit at application startup not on first request
    $self->models->{docs }->docs_tree;
    $self->models->{posts}->posts;
@@ -114,7 +114,8 @@ sub _build__usul {
    my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 
-   $conf->{cfgfiles } = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{l10n_attributes}->{domains} = [ $conf->{name} ];
    $conf->{file_root} = $docs;
 
    return Class::Usul->new( $attr );

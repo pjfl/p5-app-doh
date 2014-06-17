@@ -6,9 +6,8 @@ use namespace::sweep;
 use App::Doh::Functions    qw( build_tree extract_lang iterator localise_tree
                                make_id_from make_name_from mtime );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
-use Class::Usul::Functions qw( first_char throw trim );
+use Class::Usul::Functions qw( first_char io throw trim untaint_path );
 use Class::Usul::IPC;
-use File::DataClass::IO;
 use File::DataClass::Types qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
@@ -56,7 +55,8 @@ sub create_file_action {
       or throw error => 'File creation not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
-   my $new_node = $self->_new_node( $req->locale, $req->body_params );
+   my $params   = $req->body_params;
+   my $new_node = $self->_new_node( $req->locale, $params->( 'pathname' ) );
    my $content  = $req->loc( $self->config->default_content );
    my $path     = $new_node->{path};
 
@@ -172,7 +172,7 @@ sub rename_file_action {
    my $node     = $self->find_node( $req->locale, $old_path )
       or throw error => 'Cannot find document tree node to rename',
                   rv => HTTP_NOT_FOUND;
-   my $new_node = $self->_new_node( $req->locale, $params );
+   my $new_node = $self->_new_node( $req->locale, $params->( 'pathname' ) );
 
    $new_node->{path}->assert_filepath;
    $node->{path}->close->move( $new_node->{path} ); __prune( $node->{path} );
@@ -291,10 +291,10 @@ sub _find_first_url {
 }
 
 sub _new_node {
-   my ($self, $locale, $params) = @_;
+   my ($self, $locale, $pathname) = @_;
 
    my $lang     = extract_lang $locale;
-   my @pathname = __prepare_path( __append_suffix( $params->( 'pathname' ) ) );
+   my @pathname = __prepare_path( __append_suffix( untaint_path $pathname ) );
    my $path     = $self->config->file_root->catfile( $lang, @pathname )->utf8;
    my @filepath = map { make_id_from( $_ )->[ 0 ] } @pathname;
    my $url      = join '/', @filepath;
@@ -350,8 +350,10 @@ sub __copy_element_value {
 }
 
 sub __prepare_path {
+   my $path = shift; $path =~ s{ [\\] }{/}gmx;
+
    return (map { s{ [ ] }{_}gmx; $_ }
-           map { trim $_            } split m{ / }mx, $_[ 0 ]);
+           map { trim $_            } split m{ / }mx, $path);
 }
 
 sub __prepare_search_results {
