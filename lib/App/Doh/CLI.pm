@@ -41,8 +41,8 @@ around 'BUILDARGS' => sub {
 
    my $conf = $attr->{config}; my $prefix = app_prefix $conf->{appclass};
 
-   $conf->{logfile        } = "__LOGSDIR(${prefix}.log)__";
    $conf->{l10n_attributes}->{domains} = [ $prefix ];
+   $conf->{logfile} = "__LOGSDIR(${prefix}.log)__";
    return $attr;
 };
 
@@ -50,28 +50,30 @@ around 'BUILDARGS' => sub {
 sub make_css : method {
    my $self = shift;
    my $conf = $self->config;
-   my $cssd = $conf->root->catdir( 'css' );
+   my $cssd = $conf->root->catdir( $conf->css );
 
-   if (my $theme = $self->next_argv) { $self->_write_theme( $cssd, $theme ) }
+   if (my $colour = $self->next_argv) { $self->_write_theme( $cssd, $colour ) }
    else { $self->_write_theme( $cssd, $_ ) for (@{ $conf->themes }) }
 
    return OK;
 }
 
 sub make_static : method {
-   my $self = shift; my $dest = io( $self->next_argv // $self->config->static );
+   my $self = shift; my $conf = $self->config; my $models = $self->models;
+
+   my $dest = io( $self->next_argv // $conf->static );
 
    $ENV{DOH_MAKE_STATIC} = TRUE;
    $self->info( 'Generating static pages' );
-   $dest->is_absolute or $dest = io( $dest->rel2abs( $self->config->root ) );
+   $dest->is_absolute or $dest = io( $dest->rel2abs( $conf->root ) );
    $self->_copy_assets( $dest );
 
-   for my $locale ($self->models->{docs}->locales) {
-      my $tree = $self->models->{docs}->localised_tree( $locale );
+   for my $locale ($models->{docs}->locales) {
+      my $tree = $models->{docs}->localised_tree( $locale );
 
-      $self->_make_localised_static( $tree, $dest, $locale, FALSE );
-      $tree = $self->models->{posts}->localised_tree( $locale );
-      $self->_make_localised_static( $tree, $dest, $locale, TRUE );
+      $self->_make_localised_static( $dest, $tree, $locale, FALSE );
+      $tree = $models->{posts}->localised_tree( $locale );
+      $self->_make_localised_static( $dest, $tree, $locale, TRUE );
    }
 
    return OK;
@@ -107,7 +109,7 @@ sub _copy_assets {
 }
 
 sub _make_localised_static {
-   my ($self, $tree, $dest, $locale, $make_dirs) = @_;
+   my ($self, $dest, $tree, $locale, $make_dirs) = @_;
 
    my $conf = $self->config; my $iter = iterator( $tree );
 
@@ -120,21 +122,21 @@ sub _make_localised_static {
       my $path = io( [ $dest, @path ] )->assert_filepath;
 
       $self->info( "Writing ${locale}/".$node->{url} );
-      $self->run_cmd( $cmd, { debug => $self->debug, out => $path } );
+      $self->run_cmd( $cmd, { out => $path } );
    }
 
    return;
 }
 
 sub _write_theme {
-   my ($self, $cssd, $theme) = @_;
+   my ($self, $cssd, $colour) = @_;
 
    my $conf = $self->config;
-   my $path = $conf->root->catfile( 'less', "theme-${theme}.less" );
+   my $path = $conf->root->catfile( $conf->less, "theme-${colour}.less" );
    my $css  = $self->less->compile( $path->all );
 
-   $self->info( "Writing ${theme} theme" );
-   $cssd->catfile( "theme-${theme}.css" )->println( $css );
+   $self->info( "Writing ${colour} theme" );
+   $cssd->catfile( "theme-${colour}.css" )->println( $css );
    return;
 }
 

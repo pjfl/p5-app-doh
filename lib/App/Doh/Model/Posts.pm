@@ -28,11 +28,13 @@ around 'get_page' => sub {
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $page = $orig->( $self, $req, @args );
+   my $page = $orig->( $self, $req, @args ); my @ids = @{ $req->args };
+
+   $ids[ 0 ] and $ids[ 0 ] eq 'index' and @ids = ();
 
    $page->{template    } //= 'posts';
-   $page->{wanted      }   = join '/', $self->config->posts, @{ $req->args };
-   $page->{wanted_depth}   = () = @{ $req->args };
+   $page->{wanted      }   = join '/', $self->config->posts, @ids;
+   $page->{wanted_depth}   = () = @ids;
    return $page;
 };
 

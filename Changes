@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Static site posts index works!
           - Refactored L10n domain names
           - Using strictures internally
           - Added strictures::defanged

@@ -13,7 +13,7 @@
 [% depth = 0 -%]
             <ul class="nav nav-list">
                <li>
-[% uri = uri_for( config.posts ); tip = loc( 'Landing page' ) -%]
+[% uri = uri_for( config.posts _ '/index' ); tip = loc( 'Landing page' ) -%]
 [% linkWithTips( uri, 'folder', loc( 'Posts' ), 'Hint', tip ) -%]
                </li>
 [% FOREACH node = nav -%]

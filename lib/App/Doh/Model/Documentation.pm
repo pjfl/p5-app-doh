@@ -234,11 +234,11 @@ sub upload_file {
       or  throw error => 'File uploading not authorised',
                    rv => HTTP_UNAUTHORIZED;
 
-   my $path = $conf->assetdir->catfile( $upload->filename );
+   my $dest = $conf->assetdir->catfile( $upload->filename )->assert_filepath;
 
-   io( $upload->path )->copy( $path->assert_filepath );
+   io( $upload->path )->copy( $dest );
 
-   my $rel_path = $path->abs2rel( $self->config->assetdir );
+   my $rel_path = $dest->abs2rel( $conf->assetdir );
    my $message  = [ 'File [_1] uploaded by [_2]', $rel_path, $req->username ];
    my $location = $self->docs_url( $req );
 
@@ -318,8 +318,8 @@ sub _search_results {
    my $root    = $self->config->file_root;
    my $query   = $req->query_params->( 'query' );
    my $langd   = $root->catdir( extract_lang $req->locale );
-   my $resp    = $self->ipc->run_cmd( [ 'ack', $query, "${langd}" ],
-                 { debug => $self->usul->debug, expected_rv => 1 } );
+   my $resp    = $self->ipc->run_cmd
+                 ( [ 'ack', $query, "${langd}" ], { expected_rv => 1 } );
    my $results = $resp->rv == 1
                ? $langd->catfile( $req->loc( 'Nothing found' ) ).'::'
                : $resp->stdout;

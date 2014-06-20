@@ -22,27 +22,22 @@ use Try::Tiny;
 use Web::Simple;
 
 # Private attributes
-has '_controllers' => is => 'lazy', isa => ArrayRef[Object],
-   reader     => 'controllers', builder => sub { [
-      App::Doh::Controller::Root->new,
-   ] };
+has '_controllers' => is => 'lazy', isa => ArrayRef[Object], builder => sub {
+   [  App::Doh::Controller::Root->new, ] }, reader => 'controllers';
 
-has '_models' => is => 'lazy', isa => HashRef[Object], reader => 'models',
-   builder    => sub { {
-      'docs'  => App::Doh::Model::Documentation->new
-         ( builder  => $_[ 0 ]->usul,
-           type_map => $_[ 0 ]->views->{html}->type_map ),
-      'help'  => App::Doh::Model::Help->new( builder => $_[ 0 ]->usul ),
-      'posts' => App::Doh::Model::Posts->new
-         ( builder  => $_[ 0 ]->usul,
-           type_map => $_[ 0 ]->views->{html}->type_map ),
-   } };
+has '_models' => is => 'lazy', isa => HashRef[Object], builder => sub { {
+   'docs'     => App::Doh::Model::Documentation->new
+      ( builder  => $_[ 0 ]->usul,
+        type_map => $_[ 0 ]->views->{html}->type_map ),
+   'help'     => App::Doh::Model::Help->new( builder => $_[ 0 ]->usul ),
+   'posts'    => App::Doh::Model::Posts->new
+      ( builder  => $_[ 0 ]->usul,
+        type_map => $_[ 0 ]->views->{html}->type_map ), } }, reader => 'models';
 
-has '_views'  => is => 'lazy', isa => HashRef[Object], reader => 'views',
-   builder    => sub { {
-      'html'  => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
-      'xml'   => App::Doh::View::XML->new ( builder => $_[ 0 ]->usul ),
-   } };
+has '_views'  => is => 'lazy', isa => HashRef[Object], builder => sub { {
+   'html'     => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
+   'xml'      => App::Doh::View::XML->new ( builder => $_[ 0 ]->usul ), } },
+   reader     => 'views';
 
 has '_usul'   => is => 'lazy', isa => BaseType,
    handles    => [ 'log' ], reader => 'usul';
