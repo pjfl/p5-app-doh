@@ -60,6 +60,11 @@ TAGS
 Thumbs.db
 \bipc_srlock
 \bvar/root/docs/assets
+\bvar/root/docs/de
+\bvar/root/docs/en/01_Examples/02
+\bvar/root/docs/en/01_Examples/03
+\bvar/root/docs/en/01_Examples/04
+\bvar/root/docs/en/posts
 \bvar/root/static
 \bvar/run
 \bvar/tmp

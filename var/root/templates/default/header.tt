@@ -1,7 +1,7 @@
 [% IF page.header -%]
                <!-- Header -->
                <div class="page-header">
-                  <h1>[% page.header %]</h1>
+                  <h1>[% loc( page.header ) %]</h1>
 [%    IF page.mtime %]
                   <span class="pull-left">
                      [%- time2str( '%A, %B %e, %Y', page.mtime ) %]</span>

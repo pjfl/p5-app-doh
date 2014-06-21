@@ -77,7 +77,7 @@ around 'to_psgi_app' => sub {
 sub BUILD {
    my $self   = shift;
    my $ver    = $App::Doh::VERSION;
-   my $server = ucfirst $ENV{PLACK_ENV} // NUL;
+   my $server = ucfirst( $ENV{PLACK_ENV} // NUL );
    my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
    my $static = !!$ENV{DOH_MAKE_STATIC};
 
