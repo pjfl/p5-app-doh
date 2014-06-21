@@ -33,6 +33,9 @@ msgstr "Hilfeseiten für die Anwendung"
 msgid "Hint"
 msgstr "Hilfreiche Tipps"
 
+msgid "Index"
+msgstr "Verzeichnis"
+
 msgid "National flag of requested the language"
 msgstr "Nationalflagge der angeforderten Sprache"
 

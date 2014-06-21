@@ -3,7 +3,7 @@ package App::Doh::Model::Posts;
 use feature 'state';
 use namespace::sweep;
 
-use App::Doh::Functions    qw( build_tree localise_tree mtime );
+use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Functions qw( throw );
 use File::DataClass::Types qw( Path Str );
@@ -61,6 +61,7 @@ sub posts {
 
          $lcache->{tree} = build_tree( $self->type_map, $dir, 1, 0, $postd );
          $lcache->{type} = 'folder';
+         $self->_chain_nodes( $lcache );
 
          my $mtime = mtime $lcache; $mtime > $max_mtime and $max_mtime = $mtime;
       }
@@ -69,6 +70,18 @@ sub posts {
    }
 
    return $cache;
+}
+
+# Private methods
+sub _chain_nodes {
+   my ($self, $tree) = @_; my $iter = iterator( $tree ); my $prev;
+
+   while (defined (my $node = $iter->())) {
+      ($node->{type} eq 'folder' or $node->{id} eq 'index') and next;
+      $prev and $prev->{next} = $node; $node->{prev} = $prev; $prev = $node;
+   }
+
+   return;
 }
 
 1;

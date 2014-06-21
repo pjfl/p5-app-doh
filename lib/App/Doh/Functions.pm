@@ -2,6 +2,7 @@ package App::Doh::Functions;
 
 use 5.010001;
 use strictures;
+use feature 'state';
 use parent 'Exporter::Tiny';
 
 use Class::Usul::Constants qw( FALSE LANG NUL TRUE );
@@ -37,9 +38,11 @@ sub build_navigation_list ($$$$) {
 }
 
 sub build_tree {
-   my ($map, $dir, $depth, $order, $url_base, $parent) = @_;
+   my ($map, $dir, $depth, $no_reset, $url_base, $parent) = @_;
 
-   $depth //= 0; $depth++; $order //= 0; $url_base //= NUL; $parent //= NUL;
+   $depth //= 0; $depth++; state $order; $no_reset or $order = 0;
+
+   $url_base //= NUL; $parent //= NUL;
 
    my $fcount = 0; my $max_mtime = 0; my $tree = {};
 

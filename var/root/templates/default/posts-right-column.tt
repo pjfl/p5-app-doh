@@ -19,7 +19,15 @@
                   </form>
                </div>
 [%    ELSE -%]
-            [% page.content | eval %]
+         [% page.content | eval %]
+[%       IF page.prev -%]
+[%          uri = uri_for( page.prev.url ); tip = loc( page.prev.title ) -%]
+[%          linkWithTips( uri, 'file', loc( 'Previous' ), 'Hint', tip ) -%]
+[%       END -%]
+[%       IF page.next -%]
+[%          uri = uri_for( page.next.url ); tip = loc( page.next.title ) -%]
+[%          linkWithTips( uri, 'file', loc( 'Next' ), 'Hint', tip ) -%]
+[%       END -%]
 [%    END -%]
             </article>
 [% END -%]

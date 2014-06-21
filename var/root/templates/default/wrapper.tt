@@ -30,7 +30,7 @@
    <link href="[% links.css %]theme-[% prefs.theme %].css"
           rel="stylesheet" type="text/css">
 [%    END -%]
-   <title>[% config.title %] - [% page.title %]</title>
+   <title>[% config.title %] - [% loc( page.title ) %]</title>
 </head>
 <body>
    [% content -%]

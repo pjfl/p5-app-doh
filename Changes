@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added prev and next links to posts
           - Index page now even more fluid
           - Added .travis.yml
           - Static site posts index works!
