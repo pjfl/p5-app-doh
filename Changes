@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Index page now even more fluid
+          - Added .travis.yml
           - Static site posts index works!
           - Refactored L10n domain names
           - Using strictures internally

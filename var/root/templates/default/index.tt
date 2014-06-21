@@ -25,14 +25,13 @@
       <div class="hero-buttons container-fluid">
          <div class="container-center">
             <div class="row">
-               <div class="text-center span12">
+               <div class="text-center">
 [% hint = loc( 'Hint' ) -%]
-[% IF config.repo_url && page.mode != 'static' -%]
-[%    title = hint _ ' ~ ' _ loc( 'Public source code repository' ) -%]
+[% IF page.mode != 'static' -%]
+[%    title = hint _ ' ~ ' _ loc( 'Help pages for the application' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-secondary btn-hero"
-                         href="[% config.repo_url %]">[% loc( 'Repository' ) %]
-                     </a>
+                         href="[% links.help_url %]">[% loc( 'Help' ) %]</a>
                   </span>
 [% END -%]
 [% title = hint _ ' ~ ' _ loc( 'Documentation tree' ) -%]
@@ -49,17 +48,12 @@
                      <a class="btn btn-primary btn-hero"
                          href="[% href %]">[% loc( 'Posts' ) %]</a>
                   </span>
-[% IF page.mode != 'static' -%]
-[%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
-[%    href  = uri_for( 'static/' _ page.language _ '/index.html' ) -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-primary btn-hero"
-                         href="[% href %]">[% loc( 'Static' ) %]</a>
-                  </span>
-[%    title = hint _ ' ~ ' _ loc( 'Help pages for the application' ) -%]
+[% IF config.repo_url && page.mode != 'static' -%]
+[%    title = hint _ ' ~ ' _ loc( 'Public source code repository' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-secondary btn-hero"
-                         href="[% links.help_url %]">[% loc( 'Help' ) %]</a>
+                         href="[% config.repo_url %]">[% loc( 'Repository' ) %]
+                     </a>
                   </span>
 [% END -%]
                </div>
@@ -69,11 +63,9 @@
       <div class="homepage-content container-fluid">
          <div class="container-center">
             <div class="row">
-               <div class="span12">
 [% IF page.format == 'html' -%]
-                  [% page.content | eval %]
+               [% page.content | eval %]
 [% END -%]
-               </div>
             </div>
          </div>
       </div>

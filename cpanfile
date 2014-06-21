@@ -1,5 +1,5 @@
 requires "App::Ack" => "2.12";
-requires "Class::Usul" => "v0.39.0";
+requires "Class::Usul" => "v0.43.0";
 requires "Daemon::Control" => "0.000009";
 requires "File::DataClass" => "v0.37.0";
 requires "HTML::Accessors" => "v0.11.0";

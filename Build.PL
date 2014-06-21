@@ -26,7 +26,7 @@ my $prereqs  = {
   },
   'requires' => {
     'App::Ack' => '2.12',
-    'Class::Usul' => 'v0.39.0',
+    'Class::Usul' => 'v0.43.0',
     'Daemon::Control' => '0.000009',
     'File::DataClass' => 'v0.37.0',
     'HTML::Accessors' => 'v0.11.0',
