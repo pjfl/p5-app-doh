@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added build status badge to markdown
           - Fixed undefined variable warning in Request
           - Fixed undefined ENV variable warning in Server
           - Added prev and next links to posts

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pjfl/p5-app-doh.svg?branch=master)](https://travis-ci.org/pjfl/p5-app-doh)
+
 **Doh** is a documentation generator that uses a simple folder structure and
 [Markdown](http://daringfireball.net/projects/markdown/) files to create
 custom documentation on the fly. It helps you create great looking
