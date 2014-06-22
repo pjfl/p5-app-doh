@@ -1,5 +1,5 @@
 ---
-header: Posts
+name: Posts
 template: posts-index
 title: Posts
 ---

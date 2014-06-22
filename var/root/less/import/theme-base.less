@@ -200,9 +200,14 @@ table tr th:last-child, table tr td:last-child {
 }
 .content-page ol li, .content-page ul li { margin-left: 30px; }
 .content-page p, .content-page .page-header {
-   margin-bottom: 18px; margin-top: 0;
+   margin-bottom: 18px; margin-top: 0; min-width: 320px;
 }
 .content-page .folder-link > span { clear: left; float: left; }
+.content-page .page-header {
+   border-bottom: 1px solid; border-color: @lines;
+   margin-left: 0; margin-right: 0; min-width: 400px; overflow: hidden;
+   padding: 9px 0 8px 0;
+}
 .dialog {
    background-color: @sidebar-background; border: 1px solid;
    border-color: @lines; .border-radius; .box-shadow;
@@ -346,10 +351,6 @@ table tr th:last-child, table tr td:last-child {
 .nav.nav-list li ul li.active a { color: @dark; }
 .nav.nav-list .tips { display: block; }
 .offset1 { margin-left: 8%; }
-.page-header {
-   border-bottom: 1px solid; border-color: @lines;
-   margin: 0; min-width: 400px; overflow: hidden; padding: 9px 0 8px 0;
-}
 .page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }
 .pathname {
@@ -490,7 +491,7 @@ table tr th:last-child, table tr td:last-child {
    }
    .float-view .content-page article:before {
       background-color: white; content: ''; display: block;
-      margin: 0; min-height: 100%; min-width: 400px; overflow: auto;
+      margin: 0; min-height: 100%; min-width: 560px; overflow: auto;
       position: absolute; width: 55%; z-index: -1;
    }
    .float-view .content-page blockquote {
@@ -512,13 +513,13 @@ table tr th:last-child, table tr td:last-child {
    }
    .float-view .content-page ol li p, .float-view .content-page ul li p {
       background-color: white; clear: right; float: left;
-      margin-left: 18px; margin-right: 18px; width: auto;
+      margin-left: 18px; margin-right: 18px; min-width: 400px; width: auto;
    }
    .float-view .content-page ol li pre, .float-view .content-page ul li pre {
       .box-sizing; clear: left; float: left; margin-right: 18px; width: auto;
    }
    .float-view .content-page p, .float-view .content-page .page-header {
-      clear: left; float: left; min-width: 400px;
+      clear: left; float: left; min-width: 560px;
       padding-right: 18px; width: 55%;
    }
    .float-view .content-page p.toplink {
@@ -545,7 +546,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page h4,
    .float-view .content-page h5,
    .float-view .content-page h6 {
-      clear: left; float: left; min-width: 400px;
+      clear: left; float: left; min-width: 560px;
       padding-right: 18px; width: 55%;
    }
    .float-view .content-page .page-header:before,

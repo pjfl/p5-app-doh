@@ -1,16 +1,16 @@
-[% IF page.header -%]
                <!-- Header -->
                <div class="page-header">
-                  <h1>[% loc( page.header ) %]</h1>
-[%    IF page.mtime %]
+                  <h1>[% IF page.parent; loc( page.parent ) _ ' - '; END -%]
+                      [%- loc( page.name ) %]</h1>
+[% IF page.date -%]
                   <span class="pull-left">
-                     [%- time2str( '%A, %B %e, %Y', page.mtime ) %]</span>
+                     [%- time2str( '%A, %B %e, %Y', page.date ) %],
+                     [%- time2str( '%l:%M %p', page.date ) %]</span>
                   <span class="pull-right">
-                     [%- time2str( '%l:%M %p', page.mtime ) %]</span>
-[%    END -%]
-[%    IF page.status_message -%]
+                     [%- page.author %]</span>
+[% END -%]
+[% IF page.status_message -%]
                   <div class="container">
                      [% page.status_message %]</div>
-[%    END -%]
-               </div>
 [% END -%]
+               </div>

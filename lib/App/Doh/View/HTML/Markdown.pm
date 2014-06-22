@@ -3,6 +3,7 @@ package App::Doh::View::HTML::Markdown;
 use namespace::sweep;
 
 use App::Doh::Markdown;
+use Class::Usul::Time  qw( str2time );
 use Class::Usul::Types qw( ArrayRef Object );
 use Scalar::Util       qw( blessed );
 use YAML::Tiny;
@@ -28,6 +29,8 @@ sub serialize {
 
    if ($yaml) {
       my $data = $self->yt->read_string( $yaml )->[ 0 ];
+
+      exists $data->{date} and $data->{date} = str2time $data->{date};
 
       $page->{ $_ } = $data->{ $_ } for (keys %{ $data });
    }

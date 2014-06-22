@@ -50,15 +50,14 @@ sub build_tree {
       my ($id, $pref) =  @{ make_id_from( $path->filename ) };
       my  $name       =  make_name_from( $id );
       my  $url        =  $url_base ? "${url_base}/${id}"   : $id;
-      my  $header     =  $parent   ? "${parent} - ${name}" : $name;
       my  $mtime      =  $path->stat->{mtime};
       my  $node       =  $tree->{ $id } = {
+          date        => $mtime,
           depth       => $depth,
           format      => __extension2format( $map, $path->pathname ),
-          header      => $header,
           id          => $id,
-          mtime       => $mtime,
           name        => $name,
+          parent      => $parent,
           path        => $path->utf8,
           prefix      => $pref,
           title       => ucfirst $name,

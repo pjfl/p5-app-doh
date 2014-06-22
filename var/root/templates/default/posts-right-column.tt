@@ -19,8 +19,8 @@
                   </form>
                </div>
 [%    ELSE -%]
-                  [% page.content | eval %]
-               <p>
+                  [% page.content | eval -%]
+               <p class="text-center">
 [%       IF page.prev -%]
 [%          uri = uri_for( page.prev.url ); tip = loc( page.prev.title ) -%]
 [%          linkWithTips( uri, 'file', loc( 'Previous' ), 'Hint', tip ) -%]

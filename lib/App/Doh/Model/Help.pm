@@ -48,7 +48,8 @@ around 'load_page' => sub {
    my $page   =  {
       content => io( find_source( $want ) || $req->args->[ 0 ] ),
       format  => 'pod',
-      header  => "${title} - ${want}",
+      name    => $want,
+      parent  => $title,
       title   => $title,
       url     => 'https://metacpan.org/module/%s', };
 
