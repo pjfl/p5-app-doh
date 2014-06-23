@@ -1,4 +1,4 @@
-package App::Doh::Constants;
+package App::Doh::Attributes;
 
 use strictures;
 use namespace::autoclean ();

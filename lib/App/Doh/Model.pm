@@ -1,12 +1,12 @@
 package App::Doh::Model;
 
-use App::Doh::Constants;
+use Moo;
+use App::Doh::Attributes;
 use App::Doh::Functions    qw( show_node );
 use Class::Usul::Constants qw( NUL );
 use Class::Usul::Time      qw( str2time time2str );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( weaken );
-use Moo;
 
 extends q(App::Doh);
 
@@ -33,7 +33,7 @@ sub execute {
    my ($self, $method, @args) = @_; return $self->$method( @args );
 }
 
-sub get_content : Role(editor) Role(user) {
+sub get_content : Role(any) {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req );

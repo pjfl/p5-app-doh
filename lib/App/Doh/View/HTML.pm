@@ -2,11 +2,11 @@ package App::Doh::View::HTML;
 
 use namespace::autoclean;
 
+use Moo;
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
 use File::DataClass::Types qw( Directory HashRef Object );
 use Module::Pluggable::Object;
-use Moo;
 
 extends q(App::Doh);
 with    q(App::Doh::Role::Templates);

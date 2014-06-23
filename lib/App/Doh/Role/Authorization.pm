@@ -28,7 +28,8 @@ around 'execute' => sub {
    is_member 'any', $method_roles and return $orig->( $self, $method, $req );
 
    $req->username eq 'unknown'
-      and throw error => 'Authentication required', rv => HTTP_UNAUTHORIZED;
+      and throw error => 'Method [_1] authorization required',
+                 args => [ $method ], rv => HTTP_UNAUTHORIZED;
 
    my $conf = $self->config;
 

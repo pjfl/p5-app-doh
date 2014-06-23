@@ -2,6 +2,7 @@ package App::Doh::Config;
 
 use namespace::autoclean;
 
+use Moo;
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( app_prefix );
 use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
@@ -9,7 +10,6 @@ use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
                                NonZeroPositiveInt Path SimpleStr Str );
 use Sys::Hostname          qw( hostname );
 use Type::Utils            qw( enum );
-use Moo;
 
 extends q(Class::Usul::Config::Programs);
 

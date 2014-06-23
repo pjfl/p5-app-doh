@@ -3,9 +3,9 @@ package App::Doh::Model::Posts;
 use feature 'state';
 use namespace::autoclean;
 
+use Moo;
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );
-use Moo;
 
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::Authorization);

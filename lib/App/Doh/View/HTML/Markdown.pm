@@ -2,12 +2,12 @@ package App::Doh::View::HTML::Markdown;
 
 use namespace::autoclean;
 
+use Moo;
 use App::Doh::Markdown;
 use Class::Usul::Time  qw( str2time );
 use Class::Usul::Types qw( ArrayRef Object );
 use Scalar::Util       qw( blessed );
 use YAML::Tiny;
-use Moo;
 
 extends q(App::Doh);
 

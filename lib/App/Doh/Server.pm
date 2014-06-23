@@ -65,8 +65,8 @@ around 'to_psgi_app' => sub {
          enable 'Session::Cookie',
             httponly => TRUE,          path        => $point,
             secret   => $conf->secret, session_key => 'doh_session';
-         enable 'Auth::Htpasswd', file_root => $conf->file_root;
          enable "LogDispatch", logger => $self->usul->log;
+         enable '+App::Doh::Auth::Htpasswd', file_root => $conf->file_root;
          enable_if { $self->usul->debug } 'Debug';
          $app;
       };

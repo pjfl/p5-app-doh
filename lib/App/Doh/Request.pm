@@ -2,6 +2,7 @@ package App::Doh::Request;
 
 use namespace::autoclean;
 
+use Moo;
 use App::Doh::Functions    qw( extract_lang );
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
@@ -16,7 +17,6 @@ use Scalar::Util           qw( blessed weaken );
 use Unexpected::Functions  qw( Unspecified );
 use URI::http;
 use URI::https;
-use Moo;
 
 extends q(App::Doh);
 
