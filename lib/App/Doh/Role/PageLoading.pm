@@ -1,6 +1,6 @@
 package App::Doh::Role::PageLoading;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh::Functions    qw( build_navigation_list clone mtime );
 use Class::Usul::Constants qw( FALSE NUL TRUE );

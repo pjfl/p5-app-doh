@@ -1,6 +1,6 @@
 package App::Doh::Role::Templates;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL TRUE );
 use Class::Usul::Functions qw( throw );

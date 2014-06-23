@@ -1,6 +1,6 @@
 package App::Doh::Request;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh::Functions    qw( extract_lang );
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC );
@@ -197,8 +197,16 @@ sub query_params {
    return sub { __get_scrubbed_value( $pattern, $params, @_ ) };
 }
 
+sub request_uri {
+   my ($self, $query_params) = @_;
+
+   $query_params = { %{ $self->params }, @{ $query_params // [] } };
+
+   return $self->uri_for( $self->path, undef, $query_params );
+}
+
 sub uri_for {
-   my ($self, $path, $args, $query_params) = @_; my $params = $self->params;
+   my ($self, $path, $args, @query_params) = @_; my $params = $self->params;
 
    $args and defined $args->[ 0 ] and $path = join '/', $path, @{ $args };
 
@@ -211,7 +219,7 @@ sub uri_for {
 
    my $uri = bless \$path, 'URI::'.$self->scheme;
 
-   $query_params and $uri->query_form( @{ $query_params } );
+   $query_params[ 0 ] and $uri->query_form( @query_params );
 
    return $uri;
 }

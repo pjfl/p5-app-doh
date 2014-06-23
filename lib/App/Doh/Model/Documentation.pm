@@ -1,9 +1,11 @@
 package App::Doh::Model::Documentation;
 
 use feature 'state';
-use namespace::sweep;
+use namespace::autoclean
+              -except => [ qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES ) ];
 
-use App::Doh::Functions    qw( build_tree extract_lang iterator localise_tree
+use App::Doh::Functions    qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES
+                               build_tree extract_lang iterator localise_tree
                                make_id_from make_name_from mtime );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( first_char io throw trim untaint_path );
@@ -12,12 +14,12 @@ use Class::Usul::Time      qw( time2str );
 use File::DataClass::Types qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
-                               HTTP_REQUEST_ENTITY_TOO_LARGE
-                               HTTP_UNAUTHORIZED );
+                               HTTP_REQUEST_ENTITY_TOO_LARGE );
 use Unexpected::Functions  qw( Unspecified );
 use Moo;
 
 extends q(App::Doh::Model);
+with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::PageLoading);
@@ -50,12 +52,8 @@ around 'load_page' => sub {
 };
 
 # Public methods
-sub create_file_action {
+sub create_file_action : Role(editor) {
    my ($self, $req) = @_;
-
-   $req->username ne 'unknown'
-      or throw error => 'File creation not authorised',
-                  rv => HTTP_UNAUTHORIZED;
 
    my $conf     = $self->config;
    my $params   = $req->body_params;
@@ -72,12 +70,13 @@ sub create_file_action {
    $self->invalidate_cache( $path->stat->{mtime} );
 
    my $location = $req->uri_for( $new_node->{url} );
-   my $message  = [ 'Created file [_1]', $path->abs2rel( $conf->file_root ) ];
+   my $rel_path = $path->abs2rel( $conf->file_root );
+   my $message  = [ 'File [_1] created by [_2]', $rel_path, $req->username ];
 
    return { redirect => { location => $location, message => $message } };
 }
 
-sub dialog {
+sub dialog : Role(user) {
    my ($self, $req) = @_;
 
    my $params = $req->query_params;
@@ -103,12 +102,8 @@ sub dialog {
    return $stash;
 }
 
-sub delete_file_action {
+sub delete_file_action : Role(editor) {
    my ($self, $req) = @_;
-
-   $req->username ne 'unknown'
-      or throw error => 'File deletion not authorised',
-                  rv => HTTP_UNAUTHORIZED;
 
    my $node     = $self->find_node( $req->locale, $req->args )
       or throw error => 'Cannot find document tree node to delete',
@@ -140,12 +135,8 @@ sub docs_url {
    return $_[ 1 ]->uri_for( $_[ 0 ]->_docs_url( $_[ 2 ] // $_[ 1 ]->locale ) );
 }
 
-sub generate_static_action {
+sub generate_static_action : Role(editor) {
    my ($self, $req) = @_;
-
-   $req->username ne 'unknown'
-      or throw error => 'File deletion not authorised',
-                  rv => HTTP_UNAUTHORIZED;
 
    my $cli = $self->config->binsdir->catfile( 'doh-cli' );
    my $cmd = [ "${cli}", 'make_static' ];
@@ -167,12 +158,8 @@ sub localised_tree {
    return localise_tree $_[ 0 ]->docs_tree, $_[ 1 ];
 }
 
-sub rename_file_action {
+sub rename_file_action : Role(editor) {
    my ($self, $req) = @_;
-
-   $req->username ne 'unknown'
-      or throw error => 'File renaming not authorised',
-                  rv => HTTP_UNAUTHORIZED;
 
    my $params   = $req->body_params;
    my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
@@ -192,12 +179,8 @@ sub rename_file_action {
    return { redirect => { location => $location, message => $message } };
 }
 
-sub save_file_action {
+sub save_file_action : Role(editor) {
    my ($self, $req) = @_;
-
-   $req->username ne 'unknown'
-      or throw error => 'File updating not authorised',
-                  rv => HTTP_UNAUTHORIZED;
 
    my $node     =  $self->find_node( $req->locale, $req->args )
       or throw error => 'Cannot find document tree node to update',
@@ -213,7 +196,7 @@ sub save_file_action {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-sub search_document_tree {
+sub search_document_tree : Role(user) {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req, $self->_search_results( $req ) );
@@ -222,7 +205,7 @@ sub search_document_tree {
    return $stash;
 }
 
-sub upload_file {
+sub upload_file : Role(editor) {
    my ($self, $req) = @_; my $conf = $self->config;
 
    my $upload = $req->args->[ 0 ]
@@ -236,10 +219,6 @@ sub upload_file {
       and throw error => 'File [_1] size [_2] too big',
                  args => [ $upload->filename, $upload->size ],
                    rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
-
-   $req->username ne 'unknown'
-      or  throw error => 'File uploading not authorised',
-                   rv => HTTP_UNAUTHORIZED;
 
    my $dest = $conf->assetdir->catfile( $upload->filename )->assert_filepath;
 
@@ -337,8 +316,8 @@ sub _search_results {
 
    return { content => $leader.$content,
             format  => 'markdown',
-            header  => $title,
             mtime   => time,
+            name    => $title,
             title   => $title, };
 }
 

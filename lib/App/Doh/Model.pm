@@ -1,8 +1,10 @@
 package App::Doh::Model;
 
-use namespace::sweep;
+use namespace::autoclean
+              -except => [ qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES ) ];
 
-use App::Doh::Functions    qw( show_node );
+use App::Doh::Functions    qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES
+                               show_node );
 use Class::Usul::Constants qw( NUL );
 use Class::Usul::Time      qw( str2time time2str );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
@@ -15,16 +17,16 @@ sub exception_handler {
    my ($self, $req, $e) = @_;
 
    my $stash  = $self->get_stash( $req );
-   my $header = $req->loc( 'Exception Handler' );
+   my $title  = $req->loc( 'Exception Handler' );
    my $filler = '&nbsp;' x 40;
 
    $stash->{code} =  $e->rv >= HTTP_OK ? $e->rv : HTTP_BAD_REQUEST;
    $stash->{page} =  $self->load_page( $req, {
       content     => "${e}${filler}\n\n   Code: ".$e->rv,
       format      => 'markdown',
-      header      => $header,
       mtime       => time,
-      title       => $header, } );
+      name        => $title,
+      title       => $title, } );
    $stash->{nav } =  $self->navigation( $req, $stash );
 
    return $stash;
@@ -34,7 +36,7 @@ sub execute {
    my ($self, $method, @args) = @_; return $self->$method( @args );
 }
 
-sub get_content {
+sub get_content : Role(user) {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req );

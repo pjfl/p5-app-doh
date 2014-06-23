@@ -1,6 +1,6 @@
 package App::Doh::Server;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh::Controller::Root;
 use App::Doh::Model::Documentation;
@@ -65,8 +65,7 @@ around 'to_psgi_app' => sub {
          enable 'Session::Cookie',
             httponly => TRUE,          path        => $point,
             secret   => $conf->secret, session_key => 'doh_session';
-         enable '+App::Doh::Auth::Htpasswd',
-            file_root => $conf->file_root, params => [ qw( auth edit ) ];
+         enable 'Auth::Htpasswd', file_root => $conf->file_root;
          enable "LogDispatch", logger => $self->usul->log;
          enable_if { $self->usul->debug } 'Debug';
          $app;

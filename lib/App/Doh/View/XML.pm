@@ -1,6 +1,6 @@
 package App::Doh::View::XML;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Types     qw( Object );

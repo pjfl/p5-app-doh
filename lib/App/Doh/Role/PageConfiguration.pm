@@ -1,6 +1,6 @@
 package App::Doh::Role::PageConfiguration;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh::Functions    qw( extract_lang );
 use Class::Usul::Constants qw( FALSE NUL );

@@ -1,6 +1,6 @@
 package App::Doh::CLI;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh;
 use App::Doh::Functions    qw( iterator );

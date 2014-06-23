@@ -1,6 +1,6 @@
 package App::Doh::View::HTML::Pod;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Types     qw( ArrayRef NonEmptySimpleStr Object Str );

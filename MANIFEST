@@ -10,7 +10,6 @@ bin/doh-cli
 bin/doh-daemon
 bin/doh-server
 lib/App/Doh.pm
-lib/App/Doh/Auth/Htpasswd.pm
 lib/App/Doh/CLI.pm
 lib/App/Doh/Config.pm
 lib/App/Doh/Controller/Root.pm
@@ -22,6 +21,7 @@ lib/App/Doh/Model/Documentation.pm
 lib/App/Doh/Model/Help.pm
 lib/App/Doh/Model/Posts.pm
 lib/App/Doh/Request.pm
+lib/App/Doh/Role/Authorization.pm
 lib/App/Doh/Role/CommonLinks.pm
 lib/App/Doh/Role/PageConfiguration.pm
 lib/App/Doh/Role/PageLoading.pm
@@ -72,6 +72,7 @@ var/root/less/theme-blue.less
 var/root/less/theme-green.less
 var/root/less/theme-navy.less
 var/root/less/theme-red.less
+var/root/templates/default/blank.tt
 var/root/templates/default/code-blocks.tt
 var/root/templates/default/config-links.tt
 var/root/templates/default/create-file.tt

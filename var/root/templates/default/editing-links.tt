@@ -32,7 +32,7 @@
                   <a class="fade"
                       href="[% links.req_uri %]?edit=1">[% text %]</a></span>
                <br>
-               <form action="[% links.req_uri %]?auth=1"
+               <form action="[% links.req_uri %]"
                     enctype="application/x-www-form-urlencoded"
                      method="post" name="markdown">
 [%    title = hint _ ' ~ ' _ loc( 'Delete this markdown file' ) -%]

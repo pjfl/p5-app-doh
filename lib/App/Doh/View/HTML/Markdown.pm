@@ -1,6 +1,6 @@
 package App::Doh::View::HTML::Markdown;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh::Markdown;
 use Class::Usul::Time  qw( str2time );

@@ -1,6 +1,6 @@
 package App::Doh::View::HTML;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );

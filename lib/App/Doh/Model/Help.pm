@@ -1,6 +1,6 @@
 package App::Doh::Model::Help;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use Class::Usul::Constants qw( NUL );
 use Class::Usul::Functions qw( find_source );

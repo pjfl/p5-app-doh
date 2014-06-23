@@ -1,7 +1,7 @@
 package App::Doh::Model::Posts;
 
 use feature 'state';
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );

@@ -48,11 +48,12 @@
                      <a class="btn btn-primary btn-hero"
                          href="[% href %]">[% loc( 'Posts' ) %]</a>
                   </span>
-[% IF config.repo_url && page.mode != 'static' -%]
-[%    title = hint _ ' ~ ' _ loc( 'Public source code repository' ) -%]
+[% IF page.mode != 'static' -%]
+[%    href  = links.base_uri _ 'static/' _ page.language _ '/index.html' %]
+[%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-secondary btn-hero"
-                         href="[% config.repo_url %]">[% loc( 'Repository' ) %]
+                         href="[% href %]">[% loc( 'Static' ) %]
                      </a>
                   </span>
 [% END -%]

@@ -1,6 +1,6 @@
 package App::Doh::Daemon;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use App::Doh;
 use Class::Usul::Constants qw( EXCEPTION_CLASS OK TRUE );

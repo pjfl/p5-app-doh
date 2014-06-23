@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Deleted ::Auth::Htpasswd
+          - Addd Authorization role using subroutine attributes
+          - Dropped namespace::sweep in favour of namespace::autoclean
           - New markdown files created from a template
           - Added metadata author and date attributes to posts
           - Added build status badge to markdown

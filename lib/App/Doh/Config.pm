@@ -1,6 +1,6 @@
 package App::Doh::Config;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( app_prefix );
@@ -146,6 +146,9 @@ has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
 has 'twitter'         => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
 has 'use_flags'       => is => 'ro',   isa => Bool, default => TRUE;
+
+has 'user_roles'      => is => 'ro',   isa => HashRef[ArrayRef],
+   default            => sub { { admin => [ 'editor', 'user' ] } };
 
 has '_colours'        => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'colours';
@@ -450,6 +453,12 @@ Twitter follow buttons
 Boolean which defaults to C<TRUE>. Display the language code, which is
 derived from browsers accept language header value, as a national flag. If
 false display as text
+
+=item C<user_roles>
+
+A hash reference keyed by username. The values are array references of roles
+that the user is a member of. Membership of a role if used to grante acces
+to pages within the application
 
 =back
 

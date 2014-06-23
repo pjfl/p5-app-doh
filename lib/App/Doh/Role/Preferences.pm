@@ -1,6 +1,6 @@
 package App::Doh::Role::Preferences;
 
-use namespace::sweep;
+use namespace::autoclean;
 
 use Moo::Role;
 
