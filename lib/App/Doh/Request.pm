@@ -420,6 +420,12 @@ Returns a code reference which when called with a query parameter name returns
 the query parameter value after first scrubbing it of "dodgy" characters. Throws
 if the value is undefined or tainted
 
+=head2 C<request_uri>
+
+   $uri_obj = $self->request_uri( $query_params );
+
+Regenerates the request URI merging in the additional query parameters
+
 =head2 C<uri_for>
 
    $uri_obj = $self->uri_for( $partial_uri_path, $args, $query_params );

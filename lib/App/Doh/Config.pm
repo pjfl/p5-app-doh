@@ -456,8 +456,8 @@ false display as text
 
 =item C<user_roles>
 
-A hash reference keyed by username. The values are array references of roles
-that the user is a member of. Membership of a role if used to grante acces
+A hash reference keyed by user name. The values are array references of roles
+that the user is a member of. Membership of a role if used to granted access
 to pages within the application
 
 =back

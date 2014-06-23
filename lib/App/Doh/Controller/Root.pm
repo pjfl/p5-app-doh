@@ -66,7 +66,7 @@ Defines no attributes
 =head2 C<dispatch_request>
 
 Returns a list of code references. The prototype for each anonymous
-subroutine matches againt a specific URI pattern. It the request URI
+subroutine matches against a specific URI pattern. It the request URI
 matches this pattern the subroutine is called. Each subroutine calls
 the L<execute|App::Doh::Server/execute> method
 
