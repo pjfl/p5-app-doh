@@ -1,11 +1,9 @@
 package App::Doh::Model::Documentation;
 
 use feature 'state';
-use namespace::autoclean
-              -except => [ qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES ) ];
 
-use App::Doh::Functions    qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES
-                               build_tree extract_lang iterator localise_tree
+use App::Doh::Constants;
+use App::Doh::Functions    qw( build_tree extract_lang iterator localise_tree
                                make_id_from make_name_from mtime );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( first_char io throw trim untaint_path );
@@ -76,7 +74,7 @@ sub create_file_action : Role(editor) {
    return { redirect => { location => $location, message => $message } };
 }
 
-sub dialog : Role(user) {
+sub dialog : Role(editor) Role(user) {
    my ($self, $req) = @_;
 
    my $params = $req->query_params;
@@ -196,7 +194,7 @@ sub save_file_action : Role(editor) {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-sub search_document_tree : Role(user) {
+sub search_document_tree : Role(editor) Role(user) {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req, $self->_search_results( $req ) );

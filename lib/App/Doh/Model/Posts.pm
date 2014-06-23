@@ -5,12 +5,10 @@ use namespace::autoclean;
 
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );
-use Class::Usul::Functions qw( throw );
-use File::DataClass::Types qw( Path Str );
-use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo;
 
 extends q(App::Doh::Model);
+with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::PageLoading);
@@ -20,7 +18,7 @@ with    q(App::Doh::Role::Preferences);
 around 'get_page' => sub {
    my ($orig, $self, @args) = @_; my $page = $orig->( $self, @args );
 
-   $page->{type} eq 'folder' and $page->{author  } = 'anon'
+   $page->{type} eq 'folder' and $page->{author  } = $self->config->author
                              and $page->{template} = 'posts-index';
 
    return $page;

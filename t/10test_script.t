@@ -29,6 +29,9 @@ my $req   = App::Doh::Request->new( $self->usul, 'Getting_Started' );
 my $stash = $model->get_stash( $req );
 my $res   = $self->views->{html}->serialize( $req, $stash );
 
+is $res->[ 0 ], 200, 'Reponse code';
+is $res->[ 1 ]->[ 1 ], 'text/html', 'Response mime type';
+
 #$self->usul->dumper( $req );
 #$self->usul->dumper( $stash );
 #$self->usul->dumper( $res );

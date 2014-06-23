@@ -6,8 +6,8 @@ use App::Doh;
 use App::Doh::Functions    qw( iterator );
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Posts;
-use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL OK TRUE );
-use Class::Usul::Functions qw( app_prefix io throw );
+use Class::Usul::Constants qw( FALSE NUL OK TRUE );
+use Class::Usul::Functions qw( app_prefix io );
 use Class::Usul::Types     qw( HashRef LoadableClass Object );
 use Moo;
 

@@ -8,24 +8,9 @@ use parent 'Exporter::Tiny';
 use Class::Usul::Constants qw( FALSE LANG NUL TRUE );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref );
 
-our @EXPORT_OK = qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES
-                     build_navigation_list build_tree clone extract_lang
+our @EXPORT_OK = qw( build_navigation_list build_tree clone extract_lang
                      iterator localise_tree make_id_from make_name_from mtime
                      show_node );
-
-my $Code_Attr = {};
-
-sub FETCH_CODE_ATTRIBUTES {
-   my ($class, $code) = @_; return $Code_Attr->{ 0 + $code } // [];
-}
-
-sub MODIFY_CODE_ATTRIBUTES {
-   my ($class, $code, @attrs) = @_;
-
-   $Code_Attr->{ 0 + $code } = [ @attrs ];
-
-   return ();
-}
 
 sub build_navigation_list ($$$$) {
    my ($root, $tree, $ids, $wanted) = @_;

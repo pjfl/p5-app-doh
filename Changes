@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Moved attribute handlers to own class
           - Deleted ::Auth::Htpasswd
           - Addd Authorization role using subroutine attributes
           - Dropped namespace::sweep in favour of namespace::autoclean

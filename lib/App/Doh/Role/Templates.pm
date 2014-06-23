@@ -7,6 +7,7 @@ use Class::Usul::Functions qw( throw );
 use File::DataClass::Types qw( Directory NonEmptySimpleStr Object );
 use File::Spec::Functions  qw( catfile );
 use Template;
+use Unexpected::Functions  qw( PathNotFound );
 use Moo::Role;
 
 requires qw( config );
@@ -41,7 +42,7 @@ sub render_template {
    my $template = ($page->{template} // $conf->template).'.tt';
    my $path     =  $self->templates->catdir( $skin )->catfile( $template );
 
-   $path->exists or throw $req->loc( 'Path [_1] not found', $path );
+   $path->exists or throw class => PathNotFound, args => [ $path ];
    $self->encoder->process( catfile( $skin, $template ), $stash, \$result )
       or throw $self->encoder->error;
 

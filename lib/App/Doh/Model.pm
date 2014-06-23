@@ -1,10 +1,7 @@
 package App::Doh::Model;
 
-use namespace::autoclean
-              -except => [ qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES ) ];
-
-use App::Doh::Functions    qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES
-                               show_node );
+use App::Doh::Constants;
+use App::Doh::Functions    qw( show_node );
 use Class::Usul::Constants qw( NUL );
 use Class::Usul::Time      qw( str2time time2str );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
@@ -36,7 +33,7 @@ sub execute {
    my ($self, $method, @args) = @_; return $self->$method( @args );
 }
 
-sub get_content : Role(user) {
+sub get_content : Role(editor) Role(user) {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req );

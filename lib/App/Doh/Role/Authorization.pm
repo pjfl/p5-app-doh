@@ -3,7 +3,7 @@ package App::Doh::Role::Authorization;
 use attributes ();
 use namespace::autoclean;
 
-use Class::Usul::Constants qw( EXCEPTION_CLASS NUL );
+use Class::Usul::Constants qw( NUL );
 use Class::Usul::Functions qw( is_member throw );
 use HTTP::Status           qw( HTTP_FORBIDDEN HTTP_NOT_FOUND
                                HTTP_UNAUTHORIZED );
