@@ -25,7 +25,10 @@ has 'assetdir'        => is => 'lazy', isa => Path,
    coerce             => Path->coercion;
 
 has 'author'          => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'Dave';
+   default            => 'anon';
+
+has 'blank_template'  => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'blank';
 
 has 'brand'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -40,9 +43,6 @@ has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 
 has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'css/';
-
-has 'default_content' => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'Page intentionally created blank';
 
 has 'default_skin'    => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
@@ -227,6 +227,10 @@ containing user uploaded files
 A non empty simple string that defaults to C<Dave>. The HTML meta attributes
 author value
 
+=item C<blank_template>
+
+Name of the template file to use when creating new markdown files
+
 =item C<brand>
 
 A simple string that defaults to null. The name of the image file used
@@ -258,10 +262,6 @@ Boolean default to true. Should the C<make_css> method compress it's output
 
 A non empty simple string that defaults to F<css/>. Relative URI path
 that locates the static CSS files
-
-=item C<default_content>
-
-The string of text that is the content of any new markdown files
 
 =item C<default_skin>
 

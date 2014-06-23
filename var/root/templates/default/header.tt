@@ -6,6 +6,8 @@
                   <span class="pull-left">
                      [%- time2str( '%A, %B %e, %Y', page.date ) %],
                      [%- time2str( '%l:%M %p', page.date ) %]</span>
+[% END -%]
+[% IF page.author != 'anon' -%]
                   <span class="pull-right">
                      [%- page.author %]</span>
 [% END -%]

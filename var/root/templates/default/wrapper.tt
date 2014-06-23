@@ -1,4 +1,4 @@
-[% IF page.content_only; content; ELSE -%]
+[% IF content_only; content; ELSE -%]
 <!doctype html>
 <html lang="[% page.language %]">
 <head>

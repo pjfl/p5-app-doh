@@ -8,6 +8,7 @@ use App::Doh::Functions    qw( build_tree extract_lang iterator localise_tree
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( first_char io throw trim untaint_path );
 use Class::Usul::IPC;
+use Class::Usul::Time      qw( time2str );
 use File::DataClass::Types qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
@@ -21,6 +22,7 @@ with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
+with    q(App::Doh::Role::Templates);
 
 # Public attributes
 has 'ipc'  => is => 'lazy', isa => Object,
@@ -55,17 +57,22 @@ sub create_file_action {
       or throw error => 'File creation not authorised',
                   rv => HTTP_UNAUTHORIZED;
 
+   my $conf     = $self->config;
    my $params   = $req->body_params;
    my $new_node = $self->_new_node( $req->locale, $params->( 'pathname' ) );
-   my $content  = $req->loc( $self->config->default_content );
+   my $created  = time2str( '%Y-%m-%d %H:%M:%S %z', time, 'UTC' );
+   my $stash    = { content_only => TRUE,
+                    page         => { author   => $req->username,
+                                      created  => $created,
+                                      template => $conf->blank_template, }, };
+   my $content  = $self->render_template( $req, $stash );
    my $path     = $new_node->{path};
 
    $path->assert_filepath->println( $content )->close;
    $self->invalidate_cache( $path->stat->{mtime} );
 
    my $location = $req->uri_for( $new_node->{url} );
-   my $rel_path = $path->abs2rel( $self->config->file_root );
-   my $message  = [ 'File [_1] created by [_2]', $rel_path, $req->username ];
+   my $message  = [ 'Created file [_1]', $path->abs2rel( $conf->file_root ) ];
 
    return { redirect => { location => $location, message => $message } };
 }

@@ -20,7 +20,8 @@ with    q(App::Doh::Role::Preferences);
 around 'get_page' => sub {
    my ($orig, $self, @args) = @_; my $page = $orig->( $self, @args );
 
-   $page->{type} eq 'folder' and $page->{template} = 'posts-index';
+   $page->{type} eq 'folder' and $page->{author  } = 'anon'
+                             and $page->{template} = 'posts-index';
 
    return $page;
 };

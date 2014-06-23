@@ -25,6 +25,8 @@ sub serialize {
 
    my $markdown = blessed $content ? $content->all : $content;
 
+   $page->{editing} and return $markdown;
+
    my $yaml; $markdown =~ s{ \A --- $ ( .* ) ^ --- $ }{}msx and $yaml = $1;
 
    if ($yaml) {
@@ -35,7 +37,7 @@ sub serialize {
       $page->{ $_ } = $data->{ $_ } for (keys %{ $data });
    }
 
-   return $page->{editing} ? $markdown : $self->tm->markdown( $markdown );
+   return $self->tm->markdown( $markdown );
 }
 
 1;

@@ -1,6 +1,7 @@
 Revision history for App-Doh
 
-          - Added metadata author and data attributes to posts
+          - New markdown files created from a template
+          - Added metadata author and date attributes to posts
           - Added build status badge to markdown
           - Fixed undefined variable warning in Request
           - Fixed undefined ENV variable warning in Server
