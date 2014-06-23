@@ -10,6 +10,8 @@ bin/doh-cli
 bin/doh-daemon
 bin/doh-server
 lib/App/Doh.pm
+lib/App/Doh/Attributes.pm
+lib/App/Doh/Auth/Htpasswd.pm
 lib/App/Doh/CLI.pm
 lib/App/Doh/Config.pm
 lib/App/Doh/Controller/Root.pm
