@@ -1,9 +1,9 @@
 package App::Doh::Model::Posts;
 
 use feature 'state';
-use namespace::autoclean;
 
 use Moo;
+use App::Doh::Attributes;
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );
 
@@ -13,6 +13,8 @@ with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
+with    q(App::Doh::Role::Templates);
+with    q(App::Doh::Role::Editor);
 
 # Construction
 around 'get_page' => sub {
@@ -38,6 +40,17 @@ around 'load_page' => sub {
 };
 
 # Public methods
+sub create_file_action : Role(editor) {
+   return shift->create_file( @_ );
+}
+
+sub delete_file_action : Role(editor) {
+   my ($self, $req) = @_; my $res = $self->delete_file( $req );
+
+   $res->{redirect}->{location} = $req->uri_for( $self->config->posts );
+   return $res;
+}
+
 sub localised_tree {
    return localise_tree $_[ 0 ]->posts, $_[ 1 ];
 }
@@ -69,6 +82,14 @@ sub posts {
    }
 
    return $cache;
+}
+
+sub rename_file_action : Role(editor) {
+   return shift->rename_file( @_ );
+}
+
+sub save_file_action : Role(editor) {
+   return shift->save_file( @_ );
 }
 
 # Private methods

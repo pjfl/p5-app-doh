@@ -25,6 +25,7 @@ lib/App/Doh/Model/Posts.pm
 lib/App/Doh/Request.pm
 lib/App/Doh/Role/Authorization.pm
 lib/App/Doh/Role/CommonLinks.pm
+lib/App/Doh/Role/Editor.pm
 lib/App/Doh/Role/PageConfiguration.pm
 lib/App/Doh/Role/PageLoading.pm
 lib/App/Doh/Role/Preferences.pm

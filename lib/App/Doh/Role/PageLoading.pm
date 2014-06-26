@@ -47,11 +47,9 @@ sub find_node {
 }
 
 sub get_page {
-   my ($self, $req, $node, $locale) = @_;
+   my ($self, $req, $node, $locale) = @_; my $page = clone $node;
 
-   my $page = clone $node; $page->{content} = delete $page->{path};
-
-   $page->{locale} = $locale;
+   $page->{content} = delete $page->{path}; $page->{locale} = $locale;
 
    return $page;
 }
@@ -91,15 +89,15 @@ sub not_found {
    my ($self, $req) = @_;
 
    my $rv      = HTTP_NOT_FOUND;
-   my $header  = $req->loc( 'Not found' );
+   my $title   = $req->loc( 'Not found' );
    my $content = '> '.$req->loc( "Oh no. That page doesn't exist" )
                  ."\n\n    Code: ${rv}\n\n";
 
    return { content => $content,
             format  => 'markdown',
-            header  => $header,
             mtime   => time,
-            title   => $header, };
+            name    => $title,
+            title   => $title, };
 }
 
 1;

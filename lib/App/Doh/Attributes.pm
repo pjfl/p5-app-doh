@@ -26,7 +26,15 @@ sub FETCH_CODE_ATTRIBUTES {
 sub MODIFY_CODE_ATTRIBUTES {
    my ($class, $code, @attrs) = @_;
 
-   $Code_Attr->{ 0 + $code } = [ @attrs ];
+   for my $attr (@attrs) {
+      my ($k, $v) = $attr =~ m{ \A ([^\(]+) (?: [\(] ([^\)]+) [\)] )? \z }mx;
+
+      my $vals = $Code_Attr->{ 0 + $code }->{ $k } // [];
+
+      defined $v and push @{ $vals }, $v;
+
+      $Code_Attr->{ 0 + $code }->{ $k } = $vals;
+   }
 
    return ();
 }

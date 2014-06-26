@@ -108,8 +108,10 @@ foreground with:
    plackup bin/doh-server
 ```
 
-To start the production server in the background listening on the default port
-8085 use:
+Users must authenticate against the `.htpasswd` files under the
+document root. The default user is `admin` password `admin`. You
+should change that. To start the production server in the background
+listening on the default port 8085 use:
 
 ```shell
    doh-daemon start
@@ -365,11 +367,10 @@ terse error messages to be replaced with more user friendly ones.
 <img alt="[File editor]" class="app-thumbnail"
      src="[% links.images %]app-editor.png"/>
 
-The markdown in the document tree is editable via the web browser. The `Edit`
-link is in the left navigation column after the code blocks selector. Users
-must authenticate against the `.htpasswd` files under the document root. The
-default user is `admin` password `admin`. The `Save` button at the bottom of
-the text editor makes the changes permanent.
+The markdown in the document tree is editable via the web browser. The
+`Edit` link is in the left navigation column after the code blocks
+selector. The `Save` button at the bottom of the text editor makes the
+changes permanent.
 
 The `Create` link displays a modal dialog. Enter the path to the file you want
 to create. The path should be relative to the language sub-directory, it

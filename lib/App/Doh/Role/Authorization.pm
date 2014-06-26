@@ -15,21 +15,21 @@ requires qw( execute );
 around 'execute' => sub {
    my ($orig, $self, $method, $req) = @_; my $class = blessed $self || $self;
 
-   $self->can( $method )
-      or throw error => 'Class [_1] has no method [_2]',
-               args  => [ $class, $method ], rv => HTTP_NOT_FOUND;
+   my $code_ref = $self->can( $method )
+      or  throw error => 'Class [_1] has no method [_2]',
+                args  => [ $class, $method ], rv => HTTP_NOT_FOUND;
 
-   my $method_roles = $self->_list_roles_of( $method );
+   my $method_roles = __list_roles_of( $code_ref ); $method_roles->[ 0 ]
+      or  throw error => 'Class [_1] method [_2] is private',
+                args  => [ $class, $method ], rv => HTTP_FORBIDDEN;
 
-   $method_roles->[ 0 ]
-      or throw error => 'Method [_1] is private',
-               args  => [ $method ], rv => HTTP_FORBIDDEN;
-
-   is_member 'any', $method_roles and return $orig->( $self, $method, $req );
+   is_member 'anon', $method_roles and return $orig->( $self, $method, $req );
 
    $req->username eq 'unknown'
-      and throw error => 'Method [_1] authorization required',
-                 args => [ $method ], rv => HTTP_UNAUTHORIZED;
+      and throw error => 'Class [_1] method [_2] authorization required',
+                 args => [ $class, $method ], rv => HTTP_UNAUTHORIZED;
+
+   is_member 'any', $method_roles and return $orig->( $self, $method, $req );
 
    my $conf = $self->config;
 
@@ -43,13 +43,8 @@ around 'execute' => sub {
    return; # Never reached
 };
 
-sub _list_roles_of {
-   my ($self, $method) = @_; my $class = blessed $self || $self;
-
-   my $code_ref = $self->can( $method ) or return ();
-
-   return [ map  { m{ \A Role [\(] ([^\)]+) [\)] \z }mx }
-            grep { m{ \A Role }mx } @{ attributes::get( $code_ref ) || [] } ];
+sub __list_roles_of {
+   my $attr = attributes::get( shift ) // {}; return $attr->{Role} // [];
 }
 
 1;

@@ -3,7 +3,7 @@ package App::Doh::Model;
 use Moo;
 use App::Doh::Attributes;
 use App::Doh::Functions    qw( show_node );
-use Class::Usul::Constants qw( NUL );
+use Class::Usul::Constants qw( FALSE NUL );
 use Class::Usul::Time      qw( str2time time2str );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( weaken );
@@ -20,6 +20,7 @@ sub exception_handler {
    $stash->{code} =  $e->rv >= HTTP_OK ? $e->rv : HTTP_BAD_REQUEST;
    $stash->{page} =  $self->load_page( $req, {
       content     => "${e}${filler}\n\n   Code: ".$e->rv,
+      editing     => FALSE,
       format      => 'markdown',
       mtime       => time,
       name        => $title,
@@ -33,7 +34,7 @@ sub execute {
    my ($self, $method, @args) = @_; return $self->$method( @args );
 }
 
-sub get_content : Role(any) {
+sub get_content : Role(anon) {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req );

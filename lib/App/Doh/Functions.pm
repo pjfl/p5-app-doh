@@ -49,7 +49,7 @@ sub build_tree {
    for my $path ($dir->all) {
       my ($id, $pref) =  @{ make_id_from( $path->filename ) };
       my  $name       =  make_name_from( $id );
-      my  $url        =  $url_base ? "${url_base}/${id}"   : $id;
+      my  $url        =  $url_base ? "${url_base}/${id}" : $id;
       my  $mtime      =  $path->stat->{mtime};
       my  $node       =  $tree->{ $id } = {
           date        => $mtime,
