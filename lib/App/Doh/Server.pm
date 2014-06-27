@@ -39,8 +39,8 @@ has '_views'  => is => 'lazy', isa => HashRef[Object], builder => sub { {
    'xml'      => App::Doh::View::XML->new ( builder => $_[ 0 ]->usul ), } },
    reader     => 'views';
 
-has '_usul'   => is => 'lazy', isa => BaseType,
-   handles    => [ 'log' ], reader => 'usul';
+has '_usul'   => is => 'lazy', isa => BaseType, handles => [ 'log' ],
+   reader     => 'usul';
 
 # Construction
 around 'to_psgi_app' => sub {

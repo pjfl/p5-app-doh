@@ -43,10 +43,6 @@ sub create_file_action : Role(editor) {
    return shift->create_file( @_ );
 }
 
-sub dialog_action : Role(anon) {
-   return shift->dialog( @_ );
-}
-
 sub delete_file_action : Role(editor) {
    my ($self, $req) = @_; my $res = $self->delete_file( $req );
 
@@ -81,6 +77,10 @@ sub generate_static_action : Role(editor) {
    return $res;
 }
 
+sub get_dialog : Role(anon) {
+   return shift->dialog( @_ );
+}
+
 sub locales {
    return grep { first_char $_ ne '_' } keys %{ $_[ 0 ]->docs_tree };
 }
@@ -97,12 +97,12 @@ sub save_file_action : Role(editor) {
    return shift->save_file( @_ );
 }
 
-sub search_document_action : Role(anon) {
+sub search_document_tree : Role(anon) {
    return shift->search_document( @_ );
 }
 
-sub upload_file_action : Role(editor) {
-   my ($self, $req) = @_; my $res = $self->upload_file( $req );
+sub upload_asset : Role(editor) {
+   my ($self, $req) = @_; my $res = $self->upload( $req );
 
    $res->{redirect}->{location} = $self->docs_url( $req );
    return $res;

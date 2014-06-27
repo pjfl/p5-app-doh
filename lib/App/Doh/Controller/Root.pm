@@ -4,10 +4,10 @@ use Web::Simple;
 
 sub dispatch_request {
    sub (POST + /assets + *file~ + ?*) {
-      return shift->execute( qw( html docs  upload_file_action ), @_ );
+      return shift->execute( qw( html docs  upload_asset ), @_ );
    },
    sub (GET  + /dialog + ?*) {
-      return shift->execute( qw( xml  docs  dialog_action ), @_ );
+      return shift->execute( qw( xml  docs  get_dialog ), @_ );
    },
    sub (GET  + /pod | /pod/** + ?*) {
       return shift->execute( qw( html help  get_content ), @_ );
@@ -19,7 +19,7 @@ sub dispatch_request {
       return shift->execute( qw( html posts get_content ), @_ );
    },
    sub (GET  + /search + ?*) {
-      return shift->execute( qw( html docs  search_document_action ), @_ );
+      return shift->execute( qw( html docs  search_document_tree ), @_ );
    },
    sub (POST + / | /** + ?*) {
       return shift->execute( qw( html docs  from_request ), @_ );

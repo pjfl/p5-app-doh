@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Renamed some model methods. Updated prereqs
           - Editing posts works!
           - Added ::Auth::Htpasswd to bypass auth for static page generation
           - Renamed attribute handler class to ::Attributes

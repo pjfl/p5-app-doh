@@ -148,7 +148,7 @@ sub search_document {
    return $stash;
 }
 
-sub upload_file {
+sub upload {
    my ($self, $req) = @_; my $conf = $self->config;
 
    my $upload = $req->args->[ 0 ]
