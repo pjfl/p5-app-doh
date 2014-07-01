@@ -3,6 +3,7 @@ package App::Doh::Server;
 use namespace::autoclean;
 
 use App::Doh::Controller::Root;
+use App::Doh::Model::Authentication;
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
 use App::Doh::Model::Posts;
@@ -26,13 +27,16 @@ has '_controllers' => is => 'lazy', isa => ArrayRef[Object], builder => sub {
    [  App::Doh::Controller::Root->new, ] }, reader => 'controllers';
 
 has '_models' => is => 'lazy', isa => HashRef[Object], builder => sub { {
+   'auth'     => App::Doh::Model::Authentication->new
+      ( builder  => $_[ 0 ]->usul ),
    'docs'     => App::Doh::Model::Documentation->new
       ( builder  => $_[ 0 ]->usul,
         type_map => $_[ 0 ]->views->{html}->type_map ),
    'help'     => App::Doh::Model::Help->new( builder => $_[ 0 ]->usul ),
    'posts'    => App::Doh::Model::Posts->new
       ( builder  => $_[ 0 ]->usul,
-        type_map => $_[ 0 ]->views->{html}->type_map ), } }, reader => 'models';
+        type_map => $_[ 0 ]->views->{html}->type_map ), } },
+   reader     => 'models';
 
 has '_views'  => is => 'lazy', isa => HashRef[Object], builder => sub { {
    'html'     => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
@@ -66,7 +70,6 @@ around 'to_psgi_app' => sub {
             httponly => TRUE,          path        => $point,
             secret   => $conf->secret, session_key => 'doh_session';
          enable "LogDispatch", logger => $self->usul->log;
-         enable '+App::Doh::Auth::Htpasswd', file_root => $conf->file_root;
          enable_if { $self->usul->debug } 'Debug';
          $app;
       };

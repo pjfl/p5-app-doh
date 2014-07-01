@@ -2,7 +2,8 @@ package App::Doh::Role::Editor;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( extract_lang make_id_from make_name_from mtime );
+use App::Doh::Functions    qw( extract_lang make_id_from make_name_from mtime
+                               set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( io throw trim untaint_path );
 use Class::Usul::IPC;
@@ -71,14 +72,14 @@ sub dialog {
                                    template => "${name}-file", };
 
    if    ($name eq 'create') {
-      $page->{literal_js} = __set_element_focus( "${name}-file", 'pathname' );
+      $page->{literal_js} = set_element_focus( "${name}-file", 'pathname' );
    }
    elsif ($name eq 'rename') {
-      $page->{literal_js} = __set_element_focus( "${name}-file", 'pathname' );
+      $page->{literal_js} = set_element_focus( "${name}-file", 'pathname' );
       $page->{old_path  } = $params->( 'val' );
    }
    elsif ($name eq 'search') {
-      $page->{literal_js} = __set_element_focus( "${name}-file", 'query' );
+      $page->{literal_js} = set_element_focus( "${name}-file", 'query' );
    }
    elsif ($name eq 'upload') {
       $page->{literal_js} = __copy_element_value();
@@ -139,7 +140,7 @@ sub save_file {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-sub search_document {
+sub search {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req, $self->_search_results( $req ) );
@@ -268,14 +269,6 @@ sub __prune {
 sub __result_line {
    return $_[ 0 ].'\. ['.$_[ 1 ]->[ 0 ].']('.$_[ 1 ]->[ 1 ].")\n\n> "
          .$_[ 1 ]->[ 2 ];
-}
-
-sub __set_element_focus {
-   my ($form, $name) = @_;
-
-   return [ "var form = document.forms[ '${form}' ];",
-            "var f    = function() { form.${name}.focus() };",
-            "f.delay( 100 );" ];
 }
 
 1;

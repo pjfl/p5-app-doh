@@ -34,6 +34,12 @@
                          href="[% links.help_url %]">[% loc( 'Help' ) %]</a>
                   </span>
 [% END -%]
+[% IF page.mode != 'static' && req.username == 'unknown' -%]
+[% title = hint _ ' ~ ' _ loc( 'Authenticate with the application' ) -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-primary btn-hero windows" href="#"
+                           id="login-user">[% loc( 'Login' ) %]</a></span>
+[% ELSE -%]
 [% title = hint _ ' ~ ' _ loc( 'Documentation tree' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-primary btn-hero"
@@ -41,13 +47,14 @@
                      </a>
                   </span>
 [% title = hint _ ' ~ ' _ loc( 'Posts, blogs, and news articles' ) -%]
-[% IF page.mode != 'static'; href = uri_for( config.posts ); ELSE -%]
-[%    href = uri_for( config.posts _ '/index' ) -%]
-[% END -%]
+[%    IF page.mode != 'static'; href = uri_for( config.posts ); ELSE -%]
+[%       href = uri_for( config.posts _ '/index' ) -%]
+[%    END -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-primary btn-hero"
                          href="[% href %]">[% loc( 'Posts' ) %]</a>
                   </span>
+[% END -%]
 [% IF page.mode != 'static' -%]
 [%    href  = links.base_uri _ 'static/' _ page.language _ '/index.html' %]
 [%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]

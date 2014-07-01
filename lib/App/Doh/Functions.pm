@@ -10,7 +10,7 @@ use Class::Usul::Functions qw( first_char is_arrayref is_hashref );
 
 our @EXPORT_OK = qw( build_navigation_list build_tree clone extract_lang
                      iterator localise_tree make_id_from make_name_from mtime
-                     show_node );
+                     set_element_focus show_node );
 
 sub build_navigation_list ($$$$) {
    my ($root, $tree, $ids, $wanted) = @_;
@@ -146,6 +146,14 @@ sub make_name_from ($) {
 
 sub mtime ($) {
    return $_[ 0 ]->{tree}->{_mtime};
+}
+
+sub set_element_focus {
+   my ($form, $name) = @_;
+
+   return [ "var form = document.forms[ '${form}' ];",
+            "var f    = function() { form.${name}.focus() };",
+            "f.delay( 100 );" ];
 }
 
 sub show_node ($;$$) {

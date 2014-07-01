@@ -10,7 +10,7 @@ use HTTP::Status           qw( HTTP_FORBIDDEN HTTP_NOT_FOUND
 use Scalar::Util           qw( blessed );
 use Moo::Role;
 
-requires qw( execute );
+requires qw( config execute );
 
 around 'execute' => sub {
    my ($orig, $self, $method, $req) = @_; my $class = blessed $self || $self;

@@ -34,7 +34,7 @@ sub execute {
    my ($self, $method, @args) = @_; return $self->$method( @args );
 }
 
-sub get_content : Role(anon) {
+sub get_content : Role(any) {
    my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
    $stash->{page} = $self->load_page ( $req );

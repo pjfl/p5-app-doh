@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Adding bcrypt based authentication
           - Renamed some model methods. Updated prereqs
           - Editing posts works!
           - Added ::Auth::Htpasswd to bypass auth for static page generation

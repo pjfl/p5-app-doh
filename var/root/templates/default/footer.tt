@@ -18,6 +18,11 @@
          = { method  : 'confirmSubmit',
              args    : [ 'delete',
                 '[% loc( 'Are you sure you want to delete this file?' ) %]' ] };
+      behaviour.config.anchors[ 'login-user' ]
+         = { method  : 'modalDialog',
+             args    : [ '[% uri_for( 'login' ) %]', {
+                name : 'login-user',
+                title: '[% loc( 'Login User' ) %]' } ] };
       behaviour.config.anchors[ 'rename-file' ]
          = { method  : 'modalDialog',
              args    : [ '[% uri_for( 'dialog' ) %]?name=rename', {

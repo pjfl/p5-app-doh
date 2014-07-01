@@ -9,6 +9,12 @@ sub dispatch_request {
    sub (GET  + /dialog + ?*) {
       return shift->execute( qw( xml  docs  get_dialog ), @_ );
    },
+   sub (POST + /login + ?*) {
+      return shift->execute( qw( html auth  from_request ), @_ );
+   },
+   sub (GET  + /login + ?*) {
+      return shift->execute( qw( xml  auth  get_dialog ), @_ );
+   },
    sub (GET  + /pod | /pod/** + ?*) {
       return shift->execute( qw( html help  get_content ), @_ );
    },
@@ -19,12 +25,15 @@ sub dispatch_request {
       return shift->execute( qw( html posts get_content ), @_ );
    },
    sub (GET  + /search + ?*) {
-      return shift->execute( qw( html docs  search_document_tree ), @_ );
+      return shift->execute( qw( html docs  search_tree ), @_ );
    },
    sub (POST + / | /** + ?*) {
       return shift->execute( qw( html docs  from_request ), @_ );
    },
-   sub (GET  + / | /** + ?*) {
+   sub (GET  + / | /index + ?*) {
+      return shift->execute( qw( html docs  get_index ), @_ );
+   },
+   sub (GET  + /** + ?*) {
       return shift->execute( qw( html docs  get_content ), @_ );
    };
 }

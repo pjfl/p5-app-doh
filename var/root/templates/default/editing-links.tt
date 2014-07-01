@@ -3,28 +3,24 @@
             <div class="well well-sidebar">
 [%    hint  = loc( 'Hint' ) -%]
 [%    title = hint _ ' ~ ' _ loc( 'Search for text in markdown files' ) -%]
-[%    text  = loc( 'Search' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="windows fade" href="#"
-                        id="search-file">[% text %]</a></span>
+                        id="search-file">[% loc( 'Search' ) %]</a></span>
                <br>
 [%    title = hint _ ' ~ ' _ loc( 'Create a new markdown file' ) -%]
-[%    text  = loc( 'Create' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="windows fade" href="#"
-                        id="create-file">[% text %]</a></span>
+                        id="create-file">[% loc( 'Create' ) %]</a></span>
                <br>
 [%    title = hint _ ' ~ ' _ loc( 'Rename this markdown file' ) -%]
-[%    text  = loc( 'Rename' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="windows fade" href="#"
-                        id="rename-file">[% text %]</a></span>
+                        id="rename-file">[% loc( 'Rename' ) %]</a></span>
                <br>
 [%    title = hint _ ' ~ ' _ loc( 'Upload an asset file' ) -%]
-[%    text  = loc( 'Upload' ) -%]
                <span class="tips" title="[% title %]">
                   <a class="windows fade" href="#"
-                        id="upload-file">[% text %]</a></span>
+                        id="upload-file">[% loc( 'Upload' ) %]</a></span>
                <br>
 [%    title = hint _ ' ~ ' _ loc( 'Edit the markdown for this page' ) -%]
 [%    text  = loc( 'Edit' ) -%]

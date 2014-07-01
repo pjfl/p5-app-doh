@@ -77,8 +77,12 @@ sub generate_static_action : Role(editor) {
    return $res;
 }
 
-sub get_dialog : Role(anon) {
+sub get_dialog : Role(any) {
    return shift->dialog( @_ );
+}
+
+sub get_index : Role(anon) {
+   return shift->get_content( @_ );
 }
 
 sub locales {
@@ -97,8 +101,8 @@ sub save_file_action : Role(editor) {
    return shift->save_file( @_ );
 }
 
-sub search_document_tree : Role(anon) {
-   return shift->search_document( @_ );
+sub search_tree : Role(any) {
+   return shift->search( @_ );
 }
 
 sub upload_asset : Role(editor) {

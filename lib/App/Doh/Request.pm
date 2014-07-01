@@ -76,7 +76,7 @@ has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr,
 has 'uri'      => is => 'lazy', isa => Object;
 
 has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub { $_[ 0 ]->env->{ 'REMOTE_USER' } // 'unknown' };
+   builder     => sub { $_[ 0 ]->session->{username} // 'unknown' };
 
 # Construction
 around 'BUILDARGS' => sub {
