@@ -4,10 +4,10 @@ use namespace::autoclean;
 
 use Moo;
 use App::Doh::Functions    qw( extract_lang );
-use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL SPC );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                is_member throw trim );
-use Class::Usul::Types     qw( ArrayRef HashRef NonEmptySimpleStr
+use Class::Usul::Types     qw( ArrayRef Bool HashRef NonEmptySimpleStr
                                Object SimpleStr );
 use Encode                 qw( decode );
 use HTTP::Body;
@@ -77,6 +77,10 @@ has 'uri'      => is => 'lazy', isa => Object;
 
 has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub { $_[ 0 ]->session->{username} // 'unknown' };
+
+has 'authenticated' => is => 'lazy', isa => Bool, builder => sub {
+   $_[ 0 ]->session->{authenticated} // FALSE;
+};
 
 # Construction
 around 'BUILDARGS' => sub {

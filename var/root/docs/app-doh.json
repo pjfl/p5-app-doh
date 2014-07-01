@@ -12,4 +12,6 @@
    "locales": [ "en", "de" ],
    "title": "Doh!",
    "twitter": [ "perl" ]
+   "users": { "admin": [ "1", "", "Administrator" ] },
+   "user_roles": { "admin": [ "editor" ] }
 }

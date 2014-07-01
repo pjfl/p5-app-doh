@@ -9,7 +9,7 @@ sub dispatch_request {
    sub (GET  + /dialog + ?*) {
       return shift->execute( qw( xml  docs  get_dialog ), @_ );
    },
-   sub (POST + /login + ?*) {
+   sub (POST + /login | /logout + ?*) {
       return shift->execute( qw( html auth  from_request ), @_ );
    },
    sub (GET  + /login + ?*) {

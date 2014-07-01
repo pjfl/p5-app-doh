@@ -34,7 +34,7 @@
                          href="[% links.help_url %]">[% loc( 'Help' ) %]</a>
                   </span>
 [% END -%]
-[% IF page.mode != 'static' && req.username == 'unknown' -%]
+[% IF page.mode != 'static' && req.authenticated == 0 -%]
 [% title = hint _ ' ~ ' _ loc( 'Authenticate with the application' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-primary btn-hero windows" href="#"

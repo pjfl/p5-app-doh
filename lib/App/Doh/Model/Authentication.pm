@@ -1,42 +1,83 @@
 package App::Doh::Model::Authentication;
 
+use namespace::autoclean;
+
 use Moo;
-use App::Doh::Attributes;
-use App::Doh::Functions    qw( set_element_focus );
-use Class::Usul::Constants qw( NUL );
-use Class::Usul::Functions qw( throw );
+use App::Doh::Functions        qw( set_element_focus );
+use Class::Usul::Constants     qw( FALSE NUL TRUE );
+use Class::Usul::Functions     qw( throw );
+use Crypt::Eksblowfish::Bcrypt qw( bcrypt );
+use HTTP::Status               qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED );
+use Unexpected::Functions      qw( Unspecified );
 
 extends q(App::Doh::Model);
-with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
-sub get_dialog : Role(anon) {
-   my ($self, $req) = @_;
+sub get_dialog {
+   my ($self, $req) = @_; my $stash = $self->get_stash( $req );
 
-   my $params = $req->query_params;
-   my $stash  = $self->get_stash( $req );
-   my $page   = $stash->{page} = { meta     => { id => $params->( 'id' ), },
-                                   template => 'login-user', };
-
-   $page->{literal_js} = set_element_focus( 'login-user', 'username' );
-   $page->{username  } = $req->session->{username} // NUL;
+   $stash->{page} = {
+      literal_js => set_element_focus( 'login-user', 'username' ),
+      meta       => { id => $req->query_params->( 'id' ), },
+      template   => 'login-user',
+      username   => $req->session->{username} // NUL, };
 
    return $stash;
 }
 
-sub login_action : Role(anon) {
-   my ($self, $req) = @_;
+sub login_action {
+   my ($self, $req) = @_; my $message;
 
+   my $session  = $req->session;
    my $params   = $req->body_params;
    my $username = $params->( 'username' );
 
-   $req->session->{username} = $username;
-
-   my $message  = [ 'User [_1] logged in', $username ];
+   if ($self->_authenticate( $username, $params->( 'password' ) )) {
+      $message = [ 'User [_1] logged in', $username ];
+      $session->{authenticated} = TRUE; $session->{username} = $username;
+   }
+   else {
+      $message = [ 'User [_1] access denied', $username ];
+      $session->{authenticated} = FALSE;
+   }
 
    return { redirect => { location => $req->base, message => $message } };
+}
+
+sub logout_action {
+   my ($self, $req) = @_; my ($location, $message);
+
+   if ($req->authenticated) {
+      $location = $req->base;
+      $message  = [ 'User [_1] logged out', $req->username ];
+      $req->session->{authenticated} = FALSE;
+   }
+   else { $location = $req->uri; $message = [ 'User not logged in' ] }
+
+   return { redirect => { location => $location, message => $message } };
+}
+
+# Private methods
+sub _authenticate {
+   my ($self, $username, $password) = @_;
+
+   $username or throw class => Unspecified, args => [ 'user name' ],
+                         rv => HTTP_EXPECTATION_FAILED;
+   $password or throw class => Unspecified, args => [ 'password' ],
+                         rv => HTTP_EXPECTATION_FAILED;
+
+   my $tuple = $self->config->{users}->{ $username }
+      or throw error => 'User [_1] unknown', args => [ $username ],
+                  rv => HTTP_EXPECTATION_FAILED;
+
+   $tuple->[ 0 ] or throw error => 'User [_1] account inactive',
+                           args => [ $username ], rv => HTTP_UNAUTHORIZED;
+
+   bcrypt( $password, $tuple->[ 1 ] ) eq $tuple->[ 1 ] and return TRUE;
+
+   return FALSE;
 }
 
 1;

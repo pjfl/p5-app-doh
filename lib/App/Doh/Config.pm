@@ -147,8 +147,11 @@ has 'twitter'         => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
 has 'use_flags'       => is => 'ro',   isa => Bool, default => TRUE;
 
+has 'users'           => is => 'ro',   isa => HashRef[ArrayRef],
+   default            => sub { {} };
+
 has 'user_roles'      => is => 'ro',   isa => HashRef[ArrayRef],
-   default            => sub { { admin => [ 'editor' ] } };
+   default            => sub { {} };
 
 has '_colours'        => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'colours';
