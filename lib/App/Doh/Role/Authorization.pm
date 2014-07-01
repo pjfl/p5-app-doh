@@ -26,8 +26,8 @@ around 'execute' => sub {
    is_member 'anon', $method_roles and return $orig->( $self, $method, $req );
 
    $req->username eq 'unknown'
-      and throw error => 'Class [_1] method [_2] authorization required',
-                 args => [ $class, $method ], rv => HTTP_UNAUTHORIZED;
+      and throw error => 'Resource [_1] authorization required',
+                 args => [ $req->path ], rv => HTTP_UNAUTHORIZED;
 
    is_member 'any', $method_roles and return $orig->( $self, $method, $req );
 
