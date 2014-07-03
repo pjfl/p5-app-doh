@@ -78,6 +78,9 @@ var/root/less/theme-blue.less
 var/root/less/theme-green.less
 var/root/less/theme-navy.less
 var/root/less/theme-red.less
+var/root/templates/default/admin-left-column.tt
+var/root/templates/default/admin-right-column.tt
+var/root/templates/default/admin.tt
 var/root/templates/default/blank.tt
 var/root/templates/default/code-blocks.tt
 var/root/templates/default/config-links.tt

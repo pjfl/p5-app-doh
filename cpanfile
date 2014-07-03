@@ -1,5 +1,6 @@
 requires "App::Ack" => "2.12";
 requires "Class::Usul" => "v0.44.0";
+requires "Crypt::Eksblowfish" => "0.009";
 requires "Daemon::Control" => "0.000009";
 requires "Exporter::Tiny" => "0.026";
 requires "File::DataClass" => "v0.41.0";
