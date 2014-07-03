@@ -68,15 +68,18 @@ has 'script'   => is => 'lazy', isa => SimpleStr,
 has 'session'  => is => 'lazy', isa => HashRef,
    builder     => sub { $_[ 0 ]->env->{ 'psgix.session' } // {} };
 
-has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub {
-         delete $_[ 0 ]->body->param->{_method}
-      || delete $_[ 0 ]->params->{_method} || 'not_found' };
-
 has 'uri'      => is => 'lazy', isa => Object;
 
 has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub { $_[ 0 ]->session->{username} // 'unknown' };
+
+has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => sub {
+      my $body_method  = delete $_[ 0 ]->body->param->{_method};
+      my $param_method = delete $_[ 0 ]->params->{_method};
+      my $method       = $body_method || $param_method || 'not_found';
+
+      return (is_arrayref $method) ? $method->[ 0 ] : $method };
 
 has 'authenticated' => is => 'lazy', isa => Bool, builder => sub {
    $_[ 0 ]->session->{authenticated} // FALSE;
@@ -103,7 +106,7 @@ sub BUILD {
 
    $mode ne 'static' and $self->log->debug
       ( join SPC, (uc $self->method), $self->uri,
-        ($self->username ne 'unknown' ? $self->username : NUL) );
+        ($self->authenticated ? $self->username : NUL) );
 
    return;
 }
@@ -130,7 +133,11 @@ sub _build_body {
    length $content and $body->add( $content );
 
    for my $k (keys %{ $body->param }) {
-      $body->param->{ $k } = decode( 'UTF-8', $body->param->{ $k } );
+      if (is_arrayref $body->param->{ $k }) {
+         $body->param->{ $k } = [ map { decode( 'UTF-8', $_  ) }
+                                     @{ $body->param->{ $k } } ];
+      }
+      else { $body->param->{ $k } = decode( 'UTF-8', $body->param->{ $k } ) }
    }
 
    return $body;
@@ -243,9 +250,9 @@ sub _localize {
 # Private functions
 sub __defined_or_throw {
    defined $_[ 0 ] or throw class => Unspecified, args => [ 'parameter name' ],
-                               rv => HTTP_INTERNAL_SERVER_ERROR;
+                               rv => HTTP_INTERNAL_SERVER_ERROR, level => 5;
    defined $_[ 1 ] or throw class => Unspecified, args => [ $_[ 0 ] ],
-                               rv => HTTP_EXPECTATION_FAILED;
+                               rv => HTTP_EXPECTATION_FAILED, level => 5;
    return $_[ 1 ];
 }
 

@@ -6,7 +6,7 @@
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {
          baseURI : '[% links.base_uri %]',
-         formName: 'markdown'
+         formName: '[% page.form_name %]'
       } );
 [% IF ! page.editing && page.mode != 'static' -%]
       behaviour.config.anchors[ 'create-file' ]
@@ -14,13 +14,22 @@
              args    : [ '[% uri_for( 'dialog' ) %]?name=create', {
                 name : 'create_file',
                 title: '[% loc( 'Create File' ) %]' } ] };
+      behaviour.config.anchors[ 'create-user' ]
+         = { method  : 'modalDialog',
+             args    : [ '[% uri_for( 'user' ) %]?name=create', {
+                name : 'create-user',
+                title: '[% loc( 'Register User' ) %]' } ] };
       behaviour.config.anchors[ 'delete-file' ]
          = { method  : 'confirmSubmit',
              args    : [ 'delete',
                 '[% loc( 'Are you sure you want to delete this file?' ) %]' ] };
+      behaviour.config.anchors[ 'delete-user' ]
+         = { method  : 'confirmSubmit',
+             args    : [ 'delete',
+                '[% loc( 'Are you sure you want to delete this user?' ) %]' ] };
       behaviour.config.anchors[ 'login-user' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'login' ) %]', {
+             args    : [ '[% uri_for( 'user' ) %]?name=login', {
                 name : 'login-user',
                 title: '[% loc( 'Login User' ) %]' } ] };
       behaviour.config.anchors[ 'rename-file' ]
@@ -40,6 +49,8 @@
                 name : 'upload_file',
                 title: '[% loc( 'Upload File' ) %]',
                 value: '[% page.url %]' } ] };
+      behaviour.config.anchors[ 'users' ]
+         = { event   : 'change', method: 'submitForm', args: [ '' ] };
 [% END -%]
    </script>
 [% IF config.analytics -%]

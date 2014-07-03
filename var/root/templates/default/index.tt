@@ -28,17 +28,29 @@
                <div class="text-center">
 [% hint = loc( 'Hint' ) -%]
 [% IF page.mode != 'static' -%]
-[%    title = hint _ ' ~ ' _ loc( 'Help pages for the application' ) -%]
+[%    IF req.authenticated -%]
+[%       title = hint _ ' ~ ' _ loc( 'Admininstration interface' ) -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-secondary btn-hero"
+                         href="[% uri_for( 'admin' ) %]">[% loc( 'Admin' ) %]
+                         </a></span>
+[%    ELSE -%]
+[%       title = hint _ ' ~ ' _ loc( 'Help pages for the application' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-secondary btn-hero"
                          href="[% links.help_url %]">[% loc( 'Help' ) %]</a>
                   </span>
+[%    END -%]
 [% END -%]
-[% IF page.mode != 'static' && req.authenticated == 0 -%]
+[% IF page.mode != 'static' && !req.authenticated -%]
 [% title = hint _ ' ~ ' _ loc( 'Authenticate with the application' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-primary btn-hero windows" href="#"
                            id="login-user">[% loc( 'Login' ) %]</a></span>
+[% title = hint _ ' ~ ' _ loc( 'Register with the application' ) -%]
+                  <span class="tips" title="[% title %]">
+                     <a class="btn btn-primary btn-hero windows" href="#"
+                           id="create-user">[% loc( 'Register' ) %]</a></span>
 [% ELSE -%]
 [% title = hint _ ' ~ ' _ loc( 'Documentation tree' ) -%]
                   <span class="tips" title="[% title %]">

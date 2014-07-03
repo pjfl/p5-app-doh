@@ -1,0 +1,48 @@
+      <!-- Admin Right Column -->
+[% col_class = ''; IF prefs.float; col_class = 'float-view'; END -%]
+      <div class="right-column [% col_class %] content-area span9p5">
+         <div class="content-page">
+            <article>
+[%    INCLUDE 'default/header.tt' -%]
+               <div class="container span12">
+[% IF !page.users.result.id -%]
+                  <form action="[% uri_for( 'admin' ) %]"
+                       enctype="application/x-www-form-urlencoded"
+                        method="get" name="[% page.form_name %]">
+                     <select id="users" class="submit" name="username">
+                        <option selected="selected"></option>
+[%    FOR user = page.users.list -%]
+                        <option>[% user %]</option>
+[%    END -%]
+                     </select>
+                  </form>
+[% ELSE -%]
+[%    id = page.users.result.id %]
+                  <h3>User name: [% id %]</h3>
+                  <h4>Email: [% page.users.result.email %]</h3>
+                  <br/>
+                  <form action="[% uri_for( 'admin' ) _ '/' _ id %]"
+                       enctype="application/x-www-form-urlencoded"
+                        method="post" name="[% page.form_name %]">
+                     <input name="username" type="hidden" value="[% id %]">
+                     <button class="btn btn-submit submit" id="delete-user"
+                              name="_method" type="submit"
+                             value="delete_user">[% loc( 'Delete' ) %]</button>
+[%    IF page.users.result.active -%]
+                     <button class="btn btn-submit submit"
+                              name="_method" type="submit"
+                             value="deactivate_user">[% loc( 'Deactivate' ) %]
+                     </button>
+[%    ELSE -%]
+                     <button class="btn btn-submit submit"
+                              name="_method" type="submit"
+                             value="activate_user">[% loc( 'Activate' ) %]
+                     </button>
+[%    END -%]
+            <!-- Add / remove user roles-->
+                  </form>
+[% END -%]
+               </div>
+            </article>
+         </div>
+      </div>

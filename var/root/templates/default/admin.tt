@@ -1,0 +1,20 @@
+[% MACRO fadingLink( href, class, content ) BLOCK -%]
+<a href="[% href %]" class="[% class %] fade">[% content %]</a>
+[% END -%]
+[% MACRO linkWithTips( href, class, content, title, tip ) IF tip -%]
+               <span class="tips" title="[% loc( title ) _ ' ~ ' _ tip %]">
+                  [% fadingLink( href, class, content ) -%]
+               </span>
+[% ELSE -%]
+   [% fadingLink( href, class, content ) -%]
+[% END -%]
+[% INCLUDE 'default/navbar.tt' -%]
+[% INCLUDE 'default/fork-me.tt' -%]
+   <!-- Admin Interface -->
+   <div class="container-fluid fluid-height wrapper">
+      <div class="row-fluid columns content">
+[% INCLUDE 'default/admin-left-column.tt' -%]
+[% INCLUDE 'default/admin-right-column.tt' -%]
+      </div>
+   </div>
+[% INCLUDE 'default/footer.tt' -%]

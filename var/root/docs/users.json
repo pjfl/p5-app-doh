@@ -1,0 +1,21 @@
+{
+   "users" : {
+      "admin" : {
+         "active" : "1",
+         "email" : "",
+         "password" : "$2a$14$NmCMPGUe1BsjMX.q3HjKQ.36TooNYTlulenPcdY/HwJkOFn9BAimm",
+         "roles" : [
+            "admin",
+            "editor"
+         ]
+      },
+      "fred" : {
+         "active" : "1",
+         "email" : "fred@example.com",
+         "password" : "$2a$14$5iyIeRG4Pf40BJJ.NYxP5.SE85xVdfl1SjSqAWb0lXaAI/M0Bn6m2",
+         "roles" : [
+            "users"
+         ]
+      }
+   }
+}

@@ -6,21 +6,15 @@ use App::Doh::Functions    qw( extract_lang make_id_from make_name_from mtime
                                set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( io throw trim untaint_path );
-use Class::Usul::IPC;
 use Class::Usul::Time      qw( time2str );
-use File::DataClass::Types qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
                                HTTP_REQUEST_ENTITY_TOO_LARGE );
 use Unexpected::Functions  qw( Unspecified );
 use Moo::Role;
 
-requires qw( config find_node get_stash invalidate_cache load_page
+requires qw( config find_node get_stash invalidate_cache ipc load_page
              log navigation render_template usul );
-
-# Public attributes
-has 'ipc'  => is => 'lazy', isa => Object,
-   builder => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
 sub create_file {
    my ($self, $req) = @_;
@@ -86,20 +80,6 @@ sub dialog {
    }
 
    return $stash;
-}
-
-sub generate_static {
-   my ($self, $req) = @_;
-
-   my $cli = $self->config->binsdir->catfile( 'doh-cli' );
-   my $cmd = [ "${cli}", 'make_static' ];
-
-   $self->log->debug( $self->ipc->run_cmd( $cmd, { async => TRUE } )->out );
-
-   my $message  = [ 'Static page generation started in the background by [_1]',
-                    $req->username ];
-
-   return { redirect => { location => $req->uri, message => $message } };
 }
 
 sub rename_file {

@@ -5,7 +5,7 @@ use namespace::autoclean;
 use Moo;
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( app_prefix );
-use File::DataClass::Types qw( ArrayRef Bool Directory HashRef Int
+use File::DataClass::Types qw( ArrayRef Bool Directory File HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
                                NonZeroPositiveInt Path SimpleStr Str );
 use Sys::Hostname          qw( hostname );
@@ -23,6 +23,10 @@ has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
 has 'assetdir'        => is => 'lazy', isa => Path,
    builder            => sub { $_[ 0 ]->file_root->catfile( $_[ 0 ]->assets ) },
    coerce             => Path->coercion;
+
+has 'auth_file'       => is => 'lazy', isa => File,
+   builder            => sub { $_[ 0 ]->file_root->catfile( 'users.json' ) },
+   coerce             => File->coercion;
 
 has 'author'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'anon';
@@ -86,6 +90,9 @@ has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'links'           => is => 'lazy', isa => ArrayRef, init_arg => undef;
 
+has 'load_factor'     => is => 'ro',   isa => NonZeroPositiveInt,
+   default            => 14;
+
 has 'mdn_tab_width'   => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
 has 'max_asset_size'  => is => 'ro',   isa => Int, default => 4_194_304;
@@ -117,7 +124,7 @@ has 'root_mtime'      => is => 'lazy', isa => Path, coerce => Path->coercion,
    builder            => sub { $_[ 0 ]->file_root->catfile( '.mtime' ) };
 
 has 'scrubber'        => is => 'ro',   isa => Str,
-   default            => '[^ +\-\./0-9A-Z\\_a-z~]';
+   default            => '[^ +\-\./0-9@A-Z\\_a-z~]';
 
 has 'secret'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => hostname;
@@ -146,12 +153,6 @@ has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
 has 'twitter'         => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
 has 'use_flags'       => is => 'ro',   isa => Bool, default => TRUE;
-
-has 'users'           => is => 'ro',   isa => HashRef[ArrayRef],
-   default            => sub { {} };
-
-has 'user_roles'      => is => 'ro',   isa => HashRef[ArrayRef],
-   default            => sub { {} };
 
 has '_colours'        => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'colours';
@@ -225,8 +226,13 @@ that locates the assets files uploaded by users
 
 =item C<assetdir>
 
-Defaults to F<var/root/assets>. Path object for the directory
+Defaults to F<var/root/docs/assets>. Path object for the directory
 containing user uploaded files
+
+=item C<auth_file>
+
+Defaults to F<var/root/docs/users.json>. A file object which contains the
+users and roles defined by the application
 
 =item C<author>
 
@@ -328,6 +334,10 @@ list value
 
 A array reference of string derived from the list of configuration locales
 The value is constructed on demand and has no initial argument
+
+=item C<load_factor>
+
+Defaults to 14. A non zero positive integer passed to the C<bcrypt> function
 
 =item C<less>
 
@@ -456,13 +466,6 @@ Twitter follow buttons
 Boolean which defaults to C<TRUE>. Display the language code, which is
 derived from browsers accept language header value, as a national flag. If
 false display as text
-
-=item C<user_roles>
-
-A hash reference keyed by user name. The values are array references of roles
-that the user is a member of. Membership of a role is used to granted access
-to pages within the application. By default the admin user is a member of the
-editor role
 
 =back
 

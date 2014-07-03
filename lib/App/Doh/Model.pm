@@ -3,12 +3,25 @@ package App::Doh::Model;
 use Moo;
 use App::Doh::Attributes;
 use App::Doh::Functions    qw( show_node );
+use App::Doh::User;
 use Class::Usul::Constants qw( FALSE NUL );
+use Class::Usul::IPC;
 use Class::Usul::Time      qw( str2time time2str );
+use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( weaken );
 
 extends q(App::Doh);
+
+# Public attributes
+has 'ipc'   => is => 'lazy', isa => Object, builder  => sub {
+   Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
+
+
+has 'users' => is => 'lazy', isa => Object, builder => sub {
+   App::Doh::User->new( builder     => $_[ 0 ]->usul,
+                        load_factor => $_[ 0 ]->config->load_factor,
+                        path        => $_[ 0 ]->config->auth_file ) };
 
 sub exception_handler {
    my ($self, $req, $e) = @_;

@@ -875,6 +875,8 @@ var SubmitUtils = new Class( {
    },
 
    submitForm: function( button_value ) {
+      if (!button_value) { this.form.submit(); return true; }
+
       var button; $$( '*[name=_method]' ).some( function( el ) {
          if (el.value == button_value) { button = el; return true }
          return false;
@@ -884,7 +886,7 @@ var SubmitUtils = new Class( {
       else {
          new Element( 'input', {
             name: '_method', type: 'hidden', value: button_value
-         } ).inject( $( 'top' ), 'after' );
+         } ).inject( $( this.form ) );
       }
 
       this.form.submit();

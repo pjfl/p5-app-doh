@@ -70,13 +70,6 @@ sub docs_url {
    return $_[ 1 ]->uri_for( $_[ 0 ]->_docs_url( $_[ 2 ] // $_[ 1 ]->locale ) );
 }
 
-sub generate_static_action : Role(editor) {
-   my ($self, $req) = @_; my $res = $self->generate_static( $req );
-
-   $res->{redirect}->{location} = $self->docs_url( $req );
-   return $res;
-}
-
 sub get_dialog : Role(any) {
    return shift->dialog( @_ );
 }

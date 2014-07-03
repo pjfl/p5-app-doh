@@ -1,14 +1,13 @@
 /* Mixins */
 .border-radius(@radius: 5px) {
-   -khtml-border-radius: @radius; -moz-border-radius: @radius;
-   -webkit-border-radius: @radius; border-radius: @radius;
+   -khtml-border-radius: @radius; -webkit-border-radius: @radius;
+   border-radius: @radius;
 }
 .box-sizing(@model: border-box) {
    -khtml-box-sizing: @model; -moz-box-sizing: @model;
    -webkit-box-sizing: @model; box-sizing: @model;
 }
 .box-shadow(@depth: 5px) {
-   -moz-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
    -webkit-box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
    box-shadow: 0px @depth @depth rgba(0, 0, 0, 0.25);
 }
@@ -19,8 +18,8 @@
    font-family: @font, monaco, "Courier New", courier, monospace;
 }
 .opacity(@opacity: 0.5) {
-   -khtml-opacity: @opacity; -moz-opacity: @opacity;
-   -webkit-opacity: @opacity; opacity: @opacity;
+   -khtml-opacity: @opacity; -webkit-opacity: @opacity;
+   opacity: @opacity;
    @opperc: @opacity * 100;
    -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
    filter: ~"alpha(opacity=@{opperc})";
@@ -353,12 +352,12 @@ table tr th:last-child, table tr td:last-child {
 .offset1 { margin-left: 8%; }
 .page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }
-.pathname {
+.pathname, .standard-field {
    border: 2px inset; .border-radius; .box-sizing; font-size: 15px;
    line-height: 18px; margin: 4px 0; min-width: 400px; padding: 3px 7px;
    vertical-align: middle;
 }
-.pathname[disabled] { color: @dark; }
+.pathname[disabled], .standard-field[disabled] ] { color: @dark; }
 .pod dd p { width: auto; }
 .pod dt { clear: left; }
 .pod dt a, .pod li a { display: block; font-size: 14px; line-height: 18px; }

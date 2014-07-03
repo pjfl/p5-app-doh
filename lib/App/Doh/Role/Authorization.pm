@@ -10,7 +10,7 @@ use HTTP::Status           qw( HTTP_FORBIDDEN HTTP_NOT_FOUND
 use Scalar::Util           qw( blessed );
 use Moo::Role;
 
-requires qw( config execute );
+requires qw( config execute users );
 
 around 'execute' => sub {
    my ($orig, $self, $method, $req) = @_; my $class = blessed $self || $self;
@@ -23,7 +23,8 @@ around 'execute' => sub {
       or throw error => 'Class [_1] method [_2] is private',
                args  => [ $class, $method ], rv => HTTP_FORBIDDEN;
 
-   is_member 'anon', $method_roles and return $orig->( $self, $method, $req );
+   ($ENV{DOH_MAKE_STATIC} or is_member 'anon', $method_roles)
+      and return $orig->( $self, $method, $req );
 
    $req->authenticated
       or throw error => 'Resource [_1] authentication required',
@@ -31,9 +32,9 @@ around 'execute' => sub {
 
    is_member 'any', $method_roles and return $orig->( $self, $method, $req );
 
-   my $conf = $self->config;
+   my $user = $self->users->read_user( $req->username );
 
-   for my $role_name (@{ $conf->user_roles->{ $req->username } // [] }) {
+   for my $role_name (@{ $user->roles // [] }) {
       is_member $role_name, $method_roles
          and return $orig->( $self, $method, $req );
    }

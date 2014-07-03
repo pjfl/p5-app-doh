@@ -3,39 +3,41 @@ package App::Doh::Controller::Root;
 use Web::Simple;
 
 sub dispatch_request {
+   sub (POST + /admin | /admin/* | /login | /logout | /user + ?*) {
+      return shift->execute( qw( html auth  from_request ), @_ ) },
+
+   sub (GET  + /admin | /admin/* + ?*) {
+      return shift->execute( qw( html auth  get_form ), @_ ) },
+
    sub (POST + /assets + *file~ + ?*) {
-      return shift->execute( qw( html docs  upload_asset ), @_ );
-   },
+      return shift->execute( qw( html docs  upload_asset ), @_ ) },
+
    sub (GET  + /dialog + ?*) {
-      return shift->execute( qw( xml  docs  get_dialog ), @_ );
-   },
-   sub (POST + /login | /logout + ?*) {
-      return shift->execute( qw( html auth  from_request ), @_ );
-   },
-   sub (GET  + /login + ?*) {
-      return shift->execute( qw( xml  auth  get_dialog ), @_ );
-   },
+      return shift->execute( qw( xml  docs  get_dialog ), @_ ) },
+
    sub (GET  + /pod | /pod/** + ?*) {
-      return shift->execute( qw( html help  get_content ), @_ );
-   },
+      return shift->execute( qw( html help  get_content ), @_ ) },
+
    sub (POST + /posts | /posts/** + ?*) {
-      return shift->execute( qw( html posts from_request ), @_ );
-   },
+      return shift->execute( qw( html posts from_request ), @_ ) },
+
    sub (GET  + /posts | /posts/** + ?*) {
-      return shift->execute( qw( html posts get_content ), @_ );
-   },
+      return shift->execute( qw( html posts get_content ), @_ ) },
+
    sub (GET  + /search + ?*) {
-      return shift->execute( qw( html docs  search_tree ), @_ );
-   },
+      return shift->execute( qw( html docs  search_tree ), @_ ) },
+
+   sub (GET  + /user + ?*) {
+      return shift->execute( qw( xml  auth  get_dialog ), @_ ) },
+
    sub (POST + / | /** + ?*) {
-      return shift->execute( qw( html docs  from_request ), @_ );
-   },
+      return shift->execute( qw( html docs  from_request ), @_ ) },
+
    sub (GET  + / | /index + ?*) {
-      return shift->execute( qw( html docs  get_index ), @_ );
-   },
+      return shift->execute( qw( html docs  get_index ), @_ ) },
+
    sub (GET  + /** + ?*) {
-      return shift->execute( qw( html docs  get_content ), @_ );
-   };
+      return shift->execute( qw( html docs  get_content ), @_ ) };
 }
 
 1;

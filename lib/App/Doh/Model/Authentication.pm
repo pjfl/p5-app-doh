@@ -1,33 +1,113 @@
 package App::Doh::Model::Authentication;
 
-use namespace::autoclean;
-
 use Moo;
-use App::Doh::Functions        qw( set_element_focus );
-use Class::Usul::Constants     qw( FALSE NUL TRUE );
-use Class::Usul::Functions     qw( throw );
-use Crypt::Eksblowfish::Bcrypt qw( bcrypt );
-use HTTP::Status               qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED );
-use Unexpected::Functions      qw( Unspecified );
+use App::Doh::Attributes;
+use App::Doh::Functions    qw( set_element_focus );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
+use Class::Usul::Functions qw( throw );
+use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED
+                               HTTP_UNPROCESSABLE_ENTITY );
+use Try::Tiny;
+use Unexpected::Functions  qw( Unspecified );
 
 extends q(App::Doh::Model);
+with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
-sub get_dialog {
-   my ($self, $req) = @_; my $stash = $self->get_stash( $req );
+sub activate_user_action : Role(admin) {
+   my ($self, $req) = @_;
 
-   $stash->{page} = {
-      literal_js => set_element_focus( 'login-user', 'username' ),
-      meta       => { id => $req->query_params->( 'id' ), },
-      template   => 'login-user',
-      username   => $req->session->{username} // NUL, };
+   my $username = $req->body_params->( 'username' );
+
+   $self->users->activate_user( $username );
+
+   my $message  = [ 'User [_1] activated by [_2]', $username, $req->username ];
+
+   return { redirect => { location => $req->uri, message => $message } };
+}
+
+sub deactivate_user_action : Role(admin) {
+   my ($self, $req) = @_;
+
+   my $username = $req->body_params->( 'username' );
+
+   $self->users->deactivate_user( $username );
+
+   my $message  = [ 'User [_1] deactivated by [_2]', $username, $req->username];
+
+   return { redirect => { location => $req->uri, message => $message } };
+}
+
+sub generate_static_action : Role(admin) {
+   my ($self, $req) = @_;
+
+   my $cli = $self->config->binsdir->catfile( 'doh-cli' );
+   my $cmd = [ "${cli}", 'make_static' ];
+
+   $self->log->debug( $self->ipc->run_cmd( $cmd, { async => TRUE } )->out );
+
+   my $message = [ 'Static page generation started in the background by [_1]',
+                   $req->username ];
+
+   return { redirect => { location => $req->uri, message => $message } };
+}
+
+sub get_dialog : Role(anon) {
+   my ($self, $req) = @_;
+
+   my $params = $req->query_params;
+   my $name   = $params->( 'name' );
+   my $stash  = $self->get_stash( $req );
+   my $page   = $stash->{page} = { meta     => { id => $params->( 'id' ), },
+                                   template => "${name}-user", };
+
+   $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
+   $name eq 'login' and $page->{username} = $req->session->{username} // NUL;
 
    return $stash;
 }
 
-sub login_action {
+sub get_form : Role(admin) {
+   my ($self, $req) = @_; my $stash = $self->get_content( $req );
+
+   my $id = $req->args->[ 0 ] // $req->params->{username};
+
+   $stash->{page}->{form_name} = 'administration';
+   $stash->{page}->{template } = 'admin';
+   $stash->{page}->{users    } = $self->users->list_users( $id );
+
+   return $stash;
+}
+
+sub create_user_action : Role(anon) {
+   my ($self, $req) = @_;
+
+   my $params  = $req->body_params;
+   my $args    = { email    => $params->( 'email' ),
+                   id       => $params->( 'username' ),
+                   password => $params->( 'password' ), };
+   my $user    = $self->users->create_user( $args );
+   my $message = [ 'User [_1] created', $user->id ];
+
+   return { redirect => { location => $req->base, message => $message } };
+}
+
+sub delete_user_action : Role(admin) {
+   my ($self, $req) = @_;
+
+   my $username = $req->body_params->( 'username' );
+
+   $self->users->delete_user( $username );
+
+   my $location = $req->uri_for( 'admin' );
+   my $message  = [ 'User [_1] deleted by [_2]', $username, $req->username ];
+
+   return { redirect => { location => $location, message => $message } };
+}
+
+sub login_action : Role(anon) {
    my ($self, $req) = @_; my $message;
 
    my $session  = $req->session;
@@ -46,7 +126,7 @@ sub login_action {
    return { redirect => { location => $req->base, message => $message } };
 }
 
-sub logout_action {
+sub logout_action : Role(any) {
    my ($self, $req) = @_; my ($location, $message);
 
    if ($req->authenticated) {
@@ -59,25 +139,31 @@ sub logout_action {
    return { redirect => { location => $location, message => $message } };
 }
 
+sub navigation {
+   return [ { depth => 0, name => 'Admin', type => 'file', url => 'admin' } ];
+}
+
 # Private methods
 sub _authenticate {
-   my ($self, $username, $password) = @_;
+   my ($self, $username, $password) = @_; my ($authenticated, $user);
 
    $username or throw class => Unspecified, args => [ 'user name' ],
                          rv => HTTP_EXPECTATION_FAILED;
    $password or throw class => Unspecified, args => [ 'password' ],
                          rv => HTTP_EXPECTATION_FAILED;
 
-   my $tuple = $self->config->{users}->{ $username }
-      or throw error => 'User [_1] unknown', args => [ $username ],
-                  rv => HTTP_EXPECTATION_FAILED;
+   try   { $user = $self->users->read_user( $username ) }
+   catch { throw error => 'User [_1] unknown: [_2]', args => [ $username, $_ ],
+                    rv => HTTP_EXPECTATION_FAILED;
+   };
 
-   $tuple->[ 0 ] or throw error => 'User [_1] account inactive',
+   $user->active or throw error => 'User [_1] account inactive',
                            args => [ $username ], rv => HTTP_UNAUTHORIZED;
 
-   bcrypt( $password, $tuple->[ 1 ] ) eq $tuple->[ 1 ] and return TRUE;
+   try   { $authenticated = $user->authenticate( $password ) }
+   catch { throw error => ucfirst "${_}", rv => HTTP_UNPROCESSABLE_ENTITY };
 
-   return FALSE;
+   return $authenticated;
 }
 
 1;

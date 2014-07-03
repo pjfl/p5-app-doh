@@ -16,6 +16,7 @@ around 'load_page' => sub {
 
    $page->{ $_ } //= $conf->$_() for (qw( author description keywords ));
 
+   $page->{form_name          }   = 'markdown';
    $page->{locale             } //= $req->locale;
    $page->{wanted             } //= join '/', @{ $req->args };
    $page->{application_version}   = $App::Doh::VERSION;
