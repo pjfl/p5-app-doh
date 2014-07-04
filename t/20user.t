@@ -21,15 +21,15 @@ use Test::Requires "${perl_ver}";
 use_ok 'App::Doh::Server';
 
 my $self  = App::Doh::Server->new;
-my $users = $self->models->{auth}->users;
+my $users = $self->models->{admin}->users;
 
 $users->delete_user( 'admin' );
 
 my $user  = $users->create_user( {
-   fullname => 'Administrator', id => 'admin',
+   email    => 'Admin@example.com', id => 'admin',
    password => 'admin',      roles => [ 'admin', 'editor' ] } );
 
-is $user->fullname, 'Administrator', 'Creates user';
+is $user->email, 'Admin@example.com', 'Creates user';
 
 $users->activate_user( 'admin' );
 

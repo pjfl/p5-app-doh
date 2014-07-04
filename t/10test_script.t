@@ -18,6 +18,7 @@ BEGIN {
 use Test::Requires "${perl_ver}";
 
 use_ok 'App::Doh::Server';
+use_ok 'App::Doh::Request';
 
 my $self  = App::Doh::Server->new;
 my $model = $self->models->{docs};

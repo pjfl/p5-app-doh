@@ -425,6 +425,12 @@ if the value is undefined or tainted
 Returns the named body value, throws if the value is not defined. Returns the
 first value if the body contains more than one
 
+=head2 C<body_values>
+
+   $array_ref_values = $self->body_values( $name );
+
+Returns the named body values, throws if the values are not defined
+
 =head2 C<loc>
 
    $localised_string = $self->loc( $key, @args );

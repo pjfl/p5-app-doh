@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Fixed tests
           - Admin interface update user roles
           - Admin interface creates / deletes / activate / deactives users
           - Adding bcrypt based authentication

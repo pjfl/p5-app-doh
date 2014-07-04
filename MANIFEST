@@ -69,6 +69,7 @@ var/root/img/favicon-red.png
 var/root/img/favicon.png
 var/root/img/flags.png
 var/root/img/fork-me.png
+var/root/img/icons.png
 var/root/js/classes.js
 var/root/js/highlight.min.js
 var/root/js/less.min.js

@@ -2,8 +2,8 @@
    "users" : {
       "admin" : {
          "active" : "1",
-         "email" : "",
-         "password" : "$2a$14$NmCMPGUe1BsjMX.q3HjKQ.36TooNYTlulenPcdY/HwJkOFn9BAimm",
+         "email" : "Admin@example.com",
+         "password" : "$2a$14$x0SjyTDH8/sk4CpgR0YzDOGNxC6q0MIFaPDDWwTLzYB3eZX1i8uwa",
          "roles" : [
             "admin",
             "editor"

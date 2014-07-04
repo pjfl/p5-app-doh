@@ -111,6 +111,10 @@ Defines the following attributes;
 
 =over 3
 
+=item C<load_factor>
+
+The value passed to C<bcrypt> when creating new hashed passwords
+
 =back
 
 =head1 Subroutines/Methods
