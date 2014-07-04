@@ -4,10 +4,10 @@ use Web::Simple;
 
 sub dispatch_request {
    sub (POST + /admin | /admin/* | /login | /logout | /user + ?*) {
-      return shift->execute( qw( html auth  from_request ), @_ ) },
+      return shift->execute( qw( html admin from_request ), @_ ) },
 
    sub (GET  + /admin | /admin/* + ?*) {
-      return shift->execute( qw( html auth  get_form ), @_ ) },
+      return shift->execute( qw( html admin get_form ), @_ ) },
 
    sub (POST + /assets + *file~ + ?*) {
       return shift->execute( qw( html docs  upload_asset ), @_ ) },
@@ -28,7 +28,7 @@ sub dispatch_request {
       return shift->execute( qw( html docs  search_tree ), @_ ) },
 
    sub (GET  + /user + ?*) {
-      return shift->execute( qw( xml  auth  get_dialog ), @_ ) },
+      return shift->execute( qw( xml  admin get_dialog ), @_ ) },
 
    sub (POST + / | /** + ?*) {
       return shift->execute( qw( html docs  from_request ), @_ ) },

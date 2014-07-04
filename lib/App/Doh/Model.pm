@@ -5,6 +5,7 @@ use App::Doh::Attributes;
 use App::Doh::Functions    qw( show_node );
 use App::Doh::User;
 use Class::Usul::Constants qw( FALSE NUL );
+use Class::Usul::Functions qw( is_member );
 use Class::Usul::IPC;
 use Class::Usul::Time      qw( str2time time2str );
 use Class::Usul::Types     qw( Object );
@@ -60,11 +61,13 @@ sub get_stash {
    my ($self, $req) = @_; weaken( $req );
 
    return { code      => HTTP_OK,
+            is_member => \&is_member,
             loc       => sub { $req->loc( @_ ) },
             req       => $req,
             show_node => \&show_node,
             str2time  => \&str2time,
             time2str  => \&time2str,
+            ucfirst   => sub { ucfirst $_[ 0 ] },
             uri_for   => sub { $req->uri_for( @_ ) }, };
 }
 

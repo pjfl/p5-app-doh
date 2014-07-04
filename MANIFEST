@@ -18,7 +18,7 @@ lib/App/Doh/Daemon.pm
 lib/App/Doh/Functions.pm
 lib/App/Doh/Markdown.pm
 lib/App/Doh/Model.pm
-lib/App/Doh/Model/Authentication.pm
+lib/App/Doh/Model/Administration.pm
 lib/App/Doh/Model/Documentation.pm
 lib/App/Doh/Model/Help.pm
 lib/App/Doh/Model/Posts.pm

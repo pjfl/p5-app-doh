@@ -192,6 +192,10 @@ sub body_value {
    my $self = shift; return __get_defined_value( $self->body->param, @_ );
 }
 
+sub body_values {
+   my $self = shift; return __get_defined_values( $self->body->param, @_ );
+}
+
 sub loc {
    my $self = shift; return $self->_localize( $self->locale, @_ );
 }
@@ -264,6 +268,16 @@ sub __get_defined_value {
    is_arrayref $v and $v = $v->[ 0 ];
 
    return __defined_or_throw( $name, $v );
+}
+
+sub __get_defined_values {
+   my ($params, $name) = @_;
+
+   my $v = __defined_or_throw( $name, $params->{ $name } );
+
+   is_arrayref $v or $v = [ $v ];
+
+   return $v;
 }
 
 sub __get_scrubbed_value {

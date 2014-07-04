@@ -4,11 +4,13 @@
          <div class="content-page">
             <article>
 [%    INCLUDE 'default/header.tt' -%]
-               <div class="container span12">
+               <div class="container span9p5">
 [% IF !page.users.result.id -%]
                   <form action="[% uri_for( 'admin' ) %]"
                        enctype="application/x-www-form-urlencoded"
                         method="get" name="[% page.form_name %]">
+                     <label class="prompt"
+                              for="username">Select user name: </label>
                      <select id="users" class="submit" name="username">
                         <option selected="selected"></option>
 [%    FOR user = page.users.list -%]
@@ -17,29 +19,33 @@
                      </select>
                   </form>
 [% ELSE -%]
-[%    id = page.users.result.id %]
-                  <h3>User name: [% id %]</h3>
-                  <h4>Email: [% page.users.result.email %]</h3>
-                  <br/>
-                  <form action="[% uri_for( 'admin' ) _ '/' _ id %]"
+[%    user = page.users.result %]
+                  <h5>User name: [% user.id %]<br/>Email: [% user.email %]</h5>
+                  <br>
+                  <form action="[% uri_for( 'admin' ) _ '/' _ user.id %]"
                        enctype="application/x-www-form-urlencoded"
                         method="post" name="[% page.form_name %]">
-                     <input name="username" type="hidden" value="[% id %]">
+                     <input name="username" type="hidden" value="[% user.id %]">
+[%    FOR role = page.auth_roles -%]
+                     <input name="roles" type="checkbox" value="[% role %]"
+                      [% IF is_member( role, user.roles ) %]checked[% END %]>
+                     <span class="prompt">[% ucfirst( role ) %]</span><br>
+[%    END -%]
+                     <br>
+[%    IF user.active -%]
+[%       text = loc( 'Deactivate' ); value = 'deactivate_user' -%]
+[%    ELSE -%]
+[%       text = loc( 'Activate' ); value = 'activate_user' -%]
+[%    END -%]
+                     <button class="btn btn-submit submit" name="_method"
+                              type="submit" value="[% value %]">
+                              [% text %]</button>
                      <button class="btn btn-submit submit" id="delete-user"
                               name="_method" type="submit"
                              value="delete_user">[% loc( 'Delete' ) %]</button>
-[%    IF page.users.result.active -%]
-                     <button class="btn btn-submit submit"
-                              name="_method" type="submit"
-                             value="deactivate_user">[% loc( 'Deactivate' ) %]
-                     </button>
-[%    ELSE -%]
-                     <button class="btn btn-submit submit"
-                              name="_method" type="submit"
-                             value="activate_user">[% loc( 'Activate' ) %]
-                     </button>
-[%    END -%]
-            <!-- Add / remove user roles-->
+                     <button class="btn btn-submit submit" name="_method"
+                              type="submit" value="update_user">
+                              [% loc( 'Update' ) %]</button>
                   </form>
 [% END -%]
                </div>

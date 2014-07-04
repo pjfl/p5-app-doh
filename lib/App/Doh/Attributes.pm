@@ -20,7 +20,7 @@ sub import {
 }
 
 sub FETCH_CODE_ATTRIBUTES {
-   my ($class, $code) = @_; return $Code_Attr->{ 0 + $code } // [];
+   my ($class, $code) = @_; return $Code_Attr->{ 0 + $code } // {};
 }
 
 sub MODIFY_CODE_ATTRIBUTES {

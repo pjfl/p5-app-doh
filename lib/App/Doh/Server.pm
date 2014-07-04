@@ -3,18 +3,17 @@ package App::Doh::Server;
 use namespace::autoclean;
 
 use App::Doh::Controller::Root;
-use App::Doh::Model::Authentication;
+use App::Doh::Model::Administration;
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Help;
 use App::Doh::Model::Posts;
-use App::Doh::Request;
 use App::Doh::View::HTML;
 use App::Doh::View::XML;
 use Class::Usul;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix exception find_apphome
                                get_cfgfiles throw );
-use Class::Usul::Types     qw( ArrayRef BaseType HashRef
+use Class::Usul::Types     qw( ArrayRef BaseType HashRef LoadableClass
                                NonEmptySimpleStr Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
                                HTTP_INTERNAL_SERVER_ERROR );
@@ -22,12 +21,15 @@ use Plack::Builder;
 use Try::Tiny;
 use Web::Simple;
 
+has 'request_class' => is => 'lazy', isa => LoadableClass,
+   default          => sub { $_[ 0 ]->usul->config->request_class };
+
 # Private attributes
 has '_controllers' => is => 'lazy', isa => ArrayRef[Object], builder => sub {
    [  App::Doh::Controller::Root->new, ] }, reader => 'controllers';
 
 has '_models' => is => 'lazy', isa => HashRef[Object], builder => sub { {
-   'auth'     => App::Doh::Model::Authentication->new
+   'admin'    => App::Doh::Model::Administration->new
       ( builder  => $_[ 0 ]->usul ),
    'docs'     => App::Doh::Model::Documentation->new
       ( builder  => $_[ 0 ]->usul,
@@ -126,7 +128,7 @@ sub dispatch_request {
 sub execute {
    my ($self, $view, $model, $method, @args) = @_; my ($req, $res);
 
-   try   { $req = App::Doh::Request->new( $self->usul, @args ) }
+   try   { $req = $self->request_class->new( $self->usul, @args ) }
    catch { $res = __internal_server_error( $_ ) };
 
    $res and return $res;

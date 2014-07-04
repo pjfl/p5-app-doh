@@ -12,9 +12,9 @@
       "fred" : {
          "active" : "1",
          "email" : "fred@example.com",
-         "password" : "$2a$14$5iyIeRG4Pf40BJJ.NYxP5.SE85xVdfl1SjSqAWb0lXaAI/M0Bn6m2",
+         "password" : "$2a$14$8TBD71TCctZkkitVituqceV5OqGs/3yLMrMFYKwvdepzzGhDRAeYG",
          "roles" : [
-            "users"
+            "editor"
          ]
       }
    }

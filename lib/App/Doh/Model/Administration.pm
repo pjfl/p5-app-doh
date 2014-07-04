@@ -1,4 +1,4 @@
-package App::Doh::Model::Authentication;
+package App::Doh::Model::Administration;
 
 use Moo;
 use App::Doh::Attributes;
@@ -70,14 +70,19 @@ sub get_dialog : Role(anon) {
 }
 
 sub get_form : Role(admin) {
-   my ($self, $req) = @_; my $stash = $self->get_content( $req );
+   my ($self, $req) = @_;
 
-   my $id = $req->args->[ 0 ] // $req->params->{username};
+   my $id    = $req->args->[ 0 ] // $req->params->{username};
+   my $title = $req->loc( 'Administration' );
+   my $stash = $self->get_content( $req );
+   my $page  = $stash->{page};
 
-   $stash->{page}->{form_name} = 'administration';
-   $stash->{page}->{template } = 'admin';
-   $stash->{page}->{users    } = $self->users->list_users( $id );
-
+   $page->{auth_roles} = $self->config->auth_roles;
+   $page->{form_name } = 'administration';
+   $page->{name      } = $title;
+   $page->{template  } = 'admin';
+   $page->{title     } = $title;
+   $page->{users     } = $self->users->list_users( $id );
    return $stash;
 }
 
@@ -140,7 +145,21 @@ sub logout_action : Role(any) {
 }
 
 sub navigation {
-   return [ { depth => 0, name => 'Admin', type => 'file', url => 'admin' } ];
+   return [ { depth => 0,      name => 'Administration',
+              type  => 'file', url  => 'admin' } ];
+}
+
+sub update_user_action : Role(admin) {
+   my ($self, $req) = @_;
+
+   my $username = $req->body_params->( 'username' );
+   my $roles    = $req->body_values( 'roles' );
+
+   $self->users->update_user( { id => $username, roles => $roles } );
+
+   my $message  = [ 'User [_1] updated by [_2]', $username, $req->username ];
+
+   return { redirect => { location => $req->uri, message => $message } };
 }
 
 # Private methods
@@ -176,11 +195,11 @@ __END__
 
 =head1 Name
 
-App::Doh::Model::User - One-line description of the modules purpose
+App::Doh::Model::Administration - One-line description of the modules purpose
 
 =head1 Synopsis
 
-   use App::Doh::Model::User;
+   use App::Doh::Model::Administration;
    # Brief but working code examples
 
 =head1 Description

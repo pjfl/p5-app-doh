@@ -167,6 +167,13 @@ table tr th:last-child, table tr td:last-child {
 .btn.btn-sidebar:hover { background-color: @dark; }
 .btn.btn-sidebar:hover .icon-bar { background-color: @light; }
 .btn.btn-submit { padding: 4px 8px; .sans-font; }
+.checkbox {
+   background: url(../img/icons.png) -90px -300px no-repeat; cursor: pointer;
+   display: inline-block; height: 16px; vertical-align: baseline; width: 16px;
+}
+.checked  {
+   background: url(../img/icons.png) -120px -300px no-repeat transparent;
+}
 .columns { height: 100%; }
 .columns .left-column {
    background-color: @sidebar-background; border-bottom: 1px solid @lines;
@@ -357,7 +364,7 @@ table tr th:last-child, table tr td:last-child {
    line-height: 18px; margin: 4px 0; min-width: 400px; padding: 3px 7px;
    vertical-align: middle;
 }
-.pathname[disabled], .standard-field[disabled] ] { color: @dark; }
+.pathname[disabled], .standard-field[disabled] { color: @dark; }
 .pod dd p { width: auto; }
 .pod dt { clear: left; }
 .pod dt a, .pod li a { display: block; font-size: 14px; line-height: 18px; }
@@ -372,6 +379,7 @@ table tr th:last-child, table tr td:last-child {
 }
 .pod ul ul { margin-bottom: 0; }
 .posts.post-list { list-style: none; overflow: hidden; }
+.prompt { font-size: 14px; .serif-regular; }
 .pull-left  { float: left;  text-align: left;  }
 .pull-right { float: right; text-align: right; }
 .responsive-collapse {

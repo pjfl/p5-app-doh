@@ -28,6 +28,9 @@ has 'auth_file'       => is => 'lazy', isa => File,
    builder            => sub { $_[ 0 ]->file_root->catfile( 'users.json' ) },
    coerce             => File->coercion;
 
+has 'auth_roles'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
+   default            => sub { [ qw( admin editor users ) ] };
+
 has 'author'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'anon';
 
@@ -119,6 +122,9 @@ has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
 has 'query'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
+
+has 'request_class'   => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'App::Doh::Request';
 
 has 'root_mtime'      => is => 'lazy', isa => Path, coerce => Path->coercion,
    builder            => sub { $_[ 0 ]->file_root->catfile( '.mtime' ) };
@@ -233,6 +239,11 @@ containing user uploaded files
 
 Defaults to F<var/root/docs/users.json>. A file object which contains the
 users and roles defined by the application
+
+=item C<auth_roles>
+
+The list of roles applicable to authorization. Defaults to C<admin>,
+C<editor>, and C<users>
 
 =item C<author>
 
@@ -400,6 +411,11 @@ directory
 =item C<query>
 
 Default search string
+
+=item C<request_class>
+
+Defaults to C<App::Doh::Request>. The lazy loaded class used as the per
+request object
 
 =item C<repo_url>
 
