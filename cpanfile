@@ -10,7 +10,6 @@ requires "HTTP::Message" => "6.06";
 requires "Module::Pluggable" => "4.8";
 requires "Moo" => "1.004";
 requires "Plack" => "1.0018";
-requires "Plack::Middleware::Auth::Htpasswd" => "0.02";
 requires "Plack::Middleware::Deflater" => "0.08";
 requires "Plack::Middleware::LogErrors" => "0.001";
 requires "Plack::Middleware::Session" => "0.21";

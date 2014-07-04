@@ -37,7 +37,6 @@ my $prereqs  = {
     'Module::Pluggable' => '4.8',
     'Moo' => '1.004',
     'Plack' => '1.0018',
-    'Plack::Middleware::Auth::Htpasswd' => '0.02',
     'Plack::Middleware::Deflater' => '0.08',
     'Plack::Middleware::LogErrors' => '0.001',
     'Plack::Middleware::Session' => '0.21',
