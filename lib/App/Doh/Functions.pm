@@ -152,8 +152,8 @@ sub set_element_focus {
    my ($form, $name) = @_;
 
    return [ "var form = document.forms[ '${form}' ];",
-            "var f    = function() { form.${name}.focus() };",
-            "f.delay( 100 );" ];
+            "var f = function() { behaviour.rebuild(); form.${name}.focus() };",
+            'f.delay( 100 );', ];
 }
 
 sub show_node ($;$$) {

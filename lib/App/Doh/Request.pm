@@ -31,10 +31,9 @@ has 'domain'   => is => 'lazy', isa => NonEmptySimpleStr,
 
 has 'env'      => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'host'     => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub {
-      my $env  =  $_[ 0 ]->env;
-         $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
+has 'host'     => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
+   my $env     =  $_[ 0 ]->env;
+      $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
 
 has 'language' => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub { extract_lang $_[ 0 ]->locale };
@@ -48,22 +47,19 @@ has 'method'   => is => 'lazy', isa => SimpleStr,
 
 has 'params'   => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'path'     => is => 'lazy', isa => SimpleStr,
-   builder     => sub {
-      my $v    =  $_[ 0 ]->env->{ 'PATH_INFO' } // '/';
-         $v    =~ s{ \A / }{}mx; $v =~ s{ \? .* \z }{}mx; $v };
+has 'path'     => is => 'lazy', isa => SimpleStr, builder => sub {
+   my $v       =  $_[ 0 ]->env->{ 'PATH_INFO' } // '/';
+      $v       =~ s{ \A / }{}mx; $v =~ s{ \? .* \z }{}mx; $v };
 
-has 'query'    => is => 'lazy', isa => SimpleStr,
-   builder     => sub {
-      my $v    =  $_[ 0 ]->env->{ 'QUERY_STRING' }; $v ? "'?${v}" : NUL };
+has 'query'    => is => 'lazy', isa => SimpleStr, builder => sub {
+   my $v       =  $_[ 0 ]->env->{ 'QUERY_STRING' }; $v ? "'?${v}" : NUL };
 
 has 'scheme'   => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub { $_[ 0 ]->env->{ 'psgi.url_scheme' } // 'http' };
 
-has 'script'   => is => 'lazy', isa => SimpleStr,
-   builder     => sub {
-      my $v    =  $_[ 0 ]->env->{ 'SCRIPT_NAME' } // '/';
-         $v    =~ s{ / \z }{}gmx; $v };
+has 'script'   => is => 'lazy', isa => SimpleStr, builder => sub {
+   my $v       =  $_[ 0 ]->env->{ 'SCRIPT_NAME' } // '/';
+      $v       =~ s{ / \z }{}gmx; $v };
 
 has 'session'  => is => 'lazy', isa => HashRef,
    builder     => sub { $_[ 0 ]->env->{ 'psgix.session' } // {} };
@@ -73,17 +69,14 @@ has 'uri'      => is => 'lazy', isa => Object;
 has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
    builder     => sub { $_[ 0 ]->session->{username} // 'unknown' };
 
-has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub {
-      my $body_method  = delete $_[ 0 ]->body->param->{_method};
-      my $param_method = delete $_[ 0 ]->params->{_method};
-      my $method       = $body_method || $param_method || 'not_found';
+has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
+   my $body_method  = delete $_[ 0 ]->body->param->{_method};
+   my $param_method = delete $_[ 0 ]->params->{_method};
+   my $method       = $body_method || $param_method || 'not_found';
+   (is_arrayref $method) ? $method->[ 0 ] : $method };
 
-      return (is_arrayref $method) ? $method->[ 0 ] : $method };
-
-has 'authenticated' => is => 'lazy', isa => Bool, builder => sub {
-   $_[ 0 ]->session->{authenticated} // FALSE;
-};
+has 'authenticated' => is => 'lazy', isa => Bool,
+   builder          => sub { $_[ 0 ]->session->{authenticated} // FALSE };
 
 # Construction
 around 'BUILDARGS' => sub {

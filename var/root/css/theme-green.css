@@ -183,7 +183,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .pod pre{font-size:14px;font-weight:700;margin-bottom:18px;min-width:500px;padding-top:18px;padding-right:18px}
 .pod ul ul{margin-bottom:0}
 .posts.post-list{list-style:none;overflow:hidden}
-.prompt{font-size:14px;font-weight:400;font-family:"Roboto Slab","Times New Roman","Times","serif"}
+.prompt{display:inline-block;font-size:14px;min-width:100px;font-weight:400;font-family:"Roboto Slab","Times New Roman","Times","serif"}
 .pull-left{float:left;text-align:left}
 .pull-right{float:right;text-align:right}
 .responsive-collapse{background-color:#adcb83;border-bottom:1px solid #adcb83;display:none;padding:9px 18px}

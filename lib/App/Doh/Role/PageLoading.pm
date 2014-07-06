@@ -14,6 +14,18 @@ requires qw( config get_stash load_page localised_tree );
 has 'type_map' => is => 'lazy', isa => HashRef, builder => sub { {} };
 
 # Construction
+around 'BUILDARGS' => sub {
+   my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
+
+   my $views = $attr->{views} or return $attr;
+
+   for my $view (values %{ $views }) {
+      $view->can( 'type_map' ) and $attr->{type_map} = $view->type_map and last;
+   }
+
+   return $attr;
+};
+
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_; my %seen = ();
 

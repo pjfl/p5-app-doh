@@ -49,6 +49,12 @@
                 name : 'upload_file',
                 title: '[% loc( 'Upload File' ) %]',
                 value: '[% page.url %]' } ] };
+      behaviour.config.inputs[ 'password' ]
+         = { event   : [ 'focus', 'blur' ],
+             method  : [ 'show_password', 'hide_password' ] };
+      behaviour.config.inputs[ 'again' ]
+         = { event   : [ 'focus', 'blur' ],
+             method  : [ 'show_password', 'hide_password' ] };
       behaviour.config.anchors[ 'users' ]
          = { event   : 'change', method: 'submitForm', args: [ '' ] };
 [% END -%]

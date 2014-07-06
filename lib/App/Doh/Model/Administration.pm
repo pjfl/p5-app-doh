@@ -65,7 +65,6 @@ sub get_dialog : Role(anon) {
 
    $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
    $name eq 'login' and $page->{username} = $req->session->{username} // NUL;
-
    return $stash;
 }
 

@@ -28,25 +28,24 @@ has 'request_class' => is => 'lazy', isa => LoadableClass,
 has '_controllers' => is => 'lazy', isa => ArrayRef[Object], builder => sub {
    [  App::Doh::Controller::Root->new, ] }, reader => 'controllers';
 
-has '_models' => is => 'lazy', isa => HashRef[Object], builder => sub { {
-   'admin'    => App::Doh::Model::Administration->new
-      ( builder  => $_[ 0 ]->usul ),
-   'docs'     => App::Doh::Model::Documentation->new
-      ( builder  => $_[ 0 ]->usul,
-        type_map => $_[ 0 ]->views->{html}->type_map ),
-   'help'     => App::Doh::Model::Help->new( builder => $_[ 0 ]->usul ),
-   'posts'    => App::Doh::Model::Posts->new
-      ( builder  => $_[ 0 ]->usul,
-        type_map => $_[ 0 ]->views->{html}->type_map ), } },
-   reader     => 'models';
+has '_models'   => is => 'lazy', isa => HashRef[Object], builder => sub { {
+   'admin'      => App::Doh::Model::Administration->new
+      ( builder => $_[ 0 ]->usul ),
+   'docs'       => App::Doh::Model::Documentation->new
+      ( builder => $_[ 0 ]->usul, views => $_[ 0 ]->views ),
+   'help'       => App::Doh::Model::Help->new
+      ( builder => $_[ 0 ]->usul ),
+   'posts'      => App::Doh::Model::Posts->new
+      ( builder => $_[ 0 ]->usul, views => $_[ 0 ]->views ), } },
+   reader       => 'models';
 
-has '_views'  => is => 'lazy', isa => HashRef[Object], builder => sub { {
-   'html'     => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
-   'xml'      => App::Doh::View::XML->new ( builder => $_[ 0 ]->usul ), } },
-   reader     => 'views';
+has '_views'    => is => 'lazy', isa => HashRef[Object], builder => sub { {
+   'html'       => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
+   'xml'        => App::Doh::View::XML->new ( builder => $_[ 0 ]->usul ), } },
+   reader       => 'views';
 
-has '_usul'   => is => 'lazy', isa => BaseType, handles => [ 'log' ],
-   reader     => 'usul';
+has '_usul'     => is => 'lazy', isa => BaseType, handles => [ 'log' ],
+   reader       => 'usul';
 
 # Construction
 around 'to_psgi_app' => sub {

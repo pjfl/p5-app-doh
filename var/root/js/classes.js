@@ -123,7 +123,8 @@ var Behaviour = new Class( {
    Implements: [ Events, Options ],
 
    config: {
-      anchors: {}
+      anchors: {},
+      inputs : {}
    },
 
    options           : {

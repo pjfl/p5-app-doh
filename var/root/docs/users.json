@@ -8,14 +8,6 @@
             "admin",
             "editor"
          ]
-      },
-      "fred" : {
-         "active" : "1",
-         "email" : "fred@example.com",
-         "password" : "$2a$14$8TBD71TCctZkkitVituqceV5OqGs/3yLMrMFYKwvdepzzGhDRAeYG",
-         "roles" : [
-            "editor"
-         ]
       }
    }
 }
