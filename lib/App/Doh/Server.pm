@@ -144,6 +144,8 @@ sub execute {
    }
    catch { $res = $self->_render_exception( $view, $model, $req, $_ ) };
 
+   $req->session->update;
+
    return $res;
 }
 
@@ -153,7 +155,7 @@ sub _redirect {
 
    my $redirect = $stash->{redirect}; my $message = $redirect->{message};
 
-   $message and $req->session->{status_message} = $req->loc( @{ $message } )
+   $message and $req->session->status_message( $req->loc( @{ $message } ) )
             and $self->log->info( $req->loc_default( @{ $message } ) );
 
    return [ $code, [ 'Location', $redirect->{location} ], [] ];

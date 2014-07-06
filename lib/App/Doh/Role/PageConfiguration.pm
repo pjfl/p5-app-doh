@@ -10,9 +10,9 @@ requires qw( config load_page );
 
 # Construction
 around 'load_page' => sub {
-   my ($orig, $self, $req, @args) = @_; my $conf = $self->config;
+   my ($orig, $self, $req, @args) = @_;
 
-   my $page = $orig->( $self, $req, @args ); my $sess = $req->session;
+   my $page = $orig->( $self, $req, @args ); my $conf = $self->config;
 
    $page->{ $_ } //= $conf->$_() for (qw( author description keywords ));
 
@@ -23,7 +23,7 @@ around 'load_page' => sub {
    $page->{editing            } //= $req->params->{edit} // FALSE;
    $page->{language           }   = extract_lang $page->{locale};
    $page->{mode               }   = $req->params->{mode} // 'online';
-   $page->{status_message     }   = delete $sess->{status_message} // NUL;
+   $page->{status_message     }   = $req->session->clear_status_message;
    $page->{homepage_url       }   = $page->{mode} eq 'online'
                                   ? $req->base : $req->uri_for( 'index' );
 

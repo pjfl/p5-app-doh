@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added ::Session. Added session timeout
           - Adjusted CSS tips box model
           - Adjusted CSS prompt widths
           - Removed unsed dependency

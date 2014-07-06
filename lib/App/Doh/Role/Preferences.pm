@@ -15,8 +15,9 @@ around 'get_stash' => sub {
    my $conf   = $self->config;
 
    for my $k (@{ $conf->preferences }) {
-      $stash->{prefs}->{ $k } = $sess->{ $k }
-         = $params->{ $k } // $sess->{ $k } // $conf->$k();
+      my $v = $params->{ $k } // $sess->{ $k } // $conf->$k();
+
+      $stash->{prefs}->{ $k } = $sess->$k( $v );
    }
 
    return $stash;

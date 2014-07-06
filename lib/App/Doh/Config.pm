@@ -7,7 +7,8 @@ use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( app_prefix );
 use File::DataClass::Types qw( ArrayRef Bool Directory File HashRef Int
                                NonEmptySimpleStr NonNumericSimpleStr
-                               NonZeroPositiveInt Path SimpleStr Str );
+                               NonZeroPositiveInt Path PositiveInt
+                               SimpleStr Str );
 use Sys::Hostname          qw( hostname );
 use Type::Utils            qw( enum );
 
@@ -99,6 +100,8 @@ has 'load_factor'     => is => 'ro',   isa => NonZeroPositiveInt,
 has 'mdn_tab_width'   => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
 has 'max_asset_size'  => is => 'ro',   isa => Int, default => 4_194_304;
+
+has 'max_session_time' => is => 'ro',  isa => PositiveInt, default => 900;
 
 has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
    default            => '/';
@@ -370,6 +373,10 @@ indent a code block in the markdown class
 =item C<max_asset_size>
 
 Integer defaults to 4Mb. Maximum size in bytes of the file upload
+
+=item C<max_session_time>
+
+Time in seconds before a session expires. Defaults to 15 minutes
 
 =item C<mount_point>
 

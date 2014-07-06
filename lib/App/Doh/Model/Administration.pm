@@ -64,7 +64,7 @@ sub get_dialog : Role(anon) {
                                    template => "${name}-user", };
 
    $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
-   $name eq 'login' and $page->{username} = $req->session->{username} // NUL;
+   $name eq 'login' and $page->{username} = $req->session->username;
    return $stash;
 }
 
@@ -120,11 +120,11 @@ sub login_action : Role(anon) {
 
    if ($self->_authenticate( $username, $params->( 'password' ) )) {
       $message = [ 'User [_1] logged in', $username ];
-      $session->{authenticated} = TRUE; $session->{username} = $username;
+      $session->authenticated( TRUE ); $session->username( $username );
    }
    else {
       $message = [ 'User [_1] access denied', $username ];
-      $session->{authenticated} = FALSE;
+      $session->authenticated( FALSE );
    }
 
    return { redirect => { location => $req->base, message => $message } };
@@ -136,7 +136,7 @@ sub logout_action : Role(any) {
    if ($req->authenticated) {
       $location = $req->base;
       $message  = [ 'User [_1] logged out', $req->username ];
-      $req->session->{authenticated} = FALSE;
+      $req->session->authenticated( FALSE );
    }
    else { $location = $req->uri; $message = [ 'User not logged in' ] }
 

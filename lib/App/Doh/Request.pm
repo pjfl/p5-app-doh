@@ -4,6 +4,7 @@ use namespace::autoclean;
 
 use Moo;
 use App::Doh::Functions    qw( extract_lang );
+use App::Doh::Session;
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL SPC );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                is_member throw trim );
@@ -61,22 +62,17 @@ has 'script'   => is => 'lazy', isa => SimpleStr, builder => sub {
    my $v       =  $_[ 0 ]->env->{ 'SCRIPT_NAME' } // '/';
       $v       =~ s{ / \z }{}gmx; $v };
 
-has 'session'  => is => 'lazy', isa => HashRef,
-   builder     => sub { $_[ 0 ]->env->{ 'psgix.session' } // {} };
+has 'session'  => is => 'lazy', isa => Object, builder => sub {
+   App::Doh::Session->new( builder => $_[ 0 ]->usul, env => $_[ 0 ]->env ) },
+   handles     => [ qw( authenticated username ) ];
 
 has 'uri'      => is => 'lazy', isa => Object;
-
-has 'username' => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub { $_[ 0 ]->session->{username} // 'unknown' };
 
 has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
    my $body_method  = delete $_[ 0 ]->body->param->{_method};
    my $param_method = delete $_[ 0 ]->params->{_method};
    my $method       = $body_method || $param_method || 'not_found';
    (is_arrayref $method) ? $method->[ 0 ] : $method };
-
-has 'authenticated' => is => 'lazy', isa => Bool,
-   builder          => sub { $_[ 0 ]->session->{authenticated} // FALSE };
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -374,7 +370,7 @@ The request path
 
 =item C<session>
 
-Stores the user preferences. A hash reference
+Stores the user preferences. An instance of L<App::Doh::Session>
 
 =item C<tunnel_method>
 
