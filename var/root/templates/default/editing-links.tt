@@ -38,7 +38,7 @@
                               name="_method" type="submit"
                              value="delete_file">[% text %]</button></span>
                </form>
-[%    href  = links.base_uri _ 'static/' _ page.language _ '/index.html' %]
+[%    href  = links.base_uri _ config.static _ '/' _ page.language _ '/index.html' %]
 [%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
 [%    text  = loc( 'View Static' ) %]
                <span class="tips" title="[% title %]">

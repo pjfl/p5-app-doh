@@ -68,7 +68,7 @@
                   </span>
 [% END -%]
 [% IF page.mode != 'static' -%]
-[%    href  = links.base_uri _ 'static/' _ page.language _ '/index.html' %]
+[%    href  = links.base_uri _ config.static _ '/' _ page.language _ '/index.html' %]
 [%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
                   <span class="tips" title="[% title %]">
                      <a class="btn btn-secondary btn-hero"

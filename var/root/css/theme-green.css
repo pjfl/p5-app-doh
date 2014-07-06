@@ -202,10 +202,10 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .sub-text{font-size:10px}
 .text-center{text-align:center}
 .tips{display:inline-block;position:relative}
-.tips-container{background:#92c86a;border:2px solid transparent;border-color:#adcb83;-khtml-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-webkit-box-shadow:0 5px 5px rgba(0,0,0,0.25);box-shadow:0 5px 5px rgba(0,0,0,0.25);text-align:center;z-index:13000}
+.tips-container{background:#92c86a;border:2px solid transparent;border-color:#adcb83;-khtml-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-webkit-box-shadow:0 5px 5px rgba(0,0,0,0.25);box-shadow:0 5px 5px rgba(0,0,0,0.25);-khtml-box-sizing:content-box;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box;text-align:center;z-index:13000}
 .tips-defn{color:#000;display:block;font-size:12px;line-height:18px;padding:4px 16px 16px 16px}
 .tips-mark0{border:9px solid;border-color:transparent transparent #adcb83 #adcb83;content:' ';height:0;left:16px;position:absolute;top:-18px;width:0}
-.tips-mark1{border:7px solid;border-color:transparent transparent #92c86a #92c86a;content:' ';height:0;left:18px;position:absolute;width:0;top:-14px}
+.tips-mark1{border:7px solid;border-color:transparent transparent #92c86a #92c86a;content:' ';height:0;left:18px;position:absolute;top:-14px;width:0}
 .tips-term{color:#881102;display:block;font-size:16px;line-height:18px;padding:8px 16px 4px 16px}
 .unbounded-x{overflow-x:auto}
 .upload-file{margin:9px;overflow:hidden;position:relative}

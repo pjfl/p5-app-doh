@@ -405,8 +405,8 @@ table tr th:last-child, table tr td:last-child {
 .tips           { display: inline-block; position: relative; }
 .tips-container {
    background: @sidebar-hover; border: 2px solid transparent;
-   border-color: @lines;
-   .border-radius; .box-shadow; text-align: center; z-index: 13000;
+   border-color: @lines; .border-radius; .box-shadow;
+   .box-sizing(content-box); text-align: center; z-index: 13000;
 }
 .tips-defn {
    color: #000; display: block; font-size: 12px; line-height: 18px;
@@ -421,7 +421,7 @@ table tr th:last-child, table tr td:last-child {
    border: 7px solid;
    border-color: transparent transparent @sidebar-hover @sidebar-hover;
    content: ' '; height: 0; left: 18px; position: absolute;
-   width: 0; top: -14px;
+   top: -14px; width: 0;
 }
 .tips-term {
    color: @contrast; display: block; font-size: 16px; line-height: 18px;

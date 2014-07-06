@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Adjusted CSS tips box model
           - Adjusted CSS prompt widths
           - Removed unsed dependency
           - Fixed tests
