@@ -25,7 +25,7 @@ has 'status_message' => is => 'rw', isa => SimpleStr | Undef;
 has 'theme'          => is => 'rw', isa => NonEmptySimpleStr,
    default           => 'green';
 
-has 'updated'        => is => 'ro', isa => NonZeroPositiveInt;
+has 'updated'        => is => 'ro', isa => NonZeroPositiveInt, required => TRUE;
 
 has 'use_flags'      => is => 'rw', isa => Bool, default => TRUE;
 

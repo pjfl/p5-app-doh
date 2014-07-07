@@ -2,9 +2,10 @@ package App::Doh::Role::Preferences;
 
 use namespace::autoclean;
 
+use Try::Tiny;
 use Moo::Role;
 
-requires qw( config get_stash );
+requires qw( config get_stash log );
 
 around 'get_stash' => sub {
    my ($orig, $self, $req, @args) = @_;
@@ -17,7 +18,8 @@ around 'get_stash' => sub {
    for my $k (@{ $conf->preferences }) {
       my $v = $params->{ $k } // $sess->{ $k } // $conf->$k();
 
-      $stash->{prefs}->{ $k } = $sess->$k( $v );
+      try   { $stash->{prefs}->{ $k } = $sess->$k( $v ) }
+      catch { $self->log->debug( $_ ) };
    }
 
    return $stash;
