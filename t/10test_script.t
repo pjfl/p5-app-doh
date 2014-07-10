@@ -16,6 +16,7 @@ BEGIN {
 }
 
 use Test::Requires "${perl_ver}";
+use Test::Requires { 'warnings::illegalproto' => 0.001000 };
 
 use_ok 'App::Doh::Server';
 use_ok 'App::Doh::Request';
