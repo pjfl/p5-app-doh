@@ -44,7 +44,7 @@
                               name="_method" type="submit"
                              value="delete_user">[% loc( 'Delete' ) %]</button>
                      <button class="btn btn-submit submit" name="_method"
-                              type="submit" value="update_user">
+                              type="submit" value="update_roles">
                               [% loc( 'Update' ) %]</button>
                   </form>
 [% END -%]

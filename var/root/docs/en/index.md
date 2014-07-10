@@ -1,6 +1,6 @@
 ---
 keywords: static site generator
-template: index
+layout: index
 ---
 <p class="lead">
    <strong>Doh</strong> is a documentation generator that uses a

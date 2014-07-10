@@ -10,11 +10,11 @@
 [% END -%]
 [% INCLUDE 'default/navbar.tt' -%]
 [% INCLUDE 'default/fork-me.tt' -%]
-   <!-- Admin Interface -->
+   <!-- Layout [% page.layout %] -->
    <div class="container-fluid fluid-height wrapper">
       <div class="row-fluid columns content">
-[% INCLUDE 'default/admin-left-column.tt' -%]
-[% INCLUDE 'default/admin-right-column.tt' -%]
+[% path = 'default/' _ page.template.0  _ '-left-column.tt';  INCLUDE $path -%]
+[% path = 'default/' _ page.template.1  _ '-right-column.tt'; INCLUDE $path -%]
       </div>
    </div>
 [% INCLUDE 'default/footer.tt' -%]

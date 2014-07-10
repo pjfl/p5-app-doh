@@ -1,4 +1,4 @@
-      <!-- Posts List -->
+      <!-- Posts Index Right Column -->
 [% col_class = ''; IF prefs.float; col_class = 'float-view'; END -%]
       <div class="right-column [% col_class %] content-area span9p5">
          <div class="content-page">

@@ -101,8 +101,8 @@ sub not_found {
    my ($self, $req) = @_;
 
    my $rv      = HTTP_NOT_FOUND;
-   my $title   = $req->loc( 'Not found' );
-   my $content = '> '.$req->loc( "Oh no. That page doesn't exist" )
+   my $title   = $req->loc( 'Not Found' );
+   my $content = '##### '.$req->loc( 'Page [_1] not found', $req->uri )
                  ."\n\n    Code: ${rv}\n\n";
 
    return { content => $content,

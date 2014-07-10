@@ -43,16 +43,21 @@ sub delete_user {
    return $_[ 0 ]->_resultset->delete( $_[ 1 ] );
 }
 
+sub find_user {
+   return $_[ 0 ]->_resultset->find( $_[ 1 ] );
+}
+
 sub list_users {
    return $_[ 0 ]->_resultset->list( $_[ 1 ] // NUL );
 }
 
-sub read_user {
-   return $_[ 0 ]->_resultset->find( $_[ 1 ] );
-}
-
 sub update_user {
-   return $_[ 0 ]->_resultset->find_and_update( $_[ 1 ] );
+   my ($self, $args) = @_;
+
+   $args->{password} and $args->{password} !~ m{ \A \$ 2a }mx
+      and $args->{password} = bcrypt( $args->{password}, $self->_new_salt );
+
+   return $self->_resultset->find_and_update( $args );
 }
 
 # Private metods
@@ -79,11 +84,11 @@ use Crypt::Eksblowfish::Bcrypt qw( bcrypt );
 extends q(File::DataClass::Result);
 
 sub authenticate {
-   my ($self, $password) = @_;
+   my ($self, $plain) = @_;
 
-   my $supplied = bcrypt( $password, $self->password );
+   my $encrypted = bcrypt( $plain, $self->password );
 
-   return $supplied eq $self->password ? TRUE : FALSE;
+   return $encrypted eq $self->password ? TRUE : FALSE;
 }
 
 1;
@@ -96,7 +101,7 @@ __END__
 
 =head1 Name
 
-App::Doh::User - One-line description of the modules purpose
+App::Doh::User - Schema for the user model
 
 =head1 Synopsis
 

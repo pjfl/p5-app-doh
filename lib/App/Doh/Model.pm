@@ -38,7 +38,8 @@ sub exception_handler {
       format      => 'markdown',
       mtime       => time,
       name        => $title,
-      title       => $title, } );
+      title       => $title,
+      type        => 'generated' } );
    $stash->{nav } =  $self->navigation( $req, $stash );
 
    return $stash;

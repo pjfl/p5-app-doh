@@ -2,14 +2,14 @@ package App::Doh;
 
 use 5.010001;
 use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.2.%d', q$Rev: 54 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.2.%d', q$Rev: 55 $ =~ /\d+/gmx );
 
 use Moo;
 use Class::Usul::Constants  qw( TRUE );
 use Class::Usul::Types      qw( BaseType );
 
 has 'usul'  => is => 'ro', isa => BaseType,
-   handles  => [ qw( config localize lock log ) ],
+   handles  => [ qw( config l10n lock log ) ],
    init_arg => 'builder', required => TRUE;
 
 1;
@@ -37,7 +37,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.2.$Rev: 54 $ of L<App::Doh>
+This documents version v0.2.$Rev: 55 $ of L<App::Doh>
 
 =head1 Description
 

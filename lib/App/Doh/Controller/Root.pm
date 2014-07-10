@@ -3,7 +3,7 @@ package App::Doh::Controller::Root;
 use Web::Simple;
 
 sub dispatch_request {
-   sub (POST + /admin | /admin/* | /login | /logout | /user + ?*) {
+   sub (POST + /admin | /admin/* | /login | /logout + ?*) {
       return shift->execute( qw( html admin from_request ), @_ ) },
 
    sub (GET  + /admin | /admin/* + ?*) {
@@ -27,7 +27,10 @@ sub dispatch_request {
    sub (GET  + /search + ?*) {
       return shift->execute( qw( html docs  search_tree ), @_ ) },
 
-   sub (GET  + /user + ?*) {
+   sub (POST + /user | /user/* + ?*) {
+      return shift->execute( qw( html admin from_request ), @_ ) },
+
+   sub (GET  + /user | /user/* + ?*) {
       return shift->execute( qw( xml  admin get_dialog ), @_ ) },
 
    sub (POST + / | /** + ?*) {

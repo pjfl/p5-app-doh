@@ -32,6 +32,11 @@
              args    : [ '[% uri_for( 'user' ) %]?name=login', {
                 name : 'login-user',
                 title: '[% loc( 'Login User' ) %]' } ] };
+      behaviour.config.anchors[ 'profile-user' ]
+         = { method  : 'modalDialog',
+             args    : [ '[% uri_for( 'user' ) %]?name=profile', {
+                name : 'profile-user',
+                title: '[% loc( 'User Profile' ) %]' } ] };
       behaviour.config.anchors[ 'rename-file' ]
          = { method  : 'modalDialog',
              args    : [ '[% uri_for( 'dialog' ) %]?name=rename', {
@@ -49,10 +54,10 @@
                 name : 'upload_file',
                 title: '[% loc( 'Upload File' ) %]',
                 value: '[% page.url %]' } ] };
-      behaviour.config.inputs[ 'password' ]
+      behaviour.config.inputs[ 'again' ]
          = { event   : [ 'focus', 'blur' ],
              method  : [ 'show_password', 'hide_password' ] };
-      behaviour.config.inputs[ 'again' ]
+      behaviour.config.inputs[ 'password' ]
          = { event   : [ 'focus', 'blur' ],
              method  : [ 'show_password', 'hide_password' ] };
       behaviour.config.anchors[ 'users' ]

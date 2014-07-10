@@ -186,11 +186,11 @@ sub body_values {
 }
 
 sub loc {
-   my $self = shift; return $self->_localize( $self->locale, @_ );
+   my $self = shift; return $self->l10n->localizer( $self->locale, @_ );
 }
 
 sub loc_default {
-   my $self = shift; return $self->_localize( $self->config->locale, @_ );
+   my $self = shift; return $self->l10n->localizer( $self->config->locale, @_ );
 }
 
 sub query_params {
@@ -199,14 +199,6 @@ sub query_params {
    my $params = $self->params; weaken( $params );
 
    return sub { __get_scrubbed_value( $pattern, $params, @_ ) };
-}
-
-sub request_uri {
-   my ($self, $query_params) = @_;
-
-   $query_params = { %{ $self->params }, @{ $query_params // [] } };
-
-   return $self->uri_for( $self->path, undef, $query_params );
 }
 
 sub uri_for {
@@ -226,18 +218,6 @@ sub uri_for {
    $query_params[ 0 ] and $uri->query_form( @query_params );
 
    return $uri;
-}
-
-# Private methods
-sub _localize {
-   my ($self, $locale, $key, @args) = @_; my $car = $args[ 0 ];
-
-   my $args = (is_hashref $car) ? { %{ $car } }
-            : { params => (is_arrayref $car) ? $car : [ @args ] };
-
-   $args->{locale} //= $locale;
-
-   return $self->localize( $key, $args );
 }
 
 # Private functions
@@ -439,12 +419,6 @@ Like the C<loc> method but always translates to the default language
 Returns a code reference which when called with a query parameter name returns
 the query parameter value after first scrubbing it of "dodgy" characters. Throws
 if the value is undefined or tainted
-
-=head2 C<request_uri>
-
-   $uri_obj = $self->request_uri( $query_params );
-
-Regenerates the request URI merging in the additional query parameters
 
 =head2 C<uri_for>
 

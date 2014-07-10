@@ -24,9 +24,9 @@ sub create_file {
    my $new_node = $self->_new_node( $req->locale, $params->( 'pathname' ) );
    my $created  = time2str( '%Y-%m-%d %H:%M:%S %z', time, 'UTC' );
    my $stash    = { content_only => TRUE,
-                    page         => { author   => $req->username,
-                                      created  => $created,
-                                      template => $conf->blank_template, }, };
+                    page         => { author  => $req->username,
+                                      created => $created,
+                                      layout  => $conf->blank_template, }, };
    my $content  = $self->render_template( $req, $stash );
    my $path     = $new_node->{path};
 
@@ -62,8 +62,8 @@ sub dialog {
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
    my $stash  = $self->get_stash( $req );
-   my $page   = $stash->{page} = { meta     => { id => $params->( 'id' ), },
-                                   template => "${name}-file", };
+   my $page   = $stash->{page} = { layout => "${name}-file",
+                                   meta   => { id => $params->( 'id' ), }, };
 
    if    ($name eq 'create') {
       $page->{literal_js} = set_element_focus( "${name}-file", 'pathname' );

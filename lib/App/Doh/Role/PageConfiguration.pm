@@ -14,7 +14,9 @@ around 'load_page' => sub {
 
    my $page = $orig->( $self, $req, @args ); my $conf = $self->config;
 
-   $page->{ $_ } //= $conf->$_() for (qw( author description keywords ));
+   for (qw( author description keywords template )) {
+      $page->{ $_ } //= $conf->$_();
+   }
 
    $page->{form_name          }   = 'markdown';
    $page->{locale             } //= $req->locale;

@@ -39,11 +39,11 @@ sub render_template {
    my $conf     =  $stash->{config} = $self->config;
    my $skin     =  $stash->{skin  } = $prefs->{skin} // $conf->skin;
    my $page     =  $stash->{page  } // {};
-   my $template = ($page->{template} // $conf->template).'.tt';
-   my $path     =  $self->templates->catdir( $skin )->catfile( $template );
+   my $layout   = ($page->{layout} //= $conf->layout).'.tt';
+   my $path     =  $self->templates->catdir( $skin )->catfile( $layout );
 
    $path->exists or throw class => PathNotFound, args => [ $path ];
-   $self->encoder->process( catfile( $skin, $template ), $stash, \$result )
+   $self->encoder->process( catfile( $skin, $layout ), $stash, \$result )
       or throw $self->encoder->error;
 
    return $result;

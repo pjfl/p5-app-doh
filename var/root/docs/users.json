@@ -3,10 +3,11 @@
       "admin" : {
          "active" : "1",
          "email" : "Admin@example.com",
-         "password" : "$2a$14$x0SjyTDH8/sk4CpgR0YzDOGNxC6q0MIFaPDDWwTLzYB3eZX1i8uwa",
+         "password" : "$2a$14$zjs4Vz08tfGpNmTpFul8O.F.6HZqwjvijylAi5EZlOASld8qo.H.q",
          "roles" : [
             "admin",
-            "editor"
+            "editor",
+            "users"
          ]
       }
    }

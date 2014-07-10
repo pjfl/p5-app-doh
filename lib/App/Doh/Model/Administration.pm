@@ -60,11 +60,16 @@ sub get_dialog : Role(anon) {
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
    my $stash  = $self->get_stash( $req );
-   my $page   = $stash->{page} = { meta     => { id => $params->( 'id' ), },
-                                   template => "${name}-user", };
+   my $page   = $stash->{page} = { layout => "${name}-user",
+                                   meta   => { id => $params->( 'id' ), }, };
 
-   $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
    $name eq 'login' and $page->{username} = $req->session->username;
+   $name eq 'profile'
+      and $page->{email     } = $self->users->find_user( $req->username )->email
+      and $page->{literal_js} = set_element_focus( "${name}-user", 'email' )
+      and $page->{username  } = $req->username;
+   $name ne 'profile'
+      and $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
    return $stash;
 }
 
@@ -79,7 +84,7 @@ sub get_form : Role(admin) {
    $page->{auth_roles} = $self->config->auth_roles;
    $page->{form_name } = 'administration';
    $page->{name      } = $title;
-   $page->{template  } = 'admin';
+   $page->{template  } = [ 'admin', 'admin' ];
    $page->{title     } = $title;
    $page->{users     } = $self->users->list_users( $id );
    return $stash;
@@ -148,7 +153,7 @@ sub navigation {
               type  => 'file', url  => 'admin' } ];
 }
 
-sub update_user_action : Role(admin) {
+sub update_roles_action : Role(admin) {
    my ($self, $req) = @_;
 
    my $username = $req->body_params->( 'username' );
@@ -161,6 +166,25 @@ sub update_user_action : Role(admin) {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
+sub update_user_action : Role(users) {
+   my ($self, $req) = @_;
+
+   my $id    = $req->username;
+   my $args  = { id => $id };
+   my $user  = $self->users->find_user( $id );
+   my $email = $req->body_value( 'email' );
+   my $pass  = $req->body_value( 'password' );
+   my $again = $req->body_value( 'again' );
+
+   $email and $email ne $user->email and $args->{email} = $email;
+   $pass  and $again and $pass eq $again and $args->{password} = $pass;
+   $self->users->update_user( $args );
+
+   my $message = [ 'User [_1] profile updated', $id ];
+
+   return { redirect => { location => $req->base, message => $message } };
+}
+
 # Private methods
 sub _authenticate {
    my ($self, $username, $password) = @_; my ($authenticated, $user);
@@ -170,7 +194,7 @@ sub _authenticate {
    $password or throw class => Unspecified, args => [ 'password' ],
                          rv => HTTP_EXPECTATION_FAILED;
 
-   try   { $user = $self->users->read_user( $username ) }
+   try   { $user = $self->users->find_user( $username ) }
    catch { throw error => 'User [_1] unknown: [_2]', args => [ $username, $_ ],
                     rv => HTTP_EXPECTATION_FAILED;
    };

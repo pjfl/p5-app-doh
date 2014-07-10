@@ -32,7 +32,7 @@ around 'execute' => sub {
 
    is_member 'any', $method_roles and return $orig->( $self, $method, $req );
 
-   my $user = $self->users->read_user( $req->username );
+   my $user = $self->users->find_user( $req->username );
 
    for my $role_name (@{ $user->roles // [] }) {
       is_member $role_name, $method_roles

@@ -3,15 +3,18 @@ package App::Doh::Session;
 use namespace::autoclean;
 
 use Moo;
-use Class::Usul::Constants qw( FALSE TRUE );
+use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Types     qw( Bool HashRef NonEmptySimpleStr
                                NonZeroPositiveInt SimpleStr Undef );
+use Type::Utils            qw( enum );
 
 extends q(App::Doh);
 
+my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
+
 has 'authenticated'  => is => 'rw', isa => Bool, default => FALSE;
 
-has 'code_blocks'    => is => 'rw', isa => NonZeroPositiveInt, default => 1;
+has 'code_blocks'    => is => 'rw', isa => $BLOCK_MODES, default => 1;
 
 has 'float'          => is => 'rw', isa => Bool, default => TRUE;
 
@@ -29,8 +32,7 @@ has 'updated'        => is => 'ro', isa => NonZeroPositiveInt, required => TRUE;
 
 has 'use_flags'      => is => 'rw', isa => Bool, default => TRUE;
 
-has 'username'       => is => 'rw', isa => NonEmptySimpleStr,
-   default           => 'unknown';
+has 'username'       => is => 'rw', isa => SimpleStr, default => NUL;
 
 has '_session'       => is => 'ro', isa => HashRef, default => sub { {} };
 

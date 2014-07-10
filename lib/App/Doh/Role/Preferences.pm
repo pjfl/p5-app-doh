@@ -19,7 +19,7 @@ around 'get_stash' => sub {
       my $v = $params->{ $k } // $sess->{ $k } // $conf->$k();
 
       try   { $stash->{prefs}->{ $k } = $sess->$k( $v ) }
-      catch { $self->log->debug( $_ ) };
+      catch { $self->log->warn( $_ ) };
    }
 
    return $stash;

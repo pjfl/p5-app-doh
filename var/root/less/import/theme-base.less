@@ -196,12 +196,15 @@ table tr th:last-child, table tr td:last-child {
 .content-page article {
    max-width: 400px; min-width: 400px; padding-bottom: 18px;
 }
-.content-page > article > pre { font-weight: 700; padding: 9px; }
+.content-page article > pre {
+   font-size: 14px; font-weight: 700; line-height: 18px;
+   margin-bottom: 18px; min-width: 200px; padding: 9px;
+}
 .content-page blockquote { margin-top: 0; margin-bottom: 0; }
 .content-page code { font-weight: 700; }
 .content-page dd { margin: 9px 0 9px 18px; }
 .content-page dd, .content-page dt, .content-page p,
-.content-page article > pre, .content-page table {
+.content-page table {
    font-size: 14px; line-height: 18px; margin-bottom: 18px; min-width: 400px;
 }
 .content-page ol li, .content-page ul li { margin-left: 30px; }
@@ -250,11 +253,6 @@ table tr th:last-child, table tr td:last-child {
    text-align: left;
 }
 .file-link { white-space: nowrap; }
-.flag-container {
-   background-color: @sidebar-background; .border-radius;
-   font-size: 12px; height: 30px; line-height: 26px; margin: 12px 0 12px 18px;
-   padding: 3px; text-transform: uppercase;
-}
 .folder { font-size: 16px; line-height: 18px; }
 .footer { bottom: 0; left: 0; padding: 18px; position: fixed; }
 .github-ribbon { position: absolute; right: 0; top: 54px; z-index: 10; }
@@ -312,6 +310,16 @@ table tr th:last-child, table tr td:last-child {
 .homepage-hero { overflow: hidden; .serif-bold; }
 .homepage-hero .homepage-image { margin-bottom: 18px; max-height: 475px; }
 .homepage-hero .text-center h2 { margin: 18px auto; text-align: center; }
+.icon-container {
+   background-color: @dark; .border-radius;
+   font-size: 12px; height: 30px; line-height: 26px; margin: 12px 0 12px 18px;
+   padding: 3px;
+}
+.info-container {
+   background-color: @sidebar-background; .border-radius;
+   font-size: 12px; height: 30px; line-height: 26px; margin: 0 0 12px 18px;
+   padding: 3px; text-transform: uppercase;
+}
 .lead { font-size: 18px; line-height: 36px; }
 .navbar { .box-shadow; height: 54px; width: auto; z-index: 200; }
 .navbar-fixed-top { left: 0; position: fixed; right: 0; top: 0; }
@@ -621,6 +629,13 @@ table tr th:last-child, table tr td:last-child {
 .flag_sw {
    background: url(../img/flags.png) no-repeat 0px -240px; display: block;
    height: 24px; padding: 0 0 0 32px;
+}
+
+/* Icons */
+.tools_icon {
+   background: url(../img/icons.png) no-repeat -210px -270px;
+   display: inline-block; height: 16px; overflow: hidden;
+   vertical-align: middle; width: 16px;
 }
 
 /* Highlight.js theme Date: 17.V.2011 Author: pumbur <pumbur@pumbur.net> */

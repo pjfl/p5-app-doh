@@ -101,11 +101,11 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .container-fluid{margin:0 auto;padding-top:54px}
 .container-fluid.fluid-height{height:100%}
 .content-page article{max-width:400px;min-width:400px;padding-bottom:18px}
-.content-page>article>pre{font-weight:700;padding:9px}
+.content-page article>pre{font-size:14px;font-weight:700;line-height:18px;margin-bottom:18px;min-width:200px;padding:9px}
 .content-page blockquote{margin-top:0;margin-bottom:0}
 .content-page code{font-weight:700}
 .content-page dd{margin:9px 0 9px 18px}
-.content-page dd,.content-page dt,.content-page p,.content-page article>pre,.content-page table{font-size:14px;line-height:18px;margin-bottom:18px;min-width:400px}
+.content-page dd,.content-page dt,.content-page p,.content-page table{font-size:14px;line-height:18px;margin-bottom:18px;min-width:400px}
 .content-page ol li,.content-page ul li{margin-left:30px}
 .content-page p,.content-page .page-header{margin-bottom:18px;margin-top:0;min-width:320px}
 .content-page .folder-link>span{clear:left;float:left}
@@ -122,7 +122,6 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .expanding_area>textarea{height:100%;left:0;margin:0;overflow:hidden;position:absolute;resize:none;top:0;width:100%}
 .expanding_spacer{display:block;visibility:hidden;font-size:16px !important;margin:0 !important;max-width:820px;padding:3px !important;text-align:left}
 .file-link{white-space:nowrap}
-.flag-container{background-color:#f5f5f6;-khtml-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;font-size:12px;height:30px;line-height:26px;margin:12px 0 12px 18px;padding:3px;text-transform:uppercase}
 .folder{font-size:16px;line-height:18px}
 .footer{bottom:0;left:0;padding:18px;position:fixed}
 .github-ribbon{position:absolute;right:0;top:54px;z-index:10}
@@ -149,6 +148,8 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .homepage-hero{overflow:hidden;font-weight:700;font-family:"Roboto Slab","Times New Roman","Times","serif"}
 .homepage-hero .homepage-image{margin-bottom:18px;max-height:475px}
 .homepage-hero .text-center h2{margin:18px auto;text-align:center}
+.icon-container{background-color:#000;-khtml-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;font-size:12px;height:30px;line-height:26px;margin:12px 0 12px 18px;padding:3px}
+.info-container{background-color:#f5f5f6;-khtml-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;font-size:12px;height:30px;line-height:26px;margin:0 0 12px 18px;padding:3px;text-transform:uppercase}
 .lead{font-size:18px;line-height:36px}
 .navbar{-webkit-box-shadow:0 5px 5px rgba(0,0,0,0.25);box-shadow:0 5px 5px rgba(0,0,0,0.25);height:54px;width:auto;z-index:200}
 .navbar-fixed-top{left:0;position:fixed;right:0;top:0}
@@ -226,6 +227,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .flag_pa{background:url(../img/flags.png) no-repeat 0 -192px;display:block;height:24px;padding:0 0 0 32px}
 .flag_sp{background:url(../img/flags.png) no-repeat 0 -216px;display:block;height:24px;padding:0 0 0 32px}
 .flag_sw{background:url(../img/flags.png) no-repeat 0 -240px;display:block;height:24px;padding:0 0 0 32px}
+.tools_icon{background:url(../img/icons.png) no-repeat -210px -270px;display:inline-block;height:16px;overflow:hidden;vertical-align:middle;width:16px}
 .hljs{display:block;padding:.5em}
 .hljs-yardoctag,.hljs-phpdoc,.profile .hljs-header,.ini .hljs-title,.apache .hljs-tag,.parser3 .hljs-title{font-weight:bold}
 .coffeescript .javascript,.javascript .xml,.tex .hljs-formula,.xml .javascript,.xml .vbscript,.xml .css,.xml .hljs-cdata{opacity:.6}

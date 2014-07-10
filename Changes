@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added user profile management
           - Added ::Session to MANIFEST
           - Added ::Session. Added session timeout
           - Adjusted CSS tips box model

@@ -89,6 +89,9 @@ has 'languages'       => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
       [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ] },
    init_arg           => undef;
 
+has 'layout'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'two-columns';
+
 has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'less/';
 
@@ -147,8 +150,8 @@ has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
 has 'static'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'static';
 
-has 'template'        => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'documentation';
+has 'template'        => is => 'ro',   isa => ArrayRef,
+   default            => sub { [ 'docs', 'docs' ] };
 
 has 'theme'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'green';
@@ -349,6 +352,13 @@ list value
 A array reference of string derived from the list of configuration locales
 The value is constructed on demand and has no initial argument
 
+=item C<layout>
+
+A non empty simple string that defaults to F<two-columns>. The name of the
+L<Template::Toolkit> template used to render the HTML response page. The
+template will be wrapped by F<wrapper.tt> unless the stash attribute
+C<content_only> is true
+
 =item C<load_factor>
 
 Defaults to 14. A non zero positive integer passed to the C<bcrypt> function
@@ -462,8 +472,8 @@ contain the static HTML pages. Defaults to C<static>
 
 =item C<template>
 
-A non empty simple string that defaults to C<index>. The name of the
-L<Template::Toolkit> template used to render the HTML response page
+If the selected L<Template::Toolkit> layout is F<two-columns> then this
+attribute selects which left and right columns templates are rendered
 
 =item C<theme>
 

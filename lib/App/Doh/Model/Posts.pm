@@ -17,25 +17,19 @@ with    q(App::Doh::Role::Templates);
 with    q(App::Doh::Role::Editor);
 
 # Construction
-around 'get_page' => sub {
-   my ($orig, $self, @args) = @_; my $page = $orig->( $self, @args );
-
-   $page->{type} eq 'folder' and $page->{author  } = $self->config->author
-                             and $page->{template} = 'posts-index';
-
-   return $page;
-};
-
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $page = $orig->( $self, $req, @args ); my @ids = @{ $req->args };
+   my $page = $orig->( $self, $req, @args );
 
-   $ids[ 0 ] and $ids[ 0 ] eq 'index' and @ids = ();
+   my @ids = @{ $req->args }; $ids[ 0 ] and $ids[ 0 ] eq 'index' and @ids = ();
 
-   $page->{template    } //= 'posts';
-   $page->{wanted      }   = join '/', $self->config->posts, @ids;
-   $page->{wanted_depth}   = () = @ids;
+   $page->{type} eq 'folder' and $page->{author} = $self->config->author;
+
+   $page->{template    } =
+      [ 'posts', $page->{type} eq 'folder' ? 'posts-index' : 'posts' ];
+   $page->{wanted      } = join '/', $self->config->posts, @ids;
+   $page->{wanted_depth} = () = @ids;
    return $page;
 };
 

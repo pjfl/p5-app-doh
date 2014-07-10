@@ -1,6 +1,8 @@
 ---
 name: Posts
-template: posts-index
+template:
+  - posts
+  - posts-index
 title: Posts
 ---
 Page intentionally created blank

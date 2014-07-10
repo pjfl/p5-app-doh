@@ -43,15 +43,15 @@ has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $title  =  $req->loc( 'Help' );
-   my $want   =  $req->args->[ 0 ] || $self->config->appclass;
-   my $page   =  {
-      content => io( find_source( $want ) || $req->args->[ 0 ] ),
-      format  => 'pod',
-      name    => $want,
-      parent  => $title,
-      title   => $title,
-      url     => 'https://metacpan.org/module/%s', };
+   my $title   =  $req->loc( 'Help' );
+   my $want    =  $req->args->[ 0 ] || $self->config->appclass;
+   my $page    =  {
+      content  => io( find_source( $want ) || $req->args->[ 0 ] ),
+      format   => 'pod',
+      name     => $want,
+      parent   => $title,
+      title    => $title,
+      url      => 'https://metacpan.org/module/%s', };
 
    return $orig->( $self, $req, $page );
 };
