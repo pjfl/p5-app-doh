@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Upated metadata
           - Added user profile management
           - Added ::Session to MANIFEST
           - Added ::Session. Added session timeout

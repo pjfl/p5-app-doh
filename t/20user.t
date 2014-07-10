@@ -33,7 +33,7 @@ is $user->email, 'Admin@example.com', 'Creates user';
 
 $users->activate_user( 'admin' );
 
-ok $users->read_user( 'admin')->active, 'Activates user';
+ok $users->find_user( 'admin')->active, 'Activates user';
 
 done_testing;
 

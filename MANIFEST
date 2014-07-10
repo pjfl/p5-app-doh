@@ -45,6 +45,7 @@ t/03podcoverage.t
 t/05kwalitee.t
 t/06yaml.t
 t/07podspelling.t
+t/08memory_leak.t
 t/10test_script.t
 t/20user.t
 var/locale/de/LC_MESSAGES/app_doh.po
@@ -82,7 +83,6 @@ var/root/less/theme-navy.less
 var/root/less/theme-red.less
 var/root/templates/default/admin-left-column.tt
 var/root/templates/default/admin-right-column.tt
-var/root/templates/default/admin.tt
 var/root/templates/default/blank.tt
 var/root/templates/default/code-blocks.tt
 var/root/templates/default/config-links.tt
@@ -90,7 +90,6 @@ var/root/templates/default/create-file.tt
 var/root/templates/default/create-user.tt
 var/root/templates/default/docs-left-column.tt
 var/root/templates/default/docs-right-column.tt
-var/root/templates/default/documentation.tt
 var/root/templates/default/editing-links.tt
 var/root/templates/default/footer.tt
 var/root/templates/default/fork-me.tt
@@ -98,13 +97,13 @@ var/root/templates/default/header.tt
 var/root/templates/default/index.tt
 var/root/templates/default/login-user.tt
 var/root/templates/default/navbar.tt
-var/root/templates/default/posts-index.tt
+var/root/templates/default/posts-index-right-column.tt
 var/root/templates/default/posts-left-column.tt
-var/root/templates/default/posts-list.tt
 var/root/templates/default/posts-right-column.tt
-var/root/templates/default/posts.tt
+var/root/templates/default/profile-user.tt
 var/root/templates/default/rename-file.tt
 var/root/templates/default/search-file.tt
 var/root/templates/default/social-links.tt
+var/root/templates/default/two-columns.tt
 var/root/templates/default/upload-file.tt
 var/root/templates/default/wrapper.tt

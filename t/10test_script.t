@@ -27,7 +27,10 @@ my $tree  = $model->docs_tree;
 ok exists $tree->{en}->{tree}->{ 'Getting-Started' }, 'Creates docs tree';
 
 my $req   = App::Doh::Request->new( $self->usul, 'Getting_Started' );
-my $stash = $model->get_stash( $req );
+
+isa_ok $req, 'App::Doh::Request', 'Creates request object';
+
+my $stash = $model->get_content( $req );
 my $res   = $self->views->{html}->serialize( $req, $stash );
 
 is $res->[ 0 ], 200, 'Reponse code';

@@ -3,7 +3,7 @@
       "admin" : {
          "active" : "1",
          "email" : "Admin@example.com",
-         "password" : "$2a$14$zjs4Vz08tfGpNmTpFul8O.F.6HZqwjvijylAi5EZlOASld8qo.H.q",
+         "password" : "$2a$14$UvF5UWoz1D.CDZysyBbqiOmbRhfNx4tE2gGO1sW/d6yCxlLe7FNaq",
          "roles" : [
             "admin",
             "editor",
