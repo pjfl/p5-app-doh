@@ -18,16 +18,17 @@ around 'load_page' => sub {
       $page->{ $_ } //= $conf->$_();
    }
 
-   $page->{form_name          }   = 'markdown';
-   $page->{locale             } //= $req->locale;
-   $page->{wanted             } //= join '/', @{ $req->args };
    $page->{application_version}   = $App::Doh::VERSION;
    $page->{editing            } //= $req->params->{edit} // FALSE;
-   $page->{language           }   = extract_lang $page->{locale};
+   $page->{form_name          }   = 'markdown';
+   $page->{locale             } //= $req->locale;
    $page->{mode               }   = $req->params->{mode} // 'online';
    $page->{status_message     }   = $req->session->clear_status_message;
+   $page->{wanted             } //= join '/', @{ $req->args };
+
    $page->{homepage_url       }   = $page->{mode} eq 'online'
                                   ? $req->base : $req->uri_for( 'index' );
+   $page->{language           }   = extract_lang $page->{locale};
 
    return $page;
 };

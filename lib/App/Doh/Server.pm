@@ -53,12 +53,10 @@ around 'to_psgi_app' => sub {
 
    my $conf  = $self->usul->config; my $point = $conf->mount_point;
 
-   my @types = qw( text/css text/html text/javascript application/javascript );
-
    builder {
       mount "${point}" => builder {
          enable 'Deflater',
-            content_type  => [ @types ], vary_user_agent => TRUE;
+            content_type => $conf->deflate_types, vary_user_agent => TRUE;
          enable 'Static',
             path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
          enable 'Static',

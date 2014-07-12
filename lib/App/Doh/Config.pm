@@ -42,9 +42,10 @@ has 'brand'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'code_blocks'     => is => 'ro',   isa => $BLOCK_MODES, default => 1;
 
-has 'colours'         => is => 'lazy', isa => ArrayRef, init_arg => undef;
+has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
+   init_arg           => undef;
 
-has 'common_links'    => is => 'ro',   isa => ArrayRef,
+has 'common_links'    => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( assets css help_url images js less ) ] };
 
 has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
@@ -54,6 +55,10 @@ has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'default_skin'    => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
+
+has 'deflate_types'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
+   builder            => sub {
+      [ qw( text/css text/html text/javascript application/javascript ) ] };
 
 has 'description'     => is => 'ro',   isa => SimpleStr,
    default            => 'Site Description';
@@ -95,7 +100,8 @@ has 'layout'          => is => 'ro',   isa => NonEmptySimpleStr,
 has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'less/';
 
-has 'links'           => is => 'lazy', isa => ArrayRef, init_arg => undef;
+has 'links'           => is => 'lazy', isa => ArrayRef[HashRef],
+   init_arg           => undef;
 
 has 'load_factor'     => is => 'ro',   isa => NonZeroPositiveInt,
    default            => 14;
@@ -109,7 +115,7 @@ has 'max_session_time' => is => 'ro',  isa => PositiveInt, default => 900;
 has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
    default            => '/';
 
-has 'no_index'        => is => 'ro',   isa => ArrayRef,
+has 'no_index'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub {
       [ qw( \.git$ \.htpasswd$ \.json$ \.mtime$ \.svn$ assets$ posts$ ) ] };
 
@@ -119,7 +125,7 @@ has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
 has 'posts'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'posts';
 
-has 'preferences'     => is => 'ro',   isa => ArrayRef,
+has 'preferences'     => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub {
       [ qw( code_blocks float query skin theme use_flags ) ] };
 
@@ -150,13 +156,13 @@ has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
 has 'static'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'static';
 
-has 'template'        => is => 'ro',   isa => ArrayRef,
+has 'template'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    default            => sub { [ 'docs', 'docs' ] };
 
 has 'theme'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'green';
 
-has 'themes'          => is => 'ro',   isa => ArrayRef,
+has 'themes'          => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( blue green navy red ) ] };
 
 has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
@@ -296,6 +302,11 @@ that locates the static CSS files
 
 Simple string that default to F<default>. The name of the default template
 directory
+
+=item C<deflate_types>
+
+An array reference of non empty simple strings. The list of mime types to
+deflate in L<Plack> middleware
 
 =item C<description>
 

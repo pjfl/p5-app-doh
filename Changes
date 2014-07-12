@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Improved CSS for forms
           - Upated metadata
           - Added user profile management
           - Added ::Session to MANIFEST

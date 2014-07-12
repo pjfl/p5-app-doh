@@ -2,14 +2,14 @@
 <form action="[% links.base_uri %]user"
      enctype="application/x-www-form-urlencoded"
       method="post" name="create-user">
-   <label  class="prompt" for="username">[% loc( 'User name' ) %]</label>
+   <label  class="label" for="username">[% loc( 'User name' ) %]</label>
    <input  class="standard-field" name="username" type="textfield"><br/>
-   <label  class="prompt" for="email">[% loc( 'Email address' ) %]</label>
+   <label  class="label" for="email">[% loc( 'Email address' ) %]</label>
    <input  class="standard-field" name="email" type="textfield"><br/>
-   <label  class="prompt" for="password">[% loc( 'Password' ) %]</label>
+   <label  class="label" for="password">[% loc( 'Password' ) %]</label>
    <input  class="standard-field reveal" id="password"
             name="password" type="password"><br/>
-   <label  class="prompt" for="again">[% loc( 'Again' ) %]</label>
+   <label  class="label" for="again">[% loc( 'Again' ) %]</label>
    <input  class="standard-field reveal" id="again"
             name="again" type="password">
    <button class="btn btn-submit" name="_method" type="submit"

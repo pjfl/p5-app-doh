@@ -1,8 +1,8 @@
 <!-- Upload File -->
 <form action="[% uri_for( 'assets' ) %]"
      enctype="multipart/form-data" method="post" name="upload-file">
-   <input class="pathname" id="upload-path"
-      placeholder="Choose File" disabled="disabled">
+   <input class="pathname" disabled="disabled"
+             id="upload-path" placeholder="Choose File">
    <div class="upload-file btn btn-browse">
       <span>[% loc( 'Browse' ) %]</span><br>
       <input class="upload" id="upload-btn" name="file" type="file">
