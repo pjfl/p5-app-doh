@@ -20,23 +20,15 @@ has '+result_source_attributes' => default => sub { {
 } };
 
 # Public methods
-sub activate_user {
-   return $_[ 0 ]->update_user( { id => $_[ 1 ], active => TRUE } );
-}
-
 sub create_user {
    my ($self, $args) = @_;
 
    $args->{active  }   = FALSE;
    $args->{email   } //= NUL;
    $args->{password}   = bcrypt( $args->{password}, $self->_new_salt );
-   $args->{roles   } //= [ 'users' ];
+   $args->{roles   } //= [ 'user' ];
 
    return $self->_resultset->create( $args );
-}
-
-sub deactivate_user {
-   return $_[ 0 ]->update_user( { id => $_[ 1 ], active => FALSE } );
 }
 
 sub delete_user {

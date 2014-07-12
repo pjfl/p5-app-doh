@@ -158,12 +158,6 @@ table tr th:last-child, table tr td:last-child {
 .article-tree, .content-area { height: 100%; overflow: auto; }
 .article-tree .collapse { direction: ltr; }
 .btn { display: inline-block; text-align: center; vertical-align: middle; }
-.btn.btn-browse, .btn.btn-submit {
-   background-color: @sidebar-hover; border: @dark 1px solid;
-   .border-radius; color: @dark; font-size: 16px; line-height: 18px;
-   margin: 4px 0 4px;
-}
-.btn.btn-browse { padding: 4px 8px 4px; }
 .btn.btn-sidebar {
   background-color: @sidebar-hover; border: none; padding: 9px 9px;
 }
@@ -174,7 +168,30 @@ table tr th:last-child, table tr td:last-child {
 }
 .btn.btn-sidebar:hover { background-color: @dark; }
 .btn.btn-sidebar:hover .icon-bar { background-color: @light; }
-.btn.btn-submit { padding: 4px 8px; .sans-font; }
+.button {
+   background: @button-background-top;
+   background: -webkit-gradient(linear, left top, left bottom, from(@button-background-top), to(@button-background-bottom));
+   background: -moz-linear-gradient(top, @button-background-top, @button-background-bottom);
+   background: linear-gradient(to bottom, @button-background-top, @button-background-bottom);
+   border: 2px solid @lines; .border-radius; color: @dark;
+   display: inline-block; font-size: 16px; font-weight: bold; line-height: 18px;
+   margin: 4px 0; padding: 4px 18px; .sans-font; text-align: center;
+   text-decoration: none; text-shadow: @light 1px 1px 1px;
+   vertical-align: middle;
+}
+.button:active {
+   background: @button-background-bottom;
+   background: -webkit-gradient(linear, left top, left bottom, from(@button-background-bottom), to(@button-background-bottom));
+   background: -moz-linear-gradient(top, @button-background-bottom, @button-background-bottom);
+   background: linear-gradient(to bottom, @button-background-bottom, @button-background-bottom);
+}
+.button:hover, .button:focus {
+   background: @button-highlight-bottom;
+   background: -webkit-gradient(linear, left top, left bottom, from(@button-highlight-bottom), to(@button-highlight-top));
+   background: -moz-linear-gradient(top, @button-highlight-bottom, @button-highlight-top);
+   background: linear-gradient(to bottom, @button-highlight-bottom, @button-highlight-top);
+   border: 2px solid @lines; color: @dark; text-decoration: none;
+}
 .checkbox {
    background: url(../img/icons.png) -90px -300px no-repeat; cursor: pointer;
    display: inline-block; height: 16px; margin: 9px 0; padding: 1px 0;
@@ -204,7 +221,7 @@ table tr th:last-child, table tr td:last-child {
 .container-fluid.fluid-height { height: 100%; }
 .container-group { display: inline-block; }
 .content-page article {
-   max-width: 400px; min-width: 400px; padding-bottom: 18px;
+   max-width: 620px; min-width: 400px; padding-bottom: 18px;
 }
 .content-page article > pre {
    font-size: 14px; font-weight: 700; line-height: 18px;
@@ -230,7 +247,7 @@ table tr th:last-child, table tr td:last-child {
 .dialog {
    background-color: @sidebar-background; border: 1px solid;
    border-color: @lines; .border-radius; .box-shadow;
-   max-width: 50%; padding: 8px;
+   max-width: 66%; padding: 8px;
 }
 .dialog-body { position: relative; }
 .dialog-body form { vertical-align: middle; }

@@ -4,5 +4,5 @@
       method="get" name="search-file">
    <input  class="standard-field" name="query"
             type="textfield" value="[% prefs.query %]">
-   <button class="btn btn-submit" type="submit">[% loc( 'Search' ) %]</button>
+   <button class="button" type="submit">[% loc( 'Search' ) %]</button>
 </form>

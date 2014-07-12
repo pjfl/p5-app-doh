@@ -30,7 +30,7 @@ has 'auth_file'       => is => 'lazy', isa => File,
    coerce             => File->coercion;
 
 has 'auth_roles'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
-   default            => sub { [ qw( admin editor users ) ] };
+   default            => sub { [ qw( admin editor user ) ] };
 
 has 'author'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'anon';
@@ -255,7 +255,7 @@ users and roles defined by the application
 =item C<auth_roles>
 
 The list of roles applicable to authorization. Defaults to C<admin>,
-C<editor>, and C<users>
+C<editor>, and C<user>
 
 =item C<author>
 

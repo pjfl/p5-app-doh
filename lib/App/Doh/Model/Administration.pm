@@ -5,8 +5,8 @@ use App::Doh::Attributes;
 use App::Doh::Functions    qw( set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
-use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED
-                               HTTP_UNPROCESSABLE_ENTITY );
+use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_I_AM_A_TEAPOT
+                               HTTP_UNAUTHORIZED HTTP_UNPROCESSABLE_ENTITY );
 use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
 
@@ -21,11 +21,24 @@ sub activate_user_action : Role(admin) {
 
    my $username = $req->body_params->( 'username' );
 
-   $self->users->activate_user( $username );
+   $self->users->update_user( { id => $username, active => TRUE } );
 
    my $message  = [ 'User [_1] activated by [_2]', $username, $req->username ];
 
    return { redirect => { location => $req->uri, message => $message } };
+}
+
+sub create_user_action : Role(anon) {
+   my ($self, $req) = @_;
+
+   my $params  = $req->body_params;
+   my $args    = { email    => $params->( 'email' ),
+                   id       => $params->( 'username' ),
+                   password => $params->( 'password' ), };
+   my $user    = $self->users->create_user( $args );
+   my $message = [ 'User [_1] created', $user->id ];
+
+   return { redirect => { location => $req->base, message => $message } };
 }
 
 sub deactivate_user_action : Role(admin) {
@@ -33,11 +46,26 @@ sub deactivate_user_action : Role(admin) {
 
    my $username = $req->body_params->( 'username' );
 
-   $self->users->deactivate_user( $username );
+   $self->users->update_user( { id => $username, active => FALSE } );
 
    my $message  = [ 'User [_1] deactivated by [_2]', $username, $req->username];
 
    return { redirect => { location => $req->uri, message => $message } };
+}
+
+sub delete_user_action : Role(admin) {
+   my ($self, $req) = @_;
+
+   my $username = $req->body_params->( 'username' );
+
+   $username eq $req->username and throw error => 'Cannot self terminate',
+                                            rv => HTTP_I_AM_A_TEAPOT;
+   $self->users->delete_user( $username );
+
+   my $location = $req->uri_for( 'admin' );
+   my $message  = [ 'User [_1] deleted by [_2]', $username, $req->username ];
+
+   return { redirect => { location => $location, message => $message } };
 }
 
 sub generate_static_action : Role(admin) {
@@ -90,32 +118,6 @@ sub get_form : Role(admin) {
    return $stash;
 }
 
-sub create_user_action : Role(anon) {
-   my ($self, $req) = @_;
-
-   my $params  = $req->body_params;
-   my $args    = { email    => $params->( 'email' ),
-                   id       => $params->( 'username' ),
-                   password => $params->( 'password' ), };
-   my $user    = $self->users->create_user( $args );
-   my $message = [ 'User [_1] created', $user->id ];
-
-   return { redirect => { location => $req->base, message => $message } };
-}
-
-sub delete_user_action : Role(admin) {
-   my ($self, $req) = @_;
-
-   my $username = $req->body_params->( 'username' );
-
-   $self->users->delete_user( $username );
-
-   my $location = $req->uri_for( 'admin' );
-   my $message  = [ 'User [_1] deleted by [_2]', $username, $req->username ];
-
-   return { redirect => { location => $location, message => $message } };
-}
-
 sub login_action : Role(anon) {
    my ($self, $req) = @_; my $message;
 
@@ -153,28 +155,15 @@ sub navigation {
               type  => 'file', url  => 'admin' } ];
 }
 
-sub update_roles_action : Role(admin) {
-   my ($self, $req) = @_;
-
-   my $username = $req->body_params->( 'username' );
-   my $roles    = $req->body_values( 'roles' );
-
-   $self->users->update_user( { id => $username, roles => $roles } );
-
-   my $message  = [ 'User [_1] updated by [_2]', $username, $req->username ];
-
-   return { redirect => { location => $req->uri, message => $message } };
-}
-
-sub update_user_action : Role(users) {
+sub update_profile_action : Role(any) {
    my ($self, $req) = @_;
 
    my $id    = $req->username;
-   my $args  = { id => $id };
-   my $user  = $self->users->find_user( $id );
-   my $email = $req->body_value( 'email' );
+   my $email = $req->body_value( 'email'    );
    my $pass  = $req->body_value( 'password' );
-   my $again = $req->body_value( 'again' );
+   my $again = $req->body_value( 'again'    );
+   my $user  = $self->users->find_user( $id );
+   my $args  = { id => $id };
 
    $email and $email ne $user->email and $args->{email} = $email;
    $pass  and $again and $pass eq $again and $args->{password} = $pass;
@@ -183,6 +172,23 @@ sub update_user_action : Role(users) {
    my $message = [ 'User [_1] profile updated', $id ];
 
    return { redirect => { location => $req->base, message => $message } };
+}
+
+sub update_user_action : Role(admin) {
+   my ($self, $req) = @_;
+
+   my $id     = $req->body_params->( 'username' );
+   my $active = $req->body_value( 'active' );
+   my $roles  = $req->body_values( 'roles' );
+   my $user   = $self->users->find_user( $id );
+   my $args   = { id => $id, roles => $roles };
+
+   $active != $user->active and $args->{active} = $active;
+   $self->users->update_user( $args );
+
+   my $message = [ 'User [_1] updated by [_2]', $id, $req->username ];
+
+   return { redirect => { location => $req->uri, message => $message } };
 }
 
 # Private methods

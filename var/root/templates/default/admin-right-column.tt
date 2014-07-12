@@ -10,7 +10,7 @@
                        enctype="application/x-www-form-urlencoded"
                         method="get" name="[% page.form_name %]">
                      <label class="label"
-                              for="username">Select user name: </label>
+                              for="username">[% loc( 'User name' ) %]</label>
                      <select id="users" class="submit" name="username">
                         <option selected="selected"></option>
 [%    FOR user = page.users.list -%]
@@ -21,11 +21,11 @@
 [% ELSE -%]
 [%    user = page.users.result %]
                   <label class="label"
-                           for="username">[% loc( 'User name' ) %]:</label>
+                           for="username">[% loc( 'User name' ) %]</label>
                   <input class="standard-field" disabled="disabled"
                      name="username" type="textfield" value="[% user.id %]">
                   <br/>
-                  <label class="label" for="email">[% loc( 'Email' ) %]:</label>
+                  <label class="label" for="email">[% loc( 'Email' ) %]</label>
                   <input class="standard-field" disabled="disabled"
                      name="email" type="textfield" value="[% user.email %]">
                   <br>
@@ -34,7 +34,7 @@
                         method="post" name="[% page.form_name %]">
                      <input name="username" type="hidden" value="[% user.id %]">
                      <label class="label"
-                              for="roles">[% loc( 'Roles' ) %]:</label>
+                              for="roles">[% loc( 'Roles' ) %]</label>
                      <div class="container-group">
 [%    FOR role = page.auth_roles -%]
                         <input name="roles" type="checkbox" value="[% role %]"
@@ -43,19 +43,19 @@
 [%    END -%]
                      </div>
                      <br/>
-[%    IF user.active -%]
-[%       text = loc( 'Deactivate' ); value = 'deactivate_user' -%]
-[%    ELSE -%]
-[%       text = loc( 'Activate' ); value = 'activate_user' -%]
-[%    END -%]
-                     <button class="btn btn-submit submit" name="_method"
-                              type="submit" value="[% value %]">
-                              [% text %]</button>
-                     <button class="btn btn-submit submit" id="delete-user"
+                     <label class="label"
+                              for="active">[% loc( 'Status' ) %]</label>
+                     <div class="container-group">
+                        <input name="active" type="checkbox" value="1"
+                       [% IF user.active %]checked[% END %]>
+                        <span class="label">[% ucfirst( 'Active' ) %]</span><br>
+                     </div>
+                     <br/>
+                     <button class="button submit" id="delete-user"
                               name="_method" type="submit"
                              value="delete_user">[% loc( 'Delete' ) %]</button>
-                     <button class="btn btn-submit submit" name="_method"
-                              type="submit" value="update_roles">
+                     <button class="button submit" name="_method"
+                              type="submit" value="update_user">
                               [% loc( 'Update' ) %]</button>
                   </form>
 [% END -%]

@@ -38,6 +38,7 @@
                <form action="[% links.req_uri %]"
                     enctype="application/x-www-form-urlencoded"
                      method="post" name="markdown">
+[%    hint  = loc( 'Hint' ) -%]
 [%    title = hint _ ' ~ ' _ loc( 'Generate the static pages' ) -%]
 [%    text  = loc( 'Generate' ) %]
                   <span class="tips" title="[% title %]">

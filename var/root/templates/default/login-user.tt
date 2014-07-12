@@ -7,6 +7,6 @@
            value="[% page.username %]"><br/>
    <label  class="label" for="password">[% loc( 'Password' ) %]</label>
    <input  class="standard-field" name="password" type="password">
-   <button class="btn btn-submit" name="_method" type="submit"
+   <button class="button" name="_method" type="submit"
            value="login">[% loc( 'Login' ) %]</button>
 </form>
