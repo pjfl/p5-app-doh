@@ -25,10 +25,6 @@ has 'assetdir'        => is => 'lazy', isa => Path,
    builder            => sub { $_[ 0 ]->file_root->catfile( $_[ 0 ]->assets ) },
    coerce             => Path->coercion;
 
-has 'auth_file'       => is => 'lazy', isa => File,
-   builder            => sub { $_[ 0 ]->file_root->catfile( 'users.json' ) },
-   coerce             => File->coercion;
-
 has 'auth_roles'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    default            => sub { [ qw( admin editor user ) ] };
 
@@ -103,9 +99,6 @@ has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
 has 'links'           => is => 'lazy', isa => ArrayRef[HashRef],
    init_arg           => undef;
 
-has 'load_factor'     => is => 'ro',   isa => NonZeroPositiveInt,
-   default            => 14;
-
 has 'mdn_tab_width'   => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
 has 'max_asset_size'  => is => 'ro',   isa => Int, default => 4_194_304;
@@ -171,6 +164,9 @@ has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
 has 'twitter'         => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
 has 'use_flags'       => is => 'ro',   isa => Bool, default => TRUE;
+
+has 'user_attributes' => is => 'ro',   isa => HashRef, builder => sub { {
+   path               => $_[ 0 ]->file_root->catfile( 'users.json' ), } };
 
 has '_colours'        => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'colours';
@@ -246,11 +242,6 @@ that locates the assets files uploaded by users
 
 Defaults to F<var/root/docs/assets>. Path object for the directory
 containing user uploaded files
-
-=item C<auth_file>
-
-Defaults to F<var/root/docs/users.json>. A file object which contains the
-users and roles defined by the application
 
 =item C<auth_roles>
 
@@ -369,10 +360,6 @@ A non empty simple string that defaults to F<two-columns>. The name of the
 L<Template::Toolkit> template used to render the HTML response page. The
 template will be wrapped by F<wrapper.tt> unless the stash attribute
 C<content_only> is true
-
-=item C<load_factor>
-
-Defaults to 14. A non zero positive integer passed to the C<bcrypt> function
 
 =item C<less>
 
@@ -510,6 +497,27 @@ Twitter follow buttons
 Boolean which defaults to C<TRUE>. Display the language code, which is
 derived from browsers accept language header value, as a national flag. If
 false display as text
+
+=item C<user_attributes>
+
+Defines these attributes;
+
+=over 3
+
+=item C<load_factor>
+
+Defaults to 14. A non zero positive integer passed to the C<bcrypt> function
+
+=item C<min_pass_len>
+
+Defaults to 8. The minimum acceptable length for a password
+
+=item C<path>
+
+Defaults to F<var/root/docs/users.json>. A file object which contains the
+users and their profile used by the application
+
+=back
 
 =back
 

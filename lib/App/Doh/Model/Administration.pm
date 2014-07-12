@@ -16,18 +16,6 @@ with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
-sub activate_user_action : Role(admin) {
-   my ($self, $req) = @_;
-
-   my $username = $req->body_params->( 'username' );
-
-   $self->users->update_user( { id => $username, active => TRUE } );
-
-   my $message  = [ 'User [_1] activated by [_2]', $username, $req->username ];
-
-   return { redirect => { location => $req->uri, message => $message } };
-}
-
 sub create_user_action : Role(anon) {
    my ($self, $req) = @_;
 
@@ -35,22 +23,10 @@ sub create_user_action : Role(anon) {
    my $args    = { email    => $params->( 'email' ),
                    id       => $params->( 'username' ),
                    password => $params->( 'password' ), };
-   my $user    = $self->users->create_user( $args );
+   my $user    = $self->users->create( $args );
    my $message = [ 'User [_1] created', $user->id ];
 
    return { redirect => { location => $req->base, message => $message } };
-}
-
-sub deactivate_user_action : Role(admin) {
-   my ($self, $req) = @_;
-
-   my $username = $req->body_params->( 'username' );
-
-   $self->users->update_user( { id => $username, active => FALSE } );
-
-   my $message  = [ 'User [_1] deactivated by [_2]', $username, $req->username];
-
-   return { redirect => { location => $req->uri, message => $message } };
 }
 
 sub delete_user_action : Role(admin) {
@@ -60,7 +36,7 @@ sub delete_user_action : Role(admin) {
 
    $username eq $req->username and throw error => 'Cannot self terminate',
                                             rv => HTTP_I_AM_A_TEAPOT;
-   $self->users->delete_user( $username );
+   $self->users->delete( $username );
 
    my $location = $req->uri_for( 'admin' );
    my $message  = [ 'User [_1] deleted by [_2]', $username, $req->username ];
@@ -93,7 +69,7 @@ sub get_dialog : Role(anon) {
 
    $name eq 'login' and $page->{username} = $req->session->username;
    $name eq 'profile'
-      and $page->{email     } = $self->users->find_user( $req->username )->email
+      and $page->{email     } = $self->users->find( $req->username )->email
       and $page->{literal_js} = set_element_focus( "${name}-user", 'email' )
       and $page->{username  } = $req->username;
    $name ne 'profile'
@@ -114,7 +90,7 @@ sub get_form : Role(admin) {
    $page->{name      } = $title;
    $page->{template  } = [ 'admin', 'admin' ];
    $page->{title     } = $title;
-   $page->{users     } = $self->users->list_users( $id );
+   $page->{users     } = $self->users->list( $id );
    return $stash;
 }
 
@@ -162,12 +138,12 @@ sub update_profile_action : Role(any) {
    my $email = $req->body_value( 'email'    );
    my $pass  = $req->body_value( 'password' );
    my $again = $req->body_value( 'again'    );
-   my $user  = $self->users->find_user( $id );
+   my $user  = $self->users->find( $id );
    my $args  = { id => $id };
 
    $email and $email ne $user->email and $args->{email} = $email;
    $pass  and $again and $pass eq $again and $args->{password} = $pass;
-   $self->users->update_user( $args );
+   $self->users->update( $args );
 
    my $message = [ 'User [_1] profile updated', $id ];
 
@@ -180,11 +156,11 @@ sub update_user_action : Role(admin) {
    my $id     = $req->body_params->( 'username' );
    my $active = $req->body_value( 'active' );
    my $roles  = $req->body_values( 'roles' );
-   my $user   = $self->users->find_user( $id );
+   my $user   = $self->users->find( $id );
    my $args   = { id => $id, roles => $roles };
 
    $active != $user->active and $args->{active} = $active;
-   $self->users->update_user( $args );
+   $self->users->update( $args );
 
    my $message = [ 'User [_1] updated by [_2]', $id, $req->username ];
 
@@ -200,7 +176,7 @@ sub _authenticate {
    $password or throw class => Unspecified, args => [ 'password' ],
                          rv => HTTP_EXPECTATION_FAILED;
 
-   try   { $user = $self->users->find_user( $username ) }
+   try   { $user = $self->users->find( $username ) }
    catch { throw error => 'User [_1] unknown: [_2]', args => [ $username, $_ ],
                     rv => HTTP_EXPECTATION_FAILED;
    };

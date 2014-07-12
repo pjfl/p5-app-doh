@@ -4,13 +4,15 @@ use namespace::autoclean;
 
 use Moo;
 use Class::Usul::Constants     qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions     qw( create_token throw );
+use Class::Usul::Functions     qw( create_token is_hashref throw );
 use Class::Usul::Types         qw( NonZeroPositiveInt );
 use Crypt::Eksblowfish::Bcrypt qw( bcrypt en_base64 );
 
 extends q(File::DataClass::Schema);
 
-has 'load_factor' => is => 'ro', isa => NonZeroPositiveInt, default => 14;
+has 'load_factor'  => is => 'ro', isa => NonZeroPositiveInt, default => 14;
+
+has 'min_pass_len' => is => 'ro', isa => NonZeroPositiveInt, default => 8;
 
 has '+result_source_attributes' => default => sub { {
    users                   => {
@@ -19,45 +21,66 @@ has '+result_source_attributes' => default => sub { {
       resultset_attributes => { result_class => 'App::Doh::User::Result' } },
 } };
 
+# Construction
+around 'BUILDARGS' => sub {
+   my ($orig, $self, @args) = @_;
+
+   my $args    = (is_hashref $args[ 0 ]) ? $args[ 0 ] : { @args };
+
+   my $builder = $args->{builder}; ($builder and $builder->can( 'config' ))
+      or return $orig->( $self, @args );
+
+   my $attr    = { %{ $args }, %{ $builder->config->user_attributes // {} } };
+
+   return $orig->( $self, $attr );
+};
+
 # Public methods
-sub create_user {
+sub create {
    my ($self, $args) = @_;
 
    $args->{active  }   = FALSE;
    $args->{email   } //= NUL;
-   $args->{password}   = bcrypt( $args->{password}, $self->_new_salt );
+   $args->{password}   = $self->_encrypt_password( $args->{password} );
    $args->{roles   } //= [ 'user' ];
 
    return $self->_resultset->create( $args );
 }
 
-sub delete_user {
+sub delete {
    return $_[ 0 ]->_resultset->delete( $_[ 1 ] );
 }
 
-sub find_user {
+sub find {
    return $_[ 0 ]->_resultset->find( $_[ 1 ] );
 }
 
-sub list_users {
+sub list {
    return $_[ 0 ]->_resultset->list( $_[ 1 ] // NUL );
 }
 
-sub update_user {
+sub update {
    my ($self, $args) = @_;
 
    $args->{password} and $args->{password} !~ m{ \A \$ 2a }mx
-      and $args->{password} = bcrypt( $args->{password}, $self->_new_salt );
+      and $args->{password} = $self->_encrypt_password( $args->{password} );
 
    return $self->_resultset->find_and_update( $args );
 }
 
 # Private metods
-sub _new_salt {
-   my $lf = $_[ 0 ]->load_factor;
+sub _encrypt_password {
+   my ($self, $password) = @_;
 
-   return "\$2a\$${lf}\$"
-      .(en_base64( pack( 'H*', substr( create_token, 0, 32 ) ) ) );
+   length $password >= $self->min_pass_len
+      or throw error => 'Password too short. Minimum length [_1] characters',
+                args => [ $self->min_pass_len ];
+
+   my $lf   = $self->load_factor;
+   my $salt = "\$2a\$${lf}\$"
+              .(en_base64( pack( 'H*', substr( create_token, 0, 32 ) ) ) );
+
+   return bcrypt( $password, $salt );
 }
 
 sub _resultset {

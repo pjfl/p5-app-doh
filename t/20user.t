@@ -24,17 +24,17 @@ use_ok 'App::Doh::Server';
 my $self  = App::Doh::Server->new;
 my $users = $self->models->{admin}->users;
 
-$users->find_user( 'admin') and $users->delete_user( 'admin' );
+$users->find( 'admin') and $users->delete( 'admin' );
 
-my $user  = $users->create_user( {
+my $user  = $users->create( {
    email    => 'Admin@example.com', id => 'admin',
-   password => 'admin', roles => [ 'admin', 'editor', 'user' ] } );
+   password => 'admin123', roles => [ 'admin', 'editor', 'user' ] } );
 
 is $user->email, 'Admin@example.com', 'Creates user';
 
-$users->update_user( { id => 'admin', active => 1 } );
+$users->update( { id => 'admin', active => 1 } );
 
-ok $users->find_user( 'admin')->active, 'Activates user';
+ok $users->find( 'admin' )->active, 'Activates user';
 
 done_testing;
 

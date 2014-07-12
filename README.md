@@ -109,7 +109,7 @@ foreground with:
 ```
 
 Users must authenticate against the `.htpasswd` files under the
-document root. The default user is `admin` password `admin`. You
+document root. The default user is `admin` password `admin123`. You
 should change that. To start the production server in the background
 listening on the default port 8085 use:
 

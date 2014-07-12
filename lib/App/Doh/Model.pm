@@ -20,9 +20,7 @@ has 'ipc'   => is => 'lazy', isa => Object, builder  => sub {
 
 
 has 'users' => is => 'lazy', isa => Object, builder => sub {
-   App::Doh::User->new( builder     => $_[ 0 ]->usul,
-                        load_factor => $_[ 0 ]->config->load_factor,
-                        path        => $_[ 0 ]->config->auth_file ) };
+   App::Doh::User->new( builder => $_[ 0 ]->usul ) };
 
 sub exception_handler {
    my ($self, $req, $e) = @_;
