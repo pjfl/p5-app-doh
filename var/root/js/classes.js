@@ -394,12 +394,13 @@ var Headroom = new Class( {
       var debouncer = new Debouncer( function () {
          this.update( el.id ) }.bind( this ) );
 
+      this.props[ el.id ] = { debouncer: debouncer, prevScrollY: 0 };
+
       var attacher = function() {
          this.props[ el.id ].prevScrollY = window.getScroll().y;
          window.addEvent( 'scroll', debouncer.handleEvent.bind( debouncer ) );
       };
 
-      this.props[ el.id ] = { debouncer: debouncer, prevScrollY: 0 };
       attacher.delay( 100, this );
    },
 
