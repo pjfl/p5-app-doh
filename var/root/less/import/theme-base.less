@@ -280,8 +280,24 @@ table tr th:last-child, table tr td:last-child {
    text-align: left;
 }
 .file-link { white-space: nowrap; }
+.fixed-footer {
+   bottom: 0; left: 0; padding: 18px; position: fixed; z-index: -100;
+}
+.fixed-footer.container-fluid {
+   background-color: @dark; font-size: 14px; line-height: 18px;
+   min-height: 72px; overflow: hidden; padding-top: 0;
+}
+.fixed-footer.container-fluid .footer-nav { margin: 18px 0; }
+.fixed-footer.container-fluid .footer-nav li { list-style: none; }
+.fixed-footer.container-fluid .footer-nav li a {
+   font-size: 18px; line-height: 36px; .serif-bold;
+}
+.fixed-footer.container-fluid .footer-nav li a:hover {
+   color: @light; text-decoration: none;
+}
+.fixed-footer.container-fluid .twitter { margin-top: 36px; }
+.fixed-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .folder { font-size: 16px; line-height: 18px; }
-.footer { bottom: 0; left: 0; padding: 18px; position: fixed; }
 .github-ribbon { position: absolute; right: 0; top: 54px; z-index: 10; }
 .hero-buttons.container-fluid {
    background-color: @sidebar-hover; overflow: hidden;
@@ -300,8 +316,7 @@ table tr th:last-child, table tr td:last-child {
    background-color: @dark; color: @sidebar-background;
 }
 .hidden { display: none; }
-.homepage-content.container-fluid,
-.homepage-footer.container-fluid { font-size: 14px; line-height: 18px; }
+.homepage-content.container-fluid  { font-size: 14px; line-height: 18px; }
 .homepage-content.container-fluid .lead { .serif-regular; }
 .homepage-content.container-fluid ol,
 .homepage-content.container-fluid ul { margin: 18px 0; padding: 0; }
@@ -319,20 +334,6 @@ table tr th:last-child, table tr td:last-child {
    background-color: white; overflow: hidden;
    min-height: 72px; padding: 36px 0;
 }
-.homepage-footer.container-fluid {
-   background-color: @dark; min-height: 72px; overflow: hidden;
-   padding-top: 0;
-}
-.homepage-footer.container-fluid .footer-nav { margin: 18px 0; }
-.homepage-footer.container-fluid .footer-nav li { list-style: none; }
-.homepage-footer.container-fluid .footer-nav li a {
-   font-size: 18px; line-height: 36px; .serif-bold;
-}
-.homepage-footer.container-fluid .footer-nav li a:hover {
-   color: @light; text-decoration: none;
-}
-.homepage-footer.container-fluid .twitter { margin-top: 36px; }
-.homepage-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .homepage-hero { background-color: @light; color: @dark; }
 .homepage-hero { overflow: hidden; .serif-bold; }
 .homepage-hero .homepage-image { margin-bottom: 18px; max-height: 475px; }
@@ -517,12 +518,12 @@ table tr th:last-child, table tr td:last-child {
       height: auto; padding-top: 0; width: 100% !important;
    }
    .columns .right-column .content-page { padding-right: 220px !important; }
+   .fixed-footer.container-fluid { padding: 0 20px; }
    .hero-buttons.container-fluid .btn-hero.btn {
       display: block; margin-bottom: 10px;
    }
    .homepage-hero { padding-top: 0 !important; }
    .homepage-content.container-fluid { padding: 40px 20px; }
-   .homepage-footer.container-fluid { padding: 0 20px; }
    .responsive-collapse { display: block !important; }
 }
 @media (min-width: 820px){

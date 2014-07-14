@@ -233,7 +233,7 @@ var Behaviour = new Class( {
    },
 
    resize: function() {
-      var nav, ribbon = $( 'github-ribbon' ), w = window.getWidth();
+      var footer, nav, ribbon = $( 'github-ribbon' ), w = window.getWidth();
 
       if (w >= 820) {
          if (ribbon) ribbon.setStyle( 'right', '16px' );
@@ -242,6 +242,13 @@ var Behaviour = new Class( {
       }
       else {
          if (ribbon) ribbon.setStyle( 'right', '0px' );
+      }
+
+      if (footer = $( 'fixed-footer' )) {
+         var content = footer.getPrevious();
+
+         footer.setStyle( 'width', content.getSize().x );
+         content.setStyle( 'margin-bottom', footer.getSize().y );
       }
    },
 
