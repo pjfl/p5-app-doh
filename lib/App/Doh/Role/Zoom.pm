@@ -2,7 +2,7 @@ package App::Doh::Role::Zoom;
 
 use namespace::autoclean;
 
-use Class::Usul::Constants;
+use Class::Usul::Constants qw( EXCEPTION_CLASS );
 use Class::Usul::Functions qw( throw );
 use HTML::Zoom;
 use Scalar::Util           qw( weaken );
@@ -22,7 +22,8 @@ sub render_template {
 
    $path->exists or throw class => PathNotFound, args => [ $path ];
 
-   my $content = HTML::Zoom->from_file( $path );
+   my $content = HTML::Zoom->from_file( $path )
+                           ->apply( sub { __content( $_, $req, $stash ) } );
 
    $stash->{content_only} and return $content->to_html;
 
@@ -30,6 +31,23 @@ sub render_template {
                            ->apply( sub { __wrapper( $_, $req, $stash ) } );
 
    return $wrapper->select( 'body' )->replace_content( $content )->to_html;
+}
+
+sub __content {
+   my ($z, $req, $stash) = @_; my $layout = $stash->{page}->{layout};
+
+   my $filter = sub { no strict 'refs'; &{"__${layout}"}( $_, $req, $stash ) };
+
+   return $z->apply( $filter );
+}
+
+sub __index {
+   my ($z, $req, $stash) = @_;
+
+   $z = $z->apply( sub { __navbar( $_, $req, $stash ) } );
+   $z = $z->apply( sub { __forkme( $_, $req, $stash ) } );
+
+   return $z->apply( sub { __footer( $_, $req, $stash ) } );
 }
 
 sub __wrapper {
