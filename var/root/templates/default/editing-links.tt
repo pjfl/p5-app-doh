@@ -1,57 +1,32 @@
 [% IF ! page.editing && page.mode != 'static' && req.authenticated -%]
             <!-- Editing Links -->
             <div class="well well-sidebar">
-[%    hint  = loc( 'Hint' ) -%]
-[%    title = hint _ ' ~ ' _ loc( 'Search for text in markdown files' ) -%]
-               <span class="tips" title="[% title %]">
-                  <a class="windows fade" href="#"
-                        id="search-file">[% loc( 'Search' ) %]</a></span>
+[%    class = 'windows fade' -%]
+[%    tip   = loc( 'Search for text in markdown files' ) -%]
+[%    LinkWithTips( '#', class, loc( 'Search' ), page.hint,
+                    tip, 'search-file' ) -%]
                <br>
-[%    title = hint _ ' ~ ' _ loc( 'Create a new markdown file' ) -%]
-               <span class="tips" title="[% title %]">
-                  <a class="windows fade" href="#"
-                        id="create-file">[% loc( 'Create' ) %]</a></span>
+[%    LinkWithTips( '#', class, loc( 'Create' ), page.hint,
+                    loc( 'Create a new markdown file' ), 'create-file' ) -%]
                <br>
-[%    title = hint _ ' ~ ' _ loc( 'Rename this markdown file' ) -%]
-               <span class="tips" title="[% title %]">
-                  <a class="windows fade" href="#"
-                        id="rename-file">[% loc( 'Rename' ) %]</a></span>
+[%    LinkWithTips( '#', class, loc( 'Rename' ), page.hint,
+                    loc( 'Rename this markdown file' ), 'rename-file' ) -%]
                <br>
-[%    title = hint _ ' ~ ' _ loc( 'Upload an asset file' ) -%]
-               <span class="tips" title="[% title %]">
-                  <a class="windows fade" href="#"
-                        id="upload-file">[% loc( 'Upload' ) %]</a></span>
+[%    LinkWithTips( '#', class, loc( 'Upload' ), page.hint,
+                    loc( 'Upload an asset file' ), 'upload-file' ) -%]
                <br>
-[%    title = hint _ ' ~ ' _ loc( 'Edit the markdown for this page' ) -%]
-[%    text  = loc( 'Edit' ) -%]
-               <span class="tips" title="[% title %]">
-                  <a class="fade"
-                      href="[% links.req_uri %]?edit=1">[% text %]</a></span>
+[%    LinkWithTips( links.req_uri _ '?edit=1', 'fade', loc( 'Edit' ),
+                    page.hint, loc( 'Edit the markdown for this page' ) ) -%]
                <br>
-               <form action="[% links.req_uri %]"
-                    enctype="application/x-www-form-urlencoded"
-                     method="post" name="markdown">
-[%    title = hint _ ' ~ ' _ loc( 'Delete this markdown file' ) -%]
-[%    text  = loc( 'Delete' ) %]
-                  <span class="tips" title="[% title %]">
-                     <button class="btn fade submit" id="delete-file"
-                              name="_method" type="submit"
-                             value="delete_file">[% text %]</button></span>
-               </form>
-[%    href  = links.base_uri _ config.static _ '/' _ page.language _ '/index.html' %]
-[%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
-[%    text  = loc( 'View Static' ) %]
-               <span class="tips" title="[% title %]">
-                  <a class="btn fade" href="[% href %]">[% text %]</a></span>
-[%    title = hint _ ' ~ ' _ loc( 'Logout from the application' ) -%]
-[%    text  = loc( 'Logout' ) %]
-               <form action="[% uri_for( 'logout' ) %]"
-                    enctype="application/x-www-form-urlencoded"
-                     method="post" name="authentication">
-                  <span class="tips" title="[% title %]">
-                     <button class="btn fade submit" id="logout-user"
-                              name="_method" type="submit"
-                             value="logout">[% text %]</button></span>
-               </form>
+[%    class = 'btn fade submit' -%]
+[%    FormWithButton( links.req_uri, class, loc( 'Delete' ),
+                      page.form_name, loc( 'Delete this markdown file' ),
+                      'delete-file', 'delete_file' ) -%]
+[%    href  = links.base_uri _ config.static _ '/' _ page.language _ '/index.html' -%]
+[%    LinkWithTips( href, 'btn fade', loc( 'View Static' ),
+                    page.hint, loc( 'View the static pages' ) ) -%]
+[%    FormWithButton( uri_for( 'logout' ), class, loc( 'Logout' ),
+                      'authentication', loc( 'Logout from the application' ),
+                      'logout-user', 'logout' ) -%]
             </div>
 [% END -%]

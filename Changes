@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Rationalised the templates
           - Fixed footer and add JS handler for content margin-bottom
           - Added minimum password length
           - Admin page functional improvements

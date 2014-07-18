@@ -10,6 +10,7 @@
 \B\.gitignore-rev$
 \B\.gitpre-commit$
 \B\.svn\b
+\B\.travis.yml$
 
 # Avoid Makemaker generated and utility files.
 \bMakefile$

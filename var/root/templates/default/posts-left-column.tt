@@ -10,11 +10,11 @@
             </button>
          </div>
          <div id="sub-nav-collapse" class="collapse in">
-[% depth = 0 -%]
+[% depth = 0; folder_title = loc( 'Folder Path' ) -%]
             <ul class="nav nav-list">
                <li>
 [% uri = uri_for( config.posts _ '/index' ); tip = loc( 'Landing page' ) -%]
-[% linkWithTips( uri, 'folder', loc( 'Posts' ), 'Hint', tip ) -%]
+[% LinkWithTips( uri, 'folder', loc( 'Posts' ), page.hint, tip ) -%]
                </li>
 [% FOREACH node = nav -%]
 [%    WHILE node.depth < depth; depth = depth - 1 -%]
@@ -24,7 +24,7 @@
 [%    IF node.type == 'folder'; depth = depth + 1 -%]
             <li class="[% node.class %]">
 [%       uri = uri_for( node.url ) -%]
-[%       linkWithTips( uri, 'folder', node.name, 'Folder Path', node.tip ) -%]
+         [% LinkWithTips( uri, 'folder', node.name, folder_title, node.tip ) -%]
                <ul class="nav nav-list">
 [%    END -%]
 [% END -%]

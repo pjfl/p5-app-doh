@@ -21,6 +21,7 @@ around 'load_page' => sub {
    $page->{application_version}   = $App::Doh::VERSION;
    $page->{editing            } //= $req->params->{edit} // FALSE;
    $page->{form_name          }   = 'markdown';
+   $page->{hint               }   = $req->loc( 'Hint' );
    $page->{locale             } //= $req->locale;
    $page->{mode               }   = $req->params->{mode} // 'online';
    $page->{status_message     }   = $req->session->clear_status_message;

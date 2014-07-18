@@ -62,7 +62,8 @@ sub dialog {
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
    my $stash  = $self->get_stash( $req );
-   my $page   = $stash->{page} = { layout => "${name}-file",
+   my $page   = $stash->{page} = { hint   => $req->loc( 'Hint' ),
+                                   layout => "${name}-file",
                                    meta   => { id => $params->( 'id' ), }, };
 
    if    ($name eq 'create') {

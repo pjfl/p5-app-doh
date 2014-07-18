@@ -64,7 +64,8 @@ sub get_dialog : Role(anon) {
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
    my $stash  = $self->get_stash( $req );
-   my $page   = $stash->{page} = { layout => "${name}-user",
+   my $page   = $stash->{page} = { hint   => $req->loc( 'Hint' ),
+                                   layout => "${name}-user",
                                    meta   => { id => $params->( 'id' ), }, };
 
    $name eq 'login' and $page->{username} = $req->session->username;

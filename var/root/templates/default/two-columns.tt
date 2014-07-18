@@ -1,12 +1,18 @@
-[% MACRO fadingLink( href, class, content ) BLOCK -%]
-<a href="[% href %]" class="[% class %] fade">[% content %]</a>
+[% MACRO Link( href, class, text, id ) BLOCK -%]
+<a class="[% class %]" href="[% href %]"[% IF id -%]
+ id="[% id %]"[% END %]>[% text %]</a>
 [% END -%]
-[% MACRO linkWithTips( href, class, content, title, tip ) IF tip -%]
-               <span class="tips" title="[% loc( title ) _ ' ~ ' _ tip %]">
-                  [% fadingLink( href, class, content ) -%]
-               </span>
-[% ELSE -%]
-   [% fadingLink( href, class, content ) -%]
+[% MACRO LinkWithTips( href, class, text, title, tip, id ) BLOCK -%]
+<span class="tips" title="[% title _ ' ~ ' _ tip %]">
+   [% Link( href, class, text, id ) -%]</span>
+[% END -%]
+[% MACRO FormWithButton( href, class, text, form, tip, id, value ) BLOCK -%]
+<form action="[% href %]" enctype="application/x-www-form-urlencoded"
+      method="post" name="[% form %]">
+   <span class="tips" title="[% page.hint _ ' ~ ' _ tip %]">
+      <button class="[% class %]" id="[% id %]" name="_method"
+               type="submit" value="[% value %]">[% text %]</button></span>
+</form>
 [% END -%]
 [% INCLUDE 'default/navbar.tt' -%]
 [% INCLUDE 'default/fork-me.tt' -%]

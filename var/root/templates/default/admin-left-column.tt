@@ -11,7 +11,10 @@
          </div>
          <div id="sub-nav-collapse" class="collapse in">
             <!-- Navigation -->
-[% depth = 0 -%]
+[% depth        = 0 -%]
+[% class        = 'aj-nav folder' -%]
+[% file_title   = loc( 'File Path' ) -%]
+[% folder_title = loc( 'Folder Path' ) -%]
             <ul class="nav nav-list">
 [% FOREACH node = nav -%]
 [%    WHILE node.depth < depth; depth = depth - 1 -%]
@@ -19,12 +22,12 @@
             </li>
 [%    END -%]
             <li class="[% node.class %]">
-[%    IF node.type == 'folder'; depth = depth + 1; class = 'aj-nav folder' -%]
-[%       linkWithTips( '#', class, node.name, 'Folder Path', node.tip ) -%]
+[%    IF node.type == 'folder'; depth = depth + 1 -%]
+               [% LinkWithTips( '#', class, node.name, folder_title, node.tip )-%]
                <ul class="nav nav-list">
 [%    ELSE -%]
-[%       uri = uri_for( node.url ) -%]
-[%       linkWithTips( uri, '', node.name, 'File Path', node.tip ) -%]
+[%             href = uri_for( node.url ) -%]
+               [% LinkWithTips( href, '', node.name, file_title, node.tip ) -%]
             </li>
 [%    END -%]
 [% END -%]
@@ -35,32 +38,16 @@
             </ul>
             <!-- Links -->
             <div class="well well-sidebar">
-               <form action="[% links.req_uri %]"
-                    enctype="application/x-www-form-urlencoded"
-                     method="post" name="markdown">
-[%    hint  = loc( 'Hint' ) -%]
-[%    title = hint _ ' ~ ' _ loc( 'Generate the static pages' ) -%]
-[%    text  = loc( 'Generate' ) %]
-                  <span class="tips" title="[% title %]">
-                     <button class="btn fade submit" id="generate-static"
-                              name="_method" type="submit"
-                             value="generate_static">[% text %]</button></span>
-               </form>
-[%    href  = links.base_uri _ 'static/' _ page.language _ '/index.html' -%]
-[%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
-[%    text  = loc( 'View Static' ) %]
-               <span class="tips" title="[% title %]">
-                  <a class="btn fade" href="[% href %]">[% text %]</a></span>
-[%    title = hint _ ' ~ ' _ loc( 'Logout from the application' ) -%]
-[%    text  = loc( 'Logout' ) %]
-               <form action="[% uri_for( 'logout' ) %]"
-                    enctype="application/x-www-form-urlencoded"
-                     method="post" name="authentication">
-                  <span class="tips" title="[% title %]">
-                     <button class="btn fade submit" id="logout-user"
-                              name="_method" type="submit"
-                             value="logout">[% text %]</button></span>
-               </form>
+[%    class = 'btn fade submit' -%]
+[%    FormWithButton( links.req_uri, class, loc( 'Generate' ),
+                      'markdown', loc( 'Generate the static pages' ),
+                      'generate-static', 'generate_static' ) -%]
+[%    href = links.base_uri _ 'static/' _ page.language _ '/index.html' -%]
+[%    LinkWithTips( href, 'btn fade', loc( 'View Static' ), page.hint,
+                    loc( 'View the static pages' ) ) -%]
+[%    FormWithButton( uri_for( 'logout' ), class, loc( 'Logout' ),
+                      'authentication', loc( 'Logout from the application' ),
+                      'logout-user', 'logout' ) -%]
             </div>
          </div>
       </div>

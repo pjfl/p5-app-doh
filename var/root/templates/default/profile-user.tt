@@ -2,16 +2,15 @@
 <form action="[% links.base_uri %]user"
      enctype="application/x-www-form-urlencoded"
       method="post" name="profile-user">
-[% hint = loc( 'Hint' ) -%]
 [% IF prefs.use_flags -%]
-[%    title = loc( 'National flag of requested the language' ) -%]
+[%    tip = loc( 'National flag of requested the language' ) -%]
          <div class="info-container pull-right tips"
-              title="[% hint _ ' ~ ' _ title %]">
+              title="[% page.hint _ ' ~ ' _ tip %]">
             <span class="flag_[% req.language %]"></span></div>
 [% ELSE -%]
-[%    title = loc( 'Requested language' ) -%]
+[%    tip = loc( 'Requested language' ) -%]
          <div class="info-container pull-right tips"
-              title="[% hint _ ' ~ ' _ title %]">[% req.language %]</div>
+              title="[% page.hint _ ' ~ ' _ tip %]">[% req.language %]</div>
 [% END -%]
    <label  class="label" for="email">[% loc( 'Email address' ) %]</label>
    <input  class="standard-field" name="email" type="textfield"

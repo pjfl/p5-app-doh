@@ -4,7 +4,9 @@
          <div class="content-page">
             <article>
 [% INCLUDE 'default/header.tt' -%]
-[% depth = page.wanted_depth -%]
+[% depth        = page.wanted_depth -%]
+[% file_title   = loc( 'File Path' ) -%]
+[% folder_title = loc( 'Folder Path' ) -%]
                <ul class="posts post-list">
 [% FOREACH node = nav -%]
 [%    IF node.depth >= page.wanted_depth -%]
@@ -16,11 +18,11 @@
                <li class="[% node.class %]">
 [%          uri = uri_for( node.url ) -%]
 [%          IF node.type == 'folder'; depth = depth + 1 -%]
-[%         linkWithTips( uri, 'folder', node.name, 'Folder Path', node.tip ) -%]
+                  [% LinkWithTips( uri, 'folder', node.name, folder_title, node.tip ) -%]
                   &nbsp;([% node.fcount -%])
                   <ul class="posts post-list">
 [%          ELSE -%]
-[%             linkWithTips( uri, '', node.name, 'File Path', node.tip ) -%]
+                  [% LinkWithTips( uri, '', node.name, file_title, node.tip ) -%]
                   <br>
                   <span class="sub-text">
 [%-            time2str( '%A, %B %e, %Y', str2time( node.prefix ) ) -%]</span>

@@ -11,7 +11,10 @@
          </div>
          <div id="sub-nav-collapse" class="collapse in">
             <!-- Navigation -->
-[% depth = 0 -%]
+[% depth        = 0 -%]
+[% class        = 'aj-nav folder' -%]
+[% file_title   = loc( 'File Path' ) -%]
+[% folder_title = loc( 'Folder Path' ) -%]
             <ul class="nav nav-list">
 [% FOREACH node = nav -%]
 [%    WHILE node.depth < depth; depth = depth - 1 -%]
@@ -19,12 +22,12 @@
             </li>
 [%    END -%]
             <li class="[% node.class %]">
-[%    IF node.type == 'folder'; depth = depth + 1; class = 'aj-nav folder' -%]
-[%       linkWithTips( '#', class, node.name, 'Folder Path', node.tip ) -%]
+[%    IF node.type == 'folder'; depth = depth + 1 -%]
+[%       LinkWithTips( '#', class, node.name, folder_title, node.tip ) -%]
                <ul class="nav nav-list">
 [%    ELSE -%]
 [%       uri = uri_for( node.url ) -%]
-[%       linkWithTips( uri, '', node.name, 'File Path', node.tip ) -%]
+[%       LinkWithTips( uri, '', node.name, file_title, node.tip ) -%]
             </li>
 [%    END -%]
 [% END -%]
@@ -37,6 +40,8 @@
             <!-- Links -->
 [% INCLUDE 'default/editing-links.tt' -%]
 [% INCLUDE 'default/config-links.tt' -%]
+            <div class="well well-sidebar">
 [% INCLUDE 'default/social-links.tt' -%]
+            </div>
          </div>
       </div>

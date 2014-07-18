@@ -1,3 +1,12 @@
+[% MACRO Link( href, class, content, id ) BLOCK -%]
+<a class="[% class %]" href="[% href %]"[% IF id -%]
+ id="[% id %]"[% END %]>[% content %]</a>
+[% END -%]
+[% MACRO LinkWithTips( href, class, content, title, tip, id ) BLOCK -%]
+<span class="tips" title="[% title _ ' ~ ' _ tip %]">
+   [% Link( href, class, content, id ) -%]
+</span>
+[% END -%]
 [% INCLUDE 'default/navbar.tt' -%]
 [% INCLUDE 'default/fork-me.tt' -%]
 <!-- Index -->
@@ -26,55 +35,39 @@
          <div class="container-center">
             <div class="row">
                <div class="text-center">
-[% hint = loc( 'Hint' ) -%]
 [% IF page.mode != 'static' -%]
+[%    class = 'btn btn-secondary btn-hero fade' -%]
 [%    IF req.authenticated -%]
-[%       title = hint _ ' ~ ' _ loc( 'Admininstration interface' ) -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-secondary btn-hero"
-                         href="[% uri_for( 'admin' ) %]">[% loc( 'Admin' ) %]
-                         </a></span>
+[%       LinkWithTips( uri_for( 'admin' ), class, loc( 'Admin' ),
+                       page.hint, loc( 'Admininstration interface' ) ) -%]
 [%    ELSE -%]
-[%       title = hint _ ' ~ ' _ loc( 'Help pages for the application' ) -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-secondary btn-hero"
-                         href="[% links.help_url %]">[% loc( 'Help' ) %]</a>
-                  </span>
+[%       LinkWithTips( links.help_url, class, loc( 'Help' ),
+                       page.hint, loc( 'Help pages for the application' ) ) -%]
 [%    END -%]
 [% END -%]
 [% IF page.mode != 'static' && !req.authenticated -%]
-[% title = hint _ ' ~ ' _ loc( 'Authenticate with the application' ) -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-primary btn-hero windows" href="#"
-                           id="login-user">[% loc( 'Login' ) %]</a></span>
-[% title = hint _ ' ~ ' _ loc( 'Register with the application' ) -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-primary btn-hero windows" href="#"
-                           id="create-user">[% loc( 'Register' ) %]</a></span>
+[%    class = 'btn btn-primary btn-hero windows' -%]
+[%    text  = loc( 'Login' ) -%]
+[%    tip   = loc( 'Authenticate with the application' ) -%]
+[%    LinkWithTips( '#', class, text, page.hint, tip, 'login-user' ) -%]
+[%    text  = loc( 'Register' ) -%]
+[%    tip   = loc( 'Register with the application' ) -%]
+[%    LinkWithTips( '#', class, text, page.hint, tip, 'create-user' ) -%]
 [% ELSE -%]
-[% title = hint _ ' ~ ' _ loc( 'Documentation tree' ) -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-primary btn-hero"
-                         href="[% page.docs_url %]">[% loc( 'Documentation' ) %]
-                     </a>
-                  </span>
-[% title = hint _ ' ~ ' _ loc( 'Posts, blogs, and news articles' ) -%]
-[%    IF page.mode != 'static'; href = uri_for( config.posts ); ELSE -%]
-[%       href = uri_for( config.posts _ '/index' ) -%]
-[%    END -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-primary btn-hero"
-                         href="[% href %]">[% loc( 'Posts' ) %]</a>
-                  </span>
+[%    class = 'btn btn-primary btn-hero windows' -%]
+[%    text  = loc( 'Documentation' ) -%]
+[%    tip   = loc( 'Documentation tree' ) -%]
+[%    LinkWithTips( page.docs_url, class, text, page.hint, tip ) -%]
+[%    IF   page.mode != 'static'; href = uri_for( config.posts ) -%]
+[%    ELSE; href = uri_for( config.posts _ '/index' ); END -%]
+[%    LinkWithTips( href, class, loc( 'Posts' ),
+                    page.hint, loc( 'Posts, blogs, and news articles' ) ) -%]
 [% END -%]
 [% IF page.mode != 'static' -%]
-[%    href  = links.base_uri _ config.static _ '/' _ page.language _ '/index.html' %]
-[%    title = hint _ ' ~ ' _ loc( 'View the static pages' ) -%]
-                  <span class="tips" title="[% title %]">
-                     <a class="btn btn-secondary btn-hero"
-                         href="[% href %]">[% loc( 'Static' ) %]
-                     </a>
-                  </span>
+[%    href  = links.base_uri _ config.static _ '/'
+              _ page.language _ '/index.html' -%]
+[%    LinkWithTips( href, 'btn btn-secondary btn-hero fade', loc( 'Static' ),
+                    page.hint, loc( 'View the static pages' ) ) -%]
 [% END -%]
                </div>
             </div>
@@ -84,6 +77,7 @@
          <div class="container-center">
             <div class="row">
 [% IF page.format == 'html' -%]
+               <!-- Page Content -->
                [% page.content | eval %]
 [% END -%]
             </div>
@@ -104,13 +98,7 @@
                </div>
                <div class="span5">
                   <div class="pull-right">
-[% IF config.twitter.0 -%]
-   [% FOREACH handle = config.twitter -%]
-                     <div class="twitter">
-                        <iframe style="width:162px; height:20px;" src="https://platform.twitter.com/widgets/follow_button.html?screen_name=[% handle %]&amp;show_count=false"></iframe>
-                     </div>
-   [% END -%]
-[% END -%]
+[% INCLUDE 'default/social-links.tt' -%]
                   </div>
                </div>
             </div>
