@@ -75,6 +75,7 @@ sub get_dialog : Role(anon) {
       and $page->{username  } = $req->username;
    $name ne 'profile'
       and $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
+   $stash->{view} = 'xml';
    return $stash;
 }
 

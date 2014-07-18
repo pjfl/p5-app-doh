@@ -12,12 +12,13 @@ use App::Doh::View::XML;
 use Class::Usul;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix exception find_apphome
-                               get_cfgfiles throw );
+                               get_cfgfiles is_arrayref throw );
 use Class::Usul::Types     qw( ArrayRef BaseType HashRef LoadableClass
                                NonEmptySimpleStr Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
                                HTTP_INTERNAL_SERVER_ERROR );
 use Plack::Builder;
+use Scalar::Util           qw( blessed );
 use Try::Tiny;
 use Web::Simple;
 
@@ -122,29 +123,35 @@ sub dispatch_request {
    return map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
 }
 
-sub execute {
-   my ($self, $view, $model, $method, @args) = @_; my ($req, $res);
+sub render {
+   return response_filter {
+      (is_arrayref $_[ 0 ] and blessed $_[ 0 ]->[ 0 ]) or return $_[ 0 ];
 
-   try   { $req = $self->request_class->new( $self->usul, @args ) }
-   catch { $res = __internal_server_error( $_ ) };
+      my ($self, $model, $method, @args) = @{ $_[ 0 ] }; my ($req, $res);
 
-   $res and return $res;
+      try   { $req = $self->request_class->new( $self->usul, @args ) }
+      catch { $res = __internal_server_error( $_ ) };
 
-   try {
-      $method eq 'from_request' and $method = $req->tunnel_method.'_action';
+      $res and return $res;
 
-      my $stash = $self->models->{ $model }->execute( $method, $req );
+      try {
+         $method eq 'from_request' and $method = $req->tunnel_method.'_action';
 
-      exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
+         my $stash = $self->models->{ $model }->execute( $method, $req );
 
-      $res or $res = $self->views->{ $view }->serialize( $req, $stash )
-           or throw error => 'View [_1] returned false', args => [ $view ];
-   }
-   catch { $res = $self->_render_exception( $view, $model, $req, $_ ) };
+         exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
 
-   $req->session->update;
+         my $view  = $self->views->{ $stash->{view} };
 
-   return $res;
+         $res or $res = $view->serialize( $req, $stash )
+              or throw error => 'View [_1] returned false', args => [ $view ];
+      }
+      catch { $res = $self->_render_exception( $model, $req, $_ ) };
+
+      $req->session->update;
+
+      return $res;
+   };
 }
 
 # Private methods
@@ -160,7 +167,7 @@ sub _redirect {
 }
 
 sub _render_exception {
-   my ($self, $view, $model, $req, $e) = @_; my $res;
+   my ($self, $model, $req, $e) = @_; my $res;
 
    my $msg = "${e}"; chomp $msg; $self->log->error( $msg );
 
@@ -168,8 +175,9 @@ sub _render_exception {
 
    try {
       my $stash = $self->models->{ $model }->exception_handler( $req, $e );
+      my $view  = $self->views->{ $stash->{view} };
 
-      $res = $self->views->{ $view }->serialize( $req, $stash )
+      $res = $view->serialize( $req, $stash )
           or throw error => 'View [_1] returned false', args => [ $view ];
    }
    catch { $res = __internal_server_error( $e, $_ ) };
@@ -181,7 +189,8 @@ sub _render_exception {
 sub __internal_server_error {
    my ($e, $secondary_error) = @_; my $message = "${e}\r\n";
 
-   $secondary_error and $message .= "Secondary error: ${secondary_error}";
+   $secondary_error and $secondary_error ne "${e}"
+      and $message .= "Secondary error: ${secondary_error}";
 
    return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
 }

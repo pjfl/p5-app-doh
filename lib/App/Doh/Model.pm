@@ -67,7 +67,8 @@ sub get_stash {
             str2time  => \&str2time,
             time2str  => \&time2str,
             ucfirst   => sub { ucfirst $_[ 0 ] },
-            uri_for   => sub { $req->uri_for( @_ ) }, };
+            uri_for   => sub { $req->uri_for( @_ ) },
+            view      => 'html', };
 }
 
 sub load_page {

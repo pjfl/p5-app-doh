@@ -80,6 +80,7 @@ sub dialog {
       $page->{literal_js} = __copy_element_value();
    }
 
+   $stash->{view} = 'xml';
    return $stash;
 }
 

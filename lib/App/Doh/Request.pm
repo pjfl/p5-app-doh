@@ -257,7 +257,7 @@ sub __get_scrubbed_value {
    $pattern = $opts->{scrubber} // $pattern;
    $pattern and $v =~ s{ $pattern }{}gmx;
    $opts->{allow_null} or length $v
-      or throw class => Unspecified, args => [ $name ],
+      or throw class => Unspecified, args => [ $name ], level => 3,
                   rv => HTTP_EXPECTATION_FAILED;
    return $v;
 }
