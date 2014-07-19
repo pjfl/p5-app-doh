@@ -11,6 +11,9 @@ use YAML::Tiny;
 
 extends q(App::Doh);
 
+# Public attributes
+has '+moniker'   => default => 'markdown';
+
 has 'extensions' => is => 'lazy', isa => ArrayRef,
    builder       => sub { $_[ 0 ]->config->extensions->{markdown} };
 
@@ -20,6 +23,7 @@ has 'tm'         => is => 'lazy', isa => Object, builder => sub {
 has 'yt'         => is => 'lazy', isa => Object,
    builder       => sub { YAML::Tiny->new };
 
+# Public methods
 sub serialize {
    my ($self, $req, $page) = @_; my $content = $page->{content};
 

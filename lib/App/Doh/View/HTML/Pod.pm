@@ -14,6 +14,8 @@ extends q(App::Doh);
 $Pod::Xhtml::COMMANDS{encoding} = TRUE; # STFU
 
 # Public attributes
+has '+moniker'   => default => 'pod';
+
 has 'extensions' => is => 'lazy', isa => ArrayRef,
    builder       => sub { $_[ 0 ]->config->extensions->{pod} };
 

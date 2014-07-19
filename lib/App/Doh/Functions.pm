@@ -3,14 +3,16 @@ package App::Doh::Functions;
 use 5.010001;
 use strictures;
 use feature 'state';
-use parent 'Exporter::Tiny';
+use parent  'Exporter::Tiny';
 
-use Class::Usul::Constants qw( FALSE LANG NUL TRUE );
-use Class::Usul::Functions qw( first_char is_arrayref is_hashref );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE LANG NUL TRUE );
+use Class::Usul::Functions qw( first_char is_arrayref is_hashref throw );
+use Module::Pluggable::Object;
+use Unexpected::Functions  qw( Unspecified );
 
 our @EXPORT_OK = qw( build_navigation_list build_tree clone extract_lang
-                     iterator localise_tree make_id_from make_name_from mtime
-                     set_element_focus show_node );
+                     iterator load_components localise_tree make_id_from
+                     make_name_from mtime set_element_focus show_node );
 
 sub build_navigation_list ($$$$) {
    my ($root, $tree, $ids, $wanted) = @_;
@@ -112,6 +114,25 @@ sub iterator ($) {
 
       return;
    };
+}
+
+sub load_components ($$) {
+   my ($ns, $args) = @_;
+
+   my $plugins   = {};
+   my $min_depth = delete $args->{min_depth};
+   my @depth     = $min_depth ? (min_depth => $min_depth) : (max_depth => 4);
+   my $finder    = Module::Pluggable::Object->new
+      ( @depth, search_path => [ $ns ], require => TRUE, );
+
+   for my $plugin ($finder->plugins) {
+      my $obj = $plugin->new( $args );
+
+      $obj->moniker or throw class => Unspecified, args => [ 'moniker' ];
+      $plugins->{ $obj->moniker } = $obj;
+   }
+
+   return $plugins;
 }
 
 sub localise_tree ($$) {

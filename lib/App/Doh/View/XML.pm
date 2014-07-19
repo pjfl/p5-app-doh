@@ -11,6 +11,9 @@ use XML::Simple;
 extends q(App::Doh);
 with    q(App::Doh::Role::Templates);
 
+# Public attributes
+has '+moniker'   => default => 'xml';
+
 # Private attributes
 has '_transcoder' => is => 'lazy', isa => Object,
    builder        => sub { XML::Simple->new };

@@ -3,6 +3,7 @@ package App::Doh::View::HTML;
 use namespace::autoclean;
 
 use Moo;
+use App::Doh::Functions    qw( load_components );
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
 use File::DataClass::Types qw( Directory HashRef Object );
@@ -12,20 +13,10 @@ extends q(App::Doh);
 with    q(App::Doh::Role::Templates);
 
 # Public attributes
+has '+moniker'   => default => 'html';
+
 has 'formatters' => is => 'lazy', isa => HashRef[Object], builder => sub {
-   my $self = shift; my $formatters = {};
-
-   my $finder = Module::Pluggable::Object->new
-      ( search_path => [ __PACKAGE__ ], require => TRUE, );
-
-   for my $formatter ($finder->plugins) {
-      my $format = lc ((split m{ :: }mx, $formatter)[ -1 ]);
-
-      $formatters->{ $format } = $formatter->new( builder => $self->usul );
-   }
-
-   return $formatters;
-};
+   load_components __PACKAGE__, { builder => $_[ 0 ]->usul, min_depth => 4 } };
 
 has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
    my $self = shift; my $map = { htm => 'html', html => 'html' };

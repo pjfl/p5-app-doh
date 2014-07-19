@@ -16,6 +16,8 @@ with    q(App::Doh::Role::Preferences);
 with    q(App::Doh::Role::Templates);
 with    q(App::Doh::Role::Editor);
 
+has '+moniker' => default => 'posts';
+
 # Construction
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;

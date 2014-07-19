@@ -2,13 +2,7 @@ package App::Doh::Server;
 
 use namespace::autoclean;
 
-use App::Doh::Controller::Root;
-use App::Doh::Model::Administration;
-use App::Doh::Model::Documentation;
-use App::Doh::Model::Help;
-use App::Doh::Model::Posts;
-use App::Doh::View::HTML;
-use App::Doh::View::XML;
+use App::Doh::Functions    qw( load_components );
 use Class::Usul;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix exception find_apphome
@@ -25,35 +19,32 @@ has 'request_class' => is => 'lazy', isa => LoadableClass,
    default          => sub { $_[ 0 ]->usul->config->request_class };
 
 # Private attributes
-has '_controllers' => is => 'lazy', isa => ArrayRef[Object], builder => sub {
-   [  App::Doh::Controller::Root->new, ] }, reader => 'controllers';
+has '_controllers'  => is => 'lazy', isa => ArrayRef[Object], builder => sub {
+   my $controllers  = load_components 'App::Doh::Controller',
+      { builder     => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
 
-has '_models'   => is => 'lazy', isa => HashRef[Object], builder => sub { {
-   'admin'      => App::Doh::Model::Administration->new
-      ( builder => $_[ 0 ]->usul ),
-   'docs'       => App::Doh::Model::Documentation->new
-      ( builder => $_[ 0 ]->usul, views => $_[ 0 ]->views ),
-   'help'       => App::Doh::Model::Help->new
-      ( builder => $_[ 0 ]->usul ),
-   'posts'      => App::Doh::Model::Posts->new
-      ( builder => $_[ 0 ]->usul, views => $_[ 0 ]->views ), } },
-   reader       => 'models';
+   return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] },
+   reader           => 'controllers';
 
-has '_views'    => is => 'lazy', isa => HashRef[Object], builder => sub { {
-   'html'       => App::Doh::View::HTML->new( builder => $_[ 0 ]->usul ),
-   'xml'        => App::Doh::View::XML->new ( builder => $_[ 0 ]->usul ), } },
-   reader       => 'views';
+has '_models'       => is => 'lazy', isa => HashRef[Object], builder => sub {
+   load_components 'App::Doh::Model',
+      { builder     => $_[ 0 ]->usul, views => $_[ 0 ]->views, } },
+   reader           => 'models';
 
-has '_usul'     => is => 'lazy', isa => BaseType, handles => [ 'log' ],
-   reader       => 'usul';
+has '_views'        => is => 'lazy', isa => HashRef[Object], builder => sub {
+   load_components 'App::Doh::View', { builder => $_[ 0 ]->usul } },
+   reader           => 'views';
+
+has '_usul'         => is => 'lazy', isa => BaseType, handles => [ 'log' ],
+   reader           => 'usul';
 
 # Construction
 around 'to_psgi_app' => sub {
    my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
 
-   my $conf  = $self->usul->config; my $point = $conf->mount_point;
+   my $conf = $self->usul->config; my $point = $conf->mount_point;
 
-   builder {
+   return builder {
       mount "${point}" => builder {
          enable 'Deflater',
             content_type => $conf->deflate_types, vary_user_agent => TRUE;
@@ -123,9 +114,9 @@ sub dispatch_request {
 }
 
 sub render {
-   my ($self, $args) = @_;
+   my ($self, $args) = @_; my $models = $self->models;
 
-   (is_arrayref $args and exists $self->models->{ $args->[ 0 ] })
+   (is_arrayref $args and $args->[ 0 ] and exists $models->{ $args->[ 0 ] })
       or return $args;
 
    my ($model, $method, undef, @args) = @{ $args }; my ($req, $res);
@@ -138,7 +129,7 @@ sub render {
    try {
       $method eq 'from_request' and $method = $req->tunnel_method.'_action';
 
-      my $stash = $self->models->{ $model }->execute( $method, $req );
+      my $stash = $models->{ $model }->execute( $method, $req );
 
       exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
 

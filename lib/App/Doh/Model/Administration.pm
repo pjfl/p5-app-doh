@@ -16,6 +16,8 @@ with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
+has '+moniker' => default => 'admin';
+
 sub create_user_action : Role(anon) {
    my ($self, $req) = @_;
 

@@ -2,6 +2,10 @@ package App::Doh::Controller::Root;
 
 use Web::Simple;
 
+extends q(App::Doh);
+
+has '+moniker' => default => 'z_root';
+
 sub dispatch_request {
    sub () {
       my $self = shift; return response_filter { $self->render( @_ ) } },
@@ -43,7 +47,7 @@ sub dispatch_request {
       return [ 'docs',  'get_index', @_ ] },
 
    sub (GET  + /** + ?*) {
-      return [ 'docs', 'get_content', @_ ] };
+      return [ 'docs',  'get_content', @_ ] };
 }
 
 1;
