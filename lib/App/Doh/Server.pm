@@ -241,12 +241,13 @@ Log the server startup event
 
 The L<Web::Simple> API method used to dispatch requests
 
-=head2 C<execute>
+=head2 C<render>
 
-   $plack_response = $self->execute( $view, $model, $method, @args );
-
-Each of the L</dispatch_request> methods calls this which in turn
-calls the model and then the view. Wraps the model and view calls in a
+Each of the L</dispatch_request> methods returns a tuple containing
+the model name and method to call in addition to the parameters passed
+by L<Web::Simple>. A response filter is installed by the C<Root>
+controller handles the tuple by calling this method. It in turn calls
+the model and then the view. Wraps the model and view calls in a
 C<try> / C<catch> block and renders an exception page if those calls
 fail. Creates an L<App::Doh::Request> object which it passes into the
 model and view methods calls

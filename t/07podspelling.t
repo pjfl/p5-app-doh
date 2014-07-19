@@ -59,3 +59,4 @@ startup
 stderr
 stdout
 SYSV
+tuple
