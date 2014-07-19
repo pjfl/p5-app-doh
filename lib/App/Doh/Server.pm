@@ -18,7 +18,6 @@ use Class::Usul::Types     qw( ArrayRef BaseType HashRef LoadableClass
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
                                HTTP_INTERNAL_SERVER_ERROR );
 use Plack::Builder;
-use Scalar::Util           qw( blessed );
 use Try::Tiny;
 use Web::Simple;
 
@@ -124,34 +123,35 @@ sub dispatch_request {
 }
 
 sub render {
-   return response_filter {
-      (is_arrayref $_[ 0 ] and blessed $_[ 0 ]->[ 0 ]) or return $_[ 0 ];
+   my ($self, $args) = @_;
 
-      my ($self, $model, $method, @args) = @{ $_[ 0 ] }; my ($req, $res);
+   (is_arrayref $args and exists $self->models->{ $args->[ 0 ] })
+      or return $args;
 
-      try   { $req = $self->request_class->new( $self->usul, @args ) }
-      catch { $res = __internal_server_error( $_ ) };
+   my ($model, $method, undef, @args) = @{ $args }; my ($req, $res);
 
-      $res and return $res;
+   try   { $req = $self->request_class->new( $self->usul, @args ) }
+   catch { $res = __internal_server_error( $_ ) };
 
-      try {
-         $method eq 'from_request' and $method = $req->tunnel_method.'_action';
+   $res and return $res;
 
-         my $stash = $self->models->{ $model }->execute( $method, $req );
+   try {
+      $method eq 'from_request' and $method = $req->tunnel_method.'_action';
 
-         exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
+      my $stash = $self->models->{ $model }->execute( $method, $req );
 
-         my $view  = $self->views->{ $stash->{view} };
+      exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
 
-         $res or $res = $view->serialize( $req, $stash )
-              or throw error => 'View [_1] returned false', args => [ $view ];
-      }
-      catch { $res = $self->_render_exception( $model, $req, $_ ) };
+      my $view  = $self->views->{ $stash->{view} };
 
-      $req->session->update;
+      $res or $res = $view->serialize( $req, $stash )
+           or throw error => 'View [_1] returned false', args => [ $view ];
+   }
+   catch { $res = $self->_render_exception( $model, $req, $_ ) };
 
-      return $res;
-   };
+   $req->session->update;
+
+   return $res;
 }
 
 # Private methods

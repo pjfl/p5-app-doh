@@ -4,46 +4,46 @@ use Web::Simple;
 
 sub dispatch_request {
    sub () {
-      return shift->render },
+      my $self = shift; return response_filter { $self->render( @_ ) } },
 
    sub (POST + /admin | /admin/* | /login | /logout + ?*) {
-      return [ shift, 'admin', 'from_request', @_ ] },
+      return [ 'admin', 'from_request', @_ ] },
 
    sub (GET  + /admin | /admin/* + ?*) {
-      return [ shift, 'admin', 'get_form', @_ ] },
+      return [ 'admin', 'get_form', @_ ] },
 
    sub (POST + /assets + *file~ + ?*) {
-      return [ shift, 'docs',  'upload_asset', @_ ] },
+      return [ 'docs',  'upload_asset', @_ ] },
 
    sub (GET  + /dialog + ?*) {
-      return [ shift, 'docs',  'get_dialog', @_ ] },
+      return [ 'docs',  'get_dialog', @_ ] },
 
    sub (GET  + /pod | /pod/** + ?*) {
-      return [ shift, 'help',  'get_content', @_ ] },
+      return [ 'help',  'get_content', @_ ] },
 
    sub (POST + /posts | /posts/** + ?*) {
-      return [ shift, 'posts', 'from_request', @_ ] },
+      return [ 'posts', 'from_request', @_ ] },
 
    sub (GET  + /posts | /posts/** + ?*) {
-      return [ shift, 'posts', 'get_content', @_ ] },
+      return [ 'posts', 'get_content', @_ ] },
 
    sub (GET  + /search + ?*) {
-      return [ shift, 'docs',  'search_tree', @_ ] },
+      return [ 'docs',  'search_tree', @_ ] },
 
    sub (POST + /user | /user/* + ?*) {
-      return [ shift, 'admin', 'from_request', @_ ] },
+      return [ 'admin', 'from_request', @_ ] },
 
    sub (GET  + /user | /user/* + ?*) {
-      return [ shift, 'admin', 'get_dialog', @_ ] },
+      return [ 'admin', 'get_dialog', @_ ] },
 
    sub (POST + / | /** + ?*) {
-      return [ shift, 'docs',  'from_request', @_ ] },
+      return [ 'docs',  'from_request', @_ ] },
 
    sub (GET  + / | /index + ?*) {
-      return [ shift, 'docs',  'get_index', @_ ] },
+      return [ 'docs',  'get_index', @_ ] },
 
    sub (GET  + /** + ?*) {
-      return [ shift, 'docs', 'get_content', @_ ] };
+      return [ 'docs', 'get_content', @_ ] };
 }
 
 1;
