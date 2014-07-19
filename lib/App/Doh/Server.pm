@@ -20,19 +20,21 @@ has 'request_class' => is => 'lazy', isa => LoadableClass,
 
 # Private attributes
 has '_controllers'  => is => 'lazy', isa => ArrayRef[Object], builder => sub {
-   my $controllers  = load_components 'App::Doh::Controller',
-      { builder     => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
+   my $controllers  =
+      load_components  $_[ 0 ]->usul->config->appclass.'::Controller',
+         { builder  => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
 
    return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] },
    reader           => 'controllers';
 
 has '_models'       => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components 'App::Doh::Model',
+   load_components     $_[ 0 ]->usul->config->appclass.'::Model',
       { builder     => $_[ 0 ]->usul, views => $_[ 0 ]->views, } },
    reader           => 'models';
 
 has '_views'        => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components 'App::Doh::View', { builder => $_[ 0 ]->usul } },
+   load_components     $_[ 0 ]->usul->config->appclass.'::View',
+      { builder     => $_[ 0 ]->usul, } },
    reader           => 'views';
 
 has '_usul'         => is => 'lazy', isa => BaseType, handles => [ 'log' ],

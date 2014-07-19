@@ -4,7 +4,7 @@ use Web::Simple;
 
 extends q(App::Doh);
 
-has '+moniker' => default => 'z_root';
+has '+moniker' => default => 'root';
 
 sub dispatch_request {
    sub () {
