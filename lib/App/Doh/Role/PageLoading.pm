@@ -9,7 +9,7 @@ use Class::Usul::Types     qw( HashRef );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo::Role;
 
-requires qw( config get_stash load_page localised_tree );
+requires qw( config load_page localised_tree );
 
 has 'type_map' => is => 'lazy', isa => HashRef, builder => sub { {} };
 

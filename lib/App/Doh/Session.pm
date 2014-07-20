@@ -34,7 +34,7 @@ has 'use_flags'      => is => 'rw', isa => Bool, default => TRUE;
 
 has 'username'       => is => 'rw', isa => SimpleStr, default => NUL;
 
-has '_session'       => is => 'ro', isa => HashRef, default => sub { {} };
+has '_session'       => is => 'ro', isa => HashRef, required => TRUE;
 
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );

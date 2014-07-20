@@ -14,9 +14,9 @@ sub _DoCodeBlocks { # Add support for triple graves
             .*\n+
             )+
            )
-         (^```|(?=^[ ]{0,$self->{tab_width}}\S)|\Z)
+         (?:^```(.*)?|(?=^[ ]{0,$self->{tab_width}}\S)|\Z)
       }{
-         my $class = $1 || q(); my $codeblock = $2; my $result;
+         my $class = $1 || $3 || q(); my $codeblock = $2; my $result;
 
          $codeblock = $self->_EncodeCode( $self->_Outdent( $codeblock ) );
          $codeblock = $self->_Detab( $codeblock );

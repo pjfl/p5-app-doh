@@ -18,7 +18,6 @@ extends q(App::Doh);
 has 'ipc'   => is => 'lazy', isa => Object, builder  => sub {
    Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
-
 has 'users' => is => 'lazy', isa => Object, builder => sub {
    App::Doh::User->new( builder => $_[ 0 ]->usul ) };
 
@@ -68,7 +67,7 @@ sub get_stash {
             time2str  => \&time2str,
             ucfirst   => sub { ucfirst $_[ 0 ] },
             uri_for   => sub { $req->uri_for( @_ ) },
-            view      => 'html', };
+            view      => $self->config->default_view, };
 }
 
 sub load_page {

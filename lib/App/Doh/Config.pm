@@ -52,6 +52,8 @@ has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
 has 'default_skin'    => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
 
+has 'default_view'    => is => 'ro',   isa => SimpleStr, default => 'html';
+
 has 'deflate_types'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub {
       [ qw( text/css text/html text/javascript application/javascript ) ] };
@@ -293,6 +295,11 @@ that locates the static CSS files
 
 Simple string that default to F<default>. The name of the default template
 directory
+
+=item C<default_view>
+
+Simple string that default to C<html>. The moniker of the view that will be
+used by default to render the response
 
 =item C<deflate_types>
 
