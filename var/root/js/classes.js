@@ -122,7 +122,7 @@ String.implement( {
 var Behaviour = new Class( {
    Implements: [ Events, Options ],
 
-   config: {
+   config    : {
       anchors: {},
       inputs : {}
    },

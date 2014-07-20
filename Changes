@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Use App::Doh in ::Server to get VERSION in scope
+
 0.3.1     2014-07-19 20:44:34
           - Tested on Chrome and Opera
           - Server now loads MVC components at runtime

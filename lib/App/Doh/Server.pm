@@ -2,6 +2,7 @@ package App::Doh::Server;
 
 use namespace::autoclean;
 
+use App::Doh;
 use App::Doh::Functions    qw( load_components );
 use Class::Usul;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
