@@ -72,9 +72,10 @@ var/root/img/favicon.png
 var/root/img/flags.png
 var/root/img/fork-me.png
 var/root/img/icons.png
-var/root/js/classes.js
+var/root/js/default.js
 var/root/js/highlight.min.js
 var/root/js/less.min.js
+var/root/js/mooclasses.js
 var/root/js/mootools.min.js
 var/root/less/import/theme-base.less
 var/root/less/theme-blue.less
