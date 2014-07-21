@@ -4,6 +4,7 @@ use namespace::autoclean;
 
 use Moo;
 use App::Doh;
+use App::Doh::Functions    qw( env_var );
 use Class::Usul::Constants qw( EXCEPTION_CLASS OK TRUE );
 use Class::Usul::Functions qw( get_user throw );
 use Class::Usul::Options;
@@ -104,10 +105,10 @@ sub stop : method {
 
 # Private methods
 sub _daemon {
-   my $self = shift; $PROGRAM_NAME = $self->app; $ENV{DOH_DEBUG} = $self->debug;
+   my $self = shift; $PROGRAM_NAME = $self->app;
 
+   env_var( 'DEBUG', $self->debug );
    $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
-
    Plack::Runner->run( $self->_get_listener_args );
    exit OK;
 }
@@ -115,7 +116,7 @@ sub _daemon {
 sub _get_listener_args {
    my $self   = shift;
    my $config = $self->config;
-   my $port   = $ENV{DOH_PORT} = $self->port;
+   my $port   = env_var( 'PORT', $self->port );
    my $args   = {
       '--port'       => $port,
       '--server'     => $self->server,

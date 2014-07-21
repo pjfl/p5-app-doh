@@ -12,7 +12,7 @@
          <div id="sub-nav-collapse" class="collapse in">
             <!-- Navigation -->
 [% depth        = 0 -%]
-[% class        = 'aj-nav folder' -%]
+[% class        = 'aj-nav folder fade' -%]
 [% file_title   = loc( 'File Path' ) -%]
 [% folder_title = loc( 'Folder Path' ) -%]
             <ul class="nav nav-list">
@@ -27,7 +27,7 @@
                <ul class="nav nav-list">
 [%    ELSE -%]
 [%       uri = uri_for( node.url ) -%]
-[%       LinkWithTips( uri, '', node.name, file_title, node.tip ) -%]
+[%       LinkWithTips( uri, 'fade', node.name, file_title, node.tip ) -%]
             </li>
 [%    END -%]
 [% END -%]

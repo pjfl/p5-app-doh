@@ -8,7 +8,7 @@ use strictures;
 
 use App::Doh::Server;
 
-App::Doh::Server->new->run_if_script;
+App::Doh::Server->new( config => { appclass => 'App::Doh' } )->run_if_script;
 
 __END__
 

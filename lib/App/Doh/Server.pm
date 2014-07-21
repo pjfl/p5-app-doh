@@ -2,13 +2,12 @@ package App::Doh::Server;
 
 use namespace::autoclean;
 
-use App::Doh;
-use App::Doh::Functions    qw( load_components );
+use App::Doh::Functions    qw( env_var is_static load_components );
 use Class::Usul;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
-use Class::Usul::Functions qw( app_prefix exception find_apphome
-                               get_cfgfiles is_arrayref throw );
-use Class::Usul::Types     qw( ArrayRef BaseType HashRef LoadableClass
+use Class::Usul::Functions qw( app_prefix exception ensure_class_loaded
+                               find_apphome get_cfgfiles is_arrayref throw );
+use Class::Usul::Types     qw( ArrayRef BaseType Bool HashRef LoadableClass
                                NonEmptySimpleStr Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
                                HTTP_INTERNAL_SERVER_ERROR );
@@ -71,36 +70,34 @@ around 'to_psgi_app' => sub {
 
 sub BUILD {
    my $self   = shift;
-   my $ver    = $App::Doh::VERSION;
+   my $class  = $self->usul->config->appclass; ensure_class_loaded $class;
+   my $ver    = $class->VERSION;
    my $server = ucfirst( $ENV{PLACK_ENV} // NUL );
-   my $port   = $ENV{DOH_PORT} ? ' on port '.$ENV{DOH_PORT} : NUL;
-   my $static = !!$ENV{DOH_MAKE_STATIC};
+   my $port   = env_var( 'PORT' ) ? ' on port '.env_var( 'PORT' ) : NUL;
 
-   $static or $self->log->info( "${server} Server started v${ver}${port}" );
+   is_static or $self->log->info( "${server} Server started v${ver}${port}" );
    # Take the hit at application startup not on first request
    $self->models->{docs }->docs_tree;
    $self->models->{posts}->posts;
-   $static or $self->log->debug( 'Document tree loaded' );
+   is_static or $self->log->debug( 'Document tree loaded' );
    return;
 }
 
 sub _build__usul {
    my $self = shift;
-   my $attr = { config       => $self->config,
-                config_class => 'App::Doh::Config',
-                debug        => $ENV{DOH_DEBUG} // FALSE, };
+   my $attr = { config => $self->config, debug => env_var( 'DEBUG' ) // FALSE };
    my $conf = $attr->{config};
 
-   $conf->{appclass} //= 'App::Doh';
-   $conf->{name    } //= app_prefix   $conf->{appclass};
-   $conf->{home    }   = find_apphome $conf->{appclass}, $conf->{home};
-   $conf->{cfgfiles}   = get_cfgfiles $conf->{appclass}, $conf->{home};
+   $attr->{config_class} //= $conf->{appclass}.'::Config';
+   $conf->{name        } //= app_prefix   $conf->{appclass};
+   $conf->{home        }   = find_apphome $conf->{appclass}, $conf->{home};
+   $conf->{cfgfiles    }   = get_cfgfiles $conf->{appclass}, $conf->{home};
 
    my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
 
    $bootconf->inflate_paths( $bootconf->projects );
 
-   my $port    = $ENV{DOH_PORT} // $bootconf->port;
+   my $port    = env_var( 'PORT' ) // $bootconf->port;
    my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 

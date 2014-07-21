@@ -6,13 +6,16 @@ use feature 'state';
 use parent  'Exporter::Tiny';
 
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE LANG NUL TRUE );
-use Class::Usul::Functions qw( first_char is_arrayref is_hashref throw );
+use Class::Usul::Functions qw( first_char is_arrayref is_hashref
+                               my_prefix split_on_dash throw );
+use English                qw( -no_match_vars );
 use Module::Pluggable::Object;
 use Unexpected::Functions  qw( Unspecified );
 
-our @EXPORT_OK = qw( build_navigation_list build_tree clone extract_lang
-                     iterator load_components localise_tree make_id_from
-                     make_name_from mtime set_element_focus show_node );
+our @EXPORT_OK = qw( build_navigation_list build_tree clone  env_var
+                     extract_lang is_static iterator load_components
+                     localise_tree make_id_from make_name_from mtime
+                     set_element_focus show_node );
 
 sub build_navigation_list ($$$$) {
    my ($root, $tree, $ids, $wanted) = @_;
@@ -91,8 +94,18 @@ sub clone (;$) {
    return $v;
 }
 
+sub env_var ($;$) {
+   my $k = (uc split_on_dash my_prefix $PROGRAM_NAME).'_'.$_[ 0 ];
+
+   return defined $_[ 1 ] ? $ENV{ $k } = $_[ 1 ] : $ENV{ $k };
+}
+
 sub extract_lang ($) {
    my $v = shift; return $v ? (split m{ _ }mx, $v)[ 0 ] : LANG;
+}
+
+sub is_static () {
+   return !!env_var( 'MAKE_STATIC' );
 }
 
 sub iterator ($) {

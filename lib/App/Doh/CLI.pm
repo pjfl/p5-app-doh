@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use Moo;
 use App::Doh;
-use App::Doh::Functions    qw( iterator );
+use App::Doh::Functions    qw( env_var iterator );
 use App::Doh::Model::Documentation;
 use App::Doh::Model::Posts;
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
@@ -63,7 +63,7 @@ sub make_static : method {
 
    my $dest = io( $self->next_argv // $conf->static );
 
-   $ENV{DOH_MAKE_STATIC} = TRUE;
+   env_var( 'MAKE_STATIC', TRUE );
    $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io( $dest->rel2abs( $conf->root ) );
    $self->_copy_assets( $dest );

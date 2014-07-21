@@ -23,7 +23,9 @@ $ENV{TEST_MEMORY}
 
 use App::Doh::Server;
 
-my $app = App::Doh::Server->new; $app->to_psgi_app;
+my $app = App::Doh::Server->new( config => { appclass => 'App::Doh' } );
+
+$app->to_psgi_app;
 
 memory_cycle_ok( $app, 'App::Doh::Server has no memory cycles' );
 

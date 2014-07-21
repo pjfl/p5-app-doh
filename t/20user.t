@@ -21,7 +21,7 @@ use Test::Requires { 'warnings::illegalproto' => 0.001000 };
 
 use_ok 'App::Doh::Server';
 
-my $self  = App::Doh::Server->new;
+my $self  = App::Doh::Server->new( config => { appclass => 'App::Doh' } );
 my $users = $self->models->{admin}->users;
 
 $users->find( 'admin') and $users->delete( 'admin' );

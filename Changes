@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Pass appclass in from doh-server
+          - Abstracted apps env var access out to a function
           - Split Behaviour js class out into own file
           - Markdown allows class on trailing three graves
           - Added default view configuration option
