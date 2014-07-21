@@ -49,9 +49,6 @@ has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'css/';
 
-has 'default_skin'    => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'default';
-
 has 'default_view'    => is => 'ro',   isa => SimpleStr, default => 'html';
 
 has 'deflate_types'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
@@ -290,11 +287,6 @@ Boolean default to true. Should the C<make_css> method compress it's output
 
 A non empty simple string that defaults to F<css/>. Relative URI path
 that locates the static CSS files
-
-=item C<default_skin>
-
-Simple string that default to F<default>. The name of the default template
-directory
 
 =item C<default_view>
 

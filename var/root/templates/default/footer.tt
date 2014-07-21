@@ -1,7 +1,8 @@
    <!-- Footer -->
    <script src="[% links.js %]highlight.min.js"></script>
    <script src="[% links.js %]mootools.min.js"></script>
-   <script src="[% links.js %]classes.js"></script>
+   <script src="[% links.js %]mooclasses.js"></script>
+   <script src="[% links.js; skin %].js"></script>
    <script>
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {

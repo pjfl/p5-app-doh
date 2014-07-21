@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Split Behaviour js class out into own file
           - Markdown allows class on trailing three graves
           - Added default view configuration option
           - Use App::Doh in ::Server to get VERSION in scope
