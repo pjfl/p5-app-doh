@@ -21,7 +21,7 @@ use Test::Requires { 'warnings::illegalproto' => 0.001000 };
 use_ok 'App::Doh::Server';
 use_ok 'App::Doh::Request';
 
-my $self  = App::Doh::Server->new( );
+my $self  = App::Doh::Server->new( config => { appclass => 'App::Doh' } );
 my $model = $self->models->{docs};
 my $tree  = $model->docs_tree;
 

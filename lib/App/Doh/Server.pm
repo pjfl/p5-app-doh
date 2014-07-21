@@ -15,6 +15,8 @@ use Plack::Builder;
 use Try::Tiny;
 use Web::Simple;
 
+use warnings 'uninitialized'; # For Perl < 5.012
+
 has 'request_class' => is => 'lazy', isa => LoadableClass,
    default          => sub { $_[ 0 ]->usul->config->request_class };
 

@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Patched bug in warnings::illegalproto for Perl < 5.012
           - Pass appclass in from doh-server
           - Abstracted apps env var access out to a function
           - Split Behaviour js class out into own file
