@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use App::Doh::Functions    qw( env_var is_static load_components );
 use Class::Usul;
-use Class::Usul::Constants qw( FALSE NUL TRUE );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix exception ensure_class_loaded
                                find_apphome get_cfgfiles is_arrayref throw );
 use Class::Usul::Types     qw( ArrayRef BaseType Bool HashRef LoadableClass
@@ -13,6 +13,7 @@ use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
                                HTTP_INTERNAL_SERVER_ERROR );
 use Plack::Builder;
 use Try::Tiny;
+use Unexpected::Functions  qw( Unspecified );
 use Web::Simple;
 
 use warnings 'uninitialized'; # For Perl < 5.012
@@ -90,6 +91,8 @@ sub _build__usul {
    my $attr = { config => $self->config, debug => env_var( 'DEBUG' ) // FALSE };
    my $conf = $attr->{config};
 
+   $conf->{appclass    } or  throw class => Unspecified,
+                                    args => [ 'application class' ];
    $attr->{config_class} //= $conf->{appclass}.'::Config';
    $conf->{name        } //= app_prefix   $conf->{appclass};
    $conf->{home        }   = find_apphome $conf->{appclass}, $conf->{home};
@@ -133,12 +136,8 @@ sub render {
 
       my $stash = $models->{ $model }->execute( $method, $req );
 
-      exists $stash->{redirect} and $res = $self->_redirect( $req, $stash );
-
-      my $view  = $self->views->{ $stash->{view} };
-
-      $res or $res = $view->serialize( $req, $stash )
-           or throw error => 'View [_1] returned false', args => [ $view ];
+      if (exists $stash->{redirect}) { $res = $self->_redirect( $req, $stash ) }
+      else { $res = $self->_render_view( $model, $method, $req, $stash ) }
    }
    catch { $res = $self->_render_exception( $model, $req, $_ ) };
 
@@ -157,6 +156,21 @@ sub _redirect {
             and $self->log->info( $req->loc_default( @{ $message } ) );
 
    return [ $code, [ 'Location', $redirect->{location} ], [] ];
+}
+
+sub _render_view {
+   my ($self, $model, $method, $req, $stash) = @_;
+
+   $stash->{view} or throw error => 'Model [_1] method [_2] stashed no view',
+                            args => [ $model, $method ];
+
+   my $view = $self->views->{ $stash->{view} }
+      or throw error => 'Model [_1] method [_2] unknown view [_3]',
+                args => [ $model, $method, $stash->{view} ];
+   my $res  = $view->serialize( $req, $stash )
+      or throw error => 'View [_1] returned false', args => [ $stash->{view} ];
+
+   return $res
 }
 
 sub _render_exception {
