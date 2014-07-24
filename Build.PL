@@ -56,7 +56,8 @@ my $prereqs  = {
     'YAML::Tiny' => '1.62',
     'namespace::autoclean' => '0.19',
     'perl' => '5.010001',
-    'strictures' => '1.004004'
+    'strictures' => '1.004004',
+    'warnings::illegalproto' => '0.001002'
   },
 };
 

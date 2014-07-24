@@ -16,16 +16,13 @@ use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
 use Web::Simple;
 
-use warnings 'uninitialized'; # For Perl < 5.012
-
 has 'request_class' => is => 'lazy', isa => LoadableClass,
    default          => sub { $_[ 0 ]->usul->config->request_class };
 
 # Private attributes
 has '_controllers'  => is => 'lazy', isa => ArrayRef[Object], builder => sub {
    my $controllers  =
-      load_components  $_[ 0 ]->usul->config->appclass.'::Controller',
-         { builder  => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
+      load_components  $_[ 0 ]->usul->config->appclass.'::Controller', {};
 
    return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] },
    reader           => 'controllers';
@@ -73,10 +70,10 @@ around 'to_psgi_app' => sub {
 
 sub BUILD {
    my $self   = shift;
-   my $class  = $self->usul->config->appclass; ensure_class_loaded $class;
-   my $ver    = $class->VERSION;
    my $server = ucfirst( $ENV{PLACK_ENV} // NUL );
    my $port   = env_var( 'PORT' ) ? ' on port '.env_var( 'PORT' ) : NUL;
+   my $class  = $self->usul->config->appclass; ensure_class_loaded $class;
+   my $ver    = $class->VERSION;
 
    is_static or $self->log->info( "${server} Server started v${ver}${port}" );
    # Take the hit at application startup not on first request
@@ -115,10 +112,24 @@ sub _build__usul {
 
 # Public methods
 sub dispatch_request {
-   return map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
+   return sub () {
+      my $self = shift; return response_filter { $self->_render( @_ ) } },
+      map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
 }
 
-sub render {
+# Private methods
+sub _redirect {
+   my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
+
+   my $redirect = $stash->{redirect}; my $message = $redirect->{message};
+
+   $message and $req->session->status_message( $req->loc( @{ $message } ) )
+            and $self->log->info( $req->loc_default( @{ $message } ) );
+
+   return [ $code, [ 'Location', $redirect->{location} ], [] ];
+}
+
+sub _render {
    my ($self, $args) = @_; my $models = $self->models;
 
    (is_arrayref $args and $args->[ 0 ] and exists $models->{ $args->[ 0 ] })
@@ -144,18 +155,6 @@ sub render {
    $req->session->update;
 
    return $res;
-}
-
-# Private methods
-sub _redirect {
-   my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
-
-   my $redirect = $stash->{redirect}; my $message = $redirect->{message};
-
-   $message and $req->session->status_message( $req->loc( @{ $message } ) )
-            and $self->log->info( $req->loc_default( @{ $message } ) );
-
-   return [ $code, [ 'Location', $redirect->{location} ], [] ];
 }
 
 sub _render_view {

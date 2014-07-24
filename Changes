@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Streamlined the controller code
           - Server throws better exceptions
           - Patched bug in warnings::illegalproto for Perl < 5.012
           - Pass appclass in from doh-server

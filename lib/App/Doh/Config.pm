@@ -102,7 +102,7 @@ has 'mdn_tab_width'   => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
 has 'max_asset_size'  => is => 'ro',   isa => Int, default => 4_194_304;
 
-has 'max_session_time' => is => 'ro',  isa => PositiveInt, default => 900;
+has 'max_session_time' => is => 'ro',  isa => PositiveInt, default => 3_600;
 
 has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
    default            => '/';

@@ -2,14 +2,7 @@ package App::Doh::Controller::Root;
 
 use Web::Simple;
 
-extends q(App::Doh);
-
-has '+moniker' => default => 'root';
-
 sub dispatch_request {
-   sub () {
-      my $self = shift; return response_filter { $self->render( @_ ) } },
-
    sub (POST + /admin | /admin/* | /login | /logout + ?*) {
       return [ 'admin', 'from_request', @_ ] },
 
@@ -48,6 +41,10 @@ sub dispatch_request {
 
    sub (GET  + /** + ?*) {
       return [ 'docs',  'get_content', @_ ] };
+}
+
+sub moniker {
+   return 'root';
 }
 
 1;
@@ -93,6 +90,13 @@ Returns a list of code references. The prototype for each anonymous
 subroutine matches against a specific URI pattern. It the request URI
 matches this pattern the subroutine is called. Each subroutine calls
 the L<execute|App::Doh::Server/execute> method
+
+=head2 moniker
+
+Returns the unique key used to store an instance of this class in a
+collection of controllers. The controller's monikers are sorted and requests
+are tested against each controller in turn until a match is found. The
+'root' controller should probably come last
 
 =head1 Diagnostics
 
