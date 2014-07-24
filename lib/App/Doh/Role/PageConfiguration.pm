@@ -26,7 +26,6 @@ around 'load_page' => sub {
    $page->{mode               }   = $req->params->{mode} // 'online';
    $page->{status_message     }   = $req->session->clear_status_message;
    $page->{wanted             } //= join '/', @{ $req->args };
-
    $page->{homepage_url       }   = $page->{mode} eq 'online'
                                   ? $req->base : $req->uri_for( 'index' );
    $page->{language           }   = extract_lang $page->{locale};

@@ -5,10 +5,10 @@ use namespace::autoclean;
 use Moo;
 use App::Doh::Functions    qw( extract_lang );
 use App::Doh::Session;
-use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL SPC );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL SPC TRUE );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                is_member throw trim );
-use Class::Usul::Types     qw( ArrayRef Bool HashRef NonEmptySimpleStr
+use Class::Usul::Types     qw( ArrayRef BaseType Bool HashRef NonEmptySimpleStr
                                Object SimpleStr );
 use Encode                 qw( decode );
 use HTTP::Body;
@@ -18,8 +18,6 @@ use Scalar::Util           qw( blessed weaken );
 use Unexpected::Functions  qw( Unspecified );
 use URI::http;
 use URI::https;
-
-extends q(App::Doh);
 
 has 'args'     => is => 'ro',   isa => ArrayRef, default => sub { [] };
 
@@ -67,6 +65,10 @@ has 'session'  => is => 'lazy', isa => Object, builder => sub {
    handles     => [ qw( authenticated username ) ];
 
 has 'uri'      => is => 'lazy', isa => Object;
+
+has 'usul'     => is => 'ro',   isa => BaseType,
+   handles     => [ qw( config l10n log ) ], init_arg => 'builder',
+   required    => TRUE;
 
 has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
    my $body_method  = delete $_[ 0 ]->body->param->{_method};
@@ -365,6 +367,11 @@ The URI of the current request. Does not include the query parameters
 
 The name of the authenticated user. Defaults to C<unknown> if the user
 is anonymous
+
+=item C<usul>
+
+A copy of the L<Class::Usul> object. Required, handles C<config>, C<l10n>,
+and C<log>
 
 =back
 

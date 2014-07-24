@@ -135,10 +135,16 @@ sub load_components ($$) {
    my $plugins   = {};
    my $min_depth = delete $args->{min_depth};
    my @depth     = $min_depth ? (min_depth => $min_depth) : (max_depth => 4);
+   my $monikers  = $args->{builder}->config->monikers;
    my $finder    = Module::Pluggable::Object->new
       ( @depth, search_path => [ $ns ], require => TRUE, );
 
    for my $plugin ($finder->plugins) {
+      my $moniker = exists $monikers->{ $plugin }
+                  ? $monikers->{ $plugin } : undef;
+
+      $moniker and $args->{moniker} = $moniker;
+
       my $obj = $plugin->new( $args );
 
       $obj->moniker or throw class => Unspecified, args => [ 'moniker' ];

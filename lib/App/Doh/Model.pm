@@ -12,7 +12,7 @@ use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( weaken );
 
-extends q(App::Doh);
+with q(App::Doh::Role::Component);
 
 # Public attributes
 has 'ipc'   => is => 'lazy', isa => Object, builder  => sub {

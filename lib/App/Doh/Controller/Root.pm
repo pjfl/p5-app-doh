@@ -2,6 +2,10 @@ package App::Doh::Controller::Root;
 
 use Web::Simple;
 
+with q(App::Doh::Role::Component);
+
+has '+moniker' => default => 'root';
+
 sub dispatch_request {
    sub (POST + /admin | /admin/* | /login | /logout + ?*) {
       return [ 'admin', 'from_request', @_ ] },
@@ -41,10 +45,6 @@ sub dispatch_request {
 
    sub (GET  + /** + ?*) {
       return [ 'docs',  'get_content', @_ ] };
-}
-
-sub moniker {
-   return 'root';
 }
 
 1;

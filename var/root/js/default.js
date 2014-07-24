@@ -33,7 +33,7 @@ var Behaviour = new Class( {
          if (prefs.mode && prefs.mode.value == 'static') {
             cblocks.addEvent( 'change', function( ev ) {
                ev.stop(); this.setCodeBlockClass( cblocks.value );
-            }, this );
+            }.bind( this ) );
          }
          else {
             cblocks.addEvent( 'change', function( ev ) {

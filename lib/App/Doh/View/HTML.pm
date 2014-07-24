@@ -9,8 +9,8 @@ use Encode                 qw( encode );
 use File::DataClass::Types qw( Directory HashRef Object );
 use Module::Pluggable::Object;
 
-extends q(App::Doh);
-with    q(App::Doh::Role::Templates);
+with q(App::Doh::Role::Component);
+with q(App::Doh::Role::Templates);
 
 # Public attributes
 has '+moniker'   => default => 'html';

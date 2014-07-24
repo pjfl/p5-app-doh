@@ -8,8 +8,8 @@ use Class::Usul::Types     qw( Object );
 use Encode                 qw( encode );
 use XML::Simple;
 
-extends q(App::Doh);
-with    q(App::Doh::Role::Templates);
+with q(App::Doh::Role::Component);
+with q(App::Doh::Role::Templates);
 
 # Public attributes
 has '+moniker'   => default => 'xml';

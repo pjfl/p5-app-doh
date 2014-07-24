@@ -4,11 +4,9 @@ use namespace::autoclean;
 
 use Moo;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
-use Class::Usul::Types     qw( Bool HashRef NonEmptySimpleStr
+use Class::Usul::Types     qw( BaseType Bool HashRef NonEmptySimpleStr
                                NonZeroPositiveInt SimpleStr Undef );
 use Type::Utils            qw( enum );
-
-extends q(App::Doh);
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
 
@@ -33,6 +31,9 @@ has 'updated'        => is => 'ro', isa => NonZeroPositiveInt, required => TRUE;
 has 'use_flags'      => is => 'rw', isa => Bool, default => TRUE;
 
 has 'username'       => is => 'rw', isa => SimpleStr, default => NUL;
+
+has 'usul'           => is => 'ro', isa => BaseType, handles => [ 'config' ],
+   init_arg          => 'builder', required => TRUE;
 
 has '_session'       => is => 'ro', isa => HashRef, required => TRUE;
 

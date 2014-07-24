@@ -31,6 +31,7 @@ var/root/docs/de
 var/root/docs/en/01_Examples/*
 var/root/docs/en/Projects
 var/root/docs/en/posts
+var/root/js/codemirror.min.js
 var/root/static
 App-Doh-*
 *.tar.gz

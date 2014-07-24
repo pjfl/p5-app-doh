@@ -9,7 +9,7 @@ use HTML::Accessors;
 use Pod::Hyperlink::BounceURL;
 use Pod::Xhtml;
 
-extends q(App::Doh);
+with q(App::Doh::Role::Component);
 
 $Pod::Xhtml::COMMANDS{encoding} = TRUE; # STFU
 

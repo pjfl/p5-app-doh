@@ -9,7 +9,7 @@ use Class::Usul::Types qw( ArrayRef Object );
 use Scalar::Util       qw( blessed );
 use YAML::Tiny;
 
-extends q(App::Doh);
+with q(App::Doh::Role::Component);
 
 # Public attributes
 has '+moniker'   => default => 'markdown';

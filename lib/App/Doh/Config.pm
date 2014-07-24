@@ -104,6 +104,9 @@ has 'max_asset_size'  => is => 'ro',   isa => Int, default => 4_194_304;
 
 has 'max_session_time' => is => 'ro',  isa => PositiveInt, default => 3_600;
 
+has 'monikers'        => is => 'ro',   isa => HashRef[NonEmptySimpleStr],
+   builder            => sub { {} };
+
 has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
    default            => '/';
 
@@ -384,6 +387,12 @@ Integer defaults to 4Mb. Maximum size in bytes of the file upload
 =item C<max_session_time>
 
 Time in seconds before a session expires. Defaults to 15 minutes
+
+=item C<monikers>
+
+A hash reference of non empty simple strings that defaults empty. Keyed
+by class name the values will override the default monikers of components
+as they are instantiated
 
 =item C<mount_point>
 

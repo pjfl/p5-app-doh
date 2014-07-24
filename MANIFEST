@@ -25,6 +25,7 @@ lib/App/Doh/Model/Posts.pm
 lib/App/Doh/Request.pm
 lib/App/Doh/Role/Authorization.pm
 lib/App/Doh/Role/CommonLinks.pm
+lib/App/Doh/Role/Component.pm
 lib/App/Doh/Role/Editor.pm
 lib/App/Doh/Role/PageConfiguration.pm
 lib/App/Doh/Role/PageLoading.pm
@@ -72,6 +73,7 @@ var/root/img/favicon.png
 var/root/img/flags.png
 var/root/img/fork-me.png
 var/root/img/icons.png
+var/root/js/codemirror.min.js
 var/root/js/default.js
 var/root/js/highlight.min.js
 var/root/js/less.min.js

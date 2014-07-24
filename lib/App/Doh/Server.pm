@@ -22,8 +22,8 @@ has 'request_class' => is => 'lazy', isa => LoadableClass,
 # Private attributes
 has '_controllers'  => is => 'lazy', isa => ArrayRef[Object], builder => sub {
    my $controllers  =
-      load_components  $_[ 0 ]->usul->config->appclass.'::Controller', {};
-
+      load_components  $_[ 0 ]->usul->config->appclass.'::Controller',
+         { builder  => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
    return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] },
    reader           => 'controllers';
 

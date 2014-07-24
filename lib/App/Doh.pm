@@ -1,18 +1,7 @@
 package App::Doh;
 
 use 5.010001;
-use namespace::autoclean;
-use version; our $VERSION = qv( sprintf '0.3.%d', q$Rev: 9 $ =~ /\d+/gmx );
-
-use Moo;
-use Class::Usul::Constants  qw( NUL TRUE );
-use Class::Usul::Types      qw( BaseType SimpleStr );
-
-has 'moniker' => is => 'ro', isa => SimpleStr, default => NUL;
-
-has 'usul'    => is => 'ro', isa => BaseType,
-   handles    => [ qw( config l10n lock log ) ],
-   init_arg   => 'builder', required => TRUE;
+use version; our $VERSION = qv( sprintf '0.3.%d', q$Rev: 10 $ =~ /\d+/gmx );
 
 1;
 
@@ -39,7 +28,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.3.$Rev: 9 $ of L<App::Doh>
+This documents version v0.3.$Rev: 10 $ of L<App::Doh>
 
 =head1 Description
 
