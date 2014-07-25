@@ -95,6 +95,9 @@ has 'layout'          => is => 'ro',   isa => NonEmptySimpleStr,
 has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'less/';
 
+has 'less_files'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
+   builder            => sub { [ qw( blue editor green navy red ) ] };
+
 has 'links'           => is => 'lazy', isa => ArrayRef[HashRef],
    init_arg           => undef;
 
@@ -157,15 +160,14 @@ has 'template'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
 has 'theme'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'green';
 
-has 'themes'          => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
-   builder            => sub { [ qw( blue green navy red ) ] };
-
 has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Documentation';
 
 has 'twitter'         => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
 has 'use_flags'       => is => 'ro',   isa => Bool, default => TRUE;
+
+has 'user'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'user_attributes' => is => 'ro',   isa => HashRef, builder => sub { {
    path               => $_[ 0 ]->file_root->catfile( 'users.json' ), } };
@@ -368,6 +370,10 @@ C<content_only> is true
 A non empty simple string that defaults to F<less/>. Relative URI path that
 locates the static Less files
 
+=item C<less_files>
+
+The list of predefined colour schemes and feature specific less files
+
 =item C<links>
 
 A lazily evaluated array reference of hashes created automatically from the
@@ -486,10 +492,6 @@ attribute selects which left and right columns templates are rendered
 A non empty simple string that defaults to C<green>. The name of the
 default colour scheme
 
-=item C<themes>
-
-The list of predefined colour schemes
-
 =item C<title>
 
 A non empty simple string that defaults to C<Documentation>. The documentation
@@ -505,6 +507,11 @@ Twitter follow buttons
 Boolean which defaults to C<TRUE>. Display the language code, which is
 derived from browsers accept language header value, as a national flag. If
 false display as text
+
+=item C<user>
+
+Simple string that defaults to null. If set the daemon process will change
+to running as this user when it forks into the background
 
 =item C<user_attributes>
 

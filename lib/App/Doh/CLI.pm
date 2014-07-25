@@ -52,8 +52,8 @@ sub make_css : method {
    my $conf = $self->config;
    my $cssd = $conf->root->catdir( $conf->css );
 
-   if (my $colour = $self->next_argv) { $self->_write_theme( $cssd, $colour ) }
-   else { $self->_write_theme( $cssd, $_ ) for (@{ $conf->themes }) }
+   if (my $file = $self->next_argv) { $self->_write_theme( $cssd, $file ) }
+   else { $self->_write_theme( $cssd, $_ ) for (@{ $conf->less_files }) }
 
    return OK;
 }
@@ -88,10 +88,10 @@ sub _copy_assets {
    my ($unwanted_images, $unwanted_js, $unwanted_less);
 
    if ($conf->colours->[ 0 ]) {
-      my $themes = join '|', @{ $conf->themes };
+      my $files = join '|', @{ $conf->less_files };
 
-      $unwanted_images = qr{ favicon \- (?: $themes ) }mx;
-      $unwanted_less   = qr{ theme   \- (?: $themes ) }mx;
+      $unwanted_images = qr{ favicon \- (?: $files ) }mx;
+      $unwanted_less   = qr{ theme   \- (?: $files ) }mx;
 
       __deep_copy( $root->catdir( $conf->less ), $dest, $unwanted_less );
    }
@@ -129,14 +129,15 @@ sub _make_localised_static {
 }
 
 sub _write_theme {
-   my ($self, $cssd, $colour) = @_;
+   my ($self, $cssd, $file) = @_;
 
    my $conf = $self->config;
-   my $path = $conf->root->catfile( $conf->less, "theme-${colour}.less" );
+   my $skin = $conf->skin;
+   my $path = $conf->root->catfile( $conf->less, "theme-${file}.less" );
    my $css  = $self->less->compile( $path->all );
 
-   $self->info( "Writing ${colour} theme" );
-   $cssd->catfile( "theme-${colour}.css" )->println( $css );
+   $self->info( "Writing ${file} theme" );
+   $cssd->catfile( "${skin}-${file}.css" )->println( $css );
    return;
 }
 

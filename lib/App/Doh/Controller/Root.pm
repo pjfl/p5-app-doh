@@ -7,7 +7,7 @@ with q(App::Doh::Role::Component);
 has '+moniker' => default => 'root';
 
 sub dispatch_request {
-   sub (POST + /admin | /admin/* | /login | /logout + ?*) {
+   sub (POST + /admin | /admin/* | /login | /logout | /user | /user/* + ?*) {
       return [ 'admin', 'from_request', @_ ] },
 
    sub (GET  + /admin | /admin/* + ?*) {
@@ -30,9 +30,6 @@ sub dispatch_request {
 
    sub (GET  + /search + ?*) {
       return [ 'docs',  'search_tree', @_ ] },
-
-   sub (POST + /user | /user/* + ?*) {
-      return [ 'admin', 'from_request', @_ ] },
 
    sub (GET  + /user | /user/* + ?*) {
       return [ 'admin', 'get_dialog', @_ ] },

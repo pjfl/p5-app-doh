@@ -12,7 +12,7 @@
                   <form action="[% links.req_uri %]?edit=1"
                        enctype="application/x-www-form-urlencoded"
                         method="post" name="edit">
-                     <textarea class="editor autosize" id="markdown-editor"
+                     <textarea class="editor" id="markdown-editor"
                           name="content">[% page.content | html %]</textarea>
                      <br>
                      <button class="button" name="_method" type="submit"

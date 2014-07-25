@@ -34,13 +34,13 @@ has 'templates'    => is => 'lazy', isa => Directory,
 sub render_template {
    my ($self, $req, $stash) = @_;
 
-   my $result   =  NUL;
-   my $prefs    =  $stash->{prefs } // {};
-   my $conf     =  $stash->{config} = $self->config;
-   my $skin     =  $stash->{skin  } = $prefs->{skin} // $conf->skin;
-   my $page     =  $stash->{page  } // {};
-   my $layout   = ($page->{layout} //= $conf->layout).'.tt';
-   my $path     =  $self->templates->catdir( $skin )->catfile( $layout );
+   my $result =  NUL;
+   my $prefs  =  $stash->{prefs } // {};
+   my $conf   =  $stash->{config} = $self->config;
+   my $skin   =  $stash->{skin  } = $prefs->{skin} // $conf->skin;
+   my $page   =  $stash->{page  } // {};
+   my $layout = ($page->{layout} //= $conf->layout).'.tt';
+   my $path   =  $self->templates->catdir( $skin )->catfile( $layout );
 
    $path->exists or throw class => PathNotFound, args => [ $path ];
    $self->encoder->process( catfile( $skin, $layout ), $stash, \$result )

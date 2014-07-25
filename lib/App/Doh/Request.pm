@@ -74,7 +74,7 @@ has 'tunnel_method' => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
    my $body_method  = delete $_[ 0 ]->body->param->{_method};
    my $param_method = delete $_[ 0 ]->params->{_method};
    my $method       = $body_method || $param_method || 'not_found';
-   (is_arrayref $method) ? $method->[ 0 ] : $method };
+   return (is_arrayref $method) ? $method->[ 0 ] : $method };
 
 # Construction
 around 'BUILDARGS' => sub {

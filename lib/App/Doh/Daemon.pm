@@ -56,26 +56,30 @@ around 'run' => sub {
 };
 
 sub _build__daemon_control {
-   my $self = shift; my $config = $self->config; my $name = $config->name;
+   my $self = shift; my $conf = $self->config; my $name = $conf->name;
 
-   return Daemon::Control->new( {
+   my $args = {
       name         => blessed $self || $self,
       lsb_start    => '$syslog $remote_fs',
       lsb_stop     => '$syslog',
       lsb_sdesc    => 'Documentation Server',
       lsb_desc     => 'Manages the Documentation Server daemons',
-      path         => $config->pathname,
+      path         => $conf->pathname,
 
-      directory    => $config->appldir,
+      directory    => $conf->appldir,
       program      => sub { shift; $self->_daemon( @_ ) },
       program_args => [],
 
-      pid_file     => $config->rundir->catfile( "${name}_".$self->port.'.pid' ),
+      pid_file     => $conf->rundir->catfile( "${name}_".$self->port.'.pid' ),
       stderr_file  => $self->_stdio_file( 'err' ),
       stdout_file  => $self->_stdio_file( 'out' ),
 
       fork         => 2,
-   } );
+   };
+
+   $conf->user and $args->{user} = $conf->user;
+
+   return Daemon::Control->new( $args );
 }
 
 # Public methods
@@ -114,14 +118,14 @@ sub _daemon {
 }
 
 sub _get_listener_args {
-   my $self   = shift;
-   my $config = $self->config;
-   my $port   = env_var( 'PORT', $self->port );
-   my $args   = {
+   my $self = shift;
+   my $conf = $self->config;
+   my $port = env_var( 'PORT', $self->port );
+   my $args = {
       '--port'       => $port,
       '--server'     => $self->server,
-      '--access-log' => $config->logsdir->catfile( "access_${port}.log" ),
-      '--app'        => $config->binsdir->catfile( $self->app ), };
+      '--access-log' => $conf->logsdir->catfile( "access_${port}.log" ),
+      '--app'        => $conf->binsdir->catfile( $self->app ), };
 
    for my $k (keys %{ $self->options }) {
       $args->{ "--${k}" } = $self->options->{ $k };

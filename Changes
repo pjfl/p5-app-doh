@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Added CodeMirror JS markdown editor
+          - Added config user attribute to own Daemon process
           - Added Role::Component. Doh.pm contains only VERSION number
           - Streamlined the controller code
           - Server throws better exceptions

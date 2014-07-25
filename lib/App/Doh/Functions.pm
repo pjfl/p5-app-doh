@@ -140,15 +140,10 @@ sub load_components ($$) {
       ( @depth, search_path => [ $ns ], require => TRUE, );
 
    for my $plugin ($finder->plugins) {
-      my $moniker = exists $monikers->{ $plugin }
-                  ? $monikers->{ $plugin } : undef;
+      exists $monikers->{ $plugin } and defined $monikers->{ $plugin }
+         and $args->{moniker} = $monikers->{ $plugin };
 
-      $moniker and $args->{moniker} = $moniker;
-
-      my $obj = $plugin->new( $args );
-
-      $obj->moniker or throw class => Unspecified, args => [ 'moniker' ];
-      $plugins->{ $obj->moniker } = $obj;
+      my $obj = $plugin->new( $args ); $plugins->{ $obj->moniker } = $obj;
    }
 
    return $plugins;

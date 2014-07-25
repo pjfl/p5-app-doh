@@ -3,6 +3,9 @@
    <script src="[% links.js %]mootools.min.js"></script>
    <script src="[% links.js %]mooclasses.js"></script>
    <script src="[% links.js; skin %].js"></script>
+[% IF page.editing -%]
+   <script src="[% links.js %]editor.js"></script>
+[% END -%]
    <script>
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {
@@ -63,6 +66,12 @@
              method  : [ 'show_password', 'hide_password' ] };
       behaviour.config.anchors[ 'users' ]
          = { event   : 'change', method: 'submitForm', args: [ '' ] };
+[% END -%]
+[% IF page.editing -%]
+      var editor = new Editor( {
+          element    : $( 'markdown-editor' ),
+          lineNumbers: false } );
+      editor.render();
 [% END -%]
    </script>
 [% IF config.analytics -%]

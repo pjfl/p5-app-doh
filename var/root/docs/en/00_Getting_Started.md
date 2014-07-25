@@ -20,7 +20,7 @@ documentation in a developer friendly way.
 * Git / SVN friendly
 * Google analytics
 * Optional code float layout
-* Markdown editor and file management
+* CodeMirror markdown editor and file management
 * Multi-language support
 * Static site generator
 * Text searching

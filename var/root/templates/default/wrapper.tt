@@ -27,7 +27,11 @@
    </style>
    <script src="[% links.js %]less.min.js"></script>
 [%    ELSE -%]
-   <link href="[% links.css %]theme-[% prefs.theme %].css"
+   <link href="[% links.css %][% skin %]-[% prefs.theme %].css"
+          rel="stylesheet" type="text/css">
+[%    END -%]
+[%    IF page.editing -%]
+   <link href="[% links.css %][% skin %]-editor.css"
           rel="stylesheet" type="text/css">
 [%    END -%]
    <title>[% config.title %] - [% loc( page.title ) %]</title>
