@@ -4,7 +4,6 @@ use File::Spec::Functions qw( catdir updir );
 use FindBin               qw( $Bin );
 use lib               catdir( $Bin, updir, 'lib' );
 use strictures::defanged; # Make strictures the same as use strict warnings
-use strictures;
 
 use App::Doh::CLI;
 
