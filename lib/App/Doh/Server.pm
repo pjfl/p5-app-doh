@@ -181,10 +181,8 @@ sub _render_exception {
 
    try {
       my $stash = $self->models->{ $model }->exception_handler( $req, $e );
-      my $view  = $self->views->{ $stash->{view} };
 
-      $res = $view->serialize( $req, $stash )
-          or throw error => 'View [_1] returned false', args => [ $view ];
+      $res = $self->_render_view( $model, 'exception_handler', $req, $stash );
    }
    catch { $res = __internal_server_error( $e, $_ ) };
 

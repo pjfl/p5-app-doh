@@ -11,8 +11,4 @@
                   <span class="pull-right">
                      [%- page.author %]</span>
 [% END -%]
-[% IF page.status_message -%]
-                  <div class="container">
-                     [% page.status_message %]</div>
-[% END -%]
                </div>

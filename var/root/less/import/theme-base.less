@@ -203,6 +203,10 @@ table tr th:last-child, table tr td:last-child {
 .checked  {
    background: url(../img/icons.png) -120px -300px no-repeat transparent;
 }
+.close_icon {
+   background: url(../img/icons.png) -180px -330px no-repeat;
+   display: inline-block; height: 24px; overflow: hidden; width: 24px;
+}
 .columns { height: 100%; }
 .columns .left-column {
    background-color: @sidebar-background; border-bottom: 1px solid @lines;
@@ -407,6 +411,28 @@ table tr th:last-child, table tr td:last-child {
 }
 .nav.nav-list li ul li.active a { color: @dark; }
 .nav.nav-list .tips { display: block; }
+.notice-board { position: fixed; width: 20%; z-index: 9999; }
+.notice-board.nb-top { top: 0; }
+.notice-board.nb-right { right: 0; }
+.notice-board.nb-bottom { bottom: 0; }
+.notice-board.nb-left { left: 0; }
+.notice-board.nb-top .notice { margin-top: 10px; }
+.notice-board.nb-right .notice { margin-right: 10px; }
+.notice-board.nb-bottom .notice { margin-bottom: 10px; }
+.notice-board.nb-left .notice { margin-left: 10px; }
+.notice-board .notice {
+   background: @sidebar-hover; border: 2px solid @lines;
+   .border-radius; .box-shadow; .box-sizing(content-box);
+   padding: 10px; position: relative; z-index: 13000;
+}
+.notice-board .notice:after {
+   content: "\0020"; display: block; height: 0; clear: both;
+   visibility: hidden; overflow: hidden;
+}
+.notice-board .notice > .close_icon {
+   cursor: pointer; position: absolute; right: -8px; top: -8px;
+}
+.notice-board .notice img { float: left; margin-right: 10px; }
 .offset1 { margin-left: 8%; }
 .page-header .container { clear: both; }
 .page-header h1 { margin: 9px 0; }

@@ -4,13 +4,15 @@
    <script src="[% links.js %]mooclasses.js"></script>
    <script src="[% links.js; skin %].js"></script>
 [% IF page.editing -%]
+   <script src="[% links.js %]codemirror.js"></script>
    <script src="[% links.js %]editor.js"></script>
 [% END -%]
    <script>
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {
          baseURI : '[% links.base_uri %]',
-         formName: '[% page.form_name %]'
+         formName: '[% page.form_name %]',
+         message : '[% page.status_message %]'
       } );
 [% IF ! page.editing && page.mode != 'static' -%]
       behaviour.config.anchors[ 'create-file' ]
@@ -68,9 +70,7 @@
          = { event   : 'change', method: 'submitForm', args: [ '' ] };
 [% END -%]
 [% IF page.editing -%]
-      var editor = new Editor( {
-          element    : $( 'markdown-editor' ),
-          lineNumbers: false } );
+      var editor = new Editor( { element: $( 'markdown-editor' ) } );
       editor.render();
 [% END -%]
    </script>

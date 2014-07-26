@@ -36,7 +36,7 @@
 [%    END -%]
    <title>[% config.title %] - [% loc( page.title ) %]</title>
 </head>
-<body>
+<body id="body">
    [% content -%]
 </body>
 </html>

@@ -469,6 +469,125 @@ var LoadMore = new Class( {
    }
 } );
 
+/* Formally jquery-notification 1.1
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl-2.0.html */
+var NoticeBoard = new Class( {
+   Implements: [ Options ],
+
+   options      : {
+      canClose  : true,
+      click     : function() {},
+      content   : '',
+      fadeIn    : 400,
+      fadeOut   : 600,
+      hideDelay : 7000,
+      horizontal: 'right',
+      limit     : 3,
+      noshow    : false,
+      queue     : true,
+      slideUp   : 600,
+      vertical  : 'bottom'
+   },
+
+   initialize: function( options ) {
+      this.aroundSetOptions( options ); var opt = this.options;
+
+      var klass = 'notice-board nb-' + opt.vertical + ' nb-' + opt.horizontal;
+
+      this.board = $$( '.' + klass )[ 0 ];
+
+      // Create notification container
+      if (! this.board) this.board =
+         new Element( 'div', { class: klass } ).inject( $( 'body' ) );
+
+      this.queue = [];
+   },
+
+   create: function( content, options ) { // Create new notification and show
+      var opt  = this.mergeOptions( options );
+      var qlen = this.board.getChildren( '.notice:not(.hiding)' ).length;
+
+      if (opt.limit && qlen >= opt.limit) { // Limit reached
+         if (opt.queue) this.queue.push( [ content, opt ] );
+         return;
+      }
+
+      var el = new Element( 'div', { class: 'notice' } ).set( 'html', content );
+
+      if (opt.canClose) {
+         new Element( 'div', { class: 'close_icon' } ).inject( el, 'top' );
+      }
+
+      el.store( 'notice:options', opt ); this.attach( el );
+
+      if (!opt.noshow) this.show( el );
+
+      return el;
+   },
+
+   attach: function( el ) {
+      var opt = el.retrieve( 'notice:options' ) || this.options;
+
+      el.addEvents( {
+         click: function( ev ) {
+            ev.stop(); opt.click.call( this, el ) }.bind( this ),
+
+         mouseenter: function( ev ) { // Avoid hide when hover
+            ev.stop(); el.addClass( 'hover' );
+
+            if (el.hasClass( 'hiding' )) {
+               el.get( 'slide' ).pause(); // Recover
+               el.get( 'tween' ).pause();
+               el.set( 'tween', { duration: opt.fadeIn, property: 'opacity' } );
+               el.tween( 1 );
+               el.get( 'slide' ).show();
+               el.removeClass( 'hiding' );
+               el.addClass( 'pending' );
+            }
+         },
+
+         mouseleave: function( ev ) { // Hide was pending
+            if (el.hasClass( 'pending' )) this.hide( el );
+            el.removeClass( 'hover' );
+         }.bind( this )
+      } );
+
+      var icon; if (icon = el.getChildren( '.close_icon' )[ 0 ]) {
+         icon.addEvent( 'click', function( ev ) { // Close button
+            ev.stop(); this.hide( el ) }.bind( this ) );
+      }
+   },
+
+   show: function( el ) { // Append to board and show
+      var opt    = el.retrieve( 'notice:options' ) || this.options;
+      var fadein = opt.fadeIn;
+
+      el.inject( this.board, opt.vertical == 'top' ? 'bottom' : 'top' );
+      el.set( 'tween', { duration: fadein, property: 'opacity' } ).tween( 1 );
+
+      if (!opt.hideDelay) return;
+
+      el.noticeTimer = function() { // Hide timer
+         el.hasClass( 'hover' ) ? el.addClass( 'pending' ) : this.hide( el );
+      }.delay( opt.hideDelay, this );
+   },
+
+   hide: function( el ) {
+      var opt = el.retrieve( 'notice:options' ) || this.options;
+
+      el.addClass( 'hiding' );
+
+      el.set( 'tween', { duration: opt.fadeOut, onComplete: function() {
+         var q; if (q = this.queue.shift()) this.create( q[ 0 ], q[ 1 ] );
+      }.bind( this ), property: 'opacity' } ).tween( 0 );
+
+      el.set( 'slide', { duration: opt.slideUp, onComplete: function() {
+         el.getParent().destroy() } } ).slide( 'out' );
+   }
+} );
+
 var Replacements = new Class( {
    Implements: [ Options ],
 

@@ -12,6 +12,7 @@ var Behaviour = new Class( {
       baseURL        : null,
       firstField     : null,
       formName       : null,
+      message        : null,
       popup          : false,
       statusUpdPeriod: 4320,
       target         : null
@@ -88,6 +89,7 @@ var Behaviour = new Class( {
          offset         : 108,
          selector       : '.navbar',
          tolerance      : 10 } );
+      this.noticeBoard  = new NoticeBoard( { context: this } );
       this.replacements = new Replacements( { context: this } );
       this.linkFade     = new LinkFader( { context: this } );
       this.tips         = new Tips( {
@@ -105,6 +107,8 @@ var Behaviour = new Class( {
          onShow         : function() {
             this.tip.setStyle( 'visibility', 'visible' ); this.fx.start( 1 ) },
          showDelay      : 666 } );
+
+      if (opt.message) this.noticeBoard.create( opt.message );
 
       if (first_field && (el = $( first_field ))) el.focus();
    },

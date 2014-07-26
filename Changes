@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Switched status messages to JS notice board
+
 0.4.1     2014-07-26 01:04:29
           - Added insertGraves to markdown editor
           - Added CodeMirror JS markdown editor
