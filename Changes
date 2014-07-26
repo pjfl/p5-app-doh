@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+0.4.1     2014-07-26 01:04:29
+          - Added insertGraves to markdown editor
           - Added CodeMirror JS markdown editor
           - Added config user attribute to own Daemon process
           - Added Role::Component. Doh.pm contains only VERSION number

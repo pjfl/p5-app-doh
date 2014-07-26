@@ -139,7 +139,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .fixed-footer.container-fluid .twitter{margin-top:36px}
 .fixed-footer.container-fluid .twitter:first-child{margin-top:36px}
 .folder{font-size:16px;line-height:18px}
-.github-ribbon{position:absolute;right:0;top:54px;z-index:10}
+.github-ribbon{position:absolute;right:0;top:54px;z-index:0}
 .hero-buttons.container-fluid{background-color:#92c86a;overflow:hidden;min-height:18px;padding:18px 0}
 .hero-buttons.container-fluid .btn-hero.btn{border:5px solid #000;font-size:14px;line-height:18px;-khtml-opacity:.8;-webkit-opacity:.8;opacity:.8;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(opacity=80);filter:alpha(opacity=80);padding:18px 36px;margin:0 8px;font-weight:700;font-family:"Roboto Slab","Times New Roman","Times","serif";text-transform:uppercase}
 .hero-buttons.container-fluid .btn-hero.btn:hover{-khtml-opacity:1;-webkit-opacity:1;opacity:1;-ms-filter:progid:DXImageTransform.Microsoft.Alpha(opacity=100);filter:alpha(opacity=100)}

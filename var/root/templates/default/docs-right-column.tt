@@ -14,7 +14,6 @@
                         method="post" name="edit">
                      <textarea class="editor" id="markdown-editor"
                           name="content">[% page.content | html %]</textarea>
-                     <br>
                      <button class="button" name="_method" type="submit"
                          value="save_file">[% loc( 'Save' ) %]</button>
                   </form>

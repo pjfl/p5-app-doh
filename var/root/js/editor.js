@@ -6389,7 +6389,10 @@
     },
 
     getLine: function(line) {var l = this.getLineHandle(line); return l && l.text;},
-
+    setLine: function(line, text) {
+      if (isLine(this, line))
+        replaceRange(this, text, Pos(line, 0), clipPos(this, Pos(line)));
+    },
     getLineHandle: function(line) {if (isLine(this, line)) return getLine(this, line);},
     getLineNumber: function(line) {return lineNo(line);},
 
@@ -9395,6 +9398,19 @@ function drawImage(editor) {
   _replaceSelection(cm, stat.image, '![', '](http://)');
 }
 
+function insertGraves( editor ) {
+   var cm         = editor.codemirror;
+   var startPoint = cm.getCursor( 'start' );
+   var endPoint   = cm.getCursor( 'end' );
+   var text       = cm.getSelection();
+   var start      = '```';
+   var end        = '```';
+
+   cm.replaceSelection( start + text + end );
+   startPoint.ch += 3;
+   cm.setSelection( startPoint, endPoint );
+   cm.focus();
+}
 
 /**
  * Undo action.
@@ -9525,10 +9541,11 @@ var toolbar = [
 
   {name: 'link', action: drawLink},
   {name: 'image', action: drawImage},
+  {name: 'codeblock', action: insertGraves},
   '|',
 
-  {name: 'info', action: 'http://lab.lepture.com/editor/markdown'},
-  {name: 'preview', action: togglePreview},
+  {name: 'undo', action: undo},
+  {name: 'redo', action: redo},
   {name: 'fullscreen', action: toggleFullScreen}
 ];
 
@@ -9732,6 +9749,7 @@ Editor.toggleUnOrderedList = toggleUnOrderedList;
 Editor.toggleOrderedList = toggleOrderedList;
 Editor.drawLink = drawLink;
 Editor.drawImage = drawImage;
+Editor.insertGraves = insertGraves;
 Editor.undo = undo;
 Editor.redo = redo;
 Editor.toggleFullScreen = toggleFullScreen;
@@ -9759,6 +9777,9 @@ Editor.prototype.drawLink = function() {
 };
 Editor.prototype.drawImage = function() {
   drawImage(this);
+};
+Editor.prototype.insertGraves = function() {
+  insertGraves(this);
 };
 Editor.prototype.undo = function() {
   undo(this);

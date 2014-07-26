@@ -2,7 +2,7 @@ package strictures::defanged;
 
 use strict;
 use warnings;
-use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 9 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.1.%d', q$Rev: 1 $ =~ /\d+/gmx );
 
 sub import {
    require strictures; no warnings 'redefine';
@@ -33,7 +33,7 @@ strictures::defanged - Make strictures the same as just use strict warnings
 
 =head1 Version
 
-This documents version v0.1.$Rev: 9 $ of L<strictures::defanged>
+This documents version v0.1.$Rev: 1 $ of L<strictures::defanged>
 
 =head1 Description
 
