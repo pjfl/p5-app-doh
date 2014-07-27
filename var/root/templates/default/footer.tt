@@ -2,11 +2,11 @@
    <script src="[% links.js %]highlight.min.js"></script>
    <script src="[% links.js %]mootools.min.js"></script>
    <script src="[% links.js %]mooclasses.js"></script>
-   <script src="[% links.js; skin %].js"></script>
 [% IF page.editing -%]
    <script src="[% links.js %]codemirror.js"></script>
    <script src="[% links.js %]editor.js"></script>
 [% END -%]
+   <script src="[% links.js; skin %].js"></script>
    <script>
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {

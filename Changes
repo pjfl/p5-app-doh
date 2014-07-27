@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Refactored markdown editor
           - Switched status messages to JS notice board
 
 0.4.1     2014-07-26 01:04:29

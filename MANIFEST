@@ -74,6 +74,7 @@ var/root/img/favicon.png
 var/root/img/flags.png
 var/root/img/fork-me.png
 var/root/img/icons.png
+var/root/js/codemirror.js
 var/root/js/default.js
 var/root/js/editor.js
 var/root/js/highlight.min.js

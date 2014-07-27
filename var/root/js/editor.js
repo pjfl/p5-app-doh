@@ -1,55 +1,77 @@
 /* Editor - https://github.com/lepture/editor
  * MIT. Copyright (c) 2013 - 2014 by Hsiaoming Yang */
-(function( window ) {
+(function( window, document ) {
 var isMac     = /Mac/.test( navigator.platform );
 var shortcuts = {
-   'Cmd-B'    : toggleBold,
-   'Cmd-I'    : toggleItalic,
-   'Cmd-K'    : drawLink,
-   'Cmd-Alt-I': drawImage,
-   "Cmd-'"    : toggleBlockquote,
-   'Cmd-Alt-L': toggleOrderedList,
-   'Cmd-L'    : toggleUnOrderedList
+   'bold'          : [ 'Cmd-B',     toggleBold ],
+   'codeblock'     : [ '',          insertGraves,        'Code block' ],
+   'fullscreen'    : [ '',          toggleFullScreen,    'Full screen mode' ],
+   'h2'            : [ 'Cmd-H',     toggleH2,            'Heading level 2' ],
+   'h3'            : [ 'Cmd-Alt-H', toggleH3,            'Heading level 3' ],
+   'image'         : [ 'Cmd-Alt-I', insertImage ],
+   'italic'        : [ 'Cmd-I',     toggleItalic ],
+   'link'          : [ 'Cmd-K',     insertLink ],
+   'ordered-list'  : [ 'Cmd-Alt-L', toggleOrderedList,   'Ordered list' ],
+   'quote'         : [ "Cmd-'",     toggleBlockquote,    'Block quote' ],
+   'redo'          : [ '',          redo,                'Redo last' ],
+   'undo'          : [ '',          undo,                'Undo previous' ],
+   'unordered-list': [ 'Cmd-L',     toggleUnOrderedList, 'Unordered list' ]
 };
+var toolbar   = [
+   { name: 'h2', action: toggleH2 },
+   { name: 'h3', action: toggleH3 },
+   { name: 'bold', action: toggleBold },
+   { name: 'italic', action: toggleItalic },
+   '|',
+   { name: 'quote', action: toggleBlockquote },
+   { name: 'unordered-list', action: toggleUnOrderedList },
+   { name: 'ordered-list', action: toggleOrderedList },
+   '|',
+   { name: 'link', action: insertLink },
+   { name: 'image', action: insertImage },
+   { name: 'codeblock', action: insertGraves },
+   '|',
+   { name: 'undo', action: undo },
+   { name: 'redo', action: redo },
+   { name: 'fullscreen', action: toggleFullScreen }
+];
 
-/* Fix shortcut. Mac use Command, others use Ctrl */
-function fixShortcut( name ) {
-   if (isMac) name = name.replace( 'Ctrl', 'Cmd' );
-   else name = name.replace( 'Cmd', 'Ctrl' );
-
-   return name;
-}
-
-/* Create icon element for toolbar */
-function createIcon( name, options ) {
+function _createIcon( name, options ) {
    options = options || {};
 
    var el = document.createElement( 'a' );
    var shortcut = options.shortcut || shortcuts[ name ];
 
    if (shortcut) {
-      el.title = fixShortcut( shortcut );
+      el.title = _fixShortcut( (shortcut[ 0 ] || '...') )
+               + ' ~ ' + (shortcut[ 2 ] || name.ucfirst());
       el.title = el.title.replace( 'Cmd', '⌘' );
 
       if (isMac) el.title = el.title.replace( 'Alt', '⌥' );
    }
 
-   el.className = options.className || 'icon-' + name;
+   el.className = (options.className || 'icon-' + name) + ' tips';
    return el;
 }
 
-function createSep() {
+function _createSep() {
    el = document.createElement( 'i' );
    el.className = 'separator';
    el.innerHTML = '|';
    return el;
 }
 
-/* The state of CodeMirror at the given position */
-function getState( cm, pos ) {
-   pos = pos || cm.getCursor( 'start' );
+function _fixShortcut( name ) {
+   if (isMac) name = name.replace( 'Ctrl', 'Cmd' );
+   else name = name.replace( 'Cmd', 'Ctrl' );
 
-   var stat = cm.getTokenAt( pos ); if (!stat.type) return {};
+   return name;
+}
+
+function _getState( cm, pos ) {
+   pos = pos || cm.getCursor( 'from' );
+
+   var stat = cm.getTokenAt( pos, true ); if (!stat.type) return {};
 
    var types = stat.type.split( ' ' ), ret = {}, data, text;
 
@@ -63,6 +85,7 @@ function getState( cm, pos ) {
          if (/^\s*\d+\.\s/.test( text )) ret[ 'ordered-list' ] = true;
          else ret[ 'unordered-list' ] = true;
       }
+      else if (data === 'code') ret.codeblock = true;
       else if (data === 'atom') ret.quote = true;
       else if (data === 'em') ret.italic = true;
    }
@@ -70,8 +93,135 @@ function getState( cm, pos ) {
    return ret;
 }
 
-/* Toggle full screen of the editor
- * https://developer.mozilla.org/en-US/docs/DOM/Using_fullscreen_mode */
+function _replaceSelection( cm, active, start, end ) {
+   var startPoint = cm.getCursor( 'from' ), endPoint = cm.getCursor( 'to' );
+   var text;
+
+   if (active) {
+      text  = cm.getLine( startPoint.line );
+      start = text.slice( 0, startPoint.ch );
+      end   = text.slice( endPoint.ch );
+      cm.setLine( startPoint.line, start + end );
+   }
+   else {
+      text = cm.getSelection();
+      cm.replaceSelection( start + text + end );
+      startPoint.ch += start.length;
+
+      if (startPoint !== endPoint) endPoint.ch += start.length;
+   }
+
+   cm.setSelection( startPoint, endPoint );
+   cm.focus();
+}
+
+function _toggleLine( cm, name ) {
+   var stat       = _getState( cm );
+   var startPoint = cm.getCursor( 'from' );
+   var endPoint   = cm.getCursor( 'to' );
+   var repl = {
+      'h2'            : /^(\s*)\#\#\s+/,
+      'h3'            : /^(\s*)\#\#\#\s+/,
+      'quote'         : /^(\s*)\>\s+/,
+      'unordered-list': /^(\s*)(\*|\-|\+)\s+/,
+      'ordered-list'  : /^(\s*)\d+\.\s+/
+   };
+   var map = {
+      'h2'            : '## ',
+      'h3'            : '### ',
+      'quote'         : '> ',
+      'unordered-list': '* ',
+      'ordered-list'  : '1. '
+   };
+
+   for (var i = startPoint.line; i <= endPoint.line; i++) {
+      (function( i ) {
+         var text = cm.getLine( i );
+
+         if (stat[ name ]) text = text.replace( repl[ name ], '$1' );
+         else text = map[ name ] + text;
+
+         cm.setLine( i, text );
+      } )( i );
+   }
+
+   cm.focus();
+}
+
+function _wordCount( data ) {
+   var pattern = /[a-zA-Z0-9_\u0392-\u03c9]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
+   var m = data.match( pattern ), count = 0;
+
+   if (m === null) return count;
+
+   for (var i = 0, ml = m.length; i < ml; i++) {
+      if (m[ i ].charCodeAt( 0 ) >= 0x4E00) count += m[ i ].length;
+      else count += 1;
+   }
+
+   return count;
+}
+
+function insertGraves( editor ) {
+   var cm = editor.codemirror, stat = _getState( cm );
+
+   _replaceSelection( cm, stat.code, '```', '```' );
+}
+
+function insertImage( editor ) {
+   var cm = editor.codemirror, stat = _getState( cm );
+
+   _replaceSelection( cm, stat.image, '![', '](http://)' );
+}
+
+function insertLink( editor ) {
+   var cm = editor.codemirror, stat = _getState( cm );
+
+   _replaceSelection( cm, stat.link, '[', '](http://)' );
+}
+
+function redo( editor ) {
+   var cm = editor.codemirror; cm.redo(); cm.focus();
+}
+
+function toggleBlockquote( editor ) {
+   var cm = editor.codemirror; _toggleLine( cm, 'quote' );
+}
+
+function toggleBold( editor ) {
+   var cm         = editor.codemirror;
+   var stat       = _getState( cm );
+   var startPoint = cm.getCursor( 'from' );
+   var endPoint   = cm.getCursor( 'to' );
+   var start      = '**';
+   var end        = '**';
+   var text;
+
+   if (stat.bold) {
+      text  = cm.getLine( startPoint.line );
+      start = text.slice( 0, startPoint.ch );
+      end   = text.slice( startPoint.ch );
+      start = start.replace( /^(.*)?(\*|\_){2}(\S+.*)?$/, '$1$3' );
+      end   = end.replace( /^(.*\S+)?(\*|\_){2}(\s+.*)?$/, '$1$3' );
+      startPoint.ch -= start.length;
+
+      if (startPoint !== endPoint) endPoint.ch -= start.length;
+
+      cm.setLine( startPoint.line, start + end );
+   }
+   else {
+      text = cm.getSelection();
+      cm.replaceSelection( start + text + end );
+      startPoint.ch += start.length;
+
+      if (startPoint !== endPoint) endPoint.ch += start.length;
+   }
+
+   cm.setSelection( startPoint, endPoint );
+   cm.focus();
+}
+
+/* https://developer.mozilla.org/en-US/docs/DOM/Using_fullscreen_mode */
 function toggleFullScreen( editor ) {
    var el      = editor.codemirror.getWrapperElement();
    var doc     = document;
@@ -93,43 +243,19 @@ function toggleFullScreen( editor ) {
    else if (cancel) cancel();
 }
 
-/* Action for toggling bold */
-function toggleBold(editor) {
-   var cm         = editor.codemirror;
-   var stat       = getState( cm );
-   var startPoint = cm.getCursor( 'start' );
-   var endPoint   = cm.getCursor( 'end' );
-   var start      = '**';
-   var end        = '**';
-   var text;
-
-   if (stat.bold) {
-      text  = cm.getLine( startPoint.line );
-      start = text.slice( 0, startPoint.ch );
-      end   = text.slice( startPoint.ch );
-      start = start.replace( /^(.*)?(\*|\_){2}(\S+.*)?$/, '$1$3' );
-      end   = end.replace( /^(.*\S+)?(\*|\_){2}(\s+.*)?$/, '$1$3' );
-      startPoint.ch -= 2;
-      endPoint.ch   -= 2;
-      cm.setLine( startPoint.line, start + end );
-   }
-   else {
-      text = cm.getSelection();
-      cm.replaceSelection( start + text + end );
-      startPoint.ch += 2;
-      endPoint.ch   += 2;
-   }
-
-   cm.setSelection( startPoint, endPoint );
-   cm.focus();
+function toggleH2( editor ) {
+   var cm = editor.codemirror; _toggleLine( cm, 'h2' );
 }
 
-/* Action for toggling italic */
+function toggleH3( editor ) {
+   var cm = editor.codemirror; _toggleLine( cm, 'h3' );
+}
+
 function toggleItalic( editor ) {
    var cm         = editor.codemirror;
-   var stat       = getState( cm );
-   var startPoint = cm.getCursor( 'start' );
-   var endPoint   = cm.getCursor( 'end' );
+   var stat       = _getState( cm );
+   var startPoint = cm.getCursor( 'from' );
+   var endPoint   = cm.getCursor( 'to' );
    var start      = '*';
    var end        = '*';
    var text;
@@ -140,187 +266,35 @@ function toggleItalic( editor ) {
       end   = text.slice( startPoint.ch );
       start = start.replace( /^(.*)?(\*|\_)(\S+.*)?$/, '$1$3' );
       end   = end.replace( /^(.*\S+)?(\*|\_)(\s+.*)?$/, '$1$3' );
-      startPoint.ch -= 1;
-      endPoint.ch   -= 1;
-      cm.setLine( startPoint.line, start + end );
-   }
-   else {
-      text = cm.getSelection();
-      cm.replaceSelection( start + text + end );
-      startPoint.ch += 1;
-      endPoint.ch   += 1;
-   }
+      startPoint.ch -= start.length;
 
-   cm.setSelection( startPoint, endPoint );
-   cm.focus();
-}
+      if (startPoint !== endPoint) endPoint.ch -= start.length;
 
-/* Action for toggling blockquote */
-function toggleBlockquote( editor ) {
-   var cm = editor.codemirror; _toggleLine( cm, 'quote' );
-}
-
-/* Action for toggling ul */
-function toggleUnOrderedList( editor ) {
-   var cm = editor.codemirror; _toggleLine( cm, 'unordered-list' );
-}
-
-/* Action for toggling ol */
-function toggleOrderedList( editor ) {
-   var cm = editor.codemirror; _toggleLine( cm, 'ordered-list' );
-}
-
-/* Action for drawing a link */
-function drawLink( editor ) {
-   var cm = editor.codemirror, stat = getState( cm );
-
-   _replaceSelection( cm, stat.link, '[', '](http://)' );
-}
-
-/* Action for drawing an img */
-function drawImage( editor ) {
-   var cm = editor.codemirror, stat = getState( cm );
-
-   _replaceSelection( cm, stat.image, '![', '](http://)' );
-}
-
-function insertGraves( editor ) {
-   var cm         = editor.codemirror;
-   var startPoint = cm.getCursor( 'start' );
-   var endPoint   = cm.getCursor( 'end' );
-   var text       = cm.getSelection();
-   var start      = '```';
-   var end        = '```';
-
-   cm.replaceSelection( start + text + end );
-   startPoint.ch += 3;
-   cm.setSelection( startPoint, endPoint );
-   cm.focus();
-}
-
-/* Undo action */
-function undo( editor ) {
-   var cm = editor.codemirror; cm.undo(); cm.focus();
-}
-
-/* Redo action */
-function redo( editor ) {
-   var cm = editor.codemirror; cm.redo(); cm.focus();
-}
-
-/* Preview action */
-function togglePreview( editor ) {
-   var toolbar = editor.toolbar.preview;
-   var parse   = editor.constructor.markdown;
-   var cm      = editor.codemirror;
-   var wrapper = cm.getWrapperElement();
-   var preview = wrapper.lastChild;
-
-   if (!/editor-preview/.test( preview.className )) {
-      preview = document.createElement( 'div' );
-      preview.className = 'editor-preview';
-      wrapper.appendChild( preview );
-   }
-
-   if (/editor-preview-active/.test( preview.className )) {
-      preview.className
-         = preview.className.replace( /\s*editor-preview-active\s*/g, '' );
-      toolbar.className = toolbar.className.replace( /\s*active\s*/g, '' );
-   }
-   else {
-      /* When the preview button is clicked for the first time,
-       * give some time for the transition from editor.css to fire and the
-       * view to slide from right to left, instead of just appearing */
-      setTimeout( function() {
-         preview.className += ' editor-preview-active' }, 1 );
-      toolbar.className += ' active';
-   }
-
-   var text = cm.getValue(); preview.innerHTML = parse( text );
-}
-
-function _replaceSelection( cm, active, start, end ) {
-   var startPoint = cm.getCursor( 'start' ), endPoint = cm.getCursor( 'end' );
-   var text;
-
-   if (active) {
-      text  = cm.getLine( startPoint.line );
-      start = text.slice( 0, startPoint.ch );
-      end   = text.slice( startPoint.ch );
       cm.setLine( startPoint.line, start + end );
    }
    else {
       text = cm.getSelection();
       cm.replaceSelection( start + text + end );
       startPoint.ch += start.length;
-      endPoint.ch   += start.length;
+
+      if (startPoint !== endPoint) endPoint.ch += start.length;
    }
 
    cm.setSelection( startPoint, endPoint );
    cm.focus();
 }
 
-function _toggleLine( cm, name ) {
-   var stat       = getState( cm );
-   var startPoint = cm.getCursor( 'start' );
-   var endPoint   = cm.getCursor( 'end' );
-   var repl = {
-      'quote'         : /^(\s*)\>\s+/,
-      'unordered-list': /^(\s*)(\*|\-|\+)\s+/,
-      'ordered-list'  : /^(\s*)\d+\.\s+/
-   };
-   var map = {
-      'quote'         : '> ',
-      'unordered-list': '* ',
-      'ordered-list'  : '1. '
-   };
-
-   for (var i = startPoint.line; i <= endPoint.line; i++) {
-      (function( i ) {
-         var text = cm.getLine( i );
-
-         if (stat[ name ]) text = text.replace( repl[ name ], '$1' );
-         else text = map[ name ] + text;
-
-         cm.setLine( i, text );
-      } )( i );
-   }
-
-   cm.focus();
+function toggleOrderedList( editor ) {
+   var cm = editor.codemirror; _toggleLine( cm, 'ordered-list' );
 }
 
-/* The right word count in respect for CJK. */
-function wordCount( data ) {
-   var pattern = /[a-zA-Z0-9_\u0392-\u03c9]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
-   var m = data.match( pattern ), count = 0;
-
-   if (m === null) return count;
-
-   for (var i = 0, ml = m.length; i < ml; i++) {
-      if (m[ i ].charCodeAt( 0 ) >= 0x4E00) count += m[ i ].length;
-      else count += 1;
-   }
-
-   return count;
+function toggleUnOrderedList( editor ) {
+   var cm = editor.codemirror; _toggleLine( cm, 'unordered-list' );
 }
 
-/* Editor - editor.js */
-var toolbar = [
-   { name: 'bold', action: toggleBold },
-   { name: 'italic', action: toggleItalic },
-   '|',
-   { name: 'quote', action: toggleBlockquote },
-   { name: 'unordered-list', action: toggleUnOrderedList },
-   { name: 'ordered-list', action: toggleOrderedList },
-   '|',
-   { name: 'link', action: drawLink },
-   { name: 'image', action: drawImage },
-   { name: 'codeblock', action: insertGraves },
-   '|',
-   { name: 'undo', action: undo },
-   { name: 'redo', action: redo },
-   { name: 'fullscreen', action: toggleFullScreen }
-];
+function undo( editor ) {
+   var cm = editor.codemirror; cm.undo(); cm.focus();
+}
 
 /* Interface of Editor */
 function Editor( options ) {
@@ -336,42 +310,25 @@ function Editor( options ) {
    }
 
    this.options = options;
-   // If user has passed an element, it should auto rendered
+
    if (this.element) this.render();
 }
 
-/* Default toolbar elements */
 Editor.toolbar = toolbar;
 
-/* Default markdown render */
 Editor.markdown = function( text ) { // Use marked as markdown parser
    if (window.marked) return marked( text );
-};
-
-/* Render editor to the given element */
-Editor.prototype.render = function( el ) {
-   this.element = el || this.element
-                     || document.getElementsByTagName( 'textarea' )[ 0 ];
-
-   if (this._rendered && this._rendered === this.element) return;
-
-   this.createCodeMirror( this.element );
-
-   if (this.options.toolbar !== false) this.createToolbar();
-   if (this.options.status  !== false) this.createStatusbar();
-
-   this._rendered = this.element;
 };
 
 Editor.prototype.createCodeMirror = function( el ) {
    var self = this, keyMaps = {};
 
    for (var key in shortcuts) {
-      (function( key ) {
-         keyMaps[ fixShortcut( key ) ] = function( cm ) {
-            shortcuts[ key ]( self );
-         };
-      })( key );
+      (function( tuple ) {
+         if (tuple[ 0 ].length)
+            keyMaps[ _fixShortcut( tuple[ 0 ] ) ]
+               = function( cm ) { tuple[ 1 ]( self ) };
+      } )( shortcuts[ key ] );
    }
 
    keyMaps[ 'Enter' ] = 'newlineAndIndentContinueMarkdownList';
@@ -379,9 +336,10 @@ Editor.prototype.createCodeMirror = function( el ) {
    var codeMirrorOptions  = this.options.codeMirror || {};
    var codeMirrorDefaults = {
       extraKeys     : keyMaps,
-      indentWithTabs: true,
+      indentWithTabs: false,
       lineNumbers   : false,
       mode          : 'markdown',
+      tabSize       : 3,
       theme         : 'paper'
    };
 
@@ -394,23 +352,21 @@ Editor.prototype.createCodeMirror = function( el ) {
 };
 
 Editor.prototype.createToolbar = function( items ) {
-   var self = this; items = items || this.options.toolbar;
+   items = items || this.options.toolbar;
 
    if (!items || items.length === 0) return;
 
    var bar  = document.createElement( 'div' ); bar.className = 'editor-toolbar';
-
-   self.toolbar = {};
+   var self = this; self.toolbar = {};
 
    for (var i = 0, il = items.length; i < il; i++) {
       (function( item ) {
          var el;
 
-         if      (item.name)    el = createIcon( item.name, item );
-         else if (item === '|') el = createSep();
-         else                   el = createIcon( item );
+         if      (item.name)    el = _createIcon( item.name, item );
+         else if (item === '|') el = _createSep();
+         else                   el = _createIcon( item );
 
-         // bind events, special for info
          if (item.action) {
             if (typeof item.action === 'function') {
                el.onclick = function( e ) { item.action( self ); };
@@ -425,8 +381,9 @@ Editor.prototype.createToolbar = function( items ) {
    }
 
    var cm = this.codemirror;
+
    cm.on( 'cursorActivity', function() {
-      var stat = getState( cm );
+      var stat = _getState( cm );
 
       for (var key in self.toolbar) {
          (function( key ) {
@@ -483,54 +440,20 @@ Editor.prototype.createStatusbar = function( status ) {
    return bar;
 };
 
-/* Bind static methods for exports */
-Editor.toggleBold = toggleBold;
-Editor.toggleItalic = toggleItalic;
-Editor.toggleBlockquote = toggleBlockquote;
-Editor.toggleUnOrderedList = toggleUnOrderedList;
-Editor.toggleOrderedList = toggleOrderedList;
-Editor.drawLink = drawLink;
-Editor.drawImage = drawImage;
-Editor.insertGraves = insertGraves;
-Editor.undo = undo;
-Editor.redo = redo;
-Editor.toggleFullScreen = toggleFullScreen;
+Editor.prototype.render = function( el ) {
+   this.element = el || this.element
+                     || document.getElementsByTagName( 'textarea' )[ 0 ];
 
-/* Bind instance methods for exports */
-Editor.prototype.toggleBold = function() {
-   toggleBold( this );
-};
-Editor.prototype.toggleItalic = function() {
-   toggleItalic( this );
-};
-Editor.prototype.toggleBlockquote = function() {
-   toggleBlockquote( this );
-};
-Editor.prototype.toggleUnOrderedList = function() {
-   toggleUnOrderedList( this );
-};
-Editor.prototype.toggleOrderedList = function() {
-   toggleOrderedList( this );
-};
-Editor.prototype.drawLink = function() {
-   drawLink( this );
-};
-Editor.prototype.drawImage = function() {
-   drawImage( this );
-};
-Editor.prototype.insertGraves = function() {
-   insertGraves( this );
-};
-Editor.prototype.undo = function() {
-   undo( this );
-};
-Editor.prototype.redo = function() {
-   redo( this );
-};
-Editor.prototype.toggleFullScreen = function() {
-   toggleFullScreen( this );
+   if (this._rendered && this._rendered === this.element) return;
+
+   this.createCodeMirror( this.element );
+
+   if (this.options.toolbar !== false) this.createToolbar();
+   if (this.options.status  !== false) this.createStatusbar();
+
+   this._rendered = this.element;
 };
 
 window.Editor = Editor;
 
-})( window );
+})( window, document );

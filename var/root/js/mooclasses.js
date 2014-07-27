@@ -105,6 +105,10 @@ String.implement( {
       return new Array( times + 1 ).join( this );
    },
 
+   ucfirst: function() {
+      return this.charAt( 0 ).toUpperCase() + this.slice( 1 );
+   },
+
    unescapeHTML: function() {
       var text = this;
       text = text.replace( /\&amp\;/g,    '&' );
@@ -1131,7 +1135,9 @@ this.Tips = new Class( {
 
       this.tip.setStyle( 'width', w + 'px' );
       this.term.empty().appendText( term || opt.spacer );
-      this.defn.empty().appendText( defn || opt.spacer );
+
+      if (defn) this.defn.empty().setStyle( 'display', '' ).appendText( defn );
+      else this.defn.empty().setStyle( 'display', 'none' );
    },
 
    show: function( el ) {
