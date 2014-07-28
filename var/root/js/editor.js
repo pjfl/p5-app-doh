@@ -10,7 +10,7 @@ var shortcuts = {
    'h3'            : [ 'Cmd-Alt-H', toggleH3,            'Heading level 3' ],
    'image'         : [ 'Cmd-Alt-I', insertImage ],
    'italic'        : [ 'Cmd-I',     toggleItalic ],
-   'link'          : [ 'Cmd-K',     insertLink ],
+   'link'          : [ 'Cmd-Alt-A', insertLink ],
    'ordered-list'  : [ 'Cmd-Alt-L', toggleOrderedList,   'Ordered list' ],
    'quote'         : [ "Cmd-'",     toggleBlockquote,    'Block quote' ],
    'redo'          : [ '',          redo,                'Redo last' ],
@@ -165,7 +165,7 @@ function _wordCount( data ) {
 function insertGraves( editor ) {
    var cm = editor.codemirror, stat = _getState( cm );
 
-   _replaceSelection( cm, stat.code, '```', '```' );
+   _replaceSelection( cm, stat.code, '`', '`' );
 }
 
 function insertImage( editor ) {
@@ -416,7 +416,7 @@ Editor.prototype.createStatusbar = function( status ) {
          if (name === 'words') {
             el.innerHTML = '0';
             cm.on( 'update', function() {
-               el.innerHTML = wordCount( cm.getValue() );
+               el.innerHTML = _wordCount( cm.getValue() );
             } );
          }
          else if (name === 'lines') {

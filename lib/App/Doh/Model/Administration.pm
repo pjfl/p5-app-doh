@@ -61,7 +61,7 @@ sub generate_static_action : Role(admin) {
 }
 
 sub get_dialog : Role(anon) {
-   my ($self, $req) = @_;
+   my ($self, $req) = @_; my $user;
 
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
@@ -72,9 +72,12 @@ sub get_dialog : Role(anon) {
 
    $name eq 'login' and $page->{username} = $req->session->username;
    $name eq 'profile'
-      and $page->{email     } = $self->users->find( $req->username )->email
-      and $page->{literal_js} = set_element_focus( "${name}-user", 'email' )
-      and $page->{username  } = $req->username;
+      and $user = $self->users->find( $req->username )
+      and $page->{binding    } = $user->binding
+      and $page->{email      } = $user->email
+      and $page->{keybindings} = [ qw( default emacs sublime vim ) ]
+      and $page->{literal_js } = set_element_focus( "${name}-user", 'email' )
+      and $page->{username   } = $req->username;
    $name ne 'profile'
       and $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
    $stash->{view} = 'xml';
@@ -138,13 +141,15 @@ sub navigation {
 sub update_profile_action : Role(any) {
    my ($self, $req) = @_;
 
-   my $id    = $req->username;
-   my $email = $req->body_value( 'email'    );
-   my $pass  = $req->body_value( 'password' );
-   my $again = $req->body_value( 'again'    );
-   my $user  = $self->users->find( $id );
-   my $args  = { id => $id };
+   my $id      = $req->username;
+   my $binding = $req->body_value( 'binding' );
+   my $email   = $req->body_value( 'email'    );
+   my $pass    = $req->body_value( 'password' );
+   my $again   = $req->body_value( 'again'    );
+   my $user    = $self->users->find( $id );
+   my $args    = { id => $id };
 
+   $binding ne $user->binding and $args->{binding} = $binding;
    $email and $email ne $user->email and $args->{email} = $email;
    $pass  and $again and $pass eq $again and $args->{password} = $pass;
    $self->users->update( $args );

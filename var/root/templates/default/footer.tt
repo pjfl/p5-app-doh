@@ -38,11 +38,6 @@
              args    : [ '[% uri_for( 'user' ) %]?name=login', {
                 name : 'login-user',
                 title: '[% loc( 'Login User' ) %]' } ] };
-      behaviour.config.anchors[ 'profile-user' ]
-         = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'user' ) %]?name=profile', {
-                name : 'profile-user',
-                title: '[% loc( 'User Profile' ) %]' } ] };
       behaviour.config.anchors[ 'rename-file' ]
          = { method  : 'modalDialog',
              args    : [ '[% uri_for( 'dialog' ) %]?name=rename', {
@@ -60,6 +55,13 @@
                 name : 'upload_file',
                 title: '[% loc( 'Upload File' ) %]',
                 value: '[% page.url %]' } ] };
+[% END -%]
+[% IF page.mode != 'static' -%]
+      behaviour.config.anchors[ 'profile-user' ]
+         = { method  : 'modalDialog',
+             args    : [ '[% uri_for( 'user' ) %]?name=profile', {
+                name : 'profile-user',
+                title: '[% loc( 'User Profile' ) %]' } ] };
       behaviour.config.inputs[ 'again' ]
          = { event   : [ 'focus', 'blur' ],
              method  : [ 'show_password', 'hide_password' ] };
@@ -70,7 +72,9 @@
          = { event   : 'change', method: 'submitForm', args: [ '' ] };
 [% END -%]
 [% IF page.editing -%]
-      var editor = new Editor( { element: $( 'markdown-editor' ) } );
+      var editor = new Editor( {
+         codeMirror: { keyMap: '[% page.user.binding %]' },
+         element   : $( 'markdown-editor' ) } );
       editor.render();
 [% END -%]
    </script>

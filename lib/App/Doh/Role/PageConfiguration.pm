@@ -6,7 +6,7 @@ use App::Doh::Functions    qw( extract_lang );
 use Class::Usul::Constants qw( FALSE NUL );
 use Moo::Role;
 
-requires qw( config load_page );
+requires qw( config load_page users );
 
 # Construction
 around 'load_page' => sub {
@@ -29,6 +29,8 @@ around 'load_page' => sub {
    $page->{homepage_url       }   = $page->{mode} eq 'online'
                                   ? $req->base : $req->uri_for( 'index' );
    $page->{language           }   = extract_lang $page->{locale};
+
+   $page->{editing} and $page->{user} = $self->users->find( $req->username );
 
    return $page;
 };

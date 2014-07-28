@@ -16,7 +16,7 @@ has 'min_pass_len' => is => 'ro', isa => NonZeroPositiveInt, default => 8;
 
 has '+result_source_attributes' => default => sub { {
    users                   => {
-      attributes           => [ qw( active email password roles ) ],
+      attributes           => [ qw( active binding email password roles ) ],
       defaults             => { roles => [], },
       resultset_attributes => { result_class => 'App::Doh::User::Result' } },
 } };
@@ -40,6 +40,7 @@ sub create {
    my ($self, $args) = @_;
 
    $args->{active  }   = FALSE;
+   $args->{binding } //= 'default';
    $args->{email   } //= NUL;
    $args->{password}   = $self->_encrypt_password( $args->{password} );
    $args->{roles   } //= [ 'user' ];

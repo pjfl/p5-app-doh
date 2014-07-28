@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added keybindings for the markdown editor
           - Refactored markdown editor
           - Switched status messages to JS notice board
 
