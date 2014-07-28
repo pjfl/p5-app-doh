@@ -113,7 +113,7 @@ sub _build__usul {
 # Public methods
 sub dispatch_request {
    return sub () {
-      my $self = shift; return response_filter { $self->_render( @_ ) } },
+         my $self = shift; return response_filter { $self->_render( @_ ) } },
       map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
 }
 
@@ -173,9 +173,9 @@ sub _render_view {
 }
 
 sub _render_exception {
-   my ($self, $model, $req, $e) = @_; my $res;
+   my ($self, $model, $req, $e) = @_; my $res; my $username = $req->username;
 
-   my $msg = "${e}"; chomp $msg; $self->log->error( $msg );
+   my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
 
    $e->can( 'rv' ) or $e = exception error => $msg, rv => HTTP_BAD_REQUEST;
 

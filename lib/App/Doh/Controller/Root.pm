@@ -88,7 +88,7 @@ subroutine matches against a specific URI pattern. It the request URI
 matches this pattern the subroutine is called. Each subroutine calls
 the L<execute|App::Doh::Server/execute> method
 
-=head2 moniker
+=head2 C<moniker>
 
 Returns the unique key used to store an instance of this class in a
 collection of controllers. The controller's monikers are sorted and requests
