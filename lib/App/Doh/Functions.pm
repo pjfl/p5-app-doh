@@ -143,7 +143,7 @@ sub load_components ($$) {
       exists $monikers->{ $plugin } and defined $monikers->{ $plugin }
          and $args->{moniker} = $monikers->{ $plugin };
 
-      my $obj = $plugin->new( $args ); $plugins->{ $obj->moniker } = $obj;
+      my $comp = $plugin->new( $args ); $plugins->{ $comp->moniker } = $comp;
    }
 
    return $plugins;

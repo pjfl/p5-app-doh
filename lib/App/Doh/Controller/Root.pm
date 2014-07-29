@@ -7,41 +7,20 @@ with q(App::Doh::Role::Component);
 has '+moniker' => default => 'root';
 
 sub dispatch_request {
-   sub (POST + /admin | /admin/* | /login | /logout | /user | /user/* + ?*) {
-      return [ 'admin', 'from_request', @_ ] },
-
-   sub (GET  + /admin | /admin/* + ?*) {
-      return [ 'admin', 'get_form', @_ ] },
-
-   sub (POST + /assets + *file~ + ?*) {
-      return [ 'docs',  'upload_asset', @_ ] },
-
-   sub (GET  + /dialog + ?*) {
-      return [ 'docs',  'get_dialog', @_ ] },
-
-   sub (GET  + /pod | /pod/** + ?*) {
-      return [ 'help',  'get_content', @_ ] },
-
-   sub (POST + /posts | /posts/** + ?*) {
-      return [ 'posts', 'from_request', @_ ] },
-
-   sub (GET  + /posts | /posts/** + ?*) {
-      return [ 'posts', 'get_content', @_ ] },
-
-   sub (GET  + /search + ?*) {
-      return [ 'docs',  'search_tree', @_ ] },
-
-   sub (GET  + /user | /user/* + ?*) {
-      return [ 'admin', 'get_dialog', @_ ] },
-
-   sub (POST + / | /** + ?*) {
-      return [ 'docs',  'from_request', @_ ] },
-
-   sub (GET  + / | /index + ?*) {
-      return [ 'docs',  'get_index', @_ ] },
-
-   sub (GET  + /** + ?*) {
-      return [ 'docs',  'get_content', @_ ] };
+   sub (POST + /admin | /admin/*  + ?*) { [ 'admin', 'from_request', @_ ] },
+   sub (GET  + /admin | /admin/*  + ?*) { [ 'admin', 'get_form',     @_ ] },
+   sub (POST + /assets + *file~   + ?*) { [ 'docs',  'upload_asset', @_ ] },
+   sub (GET  + /dialog            + ?*) { [ 'docs',  'get_dialog',   @_ ] },
+   sub (POST + /login | /logout   + ?*) { [ 'admin', 'from_request', @_ ] },
+   sub (GET  + /pod   | /pod/**   + ?*) { [ 'help',  'get_content',  @_ ] },
+   sub (POST + /posts | /posts/** + ?*) { [ 'posts', 'from_request', @_ ] },
+   sub (GET  + /posts | /posts/** + ?*) { [ 'posts', 'get_content',  @_ ] },
+   sub (GET  + /search            + ?*) { [ 'docs',  'search_tree',  @_ ] },
+   sub (POST + /user  | /user/*   + ?*) { [ 'admin', 'from_request', @_ ] },
+   sub (GET  + /user  | /user/*   + ?*) { [ 'admin', 'get_dialog',   @_ ] },
+   sub (POST + /      | /**       + ?*) { [ 'docs',  'from_request', @_ ] },
+   sub (GET  + /      | /index    + ?*) { [ 'docs',  'get_index',    @_ ] },
+   sub (GET  + /**                + ?*) { [ 'docs',  'get_content',  @_ ] };
 }
 
 1;

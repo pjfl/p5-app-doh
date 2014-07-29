@@ -2,43 +2,19 @@ package App::Doh::Server;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( env_var is_static load_components );
+use App::Doh::Functions    qw( env_var is_static );
 use Class::Usul;
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions qw( app_prefix exception ensure_class_loaded
-                               find_apphome get_cfgfiles is_arrayref throw );
-use Class::Usul::Types     qw( ArrayRef BaseType Bool HashRef LoadableClass
-                               NonEmptySimpleStr Object );
-use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
-                               HTTP_INTERNAL_SERVER_ERROR );
+use Class::Usul::Functions qw( app_prefix ensure_class_loaded
+                               find_apphome get_cfgfiles throw );
+use Class::Usul::Types     qw( BaseType );
 use Plack::Builder;
-use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
 use Web::Simple;
 
-has 'request_class' => is => 'lazy', isa => LoadableClass,
-   default          => sub { $_[ 0 ]->usul->config->request_class };
+has 'usul' => is => 'lazy', isa => BaseType, handles => [ 'log' ];
 
-# Private attributes
-has '_controllers'  => is => 'lazy', isa => ArrayRef[Object], builder => sub {
-   my $controllers  =
-      load_components  $_[ 0 ]->usul->config->appclass.'::Controller',
-         { builder  => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
-   return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] },
-   reader           => 'controllers';
-
-has '_models'       => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components     $_[ 0 ]->usul->config->appclass.'::Model',
-      { builder     => $_[ 0 ]->usul, views => $_[ 0 ]->views, } },
-   reader           => 'models';
-
-has '_views'        => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components     $_[ 0 ]->usul->config->appclass.'::View',
-      { builder     => $_[ 0 ]->usul, } },
-   reader           => 'views';
-
-has '_usul'         => is => 'lazy', isa => BaseType, handles => [ 'log' ],
-   reader           => 'usul';
+with q(App::Doh::Role::ComponentLoading);
 
 # Construction
 around 'to_psgi_app' => sub {
@@ -83,7 +59,7 @@ sub BUILD {
    return;
 }
 
-sub _build__usul {
+sub _build_usul {
    my $self = shift;
    my $attr = { config => $self->config, debug => env_var( 'DEBUG' ) // FALSE };
    my $conf = $attr->{config};
@@ -112,95 +88,9 @@ sub _build__usul {
 
 # Public methods
 sub dispatch_request {
-   return sub () {
-         my $self = shift; return response_filter { $self->_render( @_ ) } },
-      map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
-}
+   my $f = sub () { my $self = shift; response_filter { $self->render( @_ ) } };
 
-# Private methods
-sub _redirect {
-   my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
-
-   my $redirect = $stash->{redirect}; my $message = $redirect->{message};
-
-   $message and $req->session->status_message( $req->loc( @{ $message } ) )
-            and $self->log->info( $req->loc_default( @{ $message } ) );
-
-   return [ $code, [ 'Location', $redirect->{location} ], [] ];
-}
-
-sub _render {
-   my ($self, $args) = @_; my $models = $self->models;
-
-   (is_arrayref $args and $args->[ 0 ] and exists $models->{ $args->[ 0 ] })
-      or return $args;
-
-   my ($model, $method, undef, @args) = @{ $args }; my ($req, $res);
-
-   try   { $req = $self->request_class->new( $self->usul, @args ) }
-   catch { $res = __internal_server_error( $_ ) };
-
-   $res and return $res;
-
-   try {
-      $method eq 'from_request' and $method = $req->tunnel_method.'_action';
-
-      my $stash = $models->{ $model }->execute( $method, $req );
-
-      if (exists $stash->{redirect}) { $res = $self->_redirect( $req, $stash ) }
-      else { $res = $self->_render_view( $model, $method, $req, $stash ) }
-   }
-   catch { $res = $self->_render_exception( $model, $req, $_ ) };
-
-   $req->session->update;
-
-   return $res;
-}
-
-sub _render_view {
-   my ($self, $model, $method, $req, $stash) = @_;
-
-   $stash->{view} or throw error => 'Model [_1] method [_2] stashed no view',
-                            args => [ $model, $method ];
-
-   my $view = $self->views->{ $stash->{view} }
-      or throw error => 'Model [_1] method [_2] unknown view [_3]',
-                args => [ $model, $method, $stash->{view} ];
-   my $res  = $view->serialize( $req, $stash )
-      or throw error => 'View [_1] returned false', args => [ $stash->{view} ];
-
-   return $res
-}
-
-sub _render_exception {
-   my ($self, $model, $req, $e) = @_; my $res; my $username = $req->username;
-
-   my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
-
-   $e->can( 'rv' ) or $e = exception error => $msg, rv => HTTP_BAD_REQUEST;
-
-   try {
-      my $stash = $self->models->{ $model }->exception_handler( $req, $e );
-
-      $res = $self->_render_view( $model, 'exception_handler', $req, $stash );
-   }
-   catch { $res = __internal_server_error( $e, $_ ) };
-
-   return $res;
-}
-
-# Private functions
-sub __internal_server_error {
-   my ($e, $secondary_error) = @_; my $message = "${e}\r\n";
-
-   $secondary_error and $secondary_error ne "${e}"
-      and $message .= "Secondary error: ${secondary_error}";
-
-   return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
-}
-
-sub __plain_header {
-   return [ 'Content-Type', 'text/plain' ];
+   return $f, map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
 }
 
 1;

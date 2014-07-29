@@ -69,9 +69,9 @@ sub get_page {
 {  my $cache //= {};
 
    sub invalidate_cache {
-      my ($self, $mtime) = @_; $cache = {};
+      my ($self, $mtime) = @_;
 
-      $self->log->debug( 'Cache invalidated' );
+      $cache = {}; $self->log->debug( 'Cache invalidated' );
       $self->config->root_mtime->touch( $mtime );
       return;
    }
