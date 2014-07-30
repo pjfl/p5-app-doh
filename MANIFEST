@@ -99,6 +99,7 @@ var/root/templates/default/create-user.tt
 var/root/templates/default/docs-left-column.tt
 var/root/templates/default/docs-right-column.tt
 var/root/templates/default/editing-links.tt
+var/root/templates/default/editor.tt
 var/root/templates/default/footer.tt
 var/root/templates/default/fork-me.tt
 var/root/templates/default/header.tt

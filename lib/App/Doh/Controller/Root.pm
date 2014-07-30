@@ -7,20 +7,20 @@ with q(App::Doh::Role::Component);
 has '+moniker' => default => 'root';
 
 sub dispatch_request {
-   sub (POST + /admin | /admin/*  + ?*) { [ 'admin', 'from_request', @_ ] },
-   sub (GET  + /admin | /admin/*  + ?*) { [ 'admin', 'get_form',     @_ ] },
-   sub (POST + /assets + *file~   + ?*) { [ 'docs',  'upload_asset', @_ ] },
-   sub (GET  + /dialog            + ?*) { [ 'docs',  'get_dialog',   @_ ] },
-   sub (POST + /login | /logout   + ?*) { [ 'admin', 'from_request', @_ ] },
-   sub (GET  + /pod   | /pod/**   + ?*) { [ 'help',  'get_content',  @_ ] },
-   sub (POST + /posts | /posts/** + ?*) { [ 'posts', 'from_request', @_ ] },
-   sub (GET  + /posts | /posts/** + ?*) { [ 'posts', 'get_content',  @_ ] },
-   sub (GET  + /search            + ?*) { [ 'docs',  'search_tree',  @_ ] },
-   sub (POST + /user  | /user/*   + ?*) { [ 'admin', 'from_request', @_ ] },
-   sub (GET  + /user  | /user/*   + ?*) { [ 'admin', 'get_dialog',   @_ ] },
-   sub (POST + /      | /**       + ?*) { [ 'docs',  'from_request', @_ ] },
-   sub (GET  + /      | /index    + ?*) { [ 'docs',  'get_index',    @_ ] },
-   sub (GET  + /**                + ?*) { [ 'docs',  'get_content',  @_ ] };
+   sub (POST + /admin  | /admin/*  + ?*) { [ 'admin', 'from_request', @_ ] },
+   sub (GET  + /admin  | /admin/*  + ?*) { [ 'admin', 'get_form',     @_ ] },
+   sub (POST + /assets + *file~    + ?*) { [ 'docs',  'upload_asset', @_ ] },
+   sub (GET  + /dialog             + ?*) { [ 'docs',  'get_dialog',   @_ ] },
+   sub (POST + /login  | /logout   + ?*) { [ 'admin', 'from_request', @_ ] },
+   sub (GET  + /pod    | /pod/**   + ?*) { [ 'help',  'get_content',  @_ ] },
+   sub (POST + /posts  | /posts/** + ?*) { [ 'posts', 'from_request', @_ ] },
+   sub (GET  + /posts  | /posts/** + ?*) { [ 'posts', 'get_content',  @_ ] },
+   sub (GET  + /search             + ?*) { [ 'docs',  'search_tree',  @_ ] },
+   sub (POST + /user   | /user/*   + ?*) { [ 'admin', 'from_request', @_ ] },
+   sub (GET  + /user   | /user/*   + ?*) { [ 'admin', 'get_dialog',   @_ ] },
+   sub (POST + /       | /**       + ?*) { [ 'docs',  'from_request', @_ ] },
+   sub (GET  + /       | /index    + ?*) { [ 'docs',  'get_index',    @_ ] },
+   sub (GET  + /**                 + ?*) { [ 'docs',  'get_content',  @_ ] };
 }
 
 1;
@@ -37,17 +37,14 @@ App::Doh::Controller::Root - Maps URIs onto view and model methods calls
 
 =head1 Synopsis
 
-   use App::Doh::Controller::Root;
-   use Class::Usul::Types qw( ArrayRef Object );
    use Web::Simple;
 
-   has '_controllers' => is => 'lazy', isa => ArrayRef[Object],
-      reader => 'controllers', builder => sub { [
-         App::Doh::Controller::Root->new,
-      ] };
+   with q(App::Doh::Role::ComponentLoading);
 
    sub dispatch_request {
-      return map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
+      my $f = sub () { my $self = shift; response_filter { $self->render( @_)}};
+
+      return $f, map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
    }
 
 =head1 Description
@@ -56,7 +53,18 @@ Maps URIs onto model methods calls
 
 =head1 Configuration and Environment
 
-Defines no attributes
+Defines one attribute
+
+=over 3
+
+=item C<moniker>
+
+Returns the unique key used to store an instance of this class in a
+collection of controllers. The controller's monikers are sorted and requests
+are tested against each controller in turn until a match is found. The
+'root' controller should probably come last
+
+=back
 
 =head1 Subroutines/Methods
 
@@ -66,13 +74,6 @@ Returns a list of code references. The prototype for each anonymous
 subroutine matches against a specific URI pattern. It the request URI
 matches this pattern the subroutine is called. Each subroutine calls
 the L<execute|App::Doh::Server/execute> method
-
-=head2 C<moniker>
-
-Returns the unique key used to store an instance of this class in a
-collection of controllers. The controller's monikers are sorted and requests
-are tested against each controller in turn until a match is found. The
-'root' controller should probably come last
 
 =head1 Diagnostics
 

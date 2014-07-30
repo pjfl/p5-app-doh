@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Created editor.tt for the markdown editor
+          - Style fixes to post navigation buttons
+
 0.5.1     2014-07-29 18:35:58
           - Made Root controller look like a routing table
           - Made component loading a role

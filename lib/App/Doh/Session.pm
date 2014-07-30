@@ -54,7 +54,8 @@ around 'BUILDARGS' => sub {
    if ($attr->{authenticated} and $max_time and $elapsed > $max_time) {
       my $username = $attr->{username}; $attr->{authenticated} = FALSE;
 
-      $usul->log->debug( "User ${username} session expired" );
+      $usul->log->debug
+         ( $attr->{status_message} = "User ${username} session expired" );
    }
 
    return $attr;

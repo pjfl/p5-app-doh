@@ -251,6 +251,9 @@ table tr th:last-child, table tr td:last-child {
    margin-left: 0; margin-right: 0; min-width: 400px; overflow: hidden;
    padding: 9px 0 8px 0;
 }
+.content-page .hero-buttons {
+   clear: left; float: left; min-width: 560px; width: 55%;
+}
 .dialog {
    background-color: @sidebar-background; border: 1px solid;
    border-color: @lines; .border-radius; .box-shadow;
@@ -274,6 +277,7 @@ table tr th:last-child, table tr td:last-child {
    margin-bottom: 18px;
 }
 .editor { font-size: 16px; line-height: 18px; .mono-font; }
+.editor-panel { clear: left; overflow-x: auto; z-index: 2; }
 .expanding_area { margin-bottom: 18px; overflow: hidden; position: relative; }
 .expanding_area > textarea, .expanding_spacer, .expanding_spacer > span {
    white-space: pre-wrap; word-wrap: break-word;
@@ -306,7 +310,7 @@ table tr th:last-child, table tr td:last-child {
 .fixed-footer.container-fluid .twitter { margin-top: 36px; }
 .fixed-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .folder { font-size: 16px; line-height: 18px; }
-.github-ribbon { position: absolute; right: 0; top: 54px; z-index: 0; }
+.github-ribbon { position: absolute; right: 0; top: 54px; z-index: 1; }
 .hero-buttons.container-fluid {
    background-color: @sidebar-hover; overflow: hidden;
    min-height: 18px; padding: 18px 0;
@@ -324,7 +328,10 @@ table tr th:last-child, table tr td:last-child {
    background-color: @dark; color: @sidebar-background;
 }
 .hidden { display: none; }
-.homepage-content.container-fluid  { font-size: 14px; line-height: 18px; }
+.homepage-content.container-fluid {
+   background-color: white; border-color: transparent; font-size: 14px;
+   line-height: 18px; overflow: hidden; min-height: 72px; padding: 36px 0;
+}
 .homepage-content.container-fluid .lead { .serif-regular; }
 .homepage-content.container-fluid ol,
 .homepage-content.container-fluid ul { margin: 18px 0; padding: 0; }
@@ -337,10 +344,6 @@ table tr th:last-child, table tr td:last-child {
    border: 3px solid transparent; border-left: 3px solid @light;
    content: ''; display: block; float: left; height: 0;
    margin: 6px; width: 0;
-}
-.homepage-content.container-fluid {
-   background-color: white; overflow: hidden;
-   min-height: 72px; padding: 36px 0;
 }
 .homepage-hero { background-color: @light; color: @dark; }
 .homepage-hero { overflow: hidden; .serif-bold; }
@@ -413,7 +416,7 @@ table tr th:last-child, table tr td:last-child {
 .nav.nav-list .tips { display: block; }
 .notice-board { position: fixed; width: 20%; z-index: 9999; }
 .notice-board.nb-top { top: 0; }
-.notice-board.nb-right { right: 0; }
+.notice-board.nb-right { right: 18px; }
 .notice-board.nb-bottom { bottom: 0; }
 .notice-board.nb-left { left: 0; }
 .notice-board.nb-top .notice { margin-top: 10px; }
@@ -501,7 +504,6 @@ table tr th:last-child, table tr td:last-child {
    color: @contrast; display: block; font-size: 16px; line-height: 18px;
    padding: 8px 16px 4px 16px;
 }
-.unbounded-x { overflow-x: auto; }
 .upload-file { margin: 9px; overflow: hidden; position: relative; }
 .upload-file .upload {
    cursor: pointer; .opacity( 0 ); position: absolute; top: 0; right: 0;
@@ -647,6 +649,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page h6:before {
       clear: both; content: ''; display: block; height: 9px; width: auto;
    }
+   .float-view .content-page .hero-buttons { padding-right: 18px; }
    .float-view .content-page .pod, .float-view .content-page .pod pre {
       clear: both; float: left; position: relative;
    }

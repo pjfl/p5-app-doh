@@ -6,18 +6,7 @@
             <article>
 [%    INCLUDE 'default/header.tt' -%]
 [%    IF page.editing -%]
-               <!-- Editor -->
-               <br>
-               <div class="unbounded-x container">
-                  <form action="[% links.req_uri %]?edit=1"
-                       enctype="application/x-www-form-urlencoded"
-                        method="post" name="edit">
-                     <textarea class="editor" id="markdown-editor"
-                          name="content">[% page.content | html %]</textarea>
-                     <button class="button" name="_method" type="submit"
-                         value="save_file">[% loc( 'Save' ) %]</button>
-                  </form>
-               </div>
+[%       INCLUDE 'default/editor.tt' -%]
 [%    ELSE -%]
                <!-- Content -->
             [% page.content | eval %]

@@ -4,9 +4,7 @@ use namespace::autoclean;
 
 use Moo;
 use App::Doh;
-use App::Doh::Functions    qw( env_var iterator );
-use App::Doh::Model::Documentation;
-use App::Doh::Model::Posts;
+use App::Doh::Functions    qw( env_var iterator load_components );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix io );
 use Class::Usul::Types     qw( HashRef LoadableClass Object );
@@ -31,9 +29,9 @@ has 'less'  => is => 'lazy', isa => Object, builder => sub {
 
 has 'less_class' => is => 'lazy', isa => LoadableClass, default => 'CSS::LESS';
 
-has 'models' => is => 'lazy', isa => HashRef[Object], builder => sub {
-   { 'docs'  => App::Doh::Model::Documentation->new( builder => $_[ 0 ] ),
-     'posts' => App::Doh::Model::Posts->new( builder => $_[ 0 ] ), } };
+has 'models'     => is => 'lazy', isa => HashRef[Object], builder => sub {
+   load_components  $_[ 0 ]->config->appclass.'::Model',
+      { builder  => $_[ 0 ], } };
 
 # Construction
 around 'BUILDARGS' => sub {
