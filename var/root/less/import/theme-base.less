@@ -96,7 +96,7 @@ del { text-decoration: line-through; }
 dl, ol, ul { margin-bottom: 18px; }
 dfn { font-style: italic; }
 fieldset {
-   border: 1px solid #c0c0c0; margin-bottom: 0 2px;
+   border: 1px solid #c0c0c0; margin-bottom: 2px;
    padding: 0.35em 0.625em 0.75em;
 }
 figure { margin: 1em 40px; }
@@ -120,7 +120,7 @@ p { margin: 9px 0; }
 pre { overflow: auto; white-space: pre; word-wrap: break-word; }
 select { margin: 0; padding: 3px; }
 small { font-size: 1em; line-height: 1.8em; }
-sub, sup { font-size: 75; line-height: 0; position: relative; }
+sub, sup { font-size: 0.75em; line-height: 0; position: relative; }
 sub { bottom: -0.25em; }
 sup { top: -0.5em; }
 table { height: auto; width: auto; }
@@ -293,7 +293,8 @@ table tr th:last-child, table tr td:last-child {
 }
 .file-link { white-space: nowrap; }
 .fixed-footer {
-   bottom: 0; left: 0; padding: 18px; position: fixed; z-index: -100;
+   bottom: 0; left: 1px; margin: 0; padding: 18px; position: fixed;
+   right: 0; z-index: -1;
 }
 .fixed-footer.container-fluid {
    background-color: @dark; font-size: 14px; line-height: 18px;
@@ -310,6 +311,7 @@ table tr th:last-child, table tr td:last-child {
 .fixed-footer.container-fluid .twitter { margin-top: 36px; }
 .fixed-footer.container-fluid .twitter:first-child { margin-top: 36px; }
 .folder { font-size: 16px; line-height: 18px; }
+.footer-spacer { position: relative; width: 100%; z-index: 0; }
 .github-ribbon { position: absolute; right: 0; top: 54px; z-index: 1; }
 .hero-buttons.container-fluid {
    background-color: @sidebar-hover; overflow: hidden;
@@ -371,7 +373,7 @@ table tr th:last-child, table tr td:last-child {
   vertical-align: top; white-space: nowrap;
 }
 .lead { font-size: 18px; line-height: 36px; }
-.navbar { .box-shadow; height: 54px; width: auto; z-index: 200; }
+.navbar { .box-shadow; height: 54px; width: auto; z-index: 2; }
 .navbar-fixed-top { left: 0; position: fixed; right: 0; top: 0; }
 .navbar-static-top .container, .navbar-fixed-top .container,
 .navbar-fixed-bottom .container { width: 940px; }
@@ -594,6 +596,7 @@ table tr th:last-child, table tr td:last-child {
    .float-view .content-page blockquote:before {
       clear: both; content: ''; display: block; height: 18px; width: auto;
    }
+   .float-view .content-page dd p { padding-right: 54px; }
    .float-view .content-page hr {
       border-color: @lines; clear: left; float: left; width: 50%;
    }

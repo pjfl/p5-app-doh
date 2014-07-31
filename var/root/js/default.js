@@ -59,6 +59,14 @@ var Behaviour = new Class( {
          } );
       }
 
+      if (footer = $( 'fixed-footer' )) {
+         var content = footer.getPrevious();
+         var fill    = new Element( 'div', {
+            class : 'footer-spacer forward-events', id: 'footer-spacer',
+            styles: { height: footer.getSize().y } } )
+            .inject( content, 'after' );
+      }
+
       if (opt.statusUpdPeriod && !opt.popup)
          this.statusUpdater.periodical( opt.statusUpdPeriod, this );
 
@@ -82,6 +90,7 @@ var Behaviour = new Class( {
       this.submit       = new SubmitUtils( {
          context        : this,
          formName       : opt.formName } );
+      this.forwarder    = new EventForwarding( { context: this } );
       this.headroom     = new Headroom( {
          classes        : {
             pinned      : 'navbar-fixed-top' },
@@ -127,13 +136,6 @@ var Behaviour = new Class( {
       }
       else {
          if (ribbon) ribbon.setStyle( 'right', '0px' );
-      }
-
-      if (footer = $( 'fixed-footer' )) {
-         var content = footer.getPrevious();
-
-         footer.setStyle( 'width', content.getSize().x );
-         content.setStyle( 'margin-bottom', footer.getSize().y );
       }
    },
 

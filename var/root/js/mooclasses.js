@@ -211,6 +211,80 @@ var Dialog = new Class( {
    }
 } );
 
+/* @author Nigel (Animal) White
+ * @contributor Shea Frederick - http://www.vinylfox.com
+ * Override to allow mouse event forwarding through masking layers */
+var EventForwarding = new Class( {
+   Implements: [ Options ],
+
+   options: {
+      events: [ 'mousemove', 'mousedown', 'mouseup', 'dblclick', 'mousewheel' ],
+      selector: '.forward-events'
+   },
+
+   initialize: function( options ) {
+       this.aroundSetOptions( options ); this.build();
+   },
+
+   attach: function( el ) {
+      var events = this.options.events, last_t;
+
+      el.addEvent( 'mouseout', function( ev ) {
+         if (last_t) { last_t.fireEvent( 'mouseout' ); last_t = null }
+      } );
+
+      events.each( function( ev_name ) {
+         el.addEvent( ev_name, function( ev ) {
+            var s = el.getScroll();
+            var x = this._num( ev.page.x, ev.client.x ) - s.x;
+            var y = this._num( ev.page.y, ev.client.y ) - s.y;
+
+            if (el.forwardingSuspended || !el.isVisible()) return;
+
+            ev.stop(); el.forwardingSuspended = true;
+
+            var index = el.getStyle( 'z-index' );
+
+            el.setStyle( 'z-index', index - 100 );
+
+            var t = $( document.elementFromPoint( x, y ) );
+
+            el.setStyle( 'z-index', index );
+//            window.alert( t.get( 'class' ) );
+            if (!t) {
+               last_t.fireEvent( 'mouseout' ); last_t = t;
+               delete el.forwardingSuspended;
+               return;
+            }
+
+            if (t === last_t) {
+               if (ev_name == 'mouseup') t.fireEvent( 'click' );
+            }
+            else {
+               if (last_t) last_t.fireEvent( 'mouseout' );
+
+               t.fireEvent( 'mouseover' );
+            }
+
+            if (ev_name !== 'mousemove') t.fireEvent( ev_name );
+
+            last_t = t; delete el.forwardingSuspended;
+            return;
+         }.bind( this ) );
+      }.bind( this ) );
+   },
+
+   _is_a_number: function( v ) {
+      return v === null || v === undefined || typeof v === 'boolean';
+   },
+
+   _num: function( v, defaultValue ) {
+      v = Number.from( this._is_a_number( v ) ? NaN : v );
+
+      return isNaN( v ) ? defaultValue : v;
+   }
+} );
+
 var Headroom = new Class( {
    Implements: [ Options ],
 
