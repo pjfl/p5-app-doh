@@ -34,7 +34,7 @@ has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
    my @nav      = ();
 
    for my $class (@{ $classes }) {
-      push @nav, { depth => 0, name => $class, type => 'file',
+      push @nav, { depth => 0, title => ucfirst $class, type => 'file',
                    url   => "${help_url}/${class}" };
    }
 
@@ -45,14 +45,14 @@ has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $title   =  $req->loc( 'Help' );
+   my $parent  =  $req->loc( 'Help' );
    my $want    =  $req->args->[ 0 ] || $self->config->appclass;
    my $page    =  {
       content  => io( find_source( $want ) || $req->args->[ 0 ] ),
       format   => 'pod',
       name     => $want,
-      parent   => $title,
-      title    => $title,
+      parent   => $parent,
+      title    => ucfirst $want,
       url      => 'https://metacpan.org/module/%s', };
 
    return $orig->( $self, $req, $page );
