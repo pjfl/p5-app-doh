@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Removed ForwardEvents class from JS. Doesn't work
           - Created editor.tt for the markdown editor
           - Style fixes to post navigation buttons
 

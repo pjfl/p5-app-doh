@@ -24,7 +24,7 @@
 [%    IF node.type == 'folder'; depth = depth + 1 -%]
             <li class="[% node.class %]">
 [%       uri = uri_for( node.url ) -%]
-         [% LinkWithTips( uri, 'folder', node.name, folder_title, node.tip ) -%]
+[%         LinkWithTips( uri, 'folder', node.title, folder_title, node.tip ) -%]
                <ul class="nav nav-list">
 [%    END -%]
 [% END -%]

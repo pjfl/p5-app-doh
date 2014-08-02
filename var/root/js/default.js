@@ -59,14 +59,6 @@ var Behaviour = new Class( {
          } );
       }
 
-      if (footer = $( 'fixed-footer' )) {
-         var content = footer.getPrevious();
-         var fill    = new Element( 'div', {
-            class : 'footer-spacer forward-events', id: 'footer-spacer',
-            styles: { height: footer.getSize().y } } )
-            .inject( content, 'after' );
-      }
-
       if (opt.statusUpdPeriod && !opt.popup)
          this.statusUpdater.periodical( opt.statusUpdPeriod, this );
 

@@ -1,7 +1,7 @@
                <!-- Header -->
                <div class="page-header">
                   <h1>[% IF page.parent; loc( page.parent ) _ ' - '; END -%]
-                      [%- loc( page.name ) %]</h1>
+                      [%- loc( page.title ) %]</h1>
 [% IF page.date -%]
                   <span class="pull-left">
                      [%- time2str( '%A, %B %e, %Y', page.date ) %],

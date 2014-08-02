@@ -48,7 +48,7 @@
                      <div class="container-group">
                         <input name="active" type="checkbox" value="1"
                        [% IF user.active %]checked[% END %]>
-                        <span class="label">[% ucfirst( 'Active' ) %]</span><br>
+                        <span class="label">[% loc( 'Active' ) %]</span><br>
                      </div>
                      <br/>
                      <button class="button submit" id="delete-user"

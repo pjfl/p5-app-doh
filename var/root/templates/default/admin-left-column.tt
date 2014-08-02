@@ -23,11 +23,11 @@
 [%    END -%]
             <li class="[% node.class %]">
 [%    IF node.type == 'folder'; depth = depth + 1 -%]
-               [% LinkWithTips( '#', class, node.name, folder_title, node.tip )-%]
+               [% LinkWithTips( '#', class, node.title, folder_title, node.tip )-%]
                <ul class="nav nav-list">
 [%    ELSE -%]
 [%             href = uri_for( node.url ) -%]
-               [% LinkWithTips( href, '', node.name, file_title, node.tip ) -%]
+               [% LinkWithTips( href, '', node.title, file_title, node.tip ) -%]
             </li>
 [%    END -%]
 [% END -%]

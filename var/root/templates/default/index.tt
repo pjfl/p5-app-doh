@@ -83,7 +83,7 @@
             </div>
          </div>
       </div>
-      <div class="fixed-footer well container-fluid" id="fixed-footer">
+      <div class="footer well container-fluid">
          <div class="container-center">
             <div class="row">
                <div class="span5">

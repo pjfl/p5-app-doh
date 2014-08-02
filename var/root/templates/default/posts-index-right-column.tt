@@ -18,11 +18,11 @@
                <li class="[% node.class %]">
 [%          uri = uri_for( node.url ) -%]
 [%          IF node.type == 'folder'; depth = depth + 1 -%]
-                  [% LinkWithTips( uri, 'folder', node.name, folder_title, node.tip ) -%]
+[%         LinkWithTips( uri, 'folder', node.title, folder_title, node.tip ) -%]
                   &nbsp;([% node.fcount -%])
                   <ul class="posts post-list">
 [%          ELSE -%]
-                  [% LinkWithTips( uri, '', node.name, file_title, node.tip ) -%]
+[%                LinkWithTips( uri, '', node.title, file_title, node.tip ) -%]
                   <br>
                   <span class="sub-text">
 [%-            time2str( '%A, %B %e, %Y', str2time( node.prefix ) ) -%]</span>

@@ -41,6 +41,9 @@ sub render_template {
    my $page   =  $stash->{page  } // {};
    my $layout = ($page->{layout} //= $conf->layout).'.tt';
    my $path   =  $self->templates->catdir( $skin )->catfile( $layout );
+   my $funcs  = (delete $stash->{functions}) // {};
+
+   $stash->{ $_ } = $funcs->{ $_ } for (keys %{ $funcs });
 
    $path->exists or throw class => PathNotFound, args => [ $path ];
    $self->encoder->process( catfile( $skin, $layout ), $stash, \$result )

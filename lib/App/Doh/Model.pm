@@ -58,16 +58,17 @@ sub get_content : Role(any) {
 sub get_stash {
    my ($self, $req) = @_; weaken( $req );
 
-   return { code      => HTTP_OK,
-            is_member => \&is_member,
-            loc       => sub { $req->loc( @_ ) },
-            req       => $req,
-            show_node => \&show_node,
-            str2time  => \&str2time,
-            time2str  => \&time2str,
-            ucfirst   => sub { ucfirst $_[ 0 ] },
-            uri_for   => sub { $req->uri_for( @_ ) },
-            view      => $self->config->default_view, };
+   return { code         => HTTP_OK,
+            functions    => {
+               is_member => \&is_member,
+               loc       => sub { $req->loc( @_ ) },
+               show_node => \&show_node,
+               str2time  => \&str2time,
+               time2str  => \&time2str,
+               ucfirst   => sub { ucfirst $_[ 0 ] },
+               uri_for   => sub { $req->uri_for( @_ ), }, },
+            req          => $req,
+            view         => $self->config->default_view, };
 }
 
 sub load_page {
