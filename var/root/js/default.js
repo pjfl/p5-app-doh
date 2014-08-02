@@ -82,7 +82,6 @@ var Behaviour = new Class( {
       this.submit       = new SubmitUtils( {
          context        : this,
          formName       : opt.formName } );
-      this.forwarder    = new EventForwarding( { context: this } );
       this.headroom     = new Headroom( {
          classes        : {
             pinned      : 'navbar-fixed-top' },

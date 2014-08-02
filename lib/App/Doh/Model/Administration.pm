@@ -134,8 +134,8 @@ sub logout_action : Role(any) {
 }
 
 sub navigation {
-   return [ { depth => 0,      name => 'Administration',
-              type  => 'file', url  => 'admin' } ];
+   return [ { depth => 0,      title => 'Administration',
+              type  => 'file', url   => 'admin' } ];
 }
 
 sub update_profile_action : Role(any) {

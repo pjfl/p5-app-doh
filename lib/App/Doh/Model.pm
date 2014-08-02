@@ -76,7 +76,7 @@ sub load_page {
 }
 
 sub navigation {
-   return [ { depth => 0, name => 'Home', type => 'file', url => NUL } ];
+   return [ { depth => 0, title => 'Home', type => 'file', url => NUL } ];
 }
 
 1;
