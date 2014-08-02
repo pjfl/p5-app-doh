@@ -151,10 +151,11 @@ var Behaviour = new Class( {
    },
 
    statusUpdater: function() {
-      var h = window.getHeight(), w = window.getWidth();
+      var el, h = window.getHeight(), w = window.getWidth();
 
       var swatch_time = Date.swatchTime();
 
-      window.defaultStatus = 'w: ' + w + ' h: ' + h + ' @' + swatch_time;
+      if (el = $( 'page-status' ) )
+         el.set( 'html', 'w: ' + w + ' h: ' + h + ' @' + swatch_time );
    }
 } );

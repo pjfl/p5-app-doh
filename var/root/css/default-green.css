@@ -197,6 +197,8 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .offset1{margin-left:8%}
 .page-header .container{clear:both}
 .page-header h1{margin:9px 0}
+.page-status{color:transparent;bottom:0;font-weight:bold;font-size:14px;padding:9px;position:fixed;right:18px;z-index:10}
+.page-status:hover{color:#881102}
 .pathname,.standard-field{border:2px inset;-khtml-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;-khtml-box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;font-size:15px;line-height:18px;margin:4px 0;min-width:400px;padding:3px 7px;vertical-align:middle}
 .pathname[disabled],.standard-field[disabled]{color:#000}
 .pod dd p{width:auto}
@@ -212,7 +214,7 @@ table tr th:last-child,table tr td:last-child{border-right:1px solid #adcb83}
 .pull-right{float:right;text-align:right}
 .responsive-collapse{background-color:#adcb83;border-bottom:1px solid #adcb83;display:none;padding:9px 18px}
 .row{overflow:hidden}
-.row-fluid{width:auto;z-index:-2}
+.row-fluid{width:auto}
 [class*="span"]{float:left;min-height:18px}
 .span2{width:16%}
 .span2p5{width:20%}

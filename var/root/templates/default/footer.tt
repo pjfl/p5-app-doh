@@ -1,4 +1,5 @@
    <!-- Footer -->
+   <div id="page-status" class="page-status"></div>
    <script src="[% links.js %]highlight.min.js"></script>
    <script src="[% links.js %]mootools.min.js"></script>
    <script src="[% links.js %]mooclasses.js"></script>
