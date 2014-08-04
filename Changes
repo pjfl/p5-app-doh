@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Improved layout of profile-user form
           - Put page status on a div since defaultStatus not supported
           - Removed ForwardEvents class from JS. Doesn't work
           - Created editor.tt for the markdown editor
