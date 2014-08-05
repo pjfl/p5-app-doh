@@ -23,10 +23,9 @@ sub create_file {
    my $params   = $req->body_params;
    my $new_node = $self->_new_node( $req->locale, $params->( 'pathname' ) );
    my $created  = time2str( '%Y-%m-%d %H:%M:%S %z', time, 'UTC' );
-   my $stash    = { content_only => TRUE,
-                    page         => { author  => $req->username,
-                                      created => $created,
-                                      layout  => $conf->blank_template, }, };
+   my $stash    = { page => { author  => $req->username,
+                              created => $created,
+                              layout  => $conf->blank_template, }, };
    my $content  = $self->render_template( $req, $stash );
    my $path     = $new_node->{path};
 

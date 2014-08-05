@@ -1,4 +1,3 @@
-[% IF content_only; content; ELSE -%]
 <!doctype html>
 <html lang="[% page.language %]">
 <head>
@@ -41,4 +40,3 @@
    [% content -%]
 </body>
 </html>
-[% END -%]

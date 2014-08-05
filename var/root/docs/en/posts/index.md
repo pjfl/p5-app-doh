@@ -1,5 +1,5 @@
 ---
-name: Posts
+name: posts
 template:
   - posts
   - posts-index

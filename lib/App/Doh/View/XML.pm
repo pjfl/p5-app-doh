@@ -20,7 +20,7 @@ has '_transcoder' => is => 'lazy', isa => Object,
 
 # Public methods
 sub serialize {
-   my ($self, $req, $stash) = @_; $stash->{content_only} = TRUE;
+   my ($self, $req, $stash) = @_;
 
    my $content = { items => [ $self->render_template( $req, $stash ) ] };
    my $js      = join "\n", @{ $stash->{page}->{literal_js} // [] };

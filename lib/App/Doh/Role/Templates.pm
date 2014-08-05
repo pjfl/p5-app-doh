@@ -19,8 +19,7 @@ has 'encoder'      => is => 'lazy', isa => Object, builder => sub {
       COMPILE_EXT  => 'c',
       ENCODING     => 'utf8',
       RELATIVE     => TRUE,
-      INCLUDE_PATH => [ $self->templates->pathname ],
-      WRAPPER      => catfile( $self->config->skin, 'wrapper.tt' ), };
+      INCLUDE_PATH => [ $self->templates->pathname ], };
    my $template    =  Template->new( $args ) or throw $Template::ERROR;
 
    return $template;

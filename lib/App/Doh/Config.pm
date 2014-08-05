@@ -362,8 +362,7 @@ The value is constructed on demand and has no initial argument
 
 A non empty simple string that defaults to F<two-columns>. The name of the
 L<Template::Toolkit> template used to render the HTML response page. The
-template will be wrapped by F<wrapper.tt> unless the stash attribute
-C<content_only> is true
+template will be wrapped by F<wrapper.tt>
 
 =item C<less>
 

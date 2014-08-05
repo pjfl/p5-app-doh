@@ -1,74 +1,67 @@
-[% MACRO Link( href, class, content, id ) BLOCK -%]
-<a class="[% class %]" href="[% href %]"[% IF id -%]
- id="[% id %]"[% END %]>[% content %]</a>
-[% END -%]
-[% MACRO LinkWithTips( href, class, content, title, tip, id ) BLOCK -%]
-<span class="tips" title="[% title _ ' ~ ' _ tip %]">
-   [% Link( href, class, content, id ) -%]
-</span>
-[% END -%]
-[% INCLUDE 'default/navbar.tt' -%]
-[% INCLUDE 'default/fork-me.tt' -%]
+[% PROCESS 'default/macros.tt' -%]
+[% WRAPPER 'default/wrapper.tt' -%]
+[%    INCLUDE 'default/navbar.tt' -%]
+[%    INCLUDE 'default/fork-me.tt' -%]
 <!-- Index -->
 <div class="container-fluid fluid-height wrapper">
    <div class="row-fluid columns content-area">
       <div class="homepage-hero well">
          <div class="container-center">
-[% IF config.description -%]
+[%    IF config.description -%]
             <div class="row">
                <div class="text-center span12">
                   <h2>[% loc( config.description ) %]</h2>
                </div>
             </div>
-[% END -%]
-[% IF config.brand -%]
+[%    END -%]
+[%    IF config.brand -%]
             <div class="row">
                <div class="span12">
                   <img class="homepage-image" alt="[% config.title %]"
                        src="[% links.images %][% config.brand %]">
                </div>
             </div>
-[% END -%]
+[%    END -%]
          </div>
       </div>
       <div class="hero-buttons container-fluid">
          <div class="container-center">
             <div class="row">
                <div class="text-center">
-[% IF page.mode != 'static' -%]
-[%    class = 'btn btn-secondary btn-hero fade' -%]
-[%    IF req.authenticated -%]
-[%       LinkWithTips( uri_for( 'admin' ), class, loc( 'Admin' ),
-                       page.hint, loc( 'Admininstration interface' ) ) -%]
-[%    ELSE -%]
-[%       LinkWithTips( links.help_url, class, loc( 'Help' ),
-                       page.hint, loc( 'Help pages for the application' ) ) -%]
+[%    IF page.mode != 'static' -%]
+[%       class = 'btn btn-secondary btn-hero fade' -%]
+[%       IF req.authenticated -%]
+[%          LinkWithTips( uri_for( 'admin' ), class, loc( 'Admin' ),
+                          page.hint, loc( 'Admininstration interface' ) ) -%]
+[%       ELSE -%]
+[%          LinkWithTips( links.help_url, class, loc( 'Help' ),
+                          page.hint, loc( 'Help pages for the application')) -%]
+[%       END -%]
 [%    END -%]
-[% END -%]
-[% IF page.mode != 'static' && !req.authenticated -%]
-[%    class = 'btn btn-primary btn-hero windows' -%]
-[%    text  = loc( 'Login' ) -%]
-[%    tip   = loc( 'Authenticate with the application' ) -%]
-[%    LinkWithTips( '#', class, text, page.hint, tip, 'login-user' ) -%]
-[%    text  = loc( 'Register' ) -%]
-[%    tip   = loc( 'Register with the application' ) -%]
-[%    LinkWithTips( '#', class, text, page.hint, tip, 'create-user' ) -%]
-[% ELSE -%]
-[%    class = 'btn btn-primary btn-hero windows' -%]
-[%    text  = loc( 'Documentation' ) -%]
-[%    tip   = loc( 'Documentation tree' ) -%]
-[%    LinkWithTips( page.docs_url, class, text, page.hint, tip ) -%]
-[%    IF   page.mode != 'static'; href = uri_for( config.posts ) -%]
-[%    ELSE; href = uri_for( config.posts _ '/index' ); END -%]
-[%    LinkWithTips( href, class, loc( 'Posts' ),
-                    page.hint, loc( 'Posts, blogs, and news articles' ) ) -%]
-[% END -%]
-[% IF page.mode != 'static' -%]
-[%    href  = links.base_uri _ config.static _ '/'
-              _ page.language _ '/index.html' -%]
-[%    LinkWithTips( href, 'btn btn-secondary btn-hero fade', loc( 'Static' ),
-                    page.hint, loc( 'View the static pages' ) ) -%]
-[% END -%]
+[%    IF page.mode != 'static' && !req.authenticated -%]
+[%       class = 'btn btn-primary btn-hero windows' -%]
+[%       text  = loc( 'Login' ) -%]
+[%       tip   = loc( 'Authenticate with the application' ) -%]
+[%       LinkWithTips( '#', class, text, page.hint, tip, 'login-user' ) -%]
+[%       text  = loc( 'Register' ) -%]
+[%       tip   = loc( 'Register with the application' ) -%]
+[%       LinkWithTips( '#', class, text, page.hint, tip, 'create-user' ) -%]
+[%    ELSE -%]
+[%       class = 'btn btn-primary btn-hero windows' -%]
+[%       text  = loc( 'Documentation' ) -%]
+[%       tip   = loc( 'Documentation tree' ) -%]
+[%       LinkWithTips( page.docs_url, class, text, page.hint, tip ) -%]
+[%       IF   page.mode != 'static'; href = uri_for( config.posts ) -%]
+[%       ELSE; href = uri_for( config.posts _ '/index' ); END -%]
+[%       LinkWithTips( href, class, loc( 'Posts' ),
+                       page.hint, loc( 'Posts, blogs, and news articles' ) ) -%]
+[%    END -%]
+[%    IF page.mode != 'static' -%]
+[%       href  = links.base_uri _ config.static _ '/'
+                 _ page.language _ '/index.html' -%]
+[%       LinkWithTips( href, 'btn btn-secondary btn-hero fade', loc( 'Static' ),
+                       page.hint, loc( 'View the static pages' ) ) -%]
+[%    END -%]
                </div>
             </div>
          </div>
@@ -76,10 +69,10 @@
       <div class="homepage-content container-fluid">
          <div class="container-center">
             <div class="row">
-[% IF page.format == 'html' -%]
+[%    IF page.format == 'html' -%]
                <!-- Page Content -->
                [% page.content | eval %]
-[% END -%]
+[%    END -%]
             </div>
          </div>
       </div>
@@ -87,18 +80,18 @@
          <div class="container-center">
             <div class="row">
                <div class="span5">
-[% IF config.links.0 -%]
+[%    IF config.links.0 -%]
                   <ul class="footer-nav">
-   [% FOREACH link = config.links -%]
+[%       FOREACH link = config.links -%]
                      <li><a href="[% link.url | eval %]" target="_blank">
                         [% link.name %]</a></li>
-   [% END -%]
+[%       END -%]
                   </ul>
-[% END -%]
+[%    END -%]
                </div>
                <div class="span5">
                   <div class="pull-right">
-[% INCLUDE 'default/social-links.tt' -%]
+[%    INCLUDE 'default/social-links.tt' -%]
                   </div>
                </div>
             </div>
@@ -106,4 +99,5 @@
       </div>
    </div>
 </div>
-[% INCLUDE 'default/footer.tt' -%]
+[%    INCLUDE 'default/footer.tt' -%]
+[% END -%]

@@ -32,6 +32,9 @@ var/root/docs/en/01_Examples/*
 var/root/docs/en/10_Plack_Handbook/*
 var/root/docs/en/Projects
 var/root/docs/en/posts
+var/root/js/jekyll.js
+var/root/less/jekyll
+var/root/templates/jekyll
 var/root/static
 App-Doh-*
 *.tar.gz
