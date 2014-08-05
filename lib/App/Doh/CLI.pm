@@ -7,7 +7,8 @@ use App::Doh;
 use App::Doh::Functions    qw( env_var iterator load_components );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix io );
-use Class::Usul::Types     qw( HashRef LoadableClass Object );
+use Class::Usul::Options;
+use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object );
 
 extends q(Class::Usul::Programs);
 
@@ -32,6 +33,11 @@ has 'less_class' => is => 'lazy', isa => LoadableClass, default => 'CSS::LESS';
 has 'models'     => is => 'lazy', isa => HashRef[Object], builder => sub {
    load_components  $_[ 0 ]->config->appclass.'::Model',
       { builder  => $_[ 0 ], } };
+
+option 'skin'    => is => 'ro',   isa => NonEmptySimpleStr,
+   documentation => 'Name of the skin to operate on',
+   default       => sub { $_[ 0 ]->config->skin }, format => 's',
+   short         => 's';
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -130,18 +136,20 @@ sub _write_theme {
    my ($self, $cssd, $file) = @_;
 
    my $conf = $self->config;
-   my $skin = $conf->skin;
-   my $path = $conf->root->catfile( $conf->less, "theme-${file}.less" );
+   my $skin = $self->skin;
+   my $path = $conf->root->catfile( $conf->less, $skin, "${file}.less" );
    my $css  = $self->less->compile( $path->all );
 
-   $self->info( "Writing ${file} theme" );
+   $self->info( "Writing ${skin}-${file} theme" );
    $cssd->catfile( "${skin}-${file}.css" )->println( $css );
    return;
 }
 
 # Private functions
 sub __deep_copy {
-   my ($src, $dest, $excluding) = @_; $excluding //= qr{ NUL() }mx;
+   my ($src, $dest, $excluding) = @_;
+
+   $src->exists or return; $excluding //= qr{ NUL() }mx;
 
    my $filter = sub { $_->is_file && $_ !~ $excluding };
    my $iter   = $src->deep->filter( $filter )->iterator;

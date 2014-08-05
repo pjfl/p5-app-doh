@@ -23,7 +23,8 @@
 [%       FOREACH colour = config.colours -%]
       @[% colour.key %]: [% colour.value %];
 [%       END -%]
-      @import "[% links.less %]import/theme-base.less";
+      @import "[% links.less %]default/editor-base.less";
+      @import "[% links.less %]default/theme-base.less";
    </style>
    <script src="[% links.js %]less.min.js"></script>
 [%    ELSE -%]

@@ -51,6 +51,7 @@ installed.
 **Requirements:**
 
 * Perl 5.10.1 or above
+* Git - to install from Github
 
 To find out if Perl is installed and which version; at a shell prompt type
 

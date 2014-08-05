@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Renamed less files to create skin structure
           - Improved layout of profile-user form
           - Put page status on a div since defaultStatus not supported
           - Removed ForwardEvents class from JS. Doesn't work
