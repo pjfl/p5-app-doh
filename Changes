@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added make_skin method to CLI
           - Renamed less files to create skin structure
           - Improved layout of profile-user form
           - Put page status on a div since defaultStatus not supported

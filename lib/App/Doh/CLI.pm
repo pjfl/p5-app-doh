@@ -5,6 +5,7 @@ use namespace::autoclean;
 use Moo;
 use App::Doh;
 use App::Doh::Functions    qw( env_var iterator load_components );
+use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix io );
 use Class::Usul::Options;
@@ -59,6 +60,27 @@ sub make_css : method {
    if (my $file = $self->next_argv) { $self->_write_theme( $cssd, $file ) }
    else { $self->_write_theme( $cssd, $_ ) for (@{ $conf->less_files }) }
 
+   return OK;
+}
+
+sub make_skin : method {
+   my $self = shift; my $conf = $self->config; my $skin = $self->skin;
+
+   require Archive::Tar; my $arc = Archive::Tar->new;
+
+   for my $path ($conf->root->catdir( $conf->less, $skin )->all_files) {
+      $arc->add_files( $path->abs2rel( $conf->appldir ) );
+   }
+
+   for my $path ($conf->root->catdir( 'templates', $skin )->all_files) {
+      $arc->add_files( $path->abs2rel( $conf->appldir ) );
+   }
+
+   my $path = $conf->root->catfile( $conf->js, "${skin}.js" );
+
+   $arc->add_files( $path->abs2rel( $conf->appldir ) );
+   $self->info( "Generating tarball for the ${skin} skin" );
+   $arc->write( "${skin}-skin.tgz", COMPRESS_GZIP );
    return OK;
 }
 
@@ -135,8 +157,8 @@ sub _make_localised_static {
 sub _write_theme {
    my ($self, $cssd, $file) = @_;
 
-   my $conf = $self->config;
    my $skin = $self->skin;
+   my $conf = $self->config;
    my $path = $conf->root->catfile( $conf->less, $skin, "${file}.less" );
    my $css  = $self->less->compile( $path->all );
 
@@ -205,6 +227,14 @@ A reference to the L<App::Doh::Model::Documentation> object
 
 Creates CSS files under F<var/root/css> one for each colour theme. If a colour
 theme name is supplied only the C<LESS> for that theme is compiled
+
+=head2 C<make_skin> - Make a tarball of the files for a skin
+
+   bin/doh-cli -s name_of_skin make_skin
+
+Creates a tarball in the current directory containing the C<LESS>
+files, templates, and JavaScript code for the named skin. Defaults to the
+F<default> skin
 
 =head2 C<make_static> - Make a static HTML copy of the documentation
 
