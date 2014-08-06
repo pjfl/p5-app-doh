@@ -224,27 +224,30 @@ sub uri_for {
 
 # Private functions
 sub __defined_or_throw {
-   defined $_[ 0 ] or throw class => Unspecified, args => [ 'parameter name' ],
-                               rv => HTTP_INTERNAL_SERVER_ERROR, level => 5;
-   defined $_[ 1 ] or throw class => Unspecified, args => [ $_[ 0 ] ],
-                               rv => HTTP_EXPECTATION_FAILED, level => 5;
-   return $_[ 1 ];
+   my ($k, $v, $opts) = @_;
+
+   defined $k or throw class => Unspecified, args => [ 'parameter name' ],
+                          rv => HTTP_INTERNAL_SERVER_ERROR, level => 5;
+   $opts->{optional} or defined $v
+      or throw class => Unspecified, args => [ $k ],
+                  rv => HTTP_EXPECTATION_FAILED, level => 5;
+   return $v;
 }
 
 sub __get_defined_value {
-   my ($params, $name) = @_;
+   my ($params, $name, $opts) = @_;
 
-   my $v = __defined_or_throw( $name, $params->{ $name } );
+   my $v = __defined_or_throw( $name, $params->{ $name }, $opts );
 
    is_arrayref $v and $v = $v->[ 0 ];
 
-   return __defined_or_throw( $name, $v );
+   return __defined_or_throw( $name, $v, $opts );
 }
 
 sub __get_defined_values {
-   my ($params, $name) = @_;
+   my ($params, $name, $opts) = @_;
 
-   my $v = __defined_or_throw( $name, $params->{ $name } );
+   my $v = __defined_or_throw( $name, $params->{ $name }, $opts );
 
    is_arrayref $v or $v = [ $v ];
 
@@ -254,11 +257,11 @@ sub __get_defined_values {
 sub __get_scrubbed_value {
    my ($pattern, $params, $name, $opts) = @_; $opts //= {};
 
-   my $v = __get_defined_value( $params, $name );
+   my $v = __get_defined_value( $params, $name, $opts );
 
    $pattern = $opts->{scrubber} // $pattern;
-   $pattern and $v =~ s{ $pattern }{}gmx;
-   $opts->{allow_null} or length $v
+   $pattern and defined $v and $v =~ s{ $pattern }{}gmx;
+   $opts->{optional} or $opts->{allow_null} or length $v
       or throw class => Unspecified, args => [ $name ], level => 3,
                   rv => HTTP_EXPECTATION_FAILED;
    return $v;

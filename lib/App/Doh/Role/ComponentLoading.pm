@@ -65,8 +65,12 @@ sub _redirect {
 
    my $redirect = $stash->{redirect}; my $message = $redirect->{message};
 
-   $message and $req->session->status_message( $req->loc( @{ $message } ) )
-            and $self->log->info( $req->loc_default( @{ $message } ) );
+   if ($message) {
+      my $mid = $req->session->status_message( $message );
+
+      $self->log->info( $req->loc_default( @{ $message } ) );
+      $redirect->{location}->query_form( 'mid', $mid );
+   }
 
    return [ $code, [ 'Location', $redirect->{location} ], [] ];
 }

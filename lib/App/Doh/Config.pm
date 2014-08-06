@@ -105,6 +105,8 @@ has 'mdn_tab_width'   => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
 has 'max_asset_size'  => is => 'ro',   isa => PositiveInt, default => 4_194_304;
 
+has 'max_messages'    => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
+
 has 'max_session_time' => is => 'ro',  isa => PositiveInt, default => 3_600;
 
 has 'monikers'        => is => 'ro',   isa => HashRef[NonEmptySimpleStr],
@@ -391,6 +393,11 @@ indent a code block in the markdown class
 =item C<max_asset_size>
 
 Integer defaults to 4Mb. Maximum size in bytes of the file upload
+
+=item C<max_messages>
+
+Non zero positive integer defaults to 3. The maximum number of messages to
+store in the session between requests
 
 =item C<max_session_time>
 

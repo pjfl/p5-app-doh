@@ -3,7 +3,7 @@ package App::Doh::Role::PageConfiguration;
 use namespace::autoclean;
 
 use App::Doh::Functions    qw( extract_lang );
-use Class::Usul::Constants qw( FALSE NUL );
+use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Moo::Role;
 
 requires qw( config load_page users );
@@ -24,7 +24,7 @@ around 'load_page' => sub {
    $page->{hint               }   = $req->loc( 'Hint' );
    $page->{locale             } //= $req->locale;
    $page->{mode               }   = $req->params->{mode} // 'online';
-   $page->{status_message     }   = $req->session->clear_status_message;
+   $page->{status_message     }   = $req->session->clear_status_message( $req );
    $page->{wanted             } //= join '/', @{ $req->args };
    $page->{homepage_url       }   = $page->{mode} eq 'online'
                                   ? $req->base : $req->uri_for( 'index' );

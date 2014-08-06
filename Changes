@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Implemented status message queue
           - Get /favicon.ico now returns 404
           - Added make_skin method to CLI
           - Renamed less files to create skin structure
