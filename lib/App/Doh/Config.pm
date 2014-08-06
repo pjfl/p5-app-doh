@@ -90,7 +90,7 @@ has 'languages'       => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
    init_arg           => undef;
 
 has 'layout'          => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'two-columns';
+   default            => 'standard';
 
 has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'less/';
@@ -360,7 +360,7 @@ The value is constructed on demand and has no initial argument
 
 =item C<layout>
 
-A non empty simple string that defaults to F<two-columns>. The name of the
+A non empty simple string that defaults to F<standard>. The name of the
 L<Template::Toolkit> template used to render the HTML response page. The
 template will be wrapped by F<wrapper.tt>
 
@@ -483,7 +483,7 @@ contain the static HTML pages. Defaults to C<static>
 
 =item C<template>
 
-If the selected L<Template::Toolkit> layout is F<two-columns> then this
+If the selected L<Template::Toolkit> layout is F<standard> then this
 attribute selects which left and right columns templates are rendered
 
 =item C<theme>
