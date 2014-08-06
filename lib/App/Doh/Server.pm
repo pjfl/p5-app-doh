@@ -20,14 +20,16 @@ with q(App::Doh::Role::ComponentLoading);
 around 'to_psgi_app' => sub {
    my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
 
-   my $conf = $self->usul->config; my $point = $conf->mount_point;
+   my $conf   = $self->usul->config;
+   my $point  = $conf->mount_point;
+   my $static = $conf->serve_as_static;
 
    return builder {
       mount "${point}" => builder {
          enable 'Deflater',
             content_type => $conf->deflate_types, vary_user_agent => TRUE;
          enable 'Static',
-            path => qr{ \A / (css | img | js | less) }mx, root => $conf->root;
+            path => qr{ \A / (?: $static ) }mx, root => $conf->root;
          enable 'Static',
             path => qr{ \A / static }mx, pass_through => TRUE,
             root => $conf->root;

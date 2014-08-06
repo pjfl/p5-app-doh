@@ -145,6 +145,9 @@ has 'scrubber'        => is => 'ro',   isa => Str,
 has 'secret'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => hostname;
 
+has 'serve_as_static' => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'css | favicon.ico | img | js | less';
+
 has 'server'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Starman';
 
@@ -465,6 +468,12 @@ pathnames or query terms. Defaults to C<[;\$\`&\r\n]>
 =item C<secret>
 
 Used to encrypt the session cookie
+
+=item C<serve_as_static>
+
+A non empty simple string which defaults to
+C<css | favicon.ico | img | js | less>. Selects the resources that are served
+by L<Plack::Middleware::Static>
 
 =item C<server>
 
