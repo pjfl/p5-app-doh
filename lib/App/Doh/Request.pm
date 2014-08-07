@@ -13,7 +13,8 @@ use Class::Usul::Types     qw( ArrayRef BaseType Bool HashRef NonEmptySimpleStr
 use Encode                 qw( decode );
 use HTTP::Body;
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED
-                               HTTP_INTERNAL_SERVER_ERROR );
+                               HTTP_INTERNAL_SERVER_ERROR
+                               HTTP_REQUEST_ENTITY_TOO_LARGE );
 use Scalar::Util           qw( blessed weaken );
 use Unexpected::Functions  qw( Unspecified );
 use URI::http;
@@ -172,19 +173,11 @@ sub _build_uri {
 
 # Public methods
 sub body_params {
-   my $self = shift; my $pattern = $self->config->scrubber;
+   my $self = shift; weaken( $self );
 
    my $params = $self->body->param; weaken( $params );
 
-   return sub { __get_scrubbed_value( $pattern, $params, @_ ) };
-}
-
-sub body_value {
-   my $self = shift; return __get_defined_value( $self->body->param, @_ );
-}
-
-sub body_values {
-   my $self = shift; return __get_defined_values( $self->body->param, @_ );
+   return sub { $self->_get_scrubbed_param( $params, @_ ) };
 }
 
 sub loc {
@@ -196,11 +189,11 @@ sub loc_default {
 }
 
 sub query_params {
-   my $self = shift; my $pattern = $self->config->scrubber;
+   my $self = shift; weaken( $self );
 
    my $params = $self->params; weaken( $params );
 
-   return sub { __get_scrubbed_value( $pattern, $params, @_ ) };
+   return sub { $self->_get_scrubbed_param( $params, @_ ) };
 }
 
 sub uri_for {
@@ -222,12 +215,29 @@ sub uri_for {
    return $uri;
 }
 
+# Private methods
+sub _get_scrubbed_param {
+   my ($self, $params, $name, $opts) = @_; $opts = { %{ $opts // {} } };
+
+   $opts->{max_length} //= $self->config->max_asset_size;
+   $opts->{scrubber  } //= $self->config->scrubber;
+
+   $opts->{multiple} and return
+      [ map { $opts->{raw} ? $_ : __scrub_value( $name, $_, $opts ) }
+           @{ __get_defined_values( $params, $name, $opts ) } ];
+
+   my $v = __get_defined_value( $params, $name, $opts );
+
+   return $opts->{raw} ? $v : __scrub_value( $name, $v, $opts );
+}
+
 # Private functions
 sub __defined_or_throw {
    my ($k, $v, $opts) = @_;
 
    defined $k or throw class => Unspecified, args => [ 'parameter name' ],
                           rv => HTTP_INTERNAL_SERVER_ERROR, level => 5;
+
    $opts->{optional} or defined $v
       or throw class => Unspecified, args => [ $k ],
                   rv => HTTP_EXPECTATION_FAILED, level => 5;
@@ -254,16 +264,19 @@ sub __get_defined_values {
    return $v;
 }
 
-sub __get_scrubbed_value {
-   my ($pattern, $params, $name, $opts) = @_; $opts //= {};
+sub __scrub_value {
+   my ($name, $v, $opts) = @_; my $pattern = $opts->{scrubber}; my $len;
 
-   my $v = __get_defined_value( $params, $name, $opts );
-
-   $pattern = $opts->{scrubber} // $pattern;
    $pattern and defined $v and $v =~ s{ $pattern }{}gmx;
-   $opts->{optional} or $opts->{allow_null} or length $v
-      or throw class => Unspecified, args => [ $name ], level => 3,
-                  rv => HTTP_EXPECTATION_FAILED;
+
+   $opts->{optional} or $opts->{allow_null} or $len = length $v
+      or  throw class => Unspecified, args => [ $name ], level => 4,
+                   rv => HTTP_EXPECTATION_FAILED;
+
+   $len and $len > $opts->{max_length}
+      and throw error => 'Parameter [_1] size [_2] too big',
+                 args => [ $name, $len ], level => 4,
+                   rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
    return $v;
 }
 
@@ -396,19 +409,6 @@ Logs the request at the debug level
 Returns a code reference which when called with a body parameter name returns
 the body parameter value after first scrubbing it of "dodgy" characters. Throws
 if the value is undefined or tainted
-
-=head2 C<body_value>
-
-   $value = $self->body_value( $name );
-
-Returns the named body value, throws if the value is not defined. Returns the
-first value if the body contains more than one
-
-=head2 C<body_values>
-
-   $array_ref_values = $self->body_values( $name );
-
-Returns the named body values, throws if the values are not defined
 
 =head2 C<loc>
 

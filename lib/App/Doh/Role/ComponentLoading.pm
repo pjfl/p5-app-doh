@@ -95,7 +95,8 @@ sub _render_exception {
 
    my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
 
-   $e->can( 'rv' ) or $e = exception error => $msg, rv => HTTP_BAD_REQUEST;
+   ($e->can( 'rv' ) and $e->rv > HTTP_BAD_REQUEST)
+      or $e = exception $e, { rv => HTTP_BAD_REQUEST };
 
    try {
       my $stash = $self->models->{ $model }->exception_handler( $req, $e );

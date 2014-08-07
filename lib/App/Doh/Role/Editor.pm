@@ -110,7 +110,7 @@ sub save_file {
    my $node     =  $self->find_node( $req->locale, $req->args )
       or throw error => 'Cannot find document tree node to update',
                   rv => HTTP_NOT_FOUND;
-   my $content  =  $req->body_value( 'content' );
+   my $content  =  $req->body_params->( 'content', { raw => TRUE } );
       $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
    my $path     =  $node->{path}; $path->println( $content ); $path->close;
    my $rel_path =  $path->abs2rel( $self->config->file_root );

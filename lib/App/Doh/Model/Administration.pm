@@ -22,9 +22,9 @@ sub create_user_action : Role(anon) {
    my ($self, $req) = @_;
 
    my $params  = $req->body_params;
-   my $args    = { email    => $params->( 'email' ),
-                   id       => $params->( 'username' ),
-                   password => $params->( 'password' ), };
+   my $args    = { id       => $params->( 'username' ),
+                   email    => $params->( 'email',    { raw => TRUE } ),
+                   password => $params->( 'password', { raw => TRUE } ), };
    my $user    = $self->users->create( $args );
    my $message = [ 'User [_1] created', $user->id ];
 
@@ -61,7 +61,7 @@ sub generate_static_action : Role(admin) {
 }
 
 sub get_dialog : Role(anon) {
-   my ($self, $req) = @_; my $user;
+   my ($self, $req) = @_;
 
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
@@ -70,16 +70,20 @@ sub get_dialog : Role(anon) {
                                    layout => "${name}-user",
                                    meta   => { id => $params->( 'id' ), }, };
 
-   $name eq 'login' and $page->{username} = $req->session->username;
-   $name eq 'profile'
-      and $user = $self->users->find( $req->username )
-      and $page->{binding    } = $user->binding
-      and $page->{email      } = $user->email
-      and $page->{keybindings} = [ qw( default emacs sublime vim ) ]
-      and $page->{literal_js } = set_element_focus( "${name}-user", 'email' )
-      and $page->{username   } = $req->username;
-   $name ne 'profile'
-      and $page->{literal_js} = set_element_focus( "${name}-user", 'username' );
+   $name eq 'login'   and $page->{username  } = $req->session->username;
+   $name ne 'profile' and $page->{literal_js}
+      = set_element_focus( "${name}-user", 'username' );
+
+   if ($name eq 'profile') {
+      my $user = $self->users->find( $req->username );
+
+      $page->{binding    } = $user->binding;
+      $page->{email      } = $user->email;
+      $page->{keybindings} = [ qw( default emacs sublime vim ) ];
+      $page->{literal_js } = set_element_focus( "${name}-user", 'email' );
+      $page->{username   } = $req->username;
+   }
+
    $stash->{view} = 'xml';
    return $stash;
 }
@@ -142,16 +146,22 @@ sub update_profile_action : Role(any) {
    my ($self, $req) = @_;
 
    my $id      = $req->username;
-   my $binding = $req->body_value( 'binding' );
-   my $email   = $req->body_value( 'email'    );
-   my $pass    = $req->body_value( 'password' );
-   my $again   = $req->body_value( 'again'    );
+   my $binding = $req->body_params->( 'binding' );
+   my $email   = $req->body_params->( 'email',    { raw => TRUE } );
+   my $pass    = $req->body_params->( 'password', { raw => TRUE } );
+   my $again   = $req->body_params->( 'again',    { raw => TRUE } );
    my $user    = $self->users->find( $id );
    my $args    = { id => $id };
 
    $binding ne $user->binding and $args->{binding} = $binding;
    $email and $email ne $user->email and $args->{email} = $email;
-   $pass  and $again and $pass eq $again and $args->{password} = $pass;
+
+   if ($pass or $again) {
+      $pass eq $again or throw error => 'User [_1] passwords do not match',
+                                args => [ $id ], rv => HTTP_EXPECTATION_FAILED;
+      $args->{password} = $pass;
+   }
+
    $self->users->update( $args );
 
    my $message = [ 'User [_1] profile updated', $id ];
@@ -163,8 +173,8 @@ sub update_user_action : Role(admin) {
    my ($self, $req) = @_;
 
    my $id     = $req->body_params->( 'username' );
-   my $active = $req->body_value( 'active' );
-   my $roles  = $req->body_values( 'roles' );
+   my $active = $req->body_params->( 'active', { optional => TRUE } ) // FALSE;
+   my $roles  = $req->body_params->( 'roles',  { multiple => TRUE } );
    my $user   = $self->users->find( $id );
    my $args   = { id => $id, roles => $roles };
 

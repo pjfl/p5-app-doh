@@ -5,21 +5,33 @@ use namespace::autoclean;
 use Moo;
 use Class::Usul::Constants     qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions     qw( create_token is_hashref throw );
-use Class::Usul::Types         qw( NonZeroPositiveInt );
+use Class::Usul::Types         qw( NonZeroPositiveInt Object );
 use Crypt::Eksblowfish::Bcrypt qw( bcrypt en_base64 );
+use Data::Validation;
 
 extends q(File::DataClass::Schema);
 
-has 'load_factor'  => is => 'ro', isa => NonZeroPositiveInt, default => 14;
+has 'load_factor'  => is => 'ro',   isa => NonZeroPositiveInt, default => 14;
 
-has 'min_pass_len' => is => 'ro', isa => NonZeroPositiveInt, default => 8;
+has 'min_pass_len' => is => 'ro',   isa => NonZeroPositiveInt, default => 8;
 
 has '+result_source_attributes' => default => sub { {
    users                   => {
       attributes           => [ qw( active binding email password roles ) ],
-      defaults             => { roles => [], },
+      defaults             => {
+         active            => FALSE,
+         binding           => 'default',
+         roles             => [ 'user' ], },
       resultset_attributes => { result_class => 'App::Doh::User::Result' } },
 } };
+
+has 'validator'    => is => 'lazy', isa => Object, builder => sub {
+   Data::Validation->new( {
+      constraints  => { password => { min_length => $_[ 0 ]->min_pass_len } },
+      fields       => {
+         binding   => { validate => 'isValidIdentifier' },
+         email     => { validate => 'isMandatory isValidEmail' },
+         password  => { validate => 'isMandatory isValidPassword' }, }, } ) };
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -30,7 +42,7 @@ around 'BUILDARGS' => sub {
    my $builder = $args->{builder}; ($builder and $builder->can( 'config' ))
       or return $orig->( $self, @args );
 
-   my $attr    = { %{ $args }, %{ $builder->config->user_attributes // {} } };
+   my $attr    = { %{ $args }, %{ $builder->config->user_attributes } };
 
    return $orig->( $self, $attr );
 };
@@ -39,11 +51,8 @@ around 'BUILDARGS' => sub {
 sub create {
    my ($self, $args) = @_;
 
-   $args->{active  }   = FALSE;
-   $args->{binding } //= 'default';
-   $args->{email   } //= NUL;
-   $args->{password}   = $self->_encrypt_password( $args->{password} );
-   $args->{roles   } //= [ 'user' ];
+   $args = $self->validator->check_form( NUL, $args );
+   $args->{password} = $self->_encrypt_password( $args->{password} );
 
    return $self->_resultset->create( $args );
 }
@@ -63,6 +72,7 @@ sub list {
 sub update {
    my ($self, $args) = @_;
 
+   $args = $self->validator->check_form( NUL, $args );
    $args->{password} and $args->{password} !~ m{ \A \$ 2a }mx
       and $args->{password} = $self->_encrypt_password( $args->{password} );
 
@@ -71,13 +81,8 @@ sub update {
 
 # Private metods
 sub _encrypt_password {
-   my ($self, $password) = @_;
+   my ($self, $password) = @_; my $lf = $self->load_factor;
 
-   length $password >= $self->min_pass_len
-      or throw error => 'Password too short. Minimum length [_1] characters',
-                args => [ $self->min_pass_len ];
-
-   my $lf   = $self->load_factor;
    my $salt = "\$2a\$${lf}\$"
               .(en_base64( pack( 'H*', substr( create_token, 0, 32 ) ) ) );
 

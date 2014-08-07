@@ -5,6 +5,7 @@ use namespace::autoclean;
 use Moo;
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( app_prefix );
+use Data::Validation;
 use File::DataClass::Types qw( ArrayRef Bool Directory File HashRef
                                NonEmptySimpleStr NonNumericSimpleStr
                                NonZeroPositiveInt Path PositiveInt
@@ -13,6 +14,8 @@ use Sys::Hostname          qw( hostname );
 use Type::Utils            qw( enum );
 
 extends q(Class::Usul::Config::Programs);
+
+Data::Validation::Constants->Exception_Class( 'Class::Usul::Exception' );
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
 

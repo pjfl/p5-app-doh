@@ -105,7 +105,7 @@ sub extract_lang ($) {
 }
 
 sub is_static () {
-   return !!env_var( 'MAKE_STATIC' );
+   return !!env_var( 'MAKE_STATIC' ) ? TRUE : FALSE;
 }
 
 sub iterator ($) {

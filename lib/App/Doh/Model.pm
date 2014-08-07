@@ -10,12 +10,12 @@ use Class::Usul::IPC;
 use Class::Usul::Time      qw( str2time time2str );
 use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
-use Scalar::Util           qw( weaken );
+use Scalar::Util           qw( blessed weaken );
 
 with q(App::Doh::Role::Component);
 
 # Public attributes
-has 'ipc'   => is => 'lazy', isa => Object, builder  => sub {
+has 'ipc'   => is => 'lazy', isa => Object, builder => sub {
    Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
 has 'users' => is => 'lazy', isa => Object, builder => sub {
@@ -26,11 +26,12 @@ sub exception_handler {
 
    my $stash  = $self->get_stash( $req );
    my $title  = $req->loc( 'Exception Handler' );
-   my $filler = '&nbsp;' x 40;
+   my $errors = '&nbsp;' x 40; $e->args->[ 0 ] and blessed $e->args->[ 0 ]
+      and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
 
    $stash->{code} =  $e->rv >= HTTP_OK ? $e->rv : HTTP_BAD_REQUEST;
    $stash->{page} =  $self->load_page( $req, {
-      content     => "${e}${filler}\n\n   Code: ".$e->rv,
+      content     => "${e}${errors}\n\n   Code: ".$e->rv,
       editing     => FALSE,
       format      => 'markdown',
       mtime       => time,
