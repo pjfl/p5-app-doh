@@ -51,12 +51,17 @@ installed.
 **Requirements:**
 
 * Perl 5.10.1 or above
-* Git - to install from Github
+* Git - to install **App::Doh** from Github
 
 To find out if Perl is installed and which version; at a shell prompt type
 
 ```shell
    perl -v
+```
+To find out if Git is installed, type
+
+```shell
+   git --version
 ```
 
 If you don't already have it, bootstrap

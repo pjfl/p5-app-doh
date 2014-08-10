@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Added t::boilerplate to tests
+
 0.6.1     2014-08-07 15:39:42
           - Added Data::Validation to user form
           - Implemented status message queue

@@ -50,6 +50,7 @@ t/07podspelling.t
 t/08memory_leak.t
 t/10test_script.t
 t/20user.t
+t/boilerplate.pm
 var/locale/de/LC_MESSAGES/app_doh.po
 var/locale/en/LC_MESSAGES/app_doh.po
 var/root/css/default-blue.css

@@ -217,17 +217,16 @@ sub __get_tip_text {
 }
 
 sub __make_tuple {
-   my $node = shift;
+   my $node = shift; my $is_folder = $node && $node->{type} eq 'folder' ? 1 : 0;
 
-   return [ 0, $node && $node->{type} eq 'folder'
-               ? [ __sorted_keys( $node->{tree} ) ] : [], $node, ];
+   return [ 0, $is_folder ? __sorted_keys( $node->{tree} ) : [], $node, ];
 }
 
 sub __sorted_keys {
    my $node = shift;
 
-   return ( sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
-            grep { first_char $_ ne '_' } keys %{ $node } );
+   return [ sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
+            grep { first_char $_ ne '_' } keys %{ $node } ];
 }
 
 1;
