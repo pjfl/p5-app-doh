@@ -235,7 +235,7 @@ sub __decode_params {
       else { $body->param->{ $k } = decode( 'UTF-8', $body->param->{ $k } ) }
    }
 
-   return;
+   return $body;
 }
 
 sub __defined_or_throw {
