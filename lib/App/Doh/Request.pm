@@ -5,10 +5,10 @@ use namespace::autoclean;
 use Moo;
 use App::Doh::Functions    qw( extract_lang );
 use App::Doh::Session;
-use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL SPC TRUE );
+use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC TRUE );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                is_member throw trim );
-use Class::Usul::Types     qw( ArrayRef BaseType Bool HashRef NonEmptySimpleStr
+use Class::Usul::Types     qw( ArrayRef BaseType HashRef NonEmptySimpleStr
                                Object SimpleStr );
 use Encode                 qw( decode );
 use HTTP::Body;
@@ -124,15 +124,7 @@ sub _build_body {
 
    length $content and $body->add( $content );
 
-   for my $k (keys %{ $body->param }) {
-      if (is_arrayref $body->param->{ $k }) {
-         $body->param->{ $k } = [ map { decode( 'UTF-8', $_  ) }
-                                     @{ $body->param->{ $k } } ];
-      }
-      else { $body->param->{ $k } = decode( 'UTF-8', $body->param->{ $k } ) }
-   }
-
-   return $body;
+   return __decode_params( $body );
 }
 
 sub _build_locale {
@@ -232,6 +224,20 @@ sub _get_scrubbed_param {
 }
 
 # Private functions
+sub __decode_params {
+   my $body = shift;
+
+   for my $k (keys %{ $body->param }) {
+      if (is_arrayref $body->param->{ $k }) {
+         $body->param->{ $k } = [ map { decode( 'UTF-8', $_  ) }
+                                     @{ $body->param->{ $k } } ];
+      }
+      else { $body->param->{ $k } = decode( 'UTF-8', $body->param->{ $k } ) }
+   }
+
+   return;
+}
+
 sub __defined_or_throw {
    my ($k, $v, $opts) = @_;
 
