@@ -37,8 +37,9 @@ around 'to_psgi_app' => sub {
             path => qr{ \A / assets }mx, pass_through => TRUE,
             root => $conf->file_root;
          enable 'Session::Cookie',
-            httponly => TRUE,          path        => $point,
-            secret   => $conf->secret, session_key => 'doh_session';
+            expires     => 7_776_000, httponly => TRUE,
+            path        => $point,    secret   => $conf->secret,
+            session_key => 'doh_session';
          enable "LogDispatch", logger => $self->usul->log;
          enable_if { $self->usul->debug } 'Debug';
          $app;

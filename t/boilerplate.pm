@@ -1,9 +1,10 @@
 package t::boilerplate;
 
+use strict;
+use warnings;
 use File::Spec::Functions qw( catdir updir );
 use FindBin               qw( $Bin );
 use lib               catdir( $Bin, updir, 'lib' ), catdir( $Bin, 'lib' );
-use strictures::defanged;
 
 use Test::Requires { version => 0.88 };
 use Module::Build;
@@ -19,7 +20,9 @@ BEGIN {
 use Test::Requires "${perl_ver}";
 
 sub import {
-   strictures::defanged->import; return;
+   strict->import;
+   $] < 5.008 ? warnings->import : warnings->import( NONFATAL => 'all' );
+   return;
 }
 
 1;
