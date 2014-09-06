@@ -1,10 +1,19 @@
    <!-- Footer -->
    <div id="page-status" class="page-status"></div>
-   <script src="[% links.js %]highlight.min.js"></script>
-   <script src="[% links.js %]mootools.min.js"></script>
+   <script src="[% links.cdnjs.highlight %]"></script>
+   <script src="[% links.cdnjs.moocore %]"></script>
+   <script src="[% links.cdnjs.moomore %]"></script>
    <script src="[% links.js %]mooclasses.js"></script>
 [% IF page.editing -%]
-   <script src="[% links.js %]codemirror.js"></script>
+   <script src="[% links.cdnjs.codemirror %]"></script>
+   <script src="[% links.cdnjs.emacs_keymap %]"></script>
+   <script src="[% links.cdnjs.sublime_keymap %]"></script>
+   <script src="[% links.cdnjs.vim_keymap %]"></script>
+   <script src="[% links.cdnjs.continuelist %]"></script>
+   <script src="[% links.cdnjs.match_brackets %]"></script>
+   <script src="[% links.cdnjs.trailing_space %]"></script>
+   <script src="[% links.cdnjs.xml %]"></script>
+   <script src="[% links.cdnjs.markdown %]"></script>
    <script src="[% links.js %]editor.js"></script>
 [% END -%]
    <script src="[% links.js; skin %].js"></script>
@@ -12,7 +21,9 @@
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {
          baseURI : '[% links.base_uri %]',
+         editing : [% IF page.editing %]true[% ELSE %]false[% END %],
          formName: '[% page.form_name %]',
+         keyMap  : '[% page.user.binding %]',
          message : '[% page.status_message %]'
       } );
 [% IF ! page.editing && page.mode != 'static' -%]
@@ -71,12 +82,6 @@
              method  : [ 'show_password', 'hide_password' ] };
       behaviour.config.anchors[ 'users' ]
          = { event   : 'change', method: 'submitForm', args: [ '' ] };
-[% END -%]
-[% IF page.editing -%]
-      var editor = new Editor( {
-         codeMirror: { keyMap: '[% page.user.binding %]' },
-         element   : $( 'markdown-editor' ) } );
-      editor.render();
 [% END -%]
    </script>
 [% IF config.analytics -%]

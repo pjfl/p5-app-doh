@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Serve JS from content delivery network
           - Added t::boilerplate to tests
 
 0.6.1     2014-08-07 15:39:42

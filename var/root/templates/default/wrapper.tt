@@ -25,7 +25,7 @@
       @import "[% links.less %]default/editor-base.less";
       @import "[% links.less %]default/theme-base.less";
    </style>
-   <script src="[% links.js %]less.min.js"></script>
+   <script src="[% links.cdnjs.less %]"></script>
 [%    ELSE -%]
    <link href="[% links.css %][% skin %]-[% prefs.theme %].css"
           rel="stylesheet" type="text/css">

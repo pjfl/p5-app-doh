@@ -101,7 +101,7 @@ function _replaceSelection( cm, active, start, end ) {
       text  = cm.getLine( startPoint.line );
       start = text.slice( 0, startPoint.ch );
       end   = text.slice( endPoint.ch );
-      cm.setLine( startPoint.line, start + end );
+      _setLine( cm, startPoint.line, start + end );
    }
    else {
       text = cm.getSelection();
@@ -113,6 +113,17 @@ function _replaceSelection( cm, active, start, end ) {
 
    cm.setSelection( startPoint, endPoint );
    cm.focus();
+}
+
+function _setLine( cm, line, text ) {
+   var doc = cm.doc;
+
+   if (line >= doc.first && line < doc.first + doc.size) {
+      doc.replaceRange( text, CodeMirror.Pos( line, 0 ),
+                        doc.clipPos( CodeMirror.Pos( line ) ) );
+   }
+
+   return;
 }
 
 function _toggleLine( cm, name ) {
@@ -141,7 +152,7 @@ function _toggleLine( cm, name ) {
          if (stat[ name ]) text = text.replace( repl[ name ], '$1' );
          else text = map[ name ] + text;
 
-         cm.setLine( i, text );
+         _setLine( cm, i, text );
       } )( i );
    }
 
@@ -207,7 +218,7 @@ function toggleBold( editor ) {
 
       if (startPoint !== endPoint) endPoint.ch -= start.length;
 
-      cm.setLine( startPoint.line, start + end );
+      _setLine( cm, startPoint.line, start + end );
    }
    else {
       text = cm.getSelection();
@@ -270,7 +281,7 @@ function toggleItalic( editor ) {
 
       if (startPoint !== endPoint) endPoint.ch -= start.length;
 
-      cm.setLine( startPoint.line, start + end );
+      _setLine( cm, startPoint.line, start + end );
    }
    else {
       text = cm.getSelection();

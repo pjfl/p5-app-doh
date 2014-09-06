@@ -11,6 +11,7 @@ around 'get_stash' => sub {
 
    my $stash = $orig->( $self, $req, @args ); my $conf = $self->config;
 
+   $stash->{links}->{cdnjs   } = $conf->cdnjs;
    $stash->{links}->{base_uri} = $req->base;
    $stash->{links}->{req_uri } = $req->uri;
 

@@ -39,6 +39,27 @@ has 'blank_template'  => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'brand'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
+has 'cdn'             => is => 'ro',   isa => SimpleStr,
+   default            => 'http://cdnjs.cloudflare.com/ajax/libs/';
+
+has 'cdnjs'           => is => 'lazy', isa => HashRef, builder => sub {
+   my $self = shift; my %cdnjs = map { $_->[ 0 ] => $self->cdn.$_->[ 1 ] }
+   [ codemirror       => 'codemirror/4.5.0/codemirror.min.js' ],
+   [ continuelist     => 'codemirror/4.5.0/addon/edit/continuelist.min.js' ],
+   [ emacs_keymap     => 'codemirror/4.5.0/keymap/emacs.min.js' ],
+   [ highlight        => 'highlight.js/8.0/highlight.min.js' ],
+   [ less             => 'less.js/1.7.4/less.min.js' ],
+   [ markdown         => 'codemirror/4.5.0/mode/markdown/markdown.min.js' ],
+   [ match_brackets   => 'codemirror/4.5.0/addon/edit/matchbrackets.min.js' ],
+   [ moocore          => 'mootools/1.4.5/mootools-core-full-nocompat.min.js' ],
+   [ moomore          => 'mootools-more/1.4.0.1/mootools-more-yui-compressed.min.js' ],
+   [ sublime_keymap   => 'codemirror/4.5.0/keymap/sublime.min.js' ],
+   [ trailing_space   => 'codemirror/4.5.0/addon/edit/trailingspace.min.js' ],
+   [ vim_keymap       => 'codemirror/4.5.0/keymap/vim.min.js' ],
+   [ xml              => 'codemirror/4.5.0/mode/xml/xml.min.js' ];
+   return \%cdnjs;
+};
+
 has 'code_blocks'     => is => 'ro',   isa => $BLOCK_MODES, default => 1;
 
 has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
@@ -273,6 +294,15 @@ Name of the template file to use when creating new markdown files
 
 A simple string that defaults to null. The name of the image file used
 on the splash screen to represent the application
+
+=item C<cdn>
+
+A simple string containing the URI prefix for the content delivery network
+
+=item C<cdnjs>
+
+A hash reference of partial URIs for JavaScript libraries stored on the
+content delivery network
 
 =item C<code_blocks>
 

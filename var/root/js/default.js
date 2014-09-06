@@ -10,8 +10,10 @@ var Behaviour = new Class( {
 
    options           : {
       baseURL        : null,
+      editing        : false,
       firstField     : null,
       formName       : null,
+      keyMap         : 'default',
       message        : null,
       popup          : false,
       statusUpdPeriod: 4320,
@@ -57,6 +59,13 @@ var Behaviour = new Class( {
          el.addEvent( 'click', function( ev ) {
             ev.stop(); $( 'sub-nav-collapse' ).toggle();
          } );
+      }
+
+      if (opt.editing) {
+         this.editor    = new Editor( {
+            codeMirror  : { keyMap: opt.keyMap },
+            element     : $( 'markdown-editor' ) } );
+         this.editor.render();
       }
 
       if (opt.statusUpdPeriod && !opt.popup)
