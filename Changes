@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added editor CSS to repo for install off Github
           - Enabled ConditionalGET in Plack stack
           - Serve JS from content delivery network
           - Added t::boilerplate to tests
