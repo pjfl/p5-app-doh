@@ -52,7 +52,7 @@ has 'locale'         => is => 'lazy', isa => NonEmptySimpleStr;
 has 'locales'        => is => 'lazy', isa => ArrayRef;
 
 has 'method'         => is => 'lazy', isa => SimpleStr,
-   builder           => sub { lc $_[ 0 ]->_env->{ 'REQUEST_METHOD' } // NUL };
+   builder           => sub { lc( $_[ 0 ]->_env->{ 'REQUEST_METHOD' } // NUL )};
 
 has 'path'           => is => 'lazy', isa => SimpleStr, builder => sub {
    my $v             =  $_[ 0 ]->_env->{ 'PATH_INFO' } // '/';
