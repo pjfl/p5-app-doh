@@ -4,13 +4,14 @@ use namespace::autoclean;
 
 use Moo;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
-use Class::Usul::Functions qw( bson64id );
+use Class::Usul::Functions qw( bson64id merge_attributes );
 use Class::Usul::Types     qw( BaseType Bool HashRef NonEmptySimpleStr
                                NonZeroPositiveInt SimpleStr Undef );
 use Type::Utils            qw( enum );
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
 
+# Public attributes
 has 'authenticated' => is => 'rw',  isa => Bool, default => FALSE;
 
 has 'code_blocks'   => is => 'rw',  isa => $BLOCK_MODES, default => 1;
@@ -33,23 +34,23 @@ has 'use_flags'     => is => 'rw',  isa => Bool, default => TRUE;
 
 has 'username'      => is => 'rw',  isa => SimpleStr, default => NUL;
 
-has 'usul'          => is => 'ro',  isa => BaseType,
-   handles          => [ 'config', 'log' ],
-   init_arg         => 'builder',   required => TRUE;
-
+# Private attributes
 has '_mid'          => is => 'rwp', isa => NonEmptySimpleStr | Undef;
 
 has '_session'      => is => 'ro',  isa => HashRef, required => TRUE;
 
+has '_usul'         => is => 'ro',  isa => BaseType,
+   handles          => [ 'config', 'log' ], init_arg => 'builder',
+   required         => TRUE;
+
+# Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
 
-   my $env = delete $attr->{env}; $attr->{_session} = $env->{ 'psgix.session' };
+   my $env  = delete $attr->{env};
+   my $sess = $attr->{_session} = $env->{ 'psgix.session' };
 
-   for my $k (keys %{ $attr->{_session} }) {
-      $attr->{ $k } = $attr->{_session}->{ $k };
-   }
-
+   merge_attributes $attr, $sess, {}, [ keys %{ $sess } ];
    $attr->{updated} //= time;
 
    return $attr;
@@ -69,6 +70,7 @@ sub BUILD {
    return;
 }
 
+# Public methods
 sub clear_status_message {
    my ($self, $req) = @_; my ($mid, $msg);
 

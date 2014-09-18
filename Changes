@@ -1,5 +1,9 @@
 Revision history for App-Doh
 
+          - Improved Request API raw params now private
+          - Session secret now has more source options
+          - Component loading respects + at the start of class names
+          - Static generation no longer creates defunct process
           - Added editor CSS to repo for install off Github
           - Enabled ConditionalGET in Plack stack
           - Serve JS from content delivery network

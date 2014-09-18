@@ -4,8 +4,7 @@ use namespace::autoclean;
 
 use App::Doh::Functions    qw( load_components );
 use Class::Usul::Functions qw( exception is_arrayref throw );
-use Class::Usul::Types     qw( ArrayRef Bool HashRef LoadableClass
-                               NonEmptySimpleStr Object );
+use Class::Usul::Types     qw( ArrayRef HashRef LoadableClass Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
                                HTTP_INTERNAL_SERVER_ERROR );
 use Try::Tiny;
@@ -14,21 +13,19 @@ use Moo::Role;
 requires qw( usul );
 
 has 'controllers'   => is => 'lazy', isa => ArrayRef[Object], builder => sub {
-   my $controllers  =
-      load_components  $_[ 0 ]->usul->config->appclass.'::Controller',
-         { builder  => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
+   my $controllers  =  load_components 'Controller', {
+      builder       => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
    return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] };
 
 has 'models'        => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components     $_[ 0 ]->usul->config->appclass.'::Model',
-      { builder     => $_[ 0 ]->usul, views => $_[ 0 ]->views, } };
+   load_components  'Model', {
+      builder       => $_[ 0 ]->usul, views => $_[ 0 ]->views, } };
 
 has 'request_class' => is => 'lazy', isa => LoadableClass,
    builder          => sub { $_[ 0 ]->usul->config->request_class };
 
 has 'views'         => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components     $_[ 0 ]->usul->config->appclass.'::View',
-      { builder     => $_[ 0 ]->usul, } };
+   load_components  'View', { builder => $_[ 0 ]->usul, } };
 
 # Public methods
 sub render {

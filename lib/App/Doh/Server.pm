@@ -39,7 +39,7 @@ around 'to_psgi_app' => sub {
             root => $conf->file_root;
          enable 'Session::Cookie',
             expires     => 7_776_000, httponly => TRUE,
-            path        => $point,    secret   => $conf->secret,
+            path        => $point,    secret   => NUL.$conf->secret,
             session_key => 'doh_session';
          enable "LogDispatch", logger => $self->usul->log;
          enable_if { $self->usul->debug } 'Debug';

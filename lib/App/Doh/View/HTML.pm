@@ -6,7 +6,7 @@ use Moo;
 use App::Doh::Functions    qw( load_components );
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
-use File::DataClass::Types qw( Directory HashRef Object );
+use File::DataClass::Types qw( HashRef Object );
 use Module::Pluggable::Object;
 
 with q(App::Doh::Role::Component);
@@ -16,7 +16,7 @@ with q(App::Doh::Role::Templates);
 has '+moniker'   => default => 'html';
 
 has 'formatters' => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components __PACKAGE__, { builder => $_[ 0 ]->usul, min_depth => 4 } };
+   load_components 'View::HTML', { builder => $_[ 0 ]->usul, } };
 
 has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
    my $self = shift; my $map = { htm => 'html', html => 'html' };

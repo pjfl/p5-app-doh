@@ -130,20 +130,23 @@ sub iterator ($) {
 }
 
 sub load_components ($$) {
-   my ($ns, $args) = @_;
+   my ($search_path, $args) = @_; my $conf = $args->{builder}->config;
 
-   my $plugins   = {};
-   my $min_depth = delete $args->{min_depth};
-   my @depth     = $min_depth ? (min_depth => $min_depth) : (max_depth => 4);
-   my $monikers  = $args->{builder}->config->monikers;
-   my $finder    = Module::Pluggable::Object->new
-      ( @depth, search_path => [ $ns ], require => TRUE, );
+   if ('+' eq substr $search_path, 0, 1) { $search_path =~ s{ \A \+ }{}mx }
+   else { $search_path = $conf->appclass."::${search_path}" }
+
+   my $depth    = () = split m{ :: }mx, $search_path, -1;
+   my @depth    = (min_depth => $depth + 1, max_depth => $depth + 1);
+   my $finder   = Module::Pluggable::Object->new
+      ( @depth, search_path => [ $search_path ], require => TRUE, );
+   my $monikers = $conf->monikers;
+   my $plugins  = {};
 
    for my $plugin ($finder->plugins) {
       exists $monikers->{ $plugin } and defined $monikers->{ $plugin }
          and $args->{moniker} = $monikers->{ $plugin };
 
-      my $comp = $plugin->new( $args ); $plugins->{ $comp->moniker } = $comp;
+      my $comp  = $plugin->new( $args ); $plugins->{ $comp->moniker } = $comp;
    }
 
    return $plugins;

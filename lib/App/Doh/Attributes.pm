@@ -9,13 +9,12 @@ our @EXPORT = qw( FETCH_CODE_ATTRIBUTES MODIFY_CODE_ATTRIBUTES );
 my $Code_Attr = {};
 
 sub import {
-   my $class = shift;
-   my $global_opts = { $_[ 0 ] && ref $_[ 0 ] eq 'HASH' ? %{+ shift } : () };
+   my $class   = shift;
+   my $caller  = caller;
+   my $globals = { $_[ 0 ] && ref $_[ 0 ] eq 'HASH' ? %{+ shift } : () };
 
-   namespace::autoclean->import
-      ( -cleanee => scalar caller, -except => [ @EXPORT ] );
-   $global_opts->{into} //= caller;
-   $class->SUPER::import( $global_opts );
+   namespace::autoclean->import( -cleanee => $caller, -except => [ @EXPORT ] );
+   $globals->{into} //= $caller; $class->SUPER::import( $globals );
    return;
 }
 
@@ -29,9 +28,11 @@ sub MODIFY_CODE_ATTRIBUTES {
    for my $attr (@attrs) {
       my ($k, $v) = $attr =~ m{ \A ([^\(]+) (?: [\(] ([^\)]+) [\)] )? \z }mx;
 
-      my $vals = $Code_Attr->{ 0 + $code }->{ $k } // [];
+      my $vals = $Code_Attr->{ 0 + $code }->{ $k } //= []; defined $v or next;
 
-      defined $v and push @{ $vals }, $v;
+         $v =~ s{ \A \` (.*) \` \z }{$1}msx
+      or $v =~ s{ \A \" (.*) \" \z }{$1}msx
+      or $v =~ s{ \A \' (.*) \' \z }{$1}msx; push @{ $vals }, $v;
 
       $Code_Attr->{ 0 + $code }->{ $k } = $vals;
    }

@@ -6,9 +6,15 @@
    <script src="[% links.js %]mooclasses.js"></script>
 [% IF page.editing -%]
    <script src="[% links.cdnjs.codemirror %]"></script>
+[%    IF page.user.binding == 'emacs' -%]
    <script src="[% links.cdnjs.emacs_keymap %]"></script>
+[%    END -%]
+[%    IF page.user.binding == 'sublime' -%]
    <script src="[% links.cdnjs.sublime_keymap %]"></script>
+[%    END -%]
+[%    IF page.user.binding == 'vim' -%]
    <script src="[% links.cdnjs.vim_keymap %]"></script>
+[%    END -%]
    <script src="[% links.cdnjs.continuelist %]"></script>
    <script src="[% links.cdnjs.match_brackets %]"></script>
    <script src="[% links.cdnjs.trailing_space %]"></script>

@@ -31,10 +31,12 @@ documentation in a developer friendly way.
 I saw [Daux.io](https://github.com/justinwalsh/daux.io) on Github and it said
 "Fork Me" so I did.
 
+JavaScript libraries hosted by [CloudFlare](https://www.cloudflare.com/).
+
 ## Differences
 
-I exchanged the PHP for modern
-[Perl](http://www.perl.org), [Moo](https://metacpan.org/module/Moo),
+I exchanged the PHP for modern [Perl](http://www.perl.org),
+[Moo](https://metacpan.org/module/Moo),
 [Plack](https://metacpan.org/module/Plack), and
 [Web::Simple](https://metacpan.org/module/Web::Simple). Not a fan of Bootstrap
 so that went also. Prefer class based inheritance when JavaScript programming
@@ -80,10 +82,10 @@ Then install [local::lib](https://metacpan.org/module/local::lib) with:
 ```
 
 The second statement sets environment variables to include the local Perl
-library. You can append the output of the perl command to your shell startup
-if you want to make it permanent. Without the correct environment settings
-Perl will not be able to find the installed dependencies and the following
-will fail, badly.
+library. You can append the output of the perl command to your shell startup if
+you want to make it permanent. Without the correct environment settings Perl
+will not be able to find the installed dependencies and the following will
+fail, badly.
 
 Install **App-Doh** with:
 
@@ -94,11 +96,10 @@ Install **App-Doh** with:
 Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,
 installation may take a while to complete. The flip side is that there are no
-external dependencies like Node.js or Grunt to install. Anyway you are
-advised to seek out sustenance whilst you wait for ack-2.12 to run it's tests.
-At the risk of installing broken modules (they are only going into a local
-library) you can skip the tests by running `cpanm` with the `--notest`
-option.
+external dependencies like Node.js or Grunt to install. Anyway you are advised
+to seek out sustenance whilst you wait for ack-2.12 to run it's tests.  At the
+risk of installing broken modules (they are only going into a local library)
+you can skip the tests by running `cpanm` with the `--notest` option.
 
 If that fails run it again with the --force option
 
@@ -115,18 +116,19 @@ foreground with:
    plackup bin/doh-server
 ```
 
-Users must authenticate against the `.htpasswd` files under the
-document root. The default user is `admin` password `admin123`. You
-should change that. To start the production server in the background
-listening on the default port 8085 use:
+Users must authenticate against the `users.json` file under the document
+root. The default user is `admin` password `admin123`. You should change that
+via the user profile editor which is the stud that appears on the right of the
+header after you have logged in. To start the production server in the
+background listening on the default port 8085 use:
 
 ```shell
    doh-daemon start
 ```
 
 The `doh-daemon` program provides normal SysV init script semantics.
-Additionally the daemon program will write an init script to standard output
-in response to the command:
+Additionally the daemon program will write an init script to standard output in
+response to the command:
 
 ```shell
    doh-daemon get_init_file

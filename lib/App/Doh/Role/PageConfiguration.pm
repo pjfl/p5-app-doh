@@ -12,18 +12,20 @@ requires qw( config load_page users );
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $page = $orig->( $self, $req, @args ); my $conf = $self->config;
+   my $conf    = $self->config; my $page = $orig->( $self, $req, @args );
+
+   my $editing = $req->query_params->( 'edit', { optional => TRUE } ) // FALSE;
 
    for (qw( author description keywords template )) {
       $page->{ $_ } //= $conf->$_();
    }
 
    $page->{application_version}   = $App::Doh::VERSION;
-   $page->{editing            } //= $req->params->{edit} // FALSE;
+   $page->{editing            } //= $editing;
    $page->{form_name          }   = 'markdown';
    $page->{hint               }   = $req->loc( 'Hint' );
    $page->{locale             } //= $req->locale;
-   $page->{mode               }   = $req->params->{mode} // 'online';
+   $page->{mode               }   = $req->mode;
    $page->{status_message     }   = $req->session->clear_status_message( $req );
    $page->{wanted             } //= join '/', @{ $req->args };
    $page->{homepage_url       }   = $page->{mode} eq 'online'

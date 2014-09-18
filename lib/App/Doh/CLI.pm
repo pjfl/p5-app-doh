@@ -32,8 +32,7 @@ has 'less'  => is => 'lazy', isa => Object, builder => sub {
 has 'less_class' => is => 'lazy', isa => LoadableClass, default => 'CSS::LESS';
 
 has 'models'     => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components  $_[ 0 ]->config->appclass.'::Model',
-      { builder  => $_[ 0 ], } };
+   load_components  'Model', { builder  => $_[ 0 ], } };
 
 option 'skin'    => is => 'ro',   isa => NonEmptySimpleStr,
    documentation => 'Name of the skin to operate on',

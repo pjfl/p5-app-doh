@@ -8,16 +8,19 @@ use Class::Usul::Functions qw( app_prefix );
 use Data::Validation;
 use File::DataClass::Types qw( ArrayRef Bool Directory File HashRef
                                NonEmptySimpleStr NonNumericSimpleStr
-                               NonZeroPositiveInt Path PositiveInt
-                               SimpleStr Str );
-use Sys::Hostname          qw( hostname );
-use Type::Utils            qw( enum );
+                               NonZeroPositiveInt Object Path
+                               PositiveInt SimpleStr Str );
+use Type::Utils            qw( as coerce enum from subtype via );
 
 extends q(Class::Usul::Config::Programs);
 
 Data::Validation::Constants->Exception_Class( 'Class::Usul::Exception' );
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
+
+my $SECRET      = subtype as Object;
+
+coerce $SECRET, from Str, via { App::Doh::_Secret->new( value => $_ ) };
 
 has 'analytics'       => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -168,8 +171,8 @@ has 'root_mtime'      => is => 'lazy', isa => Path, coerce => Path->coercion,
 has 'scrubber'        => is => 'ro',   isa => Str,
    default            => '[^ +\-\./0-9@A-Z\\_a-z~]';
 
-has 'secret'          => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => hostname;
+has 'secret'          => is => 'lazy', isa => $SECRET,
+   builder            => sub { 'hostname' }, coerce => $SECRET->coercion;
 
 has 'serve_as_static' => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'css | favicon.ico | img | js | less';
@@ -222,6 +225,28 @@ sub __to_array_of_hash {
 
    return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
             sort keys %{ $href } ],
+}
+
+package # Hide from indexer
+   App::Doh::_Secret;
+
+use overload '""' => sub { $_[ 0 ]->evaluate }, fallback => 1;
+
+use Moo;
+use Class::Usul::Constants qw( TRUE );
+use Class::Usul::Functions qw( io );
+use Class::Usul::Types     qw( NonEmptySimpleStr );
+use Sys::Hostname          qw( hostname );
+
+has 'value' => is => 'ro', isa => NonEmptySimpleStr, required => TRUE;
+
+sub evaluate {
+   my $v = $_[ 0 ]->value;
+
+   return -x $v             ? qx( $v )
+        : -r $v             ? io( $v )->all
+        : exists $ENV{ $v } ? $ENV{ $v }
+                            : eval $v;
 }
 
 1;

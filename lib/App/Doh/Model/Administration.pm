@@ -49,10 +49,12 @@ sub delete_user_action : Role(admin) {
 sub generate_static_action : Role(admin) {
    my ($self, $req) = @_;
 
-   my $cli = $self->config->binsdir->catfile( 'doh-cli' );
-   my $cmd = [ "${cli}", 'make_static' ];
+   # Need to use system to avoid defunct process
+   my $opts = { async => TRUE, use_system => TRUE, };
+   my $cli  = $self->config->binsdir->catfile( 'doh-cli' );
+   my $cmd  = [ "${cli}", 'make_static' ];
 
-   $self->log->debug( $self->ipc->run_cmd( $cmd, { async => TRUE } )->out );
+   $self->log->debug( $self->ipc->run_cmd( $cmd, $opts )->out );
 
    my $message = [ 'Static page generation started in the background by [_1]',
                    $req->username ];
@@ -91,7 +93,8 @@ sub get_dialog : Role(anon) {
 sub get_form : Role(admin) {
    my ($self, $req) = @_;
 
-   my $id    = $req->args->[ 0 ] // $req->params->{username};
+   my $id    = $req->args->[ 0 ]
+            // $req->query_params->( 'username', { optional => TRUE } );
    my $title = $req->loc( 'Administration' );
    my $stash = $self->get_content( $req );
    my $page  = $stash->{page};
@@ -111,8 +114,9 @@ sub login_action : Role(anon) {
    my $session  = $req->session;
    my $params   = $req->body_params;
    my $username = $params->( 'username' );
+   my $password = $params->( 'password', { raw => TRUE } );
 
-   if ($self->_authenticate( $username, $params->( 'password' ) )) {
+   if ($self->_authenticate( $username, $password )) {
       $message = [ 'User [_1] logged in', $username ];
       $session->authenticated( TRUE ); $session->username( $username );
    }
