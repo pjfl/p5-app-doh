@@ -77,14 +77,10 @@ var/root/img/favicon.png
 var/root/img/flags.png
 var/root/img/fork-me.png
 var/root/img/icons.png
-var/root/js/codemirror.js
 var/root/js/default.js
 var/root/js/editor.js
-var/root/js/highlight.min.js
 var/root/js/jekyll.js
-var/root/js/less.min.js
 var/root/js/mooclasses.js
-var/root/js/mootools.min.js
 var/root/less/default/blue.less
 var/root/less/default/editor-base.less
 var/root/less/default/editor.less
