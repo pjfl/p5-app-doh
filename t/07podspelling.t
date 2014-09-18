@@ -39,6 +39,7 @@ done_testing();
 __DATA__
 peter
 flanigan
+analytics
 API
 BUILDARGS
 cli
@@ -48,6 +49,7 @@ inline
 JavaScript
 JSON
 loc
+merchantability
 microformat
 microformats
 middleware

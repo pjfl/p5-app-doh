@@ -48,7 +48,7 @@ around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
 
    my $env  = delete $attr->{env};
-   my $sess = $attr->{_session} = $env->{ 'psgix.session' };
+   my $sess = $attr->{_session} = $env->{ 'psgix.session' } // {};
 
    merge_attributes $attr, $sess, {}, [ keys %{ $sess } ];
    $attr->{updated} //= time;

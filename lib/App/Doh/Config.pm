@@ -303,7 +303,7 @@ containing user uploaded files
 
 =item C<auth_roles>
 
-The list of roles applicable to authorization. Defaults to C<admin>,
+The list of roles applicable to authorisation. Defaults to C<admin>,
 C<editor>, and C<user>
 
 =item C<author>

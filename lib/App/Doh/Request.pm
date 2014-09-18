@@ -363,7 +363,7 @@ An L<HTTP::Body> object constructed from the current request
 
 =item C<content_length>
 
-Length in bytes of the undecoded body content
+Length in bytes of the not yet decoded body content
 
 =item C<content_type>
 
@@ -373,6 +373,10 @@ Mime type of the body content
 
 A non empty simple string which is the domain of the request. The value of
 C<host> but without the port number
+
+=item C<encoding>
+
+The encoding used to decode all inputs, defaults to C<UTF-8>
 
 =item C<host>
 
@@ -471,6 +475,11 @@ the request in a future release
 =head2 C<loc_default>
 
 Like the C<loc> method but always translates to the default language
+
+=head2 C<mode>
+
+The mode of the current request. Set to C<online> if this is a live request,
+set to C<static> of this request is generating a static page
 
 =head2 C<query_params>
 
