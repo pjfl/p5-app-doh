@@ -9,7 +9,8 @@ use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix io );
 use Class::Usul::Options;
-use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object );
+use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object
+                               PositiveInt );
 
 extends q(Class::Usul::Programs);
 
@@ -29,15 +30,20 @@ has 'less'  => is => 'lazy', isa => Object, builder => sub {
                                   tmp_path      => $conf->tempdir, );
 };
 
-has 'less_class' => is => 'lazy', isa => LoadableClass, default => 'CSS::LESS';
+has 'less_class'      => is => 'lazy', isa => LoadableClass,
+   default            => 'CSS::LESS';
 
-has 'models'     => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components  'Model', { builder  => $_[ 0 ], } };
+option 'max_gen_time' => is => 'ro',   isa => PositiveInt,
+   documentation      => 'Maximum generation run time in seconds',
+   default            => 1_800, format => 'i', short => 'm';
 
-option 'skin'    => is => 'ro',   isa => NonEmptySimpleStr,
-   documentation => 'Name of the skin to operate on',
-   default       => sub { $_[ 0 ]->config->skin }, format => 's',
-   short         => 's';
+has 'models'          => is => 'lazy', isa => HashRef[Object], builder => sub {
+   load_components    'Model', { builder  => $_[ 0 ], } };
+
+option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
+   documentation      => 'Name of the skin to operate on',
+   default            => sub { $_[ 0 ]->config->skin }, format => 's',
+   short              => 's';
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -84,7 +90,14 @@ sub make_skin : method {
 }
 
 sub make_static : method {
+   # TODO: Add caching to stop uneeded regeneration. Use mod times
    my $self = shift; my $conf = $self->config; my $models = $self->models;
+
+   my $opts = { async => TRUE, k => 'make_static', t => $self->max_gen_time };
+
+   unless ($self->lock->set( $opts )) {
+      $self->info( 'Static page generation already in progress' ); return OK;
+   }
 
    my $dest = io( $self->next_argv // $conf->static );
 
@@ -101,6 +114,7 @@ sub make_static : method {
       $self->_make_localised_static( $dest, $tree, $locale, TRUE );
    }
 
+   $self->lock->reset( k => 'make_static' );
    return OK;
 }
 

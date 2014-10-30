@@ -3,7 +3,7 @@ package App::Doh::Request;
 use namespace::autoclean;
 
 use Moo;
-use App::Doh::Functions    qw( extract_lang );
+use App::Doh::Functions    qw( extract_lang new_uri );
 use App::Doh::Session;
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC TRUE );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
@@ -18,8 +18,6 @@ use HTTP::Status           qw( HTTP_EXPECTATION_FAILED
 use Scalar::Util           qw( blessed weaken );
 use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
-use URI::http;
-use URI::https;
 
 # Public attributes
 has 'args'           => is => 'ro',   isa => ArrayRef, default => sub { [] };
@@ -77,24 +75,32 @@ has 'tunnel_method'  => is => 'lazy', isa => NonEmptySimpleStr;
 has 'uri'            => is => 'lazy', isa => Object;
 
 # Private attributes
+has '_base'          => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
+   $_[ 0 ]->scheme.'://'.$_[ 0 ]->host.$_[ 0 ]->script.'/' }, init_arg => undef;
+
 has '_content'       => is => 'lazy', isa => Str, init_arg => undef;
 
-has '_env'           => is => 'ro',   isa => HashRef, default => sub { {} };
+has '_env'           => is => 'ro',   isa => HashRef, default => sub { {} },
+   init_arg          => 'env';
 
-has '_params'        => is => 'ro',   isa => HashRef, default => sub { {} };
+has '_params'        => is => 'ro',   isa => HashRef, default => sub { {} },
+   init_arg          => 'params';
 
 has '_usul'          => is => 'ro',   isa => BaseType,
-   handles           => [ qw( config l10n log ) ], required => TRUE;
+   handles           => [ qw( config l10n log ) ],
+   init_arg          => 'builder', required => TRUE;
 
 # Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = {};
 
-   $attr->{_usul  } = shift @args;
-   $attr->{_env   } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
-   $attr->{_params} = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
+   is_hashref $args[ 0 ] and return $args[ 0 ];
+
+   $attr->{builder} = shift @args;
+   $attr->{env    } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
+   $attr->{params } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{args   } = (defined $args[ 0 ] && blessed $args[ 0 ])
-                    ? [ $args[ 0 ] ]
+                    ? [ $args[ 0 ] ] # Upload object
                     : [ split m{ / }mx, trim $args[ 0 ] || NUL ];
    return $attr;
 };
@@ -111,14 +117,13 @@ sub BUILD {
 }
 
 sub _build_base {
-   my $self = shift; my $uri;
+   my $self = shift; my $uri = $self->_base;
 
    if ($self->mode eq 'static') {
       my @path = split m{ / }mx, $self->path; $uri = '../' x scalar @path;
    }
-   else { $uri = $self->scheme.'://'.$self->host.$self->script.'/' }
 
-   return bless \$uri, 'URI::'.$self->scheme;
+   return new_uri $uri, $self->scheme;
 }
 
 sub _build_body {
@@ -173,12 +178,12 @@ sub _build_tunnel_method  {
 }
 
 sub _build_uri {
-   my $self = shift;my $uri;
+   my $self = shift; my $uri;
 
-   if ($self->mode ne 'static') { $uri = $self->base.$self->path }
-   else { $uri = $self->base.$self->locale.'/'.$self->path.'.html' }
+   if ($self->mode ne 'static') { $uri = $self->_base.$self->path }
+   else { $uri = $self->_base.$self->locale.'/'.$self->path.'.html' }
 
-   return bless \$uri, 'URI::'.$self->scheme;
+   return new_uri $uri, $self->scheme;
 }
 
 # Public methods
@@ -217,11 +222,11 @@ sub uri_for {
 
    if ($self->mode eq 'static' and '/' ne substr $path, -1, 1) {
       $path or $path = 'index';
-      $path = $self->base.$self->locale."/${path}.html";
+      $path = $self->_base.$self->locale."/${path}.html";
    }
-   else { first_char $path ne '/' and $path = $self->base.$path }
+   else { first_char $path ne '/' and $path = $self->_base.$path }
 
-   my $uri = bless \$path, 'URI::'.$self->scheme;
+   my $uri = new_uri $path, $self->scheme;
 
    $query_params[ 0 ] and $uri->query_form( @query_params );
 
@@ -287,7 +292,7 @@ sub __get_defined_value {
 
    my $v = __defined_or_throw( $name, $params->{ $name }, $opts );
 
-   is_arrayref $v and $v = $v->[ 0 ];
+   is_arrayref $v and $v = $v->[ -1 ];
 
    return __defined_or_throw( $name, $v, $opts );
 }

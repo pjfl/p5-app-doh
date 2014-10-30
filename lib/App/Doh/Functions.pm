@@ -5,17 +5,24 @@ use strictures;
 use feature 'state';
 use parent  'Exporter::Tiny';
 
-use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE LANG NUL TRUE );
+use Class::Usul::Constants qw( FALSE LANG NUL TRUE );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
-                               my_prefix split_on_dash throw );
+                               my_prefix split_on_dash );
 use English                qw( -no_match_vars );
 use Module::Pluggable::Object;
-use Unexpected::Functions  qw( Unspecified );
+use URI::Escape            qw( );
+use URI::http;
+use URI::https;
 
 our @EXPORT_OK = qw( build_navigation_list build_tree clone  env_var
                      extract_lang is_static iterator load_components
                      localise_tree make_id_from make_name_from mtime
-                     set_element_focus show_node );
+                     new_uri set_element_focus show_node );
+
+my $reserved   = q(;/?:@&=+$,[]);
+my $mark       = q(-_.!~*'());                                    #'; emacs
+my $unreserved = "A-Za-z0-9\Q${mark}\E";
+my $uric       = quotemeta( $reserved )."${unreserved}%";
 
 sub build_navigation_list ($$$$) {
    my ($root, $tree, $ids, $wanted) = @_;
@@ -186,6 +193,10 @@ sub mtime ($) {
    return $_[ 0 ]->{tree}->{_mtime};
 }
 
+sub new_uri ($$) {
+   return bless __uric_escape( $_[ 0 ] ), 'URI::'.$_[ 1 ];
+}
+
 sub set_element_focus {
    my ($form, $name) = @_;
 
@@ -230,6 +241,14 @@ sub __sorted_keys {
 
    return [ sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
             grep { first_char $_ ne '_' } keys %{ $node } ];
+}
+
+sub __uric_escape {
+    my $str = shift;
+
+    $str =~ s{([^$uric\#])}{ URI::Escape::escape_char($1) }ego;
+    utf8::downgrade( $str );
+    return \$str;
 }
 
 1;
