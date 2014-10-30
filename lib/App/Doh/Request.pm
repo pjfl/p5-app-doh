@@ -23,7 +23,8 @@ use Unexpected::Functions  qw( Unspecified );
 has 'args'           => is => 'ro',   isa => ArrayRef, default => sub { [] };
 
 has 'base'           => is => 'lazy', isa => Object,
-   builder           => sub { new_uri $_[ 0 ]->_base, $_[ 0 ]->scheme };
+   builder           => sub { new_uri $_[ 0 ]->_base, $_[ 0 ]->scheme },
+   init_arg          => undef;
 
 has 'body'           => is => 'lazy', isa => Object;
 
@@ -36,8 +37,8 @@ has 'content_type'   => is => 'lazy', isa => SimpleStr,
 has 'domain'         => is => 'lazy', isa => NonEmptySimpleStr,
    builder           => sub { (split m{ : }mx, $_[ 0 ]->host)[ 0 ] };
 
-has 'encoding'       => is => 'ro',   isa => NonEmptySimpleStr,
-   default           => 'UTF-8';
+has 'encoding'       => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => sub { $_[ 0 ]->config->encoding };
 
 has 'host'           => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
    my $env           =  $_[ 0 ]->_env;
@@ -134,7 +135,7 @@ sub _build_body {
    my $body = HTTP::Body->new( $self->content_type, length $content );
 
    length $content and $body->add( $content );
-
+   $self->_decode_hash( $body->param );
    return $body;
 }
 
@@ -145,9 +146,9 @@ sub _build__content {
    my $fh = $env->{ 'psgi.input' } or return NUL;
 
    try   { $fh->seek( 0, 0 ); $fh->read( $content, $cl, 0 ); $fh->seek( 0, 0 ) }
-   catch { $self->log->error( $_ ); $content = undef };
+   catch { $self->log->error( $_ ); $content = NUL };
 
-   return $content ? decode( $self->encoding, $content ) : NUL;
+   return $content || NUL;
 }
 
 sub _build_locale {

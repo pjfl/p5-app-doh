@@ -17,7 +17,8 @@ var Behaviour = new Class( {
       message        : null,
       popup          : false,
       statusUpdPeriod: 4320,
-      target         : null
+      target         : null,
+      useCodeMirror  : true
    },
 
    initialize: function( options ) {
@@ -61,7 +62,7 @@ var Behaviour = new Class( {
          } );
       }
 
-      if (opt.editing) {
+      if (opt.editing && opt.useCodeMirror) {
          this.editor    = new Editor( {
             codeMirror  : { keyMap: opt.keyMap },
             element     : $( 'markdown-editor' ) } );

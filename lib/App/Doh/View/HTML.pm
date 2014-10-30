@@ -32,11 +32,11 @@ has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
 
 # Public methods
 sub serialize {
-   my ($self, $req, $stash) = @_;
+   my ($self, $req, $stash) = @_; my $enc = $self->encoding;
 
    $self->_serialize_microformat( $req, $stash->{page} //= {} );
 
-   my $html = encode( 'UTF-8', $self->render_template( $req, $stash ) );
+   my $html = encode( $enc, $self->render_template( $req, $stash ) );
 
    return [ $stash->{code}, __header( $stash->{http_headers} ), [ $html ] ];
 }

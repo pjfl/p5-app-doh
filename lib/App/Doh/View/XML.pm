@@ -25,11 +25,12 @@ sub serialize {
    my $content = { items => [ $self->render_template( $req, $stash ) ] };
    my $js      = join "\n", @{ $stash->{page}->{literal_js} // [] };
    my $meta    = $stash->{page}->{meta} // {};
+   my $enc     = $self->encoding;
 
    $content->{ $_ } = $meta->{ $_ } for (keys %{ $meta });
 
    $js and $content->{script} //= [] and push @{ $content->{script} }, $js;
-   $content = encode( 'UTF-8', $self->_transcoder->xml_out( $content ) );
+   $content = encode( $enc, $self->_transcoder->xml_out( $content ) );
 
    return [ $stash->{code}, __header( $stash->{http_headers} ), [ $content ] ];
 }

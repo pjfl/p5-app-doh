@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Fixed decoding of body parameters
+          - Component and input encoding defaults to config
           - Added maximum generation run time
           - URIs now properly enscaped
           - Improved Request API will instantiate from a hash
