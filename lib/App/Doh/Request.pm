@@ -22,7 +22,8 @@ use Unexpected::Functions  qw( Unspecified );
 # Public attributes
 has 'args'           => is => 'ro',   isa => ArrayRef, default => sub { [] };
 
-has 'base'           => is => 'lazy', isa => Object;
+has 'base'           => is => 'lazy', isa => Object,
+   builder           => sub { new_uri $_[ 0 ]->_base, $_[ 0 ]->scheme };
 
 has 'body'           => is => 'lazy', isa => Object;
 
@@ -75,8 +76,8 @@ has 'tunnel_method'  => is => 'lazy', isa => NonEmptySimpleStr;
 has 'uri'            => is => 'lazy', isa => Object;
 
 # Private attributes
-has '_base'          => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
-   $_[ 0 ]->scheme.'://'.$_[ 0 ]->host.$_[ 0 ]->script.'/' }, init_arg => undef;
+has '_base'          => is => 'lazy', isa => NonEmptySimpleStr,
+   init_arg          => undef;
 
 has '_content'       => is => 'lazy', isa => Str, init_arg => undef;
 
@@ -116,14 +117,15 @@ sub BUILD {
    return;
 }
 
-sub _build_base {
-   my $self = shift; my $uri = $self->_base;
+sub _build__base {
+   my $self = shift; my $base;
 
    if ($self->mode eq 'static') {
-      my @path = split m{ / }mx, $self->path; $uri = '../' x scalar @path;
+      my @path = split m{ / }mx, $self->path; $base = '../' x scalar @path;
    }
+   else { $base = $self->scheme.'://'.$self->host.$self->script.'/' }
 
-   return new_uri $uri, $self->scheme;
+   return $base;
 }
 
 sub _build_body {
