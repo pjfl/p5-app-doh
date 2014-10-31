@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use Moo;
 use Class::Usul::Constants     qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions     qw( create_token is_hashref throw );
+use Class::Usul::Functions     qw( create_token is_hashref );
 use Class::Usul::Types         qw( NonZeroPositiveInt Object );
 use Crypt::Eksblowfish::Bcrypt qw( bcrypt en_base64 );
 use Data::Validation;

@@ -43,8 +43,7 @@ sub delete_file {
    my ($self, $req) = @_;
 
    my $node     = $self->find_node( $req->locale, $req->args )
-      or throw error => 'Cannot find document tree node to delete',
-                  rv => HTTP_NOT_FOUND;
+      or throw 'Cannot find document tree node to delete', rv => HTTP_NOT_FOUND;
    my $path     = $node->{path};
 
    $path->exists and $path->unlink; __prune( $path ); $self->invalidate_cache;
@@ -89,8 +88,7 @@ sub rename_file {
    my $params   = $req->body_params;
    my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
    my $node     = $self->find_node( $req->locale, $old_path )
-      or throw error => 'Cannot find document tree node to rename',
-                  rv => HTTP_NOT_FOUND;
+      or throw 'Cannot find document tree node to rename', rv => HTTP_NOT_FOUND;
    my $new_node = $self->_new_node( $req->locale, $params->( 'pathname' ) );
 
    $new_node->{path}->assert_filepath;
@@ -108,8 +106,7 @@ sub save_file {
    my ($self, $req) = @_;
 
    my $node     =  $self->find_node( $req->locale, $req->args )
-      or throw error => 'Cannot find document tree node to update',
-                  rv => HTTP_NOT_FOUND;
+      or throw 'Cannot find document tree node to update', rv => HTTP_NOT_FOUND;
    my $content  =  $req->body_params->( 'content', { raw => TRUE } );
       $content  =~ s{ \r\n }{\n}gmx; $content =~ s{ \s+ \z }{}mx;
    my $path     =  $node->{path}; $path->println( $content ); $path->close;
@@ -134,16 +131,15 @@ sub upload {
    my ($self, $req) = @_; my $conf = $self->config;
 
    my $upload = $req->args->[ 0 ]
-      or  throw class => Unspecified, args => [ 'upload object' ],
-                   rv => HTTP_EXPECTATION_FAILED;
+      or  throw Unspecified, args => [ 'upload object' ],
+                               rv => HTTP_EXPECTATION_FAILED;
 
-   $upload->is_upload
-      or  throw error => $upload->reason, rv => HTTP_EXPECTATION_FAILED;
+   $upload->is_upload or throw $upload->reason, rv => HTTP_EXPECTATION_FAILED;
 
    $upload->size > $conf->max_asset_size
-      and throw error => 'File [_1] size [_2] too big',
-                 args => [ $upload->filename, $upload->size ],
-                   rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
+      and throw 'File [_1] size [_2] too big',
+                args => [ $upload->filename, $upload->size ],
+                  rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
 
    my $dest = $conf->assetdir->catfile( $upload->filename )->assert_filepath;
 
@@ -170,9 +166,9 @@ sub _new_node {
    $parent and $parent->{type} eq 'folder'
       and exists $parent->{tree}->{ $id }
       and $parent->{tree}->{ $id }->{path} eq $path
-      and throw error => 'Path [_1] already exists',
-                 args => [ join '/', $lang, @pathname ],
-                   rv => HTTP_PRECONDITION_FAILED;
+      and throw 'Path [_1] already exists',
+                args => [ join '/', $lang, @pathname ],
+                  rv => HTTP_PRECONDITION_FAILED;
 
    return { path => $path, url => $url, };
 }

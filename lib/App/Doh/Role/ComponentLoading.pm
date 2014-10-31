@@ -34,7 +34,7 @@ sub render {
    (is_arrayref $args and $args->[ 0 ] and exists $models->{ $args->[ 0 ] })
       or return $args;
 
-   my ($model, $method, undef, @args) = @{ $args }; my ($req, $res);
+   my ($moniker, $method, undef, @args) = @{ $args }; my ($req, $res);
 
    try   { $req = $self->request_class->new( $self->usul, @args ) }
    catch { $res = __internal_server_error( $_ ) };
@@ -44,12 +44,12 @@ sub render {
    try {
       $method eq 'from_request' and $method = $req->tunnel_method.'_action';
 
-      my $stash = $models->{ $model }->execute( $method, $req );
+      my $stash = $models->{ $moniker }->execute( $method, $req );
 
       if (exists $stash->{redirect}) { $res = $self->_redirect( $req, $stash ) }
-      else { $res = $self->_render_view( $model, $method, $req, $stash ) }
+      else { $res = $self->_render_view( $moniker, $method, $req, $stash ) }
    }
-   catch { $res = $self->_render_exception( $model, $req, $_ ) };
+   catch { $res = $self->_render_exception( $moniker, $req, $_ ) };
 
    $req->session->update;
 
@@ -73,22 +73,22 @@ sub _redirect {
 }
 
 sub _render_view {
-   my ($self, $model, $method, $req, $stash) = @_;
+   my ($self, $moniker, $method, $req, $stash) = @_;
 
-   $stash->{view} or throw error => 'Model [_1] method [_2] stashed no view',
-                            args => [ $model, $method ];
+   $stash->{view} or throw 'Model [_1] method [_2] stashed no view',
+                           args => [ $moniker, $method ];
 
    my $view = $self->views->{ $stash->{view} }
-      or throw error => 'Model [_1] method [_2] unknown view [_3]',
-                args => [ $model, $method, $stash->{view} ];
+      or throw 'Model [_1] method [_2] unknown view [_3]',
+               args => [ $moniker, $method, $stash->{view} ];
    my $res  = $view->serialize( $req, $stash )
-      or throw error => 'View [_1] returned false', args => [ $stash->{view} ];
+      or throw 'View [_1] returned false', args => [ $stash->{view} ];
 
    return $res
 }
 
 sub _render_exception {
-   my ($self, $model, $req, $e) = @_; my $res; my $username = $req->username;
+   my ($self, $moniker, $req, $e) = @_; my $res; my $username = $req->username;
 
    my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
 
@@ -96,27 +96,13 @@ sub _render_exception {
       or $e = exception $e, { rv => HTTP_BAD_REQUEST };
 
    try {
-      my $stash = $self->models->{ $model }->exception_handler( $req, $e );
+      my $stash = $self->models->{ $moniker }->exception_handler( $req, $e );
 
-      $res = $self->_render_view( $model, 'exception_handler', $req, $stash );
+      $res = $self->_render_view( $moniker, 'exception_handler', $req, $stash );
    }
-   catch { $res = __internal_server_error( $e, $_ ) };
+   catch { throw $e };
 
    return $res;
-}
-
-# Private functions
-sub __internal_server_error {
-   my ($e, $secondary_error) = @_; my $message = "${e}\r\n";
-
-   $secondary_error and $secondary_error ne "${e}"
-      and $message .= "Secondary error: ${secondary_error}";
-
-   return [ HTTP_INTERNAL_SERVER_ERROR, __plain_header(), [ $message ] ];
-}
-
-sub __plain_header {
-   return [ 'Content-Type', 'text/plain' ];
 }
 
 1;

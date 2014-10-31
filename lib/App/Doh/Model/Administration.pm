@@ -161,8 +161,8 @@ sub update_profile_action : Role(any) {
    $email and $email ne $user->email and $args->{email} = $email;
 
    if ($pass or $again) {
-      $pass eq $again or throw error => 'User [_1] passwords do not match',
-                                args => [ $id ], rv => HTTP_EXPECTATION_FAILED;
+      $pass eq $again or throw 'User [_1] passwords do not match',
+                               args => [ $id ], rv => HTTP_EXPECTATION_FAILED;
       $args->{password} = $pass;
    }
 
@@ -194,21 +194,21 @@ sub update_user_action : Role(admin) {
 sub _authenticate {
    my ($self, $username, $password) = @_; my ($authenticated, $user);
 
-   $username or throw class => Unspecified, args => [ 'user name' ],
-                         rv => HTTP_EXPECTATION_FAILED;
-   $password or throw class => Unspecified, args => [ 'password' ],
-                         rv => HTTP_EXPECTATION_FAILED;
+   $username or throw Unspecified, args => [ 'user name' ],
+                                     rv => HTTP_EXPECTATION_FAILED;
+   $password or throw Unspecified, args => [ 'password' ],
+                                     rv => HTTP_EXPECTATION_FAILED;
 
    try   { $user = $self->users->find( $username ) }
-   catch { throw error => 'User [_1] unknown: [_2]', args => [ $username, $_ ],
-                    rv => HTTP_EXPECTATION_FAILED;
+   catch { throw 'User [_1] unknown: [_2]', args => [ $username, $_ ],
+                                              rv => HTTP_EXPECTATION_FAILED;
    };
 
-   $user->active or throw error => 'User [_1] account inactive',
-                           args => [ $username ], rv => HTTP_UNAUTHORIZED;
+   $user->active or throw 'User [_1] account inactive',
+                          args => [ $username ], rv => HTTP_UNAUTHORIZED;
 
    try   { $authenticated = $user->authenticate( $password ) }
-   catch { throw error => ucfirst "${_}", rv => HTTP_UNPROCESSABLE_ENTITY };
+   catch { throw ucfirst "${_}", rv => HTTP_UNPROCESSABLE_ENTITY };
 
    return $authenticated;
 }

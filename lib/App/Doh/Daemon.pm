@@ -43,9 +43,9 @@ has '_daemon_control' => is => 'lazy', isa => Object;
 around 'run' => sub {
    my ($orig, $self) = @_; my $daemon = $self->_daemon_control;
 
-   $daemon->name     or throw class => Unspecified, args => [ 'name'     ];
-   $daemon->program  or throw class => Unspecified, args => [ 'program'  ];
-   $daemon->pid_file or throw class => Unspecified, args => [ 'pid file' ];
+   $daemon->name     or throw Unspecified, args => [ 'name'     ];
+   $daemon->program  or throw Unspecified, args => [ 'program'  ];
+   $daemon->pid_file or throw Unspecified, args => [ 'pid file' ];
 
    $daemon->uid and not $daemon->gid
       and $daemon->gid( get_user( $daemon->uid )->gid );

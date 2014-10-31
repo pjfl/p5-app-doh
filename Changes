@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Updated throw call syntax
           - Fixed decoding of body parameters
           - Component and input encoding defaults to config
           - Added maximum generation run time

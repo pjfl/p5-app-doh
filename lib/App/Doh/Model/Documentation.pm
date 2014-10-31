@@ -112,8 +112,8 @@ sub _docs_url {
    my ($self, $locale) = @_; state $cache //= {};
 
    my $node  = $self->localised_tree( $locale )
-      or throw error => 'No document tree for locale [_1]',
-                args => [ $locale ], rv => HTTP_NOT_FOUND;
+      or throw 'No document tree for locale [_1]',
+               args => [ $locale ], rv => HTTP_NOT_FOUND;
    my $mtime = mtime $node;
    my $tuple = $cache->{ $locale };
 

@@ -83,8 +83,8 @@ sub get_page {
       my $locale = $self->config->locale; # Always index config default language
       my $root   = $self->config->file_root;
       my $node   = $self->localised_tree( $locale )
-         or throw error => 'No document tree for default locale [_1]',
-                   args => [ $locale ], rv => HTTP_NOT_FOUND;
+         or throw 'No document tree for default locale [_1]',
+                  args => [ $locale ], rv => HTTP_NOT_FOUND;
       my $wanted = $stash->{page}->{wanted} // NUL;
       my $nav    = $cache->{ $wanted };
 

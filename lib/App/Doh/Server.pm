@@ -68,8 +68,7 @@ sub _build_usul {
    my $attr = { config => $self->config, debug => env_var( 'DEBUG' ) // FALSE };
    my $conf = $attr->{config};
 
-   $conf->{appclass    } or  throw class => Unspecified,
-                                    args => [ 'application class' ];
+   $conf->{appclass    } or  throw Unspecified, args => [ 'application class' ];
    $attr->{config_class} //= $conf->{appclass}.'::Config';
    $conf->{name        } //= app_prefix   $conf->{appclass};
    $conf->{home        }   = find_apphome $conf->{appclass}, $conf->{home};
