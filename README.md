@@ -439,5 +439,6 @@ If you need help using Doh, or have found a bug, please create an issue on the
 <a href="https://github.com/pjfl/p5-app-doh/issues" target="_blank">Github
 repo</a>.
 
-Please note that a Perl module failing to install is not an issue for
-*this* application.
+Please note that a Perl module failing to install is not an issue for *this*
+application. Each Perl module has an issues tracker which can be found via that
+modules [Meta::CPAN](https://metacpan.org) page
