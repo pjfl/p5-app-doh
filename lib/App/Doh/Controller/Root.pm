@@ -33,7 +33,7 @@ __END__
 
 =head1 Name
 
-App::Doh::Controller::Root - Maps URIs onto view and model methods calls
+App::Doh::Controller::Root - Maps URIs onto model method calls
 
 =head1 Synopsis
 

@@ -27,6 +27,55 @@ has 'request_class' => is => 'lazy', isa => LoadableClass,
 has 'views'         => is => 'lazy', isa => HashRef[Object], builder => sub {
    load_components  'View', { builder => $_[ 0 ]->usul, } };
 
+# Private methods
+my $_redirect = sub {
+   my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
+
+   my $redirect = $stash->{redirect}; my $message = $redirect->{message};
+
+   if ($message) {
+      my $mid = $req->session->status_message( $message );
+
+      $self->log->info( $req->loc_default( @{ $message } ) );
+      $redirect->{location}->query_form( 'mid', $mid );
+   }
+
+   return [ $code, [ 'Location', $redirect->{location} ], [] ];
+};
+
+my $_render_view = sub {
+   my ($self, $moniker, $method, $req, $stash) = @_;
+
+   $stash->{view}
+      or throw 'Model [_1] method [_2] stashed no view', [ $moniker, $method ];
+
+   my $view = $self->views->{ $stash->{view} }
+      or throw 'Model [_1] method [_2] unknown view [_3]',
+               [ $moniker, $method, $stash->{view} ];
+   my $res  = $view->serialize( $req, $stash )
+      or throw 'View [_1] returned false', [ $stash->{view} ];
+
+   return $res
+};
+
+my $_render_exception = sub {
+   my ($self, $moniker, $req, $e) = @_; my $res; my $username = $req->username;
+
+   my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
+
+   ($e->can( 'rv' ) and $e->rv > HTTP_BAD_REQUEST)
+      or $e = exception $e, { rv => HTTP_BAD_REQUEST };
+
+   try {
+      my $stash = $self->models->{ $moniker }->exception_handler( $req, $e );
+
+      $res = $self->$_render_view( $moniker, 'exception_handler', $req, $stash);
+   }
+   catch { throw $e };
+
+   return $res;
+};
+
 # Public methods
 sub render {
    my ($self, $args) = @_; my $models = $self->models;
@@ -46,61 +95,12 @@ sub render {
 
       my $stash = $models->{ $moniker }->execute( $method, $req );
 
-      if (exists $stash->{redirect}) { $res = $self->_redirect( $req, $stash ) }
-      else { $res = $self->_render_view( $moniker, $method, $req, $stash ) }
+      if (exists $stash->{redirect}) { $res = $self->$_redirect( $req, $stash )}
+      else { $res = $self->$_render_view( $moniker, $method, $req, $stash ) }
    }
-   catch { $res = $self->_render_exception( $moniker, $req, $_ ) };
+   catch { $res = $self->$_render_exception( $moniker, $req, $_ ) };
 
    $req->session->update;
-
-   return $res;
-}
-
-# Private methods
-sub _redirect {
-   my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
-
-   my $redirect = $stash->{redirect}; my $message = $redirect->{message};
-
-   if ($message) {
-      my $mid = $req->session->status_message( $message );
-
-      $self->log->info( $req->loc_default( @{ $message } ) );
-      $redirect->{location}->query_form( 'mid', $mid );
-   }
-
-   return [ $code, [ 'Location', $redirect->{location} ], [] ];
-}
-
-sub _render_view {
-   my ($self, $moniker, $method, $req, $stash) = @_;
-
-   $stash->{view} or throw 'Model [_1] method [_2] stashed no view',
-                           args => [ $moniker, $method ];
-
-   my $view = $self->views->{ $stash->{view} }
-      or throw 'Model [_1] method [_2] unknown view [_3]',
-               args => [ $moniker, $method, $stash->{view} ];
-   my $res  = $view->serialize( $req, $stash )
-      or throw 'View [_1] returned false', args => [ $stash->{view} ];
-
-   return $res
-}
-
-sub _render_exception {
-   my ($self, $moniker, $req, $e) = @_; my $res; my $username = $req->username;
-
-   my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
-
-   ($e->can( 'rv' ) and $e->rv > HTTP_BAD_REQUEST)
-      or $e = exception $e, { rv => HTTP_BAD_REQUEST };
-
-   try {
-      my $stash = $self->models->{ $moniker }->exception_handler( $req, $e );
-
-      $res = $self->_render_view( $moniker, 'exception_handler', $req, $stash );
-   }
-   catch { throw $e };
 
    return $res;
 }

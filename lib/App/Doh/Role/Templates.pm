@@ -44,7 +44,7 @@ sub render_template {
 
    $stash->{ $_ } = $funcs->{ $_ } for (keys %{ $funcs });
 
-   $path->exists or throw PathNotFound, args => [ $path ];
+   $path->exists or throw PathNotFound, [ $path ];
    $self->encoder->process( catfile( $skin, $layout ), $stash, \$result )
       or throw $self->encoder->error;
 

@@ -210,21 +210,21 @@ has '_colours'        => is => 'ro',   isa => HashRef,
 has '_links'          => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'links';
 
-# Private methods
-sub _build_colours {
-   return __to_array_of_hash( $_[ 0 ]->_colours, qw( key value ) );
-}
-
-sub _build_links {
-   return __to_array_of_hash( $_[ 0 ]->_links, qw( name url ) );
-}
-
 # Private functions
-sub __to_array_of_hash {
+my $_to_array_of_hash = sub {
    my ($href, $key_key, $val_key) = @_;
 
    return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
             sort keys %{ $href } ],
+};
+
+# Construction
+sub _build_colours {
+   return $_to_array_of_hash->( $_[ 0 ]->_colours, 'key', 'value' );
+}
+
+sub _build_links {
+   return $_to_array_of_hash->( $_[ 0 ]->_links, 'name', 'url' );
 }
 
 package # Hide from indexer

@@ -19,6 +19,40 @@ with    q(App::Doh::Role::Editor);
 
 has '+moniker' => default => 'docs';
 
+# Private methods
+my $_find_first_url = sub {
+   my ($self, $locale) = @_;
+
+   my $iter = iterator $self->localised_tree( $locale );
+
+   while (defined (my $node = $iter->())) {
+      $node->{type} ne 'folder' and $node->{id} ne 'index'
+         and return $node->{url};
+   }
+
+   my $error = "Config Error: Unable to find the first page in\n"
+      ."the /docs folder. Double check you have at least one file in the root\n"
+      ."of the /docs folder. Also make sure you do not have any empty folders";
+
+   $self->log->error( $error );
+   return '/';
+};
+
+my $_docs_url = sub {
+   my ($self, $locale) = @_; state $cache //= {};
+
+   my $node  = $self->localised_tree( $locale )
+      or throw 'No document tree for locale [_1]', [ $locale ],
+               rv => HTTP_NOT_FOUND;
+   my $mtime = mtime $node;
+   my $tuple = $cache->{ $locale };
+
+   (not $tuple or $mtime > $tuple->[ 0 ]) and $cache->{ $locale }
+      = $tuple = [ $mtime, $self->$_find_first_url( $locale ) ];
+
+   return $tuple->[ 1 ];
+};
+
 # Construction
 around 'get_page' => sub {
    my ($orig, $self, $req, $node, $locale) = @_;
@@ -69,7 +103,7 @@ sub docs_tree {
 }
 
 sub docs_url {
-   return $_[ 1 ]->uri_for( $_[ 0 ]->_docs_url( $_[ 2 ] // $_[ 1 ]->locale ) );
+   return $_[ 1 ]->uri_for( $_[ 0 ]->$_docs_url( $_[ 2 ] // $_[ 1 ]->locale ) );
 }
 
 sub get_dialog : Role(any) {
@@ -105,40 +139,6 @@ sub upload_asset : Role(editor) {
 
    $res->{redirect}->{location} = $self->docs_url( $req );
    return $res;
-}
-
-# Private methods
-sub _docs_url {
-   my ($self, $locale) = @_; state $cache //= {};
-
-   my $node  = $self->localised_tree( $locale )
-      or throw 'No document tree for locale [_1]',
-               args => [ $locale ], rv => HTTP_NOT_FOUND;
-   my $mtime = mtime $node;
-   my $tuple = $cache->{ $locale };
-
-   (not $tuple or $mtime > $tuple->[ 0 ]) and $cache->{ $locale }
-      = $tuple = [ $mtime, $self->_find_first_url( $locale ) ];
-
-   return $tuple->[ 1 ];
-}
-
-sub _find_first_url {
-   my ($self, $locale) = @_;
-
-   my $iter = iterator( $self->localised_tree( $locale ) );
-
-   while (defined (my $node = $iter->())) {
-      $node->{type} ne 'folder' and $node->{id} ne 'index'
-         and return $node->{url};
-   }
-
-   my $error = "Config Error: Unable to find the first page in\n"
-      ."the /docs folder. Double check you have at least one file in the root\n"
-      ."of the /docs folder. Also make sure you do not have any empty folders";
-
-   $self->log->error( $error );
-   return '/';
 }
 
 1;

@@ -30,19 +30,13 @@ has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
    return $map;
 };
 
-# Public methods
-sub serialize {
-   my ($self, $req, $stash) = @_; my $enc = $self->encoding;
-
-   $self->_serialize_microformat( $req, $stash->{page} //= {} );
-
-   my $html = encode( $enc, $self->render_template( $req, $stash ) );
-
-   return [ $stash->{code}, __header( $stash->{http_headers} ), [ $html ] ];
-}
+# Private functions
+my $_header = sub {
+   return [ 'Content-Type' => 'text/html', @{ $_[ 0 ] || [] } ];
+};
 
 # Private methods
-sub _serialize_microformat {
+my $_serialize_microformat = sub {
    my ($self, $req, $page) = @_; defined $page->{format} or return;
 
    $page->{format} eq 'text'
@@ -56,11 +50,17 @@ sub _serialize_microformat {
       and $page->{format} = 'html';
 
    return;
-}
+};
 
-# Private functions
-sub __header {
-   return [ 'Content-Type' => 'text/html', @{ $_[ 0 ] || [] } ];
+# Public methods
+sub serialize {
+   my ($self, $req, $stash) = @_; my $enc = $self->encoding;
+
+   $self->$_serialize_microformat( $req, $stash->{page} //= {} );
+
+   my $html = encode( $enc, $self->render_template( $req, $stash ) );
+
+   return [ $stash->{code}, $_header->( $stash->{http_headers} ), [ $html ] ];
 }
 
 1;

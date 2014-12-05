@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Made private functions and methods lexical subs
+
 0.8.1     2014-10-31 01:08:36
           - Updated throw call syntax
           - Fixed decoding of body parameters

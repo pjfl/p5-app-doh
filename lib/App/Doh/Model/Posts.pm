@@ -18,6 +18,18 @@ with    q(App::Doh::Role::Editor);
 
 has '+moniker' => default => 'posts';
 
+# Private methods
+my $_chain_nodes = sub {
+   my ($self, $tree) = @_; my $iter = iterator $tree; my $prev;
+
+   while (defined (my $node = $iter->())) {
+      ($node->{type} eq 'folder' or $node->{id} eq 'index') and next;
+      $prev and $prev->{next} = $node; $node->{prev} = $prev; $prev = $node;
+   }
+
+   return;
+};
+
 # Construction
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
@@ -69,7 +81,7 @@ sub posts {
 
          $lcache->{tree} = build_tree( $self->type_map, $dir, 1, 0, $postd );
          $lcache->{type} = 'folder';
-         $self->_chain_nodes( $lcache );
+         $self->$_chain_nodes( $lcache );
 
          my $mtime = mtime $lcache; $mtime > $max_mtime and $max_mtime = $mtime;
       }
@@ -86,18 +98,6 @@ sub rename_file_action : Role(editor) {
 
 sub save_file_action : Role(editor) {
    return shift->save_file( @_ );
-}
-
-# Private methods
-sub _chain_nodes {
-   my ($self, $tree) = @_; my $iter = iterator( $tree ); my $prev;
-
-   while (defined (my $node = $iter->())) {
-      ($node->{type} eq 'folder' or $node->{id} eq 'index') and next;
-      $prev and $prev->{next} = $node; $node->{prev} = $prev; $prev = $node;
-   }
-
-   return;
 }
 
 1;

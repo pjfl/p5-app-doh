@@ -92,6 +92,94 @@ has '_usul'          => is => 'ro',   isa => BaseType,
    handles           => [ qw( config l10n log ) ],
    init_arg          => 'builder', required => TRUE;
 
+# Private functions
+my $_defined_or_throw = sub {
+   my ($k, $v, $opts) = @_;
+
+   defined $k or throw Unspecified, [ 'parameter name' ], level => 5,
+                       rv => HTTP_INTERNAL_SERVER_ERROR;
+
+   $opts->{optional} or defined $v
+      or throw Unspecified, [ $k ], level => 5, rv => HTTP_EXPECTATION_FAILED;
+   return $v;
+};
+
+my $_get_defined_value = sub {
+   my ($params, $name, $opts) = @_;
+
+   my $v = $_defined_or_throw->( $name, $params->{ $name }, $opts );
+
+   is_arrayref $v and $v = $v->[ -1 ];
+
+   return $_defined_or_throw->( $name, $v, $opts );
+};
+
+my $_get_defined_values = sub {
+   my ($params, $name, $opts) = @_;
+
+   my $v = $_defined_or_throw->( $name, $params->{ $name }, $opts );
+
+   is_arrayref $v or $v = [ $v ];
+
+   return $v;
+};
+
+my $_scrub_value = sub {
+   my ($name, $v, $opts) = @_; my $pattern = $opts->{scrubber}; my $len;
+
+   $pattern and defined $v and $v =~ s{ $pattern }{}gmx;
+
+   $opts->{optional} or $opts->{allow_null} or $len = length $v
+      or  throw Unspecified, [ $name ], level => 4,
+                rv => HTTP_EXPECTATION_FAILED;
+
+   $len and $len > $opts->{max_length}
+      and throw 'Parameter [_1] size [_2] too big', [ $name, $len ], level => 4,
+                rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
+   return $v;
+};
+
+# Private methods
+my $_decode_array = sub {
+   my ($self, $param) = @_; my $enc = $self->encoding;
+
+   (not defined $param->[ 0 ] or blessed $param->[ 0 ]) and return;
+
+   for (my $i = 0, my $len = @{ $param }; $i < $len; $i++) {
+      $param->[ $i ] = decode( $enc, $param->[ $i ] );
+   }
+
+   return;
+};
+
+my $_decode_hash = sub {
+   my ($self, $param) = @_; my $enc = $self->encoding;
+
+   for my $k (keys %{ $param }) {
+      if (is_arrayref $param->{ $k }) {
+         $param->{ decode( $enc, $k ) }
+            = [ map { decode( $enc, $_ ) } @{ $param->{ $k } } ];
+      }
+      else { $param->{ decode( $enc, $k ) } = decode( $enc, $param->{ $k } ) }
+   }
+
+   return;
+};
+
+my $_get_scrubbed_param = sub {
+   my ($self, $params, $name, $opts) = @_; $opts = { %{ $opts // {} } };
+
+   $opts->{max_length} //= $self->config->max_asset_size;
+   $opts->{scrubber  } //= $self->config->scrubber;
+   $opts->{multiple  } and return
+      [ map { $opts->{raw} ? $_ : $_scrub_value->( $name, $_, $opts ) }
+           @{ $_get_defined_values->( $params, $name, $opts ) } ];
+
+   my $v = $_get_defined_value->( $params, $name, $opts );
+
+   return $opts->{raw} ? $v : $_scrub_value->( $name, $v, $opts );
+};
+
 # Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = {};
@@ -110,7 +198,7 @@ around 'BUILDARGS' => sub {
 sub BUILD {
    my $self = shift;
 
-   $self->_decode_array( $self->args ); $self->_decode_hash( $self->_params );
+   $self->$_decode_array( $self->args ); $self->$_decode_hash( $self->_params );
 
    $self->mode ne 'static' and $self->log->debug
       ( join SPC, (uc $self->method), $self->uri,
@@ -135,7 +223,7 @@ sub _build_body {
    my $body = HTTP::Body->new( $self->content_type, length $content );
 
    length $content and $body->add( $content );
-   $self->_decode_hash( $body->param );
+   $self->$_decode_hash( $body->param );
    return $body;
 }
 
@@ -195,7 +283,7 @@ sub body_params {
 
    my $params = $self->body->param; weaken( $params );
 
-   return sub { $self->_get_scrubbed_param( $params, @_ ) };
+   return sub { $self->$_get_scrubbed_param( $params, @_ ) };
 }
 
 sub loc {
@@ -215,7 +303,7 @@ sub query_params {
 
    my $params = $self->_params; weaken( $params );
 
-   return sub { $self->_get_scrubbed_param( $params, @_ ) };
+   return sub { $self->$_get_scrubbed_param( $params, @_ ) };
 }
 
 sub uri_for {
@@ -234,96 +322,6 @@ sub uri_for {
    $query_params[ 0 ] and $uri->query_form( @query_params );
 
    return $uri;
-}
-
-# Private methods
-sub _decode_array {
-   my ($self, $param) = @_; my $enc = $self->encoding;
-
-   (not defined $param->[ 0 ] or blessed $param->[ 0 ]) and return;
-
-   for (my $i = 0, my $len = @{ $param }; $i < $len; $i++) {
-      $param->[ $i ] = decode( $enc, $param->[ $i ] );
-   }
-
-   return;
-}
-
-sub _decode_hash {
-   my ($self, $param) = @_; my $enc = $self->encoding;
-
-   for my $k (keys %{ $param }) {
-      if (is_arrayref $param->{ $k }) {
-         $param->{ decode( $enc, $k ) }
-            = [ map { decode( $enc, $_ ) } @{ $param->{ $k } } ];
-      }
-      else { $param->{ decode( $enc, $k ) } = decode( $enc, $param->{ $k } ) }
-   }
-
-   return;
-}
-
-sub _get_scrubbed_param {
-   my ($self, $params, $name, $opts) = @_; $opts = { %{ $opts // {} } };
-
-   $opts->{max_length} //= $self->config->max_asset_size;
-   $opts->{scrubber  } //= $self->config->scrubber;
-   $opts->{multiple  } and return
-      [ map { $opts->{raw} ? $_ : __scrub_value( $name, $_, $opts ) }
-           @{ __get_defined_values( $params, $name, $opts ) } ];
-
-   my $v = __get_defined_value( $params, $name, $opts );
-
-   return $opts->{raw} ? $v : __scrub_value( $name, $v, $opts );
-}
-
-# Private functions
-sub __defined_or_throw {
-   my ($k, $v, $opts) = @_;
-
-   defined $k or throw class => Unspecified, args => [ 'parameter name' ],
-                          rv => HTTP_INTERNAL_SERVER_ERROR, level => 5;
-
-   $opts->{optional} or defined $v
-      or throw class => Unspecified, args => [ $k ],
-                  rv => HTTP_EXPECTATION_FAILED, level => 5;
-   return $v;
-}
-
-sub __get_defined_value {
-   my ($params, $name, $opts) = @_;
-
-   my $v = __defined_or_throw( $name, $params->{ $name }, $opts );
-
-   is_arrayref $v and $v = $v->[ -1 ];
-
-   return __defined_or_throw( $name, $v, $opts );
-}
-
-sub __get_defined_values {
-   my ($params, $name, $opts) = @_;
-
-   my $v = __defined_or_throw( $name, $params->{ $name }, $opts );
-
-   is_arrayref $v or $v = [ $v ];
-
-   return $v;
-}
-
-sub __scrub_value {
-   my ($name, $v, $opts) = @_; my $pattern = $opts->{scrubber}; my $len;
-
-   $pattern and defined $v and $v =~ s{ $pattern }{}gmx;
-
-   $opts->{optional} or $opts->{allow_null} or $len = length $v
-      or  throw class => Unspecified, args => [ $name ], level => 4,
-                   rv => HTTP_EXPECTATION_FAILED;
-
-   $len and $len > $opts->{max_length}
-      and throw error => 'Parameter [_1] size [_2] too big',
-                 args => [ $name, $len ], level => 4,
-                   rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
-   return $v;
 }
 
 1;

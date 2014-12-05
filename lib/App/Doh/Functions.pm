@@ -24,6 +24,44 @@ my $mark       = q(-_.!~*'());                                    #'; emacs
 my $unreserved = "A-Za-z0-9\Q${mark}\E";
 my $uric       = quotemeta( $reserved )."${unreserved}%";
 
+# Private functions
+my $_extension2format = sub {
+   my ($map, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
+
+   return $map->{ $extn } // 'text';
+};
+
+my $_get_tip_text = sub {
+   my ($root, $node) = @_; my $text = $node->{path}->abs2rel( $root );
+
+   $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ \. .+ \z }{}mx;
+   $text =~ s{ [/] }{ / }gmx;     $text =~ s{ [_] }{ }gmx;
+
+   return $text;
+};
+
+my $_sorted_keys = sub {
+   my $node = shift;
+
+   return [ sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
+            grep { first_char $_ ne '_' } keys %{ $node } ];
+};
+
+my $_uric_escape = sub {
+    my $str = shift;
+
+    $str =~ s{([^$uric\#])}{ URI::Escape::escape_char($1) }ego;
+    utf8::downgrade( $str );
+    return \$str;
+};
+
+my $_make_tuple = sub {
+   my $node = shift; my $is_folder = $node && $node->{type} eq 'folder' ? 1 : 0;
+
+   return [ 0, $is_folder ? $_sorted_keys->( $node->{tree} ) : [], $node, ];
+};
+
+# Public functions
 sub build_navigation_list ($$$$) {
    my ($root, $tree, $ids, $wanted) = @_;
 
@@ -35,7 +73,7 @@ sub build_navigation_list ($$$$) {
       my $link = clone( $node ); delete $link->{tree};
 
       $link->{class}  = $node->{type} eq 'folder' ? 'folder-link' : 'file-link';
-      $link->{tip  }  = __get_tip_text( $root, $node );
+      $link->{tip  }  = $_get_tip_text->( $root, $node );
       $link->{depth} -= 2;
 
       if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
@@ -66,7 +104,7 @@ sub build_tree {
       my  $node       =  $tree->{ $id } = {
           date        => $mtime,
           depth       => $depth,
-          format      => __extension2format( $map, $path->pathname ),
+          format      => $_extension2format->( $map, $path->pathname ),
           id          => $id,
           name        => $name,
           parent      => $parent,
@@ -116,7 +154,7 @@ sub is_static () {
 }
 
 sub iterator ($) {
-   my $tree = shift; my @folders = ( __make_tuple( $tree ) );
+   my $tree = shift; my @folders = ( $_make_tuple->( $tree ) );
 
    return sub {
       while (my $tuple = $folders[ 0 ]) {
@@ -124,7 +162,7 @@ sub iterator ($) {
             my $node = $tuple->[ 2 ]->{tree}->{ $k };
 
             $node->{type} eq 'folder'
-               and unshift @folders, __make_tuple( $node );
+               and unshift @folders, $_make_tuple->( $node );
 
             return $node;
          }
@@ -194,7 +232,7 @@ sub mtime ($) {
 }
 
 sub new_uri ($$) {
-   return bless __uric_escape( $_[ 0 ] ), 'URI::'.$_[ 1 ];
+   return bless $_uric_escape->( $_[ 0 ] ), 'URI::'.$_[ 1 ];
 }
 
 sub set_element_focus {
@@ -212,43 +250,6 @@ sub show_node ($;$$) {
 
    return $node->{depth} >= $wanted_depth
        && $node->{url  } =~ m{ \A $wanted }mx ? TRUE : FALSE;
-}
-
-# Private functions
-sub __extension2format {
-   my ($map, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
-
-   return $map->{ $extn } // 'text';
-}
-
-sub __get_tip_text {
-   my ($root, $node) = @_; my $text = $node->{path}->abs2rel( $root );
-
-   $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ \. .+ \z }{}mx;
-   $text =~ s{ [/] }{ / }gmx;     $text =~ s{ [_] }{ }gmx;
-
-   return $text;
-}
-
-sub __make_tuple {
-   my $node = shift; my $is_folder = $node && $node->{type} eq 'folder' ? 1 : 0;
-
-   return [ 0, $is_folder ? __sorted_keys( $node->{tree} ) : [], $node, ];
-}
-
-sub __sorted_keys {
-   my $node = shift;
-
-   return [ sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
-            grep { first_char $_ ne '_' } keys %{ $node } ];
-}
-
-sub __uric_escape {
-    my $str = shift;
-
-    $str =~ s{([^$uric\#])}{ URI::Escape::escape_char($1) }ego;
-    utf8::downgrade( $str );
-    return \$str;
 }
 
 1;

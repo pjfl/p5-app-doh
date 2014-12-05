@@ -18,6 +18,11 @@ has '+moniker'   => default => 'xml';
 has '_transcoder' => is => 'lazy', isa => Object,
    builder        => sub { XML::Simple->new };
 
+# Private functions
+my $_header = sub {
+   return [ 'Content-Type' => 'text/xml', @{ $_[ 0 ] // [] } ];
+};
+
 # Public methods
 sub serialize {
    my ($self, $req, $stash) = @_;
@@ -32,12 +37,7 @@ sub serialize {
    $js and $content->{script} //= [] and push @{ $content->{script} }, $js;
    $content = encode( $enc, $self->_transcoder->xml_out( $content ) );
 
-   return [ $stash->{code}, __header( $stash->{http_headers} ), [ $content ] ];
-}
-
-# Private functions
-sub __header {
-   return [ 'Content-Type' => 'text/xml', @{ $_[ 0 ] // [] } ];
+   return [ $stash->{code}, $_header->( $stash->{http_headers} ), [ $content ]];
 }
 
 1;

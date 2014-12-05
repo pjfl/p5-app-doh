@@ -39,13 +39,46 @@ option 'server'  => is => 'ro', isa => NonEmptySimpleStr,
 # Private attributes
 has '_daemon_control' => is => 'lazy', isa => Object;
 
+# Private methods
+my $_get_listener_args = sub {
+   my $self = shift;
+   my $conf = $self->config;
+   my $port = env_var( 'PORT', $self->port );
+   my $args = {
+      '--port'       => $port,
+      '--server'     => $self->server,
+      '--access-log' => $conf->logsdir->catfile( "access_${port}.log" ),
+      '--app'        => $conf->binsdir->catfile( $self->app ), };
+
+   for my $k (keys %{ $self->options }) {
+      $args->{ "--${k}" } = $self->options->{ $k };
+   }
+
+   return %{ $args };
+};
+
+my $_stdio_file = sub {
+   my ($self, $extn, $name) = @_; $name ||= $self->config->name;
+
+   return $self->file->tempdir->catfile( "${name}.${extn}" );
+};
+
+my $_daemon = sub {
+   my $self = shift; $PROGRAM_NAME = $self->app;
+
+   env_var( 'DEBUG', $self->debug );
+   $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
+   Plack::Runner->run( $self->$_get_listener_args );
+   exit OK;
+};
+
 # Construction
 around 'run' => sub {
    my ($orig, $self) = @_; my $daemon = $self->_daemon_control;
 
-   $daemon->name     or throw Unspecified, args => [ 'name'     ];
-   $daemon->program  or throw Unspecified, args => [ 'program'  ];
-   $daemon->pid_file or throw Unspecified, args => [ 'pid file' ];
+   $daemon->name     or throw Unspecified, [ 'name'     ];
+   $daemon->program  or throw Unspecified, [ 'program'  ];
+   $daemon->pid_file or throw Unspecified, [ 'pid file' ];
 
    $daemon->uid and not $daemon->gid
       and $daemon->gid( get_user( $daemon->uid )->gid );
@@ -67,12 +100,12 @@ sub _build__daemon_control {
       path         => $conf->pathname,
 
       directory    => $conf->appldir,
-      program      => sub { shift; $self->_daemon( @_ ) },
+      program      => sub { shift; $self->$_daemon( @_ ) },
       program_args => [],
 
       pid_file     => $conf->rundir->catfile( "${name}_".$self->port.'.pid' ),
-      stderr_file  => $self->_stdio_file( 'err' ),
-      stdout_file  => $self->_stdio_file( 'out' ),
+      stderr_file  => $self->$_stdio_file( 'err' ),
+      stdout_file  => $self->$_stdio_file( 'out' ),
 
       fork         => 2,
    };
@@ -105,39 +138,6 @@ sub status : method {
 
 sub stop : method {
    $_[ 0 ]->_daemon_control->do_stop; return OK;
-}
-
-# Private methods
-sub _daemon {
-   my $self = shift; $PROGRAM_NAME = $self->app;
-
-   env_var( 'DEBUG', $self->debug );
-   $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
-   Plack::Runner->run( $self->_get_listener_args );
-   exit OK;
-}
-
-sub _get_listener_args {
-   my $self = shift;
-   my $conf = $self->config;
-   my $port = env_var( 'PORT', $self->port );
-   my $args = {
-      '--port'       => $port,
-      '--server'     => $self->server,
-      '--access-log' => $conf->logsdir->catfile( "access_${port}.log" ),
-      '--app'        => $conf->binsdir->catfile( $self->app ), };
-
-   for my $k (keys %{ $self->options }) {
-      $args->{ "--${k}" } = $self->options->{ $k };
-   }
-
-   return %{ $args };
-}
-
-sub _stdio_file {
-   my ($self, $extn, $name) = @_; $name ||= $self->config->name;
-
-   return $self->file->tempdir->catfile( "${name}.${extn}" );
 }
 
 1;

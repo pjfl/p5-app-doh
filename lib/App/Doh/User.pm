@@ -33,6 +33,20 @@ has 'validator'    => is => 'lazy', isa => Object, builder => sub {
          email     => { validate => 'isMandatory isValidEmail' },
          password  => { validate => 'isMandatory isValidPassword' }, }, } ) };
 
+# Private methods
+my $_encrypt_password = sub {
+   my ($self, $password) = @_; my $lf = $self->load_factor;
+
+   my $salt = "\$2a\$${lf}\$"
+              .(en_base64( pack( 'H*', substr( create_token, 0, 32 ) ) ) );
+
+   return bcrypt( $password, $salt );
+};
+
+my $_resultset = sub {
+   return $_[ 0 ]->resultset( 'users' );
+};
+
 # Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_;
@@ -52,21 +66,21 @@ sub create {
    my ($self, $args) = @_;
 
    $args = $self->validator->check_form( NUL, $args );
-   $args->{password} = $self->_encrypt_password( $args->{password} );
+   $args->{password} = $self->$_encrypt_password( $args->{password} );
 
-   return $self->_resultset->create( $args );
+   return $self->$_resultset->create( $args );
 }
 
 sub delete {
-   return $_[ 0 ]->_resultset->delete( $_[ 1 ] );
+   return $_[ 0 ]->$_resultset->delete( $_[ 1 ] );
 }
 
 sub find {
-   return $_[ 0 ]->_resultset->find( $_[ 1 ] );
+   return $_[ 0 ]->$_resultset->find( $_[ 1 ] );
 }
 
 sub list {
-   return $_[ 0 ]->_resultset->list( $_[ 1 ] // NUL );
+   return $_[ 0 ]->$_resultset->list( $_[ 1 ] // NUL );
 }
 
 sub update {
@@ -74,26 +88,10 @@ sub update {
 
    $args = $self->validator->check_form( NUL, $args );
    $args->{password} and $args->{password} !~ m{ \A \$ 2a }mx
-      and $args->{password} = $self->_encrypt_password( $args->{password} );
+      and $args->{password} = $self->$_encrypt_password( $args->{password} );
 
-   return $self->_resultset->find_and_update( $args );
+   return $self->$_resultset->find_and_update( $args );
 }
-
-# Private metods
-sub _encrypt_password {
-   my ($self, $password) = @_; my $lf = $self->load_factor;
-
-   my $salt = "\$2a\$${lf}\$"
-              .(en_base64( pack( 'H*', substr( create_token, 0, 32 ) ) ) );
-
-   return bcrypt( $password, $salt );
-}
-
-sub _resultset {
-   return $_[ 0 ]->resultset( 'users' );
-}
-
-1;
 
 package # Hide from indexer
    App::Doh::User::Result;

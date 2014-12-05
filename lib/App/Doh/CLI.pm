@@ -45,6 +45,24 @@ option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
    default            => sub { $_[ 0 ]->config->skin }, format => 's',
    short              => 's';
 
+# Private functions
+my $_deep_copy = sub {
+   my ($src, $dest, $excluding) = @_;
+
+   $src->exists or return; $excluding //= qr{ NUL() }mx;
+
+   my $filter = sub { $_->is_file && $_ !~ $excluding };
+   my $iter   = $src->deep->filter( $filter )->iterator;
+
+   while (my $from = $iter->()) {
+      my $to = $dest->catfile( $from->abs2rel( $src->parent ) );
+
+      $from->copy( $to->assert_filepath );
+   }
+
+   return;
+};
+
 # Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
@@ -56,14 +74,76 @@ around 'BUILDARGS' => sub {
    return $attr;
 };
 
+# Private methods
+my $_copy_assets = sub {
+   my ($self, $dest) = @_; my $conf = $self->config; my $root = $conf->root;
+
+   $dest->exists or $dest->mkpath; $dest->rmtree( { keep_root => TRUE } );
+
+   my ($unwanted_images, $unwanted_js, $unwanted_less);
+
+   if ($conf->colours->[ 0 ]) {
+      my $files = join '|', @{ $conf->less_files };
+
+      $unwanted_images = qr{ favicon \- (?: $files ) }mx;
+      $unwanted_less   = qr{ theme   \- (?: $files ) }mx;
+
+      $_deep_copy->( $root->catdir( $conf->less ), $dest, $unwanted_less );
+   }
+   else {
+      $unwanted_images = qr{ favicon\.png  }mx;
+      $unwanted_js     = qr{ less\.min\.js }mx;
+
+      $_deep_copy->( $root->catdir( $conf->css ), $dest );
+   }
+
+   $_deep_copy->( $conf->file_root->catdir( $conf->assets ), $dest );
+   $_deep_copy->( $root->catdir( $conf->images ), $dest, $unwanted_images );
+   $_deep_copy->( $root->catdir( $conf->js     ), $dest, $unwanted_js );
+   return;
+};
+
+my $_make_localised_static = sub {
+   my ($self, $dest, $tree, $locale, $make_dirs) = @_;
+
+   my $conf = $self->config; my $iter = iterator( $tree );
+
+   while (my $node = $iter->()) {
+      not $make_dirs and $node->{type} eq 'folder' and next;
+
+      my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
+      my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
+      my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
+      my $path = io( [ $dest, @path ] )->assert_filepath;
+
+      $self->info( "Writing ${locale}/".$node->{url} );
+      $self->run_cmd( $cmd, { out => $path } );
+   }
+
+   return;
+};
+
+my $_write_theme = sub {
+   my ($self, $cssd, $file) = @_;
+
+   my $skin = $self->skin;
+   my $conf = $self->config;
+   my $path = $conf->root->catfile( $conf->less, $skin, "${file}.less" );
+   my $css  = $self->less->compile( $path->all );
+
+   $self->info( "Writing ${skin}-${file} theme" );
+   $cssd->catfile( "${skin}-${file}.css" )->println( $css );
+   return;
+};
+
 # Public methods
 sub make_css : method {
    my $self = shift;
    my $conf = $self->config;
    my $cssd = $conf->root->catdir( $conf->css );
 
-   if (my $file = $self->next_argv) { $self->_write_theme( $cssd, $file ) }
-   else { $self->_write_theme( $cssd, $_ ) for (@{ $conf->less_files }) }
+   if (my $file = $self->next_argv) { $self->$_write_theme( $cssd, $file ) }
+   else { $self->$_write_theme( $cssd, $_ ) for (@{ $conf->less_files }) }
 
    return OK;
 }
@@ -104,98 +184,18 @@ sub make_static : method {
    env_var( 'MAKE_STATIC', TRUE );
    $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io( $dest->rel2abs( $conf->root ) );
-   $self->_copy_assets( $dest );
+   $self->$_copy_assets( $dest );
 
    for my $locale ($models->{docs}->locales) {
       my $tree = $models->{docs}->localised_tree( $locale );
 
-      $self->_make_localised_static( $dest, $tree, $locale, FALSE );
+      $self->$_make_localised_static( $dest, $tree, $locale, FALSE );
       $tree = $models->{posts}->localised_tree( $locale );
-      $self->_make_localised_static( $dest, $tree, $locale, TRUE );
+      $self->$_make_localised_static( $dest, $tree, $locale, TRUE );
    }
 
    $self->lock->reset( k => 'make_static' );
    return OK;
-}
-
-# Private methods
-sub _copy_assets {
-   my ($self, $dest) = @_; my $conf = $self->config; my $root = $conf->root;
-
-   $dest->exists or $dest->mkpath; $dest->rmtree( { keep_root => TRUE } );
-
-   my ($unwanted_images, $unwanted_js, $unwanted_less);
-
-   if ($conf->colours->[ 0 ]) {
-      my $files = join '|', @{ $conf->less_files };
-
-      $unwanted_images = qr{ favicon \- (?: $files ) }mx;
-      $unwanted_less   = qr{ theme   \- (?: $files ) }mx;
-
-      __deep_copy( $root->catdir( $conf->less ), $dest, $unwanted_less );
-   }
-   else {
-      $unwanted_images = qr{ favicon\.png  }mx;
-      $unwanted_js     = qr{ less\.min\.js }mx;
-
-      __deep_copy( $root->catdir( $conf->css ), $dest );
-   }
-
-   __deep_copy( $conf->file_root->catdir( $conf->assets ), $dest );
-   __deep_copy( $root->catdir( $conf->images ), $dest, $unwanted_images );
-   __deep_copy( $root->catdir( $conf->js     ), $dest, $unwanted_js );
-   return;
-}
-
-sub _make_localised_static {
-   my ($self, $dest, $tree, $locale, $make_dirs) = @_;
-
-   my $conf = $self->config; my $iter = iterator( $tree );
-
-   while (my $node = $iter->()) {
-      not $make_dirs and $node->{type} eq 'folder' and next;
-
-      my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
-      my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
-      my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
-      my $path = io( [ $dest, @path ] )->assert_filepath;
-
-      $self->info( "Writing ${locale}/".$node->{url} );
-      $self->run_cmd( $cmd, { out => $path } );
-   }
-
-   return;
-}
-
-sub _write_theme {
-   my ($self, $cssd, $file) = @_;
-
-   my $skin = $self->skin;
-   my $conf = $self->config;
-   my $path = $conf->root->catfile( $conf->less, $skin, "${file}.less" );
-   my $css  = $self->less->compile( $path->all );
-
-   $self->info( "Writing ${skin}-${file} theme" );
-   $cssd->catfile( "${skin}-${file}.css" )->println( $css );
-   return;
-}
-
-# Private functions
-sub __deep_copy {
-   my ($src, $dest, $excluding) = @_;
-
-   $src->exists or return; $excluding //= qr{ NUL() }mx;
-
-   my $filter = sub { $_->is_file && $_ !~ $excluding };
-   my $iter   = $src->deep->filter( $filter )->iterator;
-
-   while (my $from = $iter->()) {
-      my $to = $dest->catfile( $from->abs2rel( $src->parent ) );
-
-      $from->copy( $to->assert_filepath );
-   }
-
-   return;
 }
 
 1;

@@ -26,6 +26,24 @@ has 'link_text'  => is => 'ro',   isa => NonEmptySimpleStr,
 has '_hacc'      => is => 'lazy', isa => Object,
    builder       => sub { HTML::Accessors->new( content_type => 'text/html' ) };
 
+# Private methods
+my $_error = sub {
+   my ($self, $req, $path) = @_;
+
+   my $error = $req->loc( 'Class [_1] has no POD', $path->filename );
+
+   return $self->_hacc->pre( $error );
+};
+
+my $_top_link = sub {
+   my ($self, $req) = @_; my $hacc = $self->_hacc;
+
+   my $attr = { class => 'toplink', href => '#podtop' };
+   my $link = $hacc->a( $attr, $req->loc( $self->link_text ) );
+
+   return $hacc->p( { class => 'toplink' }, $link );
+};
+
 # Public methods
 sub serialize {
    my ($self, $req, $page) = @_;
@@ -40,33 +58,15 @@ sub serialize {
          LinkParser   => $link_parser,
          StringMode   => TRUE,
          TopHeading   => 1,
-         TopLinks     => $self->_top_link( $req ), );
+         TopLinks     => $self->$_top_link( $req ), );
 
    $content and $content->exists
       and $parser->parse_from_file( $content->pathname );
-   $content = $parser->asString || $self->_error( $req, $content );
+   $content = $parser->asString || $self->$_error( $req, $content );
    # Setting TopHeading = 2 screws the indent level in the index
    $content =~ s{ <   h (\d) }{"<h"  . ( $1 + 1 ) }egmx;
    $content =~ s{ < / h (\d) }{"</h" . ( $1 + 1 ) }egmx;
    return $header.$content;
-}
-
-# Private methods
-sub _error {
-   my ($self, $req, $path) = @_;
-
-   my $error = $req->loc( 'Class [_1] has no POD', $path->filename );
-
-   return $self->_hacc->pre( $error );
-}
-
-sub _top_link {
-   my ($self, $req) = @_; my $hacc = $self->_hacc;
-
-   my $attr = { class => 'toplink', href => '#podtop' };
-   my $link = $hacc->a( $attr, $req->loc( $self->link_text ) );
-
-   return $hacc->p( { class => 'toplink' }, $link );
 }
 
 1;

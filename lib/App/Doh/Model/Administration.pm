@@ -18,6 +18,31 @@ with    q(App::Doh::Role::Preferences);
 
 has '+moniker' => default => 'admin';
 
+# Private methods
+my $_authenticate = sub {
+   my ($self, $username, $password) = @_; my ($authenticated, $user);
+
+   $username or throw Unspecified, [ 'user name' ],
+                      rv => HTTP_EXPECTATION_FAILED;
+   $password or throw Unspecified, [ 'password' ],
+                      rv => HTTP_EXPECTATION_FAILED;
+
+   try   { $user = $self->users->find( $username ) }
+   catch {
+      throw 'User [_1] unknown: [_2]', [ $username, $_ ],
+            rv => HTTP_EXPECTATION_FAILED;
+   };
+
+   $user->active or throw 'User [_1] account inactive', [ $username ],
+                          rv => HTTP_UNAUTHORIZED;
+
+   try   { $authenticated = $user->authenticate( $password ) }
+   catch { throw ucfirst "${_}", rv => HTTP_UNPROCESSABLE_ENTITY };
+
+   return $authenticated;
+};
+
+# Public methods
 sub create_user_action : Role(anon) {
    my ($self, $req) = @_;
 
@@ -36,8 +61,8 @@ sub delete_user_action : Role(admin) {
 
    my $username = $req->body_params->( 'username' );
 
-   $username eq $req->username and throw error => 'Cannot self terminate',
-                                            rv => HTTP_I_AM_A_TEAPOT;
+   $username eq $req->username
+      and throw 'Cannot self terminate', rv => HTTP_I_AM_A_TEAPOT;
    $self->users->delete( $username );
 
    my $location = $req->uri_for( 'admin' );
@@ -116,7 +141,7 @@ sub login_action : Role(anon) {
    my $username = $params->( 'username' );
    my $password = $params->( 'password', { raw => TRUE } );
 
-   if ($self->_authenticate( $username, $password )) {
+   if ($self->$_authenticate( $username, $password )) {
       $message = [ 'User [_1] logged in', $username ];
       $session->authenticated( TRUE ); $session->username( $username );
    }
@@ -161,8 +186,8 @@ sub update_profile_action : Role(any) {
    $email and $email ne $user->email and $args->{email} = $email;
 
    if ($pass or $again) {
-      $pass eq $again or throw 'User [_1] passwords do not match',
-                               args => [ $id ], rv => HTTP_EXPECTATION_FAILED;
+      $pass eq $again or throw 'User [_1] passwords do not match', [ $id ],
+                               rv => HTTP_EXPECTATION_FAILED;
       $args->{password} = $pass;
    }
 
@@ -188,29 +213,6 @@ sub update_user_action : Role(admin) {
    my $message = [ 'User [_1] updated by [_2]', $id, $req->username ];
 
    return { redirect => { location => $req->uri, message => $message } };
-}
-
-# Private methods
-sub _authenticate {
-   my ($self, $username, $password) = @_; my ($authenticated, $user);
-
-   $username or throw Unspecified, args => [ 'user name' ],
-                                     rv => HTTP_EXPECTATION_FAILED;
-   $password or throw Unspecified, args => [ 'password' ],
-                                     rv => HTTP_EXPECTATION_FAILED;
-
-   try   { $user = $self->users->find( $username ) }
-   catch { throw 'User [_1] unknown: [_2]', args => [ $username, $_ ],
-                                              rv => HTTP_EXPECTATION_FAILED;
-   };
-
-   $user->active or throw 'User [_1] account inactive',
-                          args => [ $username ], rv => HTTP_UNAUTHORIZED;
-
-   try   { $authenticated = $user->authenticate( $password ) }
-   catch { throw ucfirst "${_}", rv => HTTP_UNPROCESSABLE_ENTITY };
-
-   return $authenticated;
 }
 
 1;
