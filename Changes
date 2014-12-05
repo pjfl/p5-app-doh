@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Fixed search methods external call to ack
           - Made private functions and methods lexical subs
 
 0.8.1     2014-10-31 01:08:36

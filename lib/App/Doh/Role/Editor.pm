@@ -96,7 +96,7 @@ my $_search_results = sub {
    my $query   = $req->query_params->( 'query' );
    my $langd   = $root->catdir( extract_lang $req->locale );
    my $resp    = $self->ipc->run_cmd
-                 ( "ack '${query}' ${langd}", { expected_rv => 1 } );
+                 ( [ 'ack', $query, "${langd}" ], { expected_rv => 1, } );
    my $results = $resp->rv == 1
                ? $langd->catfile( $req->loc( 'Nothing found' ) ).'::'
                : $resp->stdout;
