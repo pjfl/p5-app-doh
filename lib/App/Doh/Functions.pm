@@ -177,7 +177,7 @@ sub iterator ($) {
 sub load_components ($$) {
    my ($search_path, $args) = @_; my $conf = $args->{builder}->config;
 
-   if ('+' eq substr $search_path, 0, 1) { $search_path =~ s{ \A \+ }{}mx }
+   if (first_char $search_path eq '+') { $search_path = substr $search_path, 1 }
    else { $search_path = $conf->appclass."::${search_path}" }
 
    my $depth    = () = split m{ :: }mx, $search_path, -1;
@@ -235,7 +235,7 @@ sub new_uri ($$) {
    return bless $_uric_escape->( $_[ 0 ] ), 'URI::'.$_[ 1 ];
 }
 
-sub set_element_focus {
+sub set_element_focus ($$) {
    my ($form, $name) = @_;
 
    return [ "var form = document.forms[ '${form}' ];",

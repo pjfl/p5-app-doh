@@ -99,7 +99,7 @@ sub get_dialog : Role(anon) {
 
    $name eq 'login'   and $page->{username  } = $req->session->username;
    $name ne 'profile' and $page->{literal_js}
-      = set_element_focus( "${name}-user", 'username' );
+      = set_element_focus "${name}-user", 'username';
 
    if ($name eq 'profile') {
       my $user = $self->users->find( $req->username );
@@ -107,7 +107,7 @@ sub get_dialog : Role(anon) {
       $page->{binding    } = $user->binding;
       $page->{email      } = $user->email;
       $page->{keybindings} = [ qw( default emacs sublime vim ) ];
-      $page->{literal_js } = set_element_focus( "${name}-user", 'email' );
+      $page->{literal_js } = set_element_focus "${name}-user", 'email';
       $page->{username   } = $req->username;
    }
 

@@ -162,14 +162,14 @@ sub dialog {
                                    meta   => { id => $params->( 'id' ), }, };
 
    if    ($name eq 'create') {
-      $page->{literal_js} = set_element_focus( "${name}-file", 'pathname' );
+      $page->{literal_js} = set_element_focus "${name}-file", 'pathname';
    }
    elsif ($name eq 'rename') {
-      $page->{literal_js} = set_element_focus( "${name}-file", 'pathname' );
+      $page->{literal_js} = set_element_focus "${name}-file", 'pathname';
       $page->{old_path  } = $params->( 'val' );
    }
    elsif ($name eq 'search') {
-      $page->{literal_js} = set_element_focus( "${name}-file", 'query' );
+      $page->{literal_js} = set_element_focus "${name}-file", 'query';
    }
    elsif ($name eq 'upload') {
       $page->{literal_js} = $_copy_element_value->();

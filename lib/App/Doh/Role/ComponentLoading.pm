@@ -86,9 +86,7 @@ sub render {
    my ($moniker, $method, undef, @args) = @{ $args }; my ($req, $res);
 
    try   { $req = $self->request_class->new( $self->usul, @args ) }
-   catch { $res = __internal_server_error( $_ ) };
-
-   $res and return $res;
+   catch { $self->log->error( $_ ); throw $_ };
 
    try {
       $method eq 'from_request' and $method = $req->tunnel_method.'_action';
