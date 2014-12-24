@@ -25,7 +25,7 @@ if ($] < $perl_ver) { # Not interested in reports below min perl ver
 
 my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
    'module_name' => $name,
-   'notes'       => { min_perl_version => $perl_ver },
+   'notes'       => { min_perl_version => $perl_ver, testing => testing },
    %{ $prereqs },
 ##{ $plugin->get_default('share_dir') ##}
 );

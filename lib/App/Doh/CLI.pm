@@ -38,7 +38,7 @@ option 'max_gen_time' => is => 'ro',   isa => PositiveInt,
    default            => 1_800, format => 'i', short => 'm';
 
 has 'models'          => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components    'Model', { builder  => $_[ 0 ], } };
+   load_components    'Model', $_[ 0 ]->config, { builder  => $_[ 0 ], } };
 
 option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
    documentation      => 'Name of the skin to operate on',

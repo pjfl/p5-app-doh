@@ -5,11 +5,12 @@ use strictures;
 use feature 'state';
 use parent  'Exporter::Tiny';
 
-use Class::Usul::Constants qw( FALSE LANG NUL TRUE );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE LANG NUL TRUE );
 use Class::Usul::Functions qw( first_char is_arrayref is_hashref
-                               my_prefix split_on_dash );
+                               merge_attributes my_prefix split_on_dash throw );
 use English                qw( -no_match_vars );
 use Module::Pluggable::Object;
+use Unexpected::Functions  qw( Unspecified );
 use URI::Escape            qw( );
 use URI::http;
 use URI::https;
@@ -174,17 +175,21 @@ sub iterator ($) {
    };
 }
 
-sub load_components ($$) {
-   my ($search_path, $args) = @_; my $conf = $args->{builder}->config;
+sub load_components ($$;$) {
+   my ($search_path, $config, $args) = @_; $args //= {};
+
+   $search_path or throw Unspecified, [ 'search path' ];
+   $config = merge_attributes {}, $config, {}, [ 'appclass', 'monikers' ];
+   $config->{appclass} or throw Unspecified, [ 'application class' ];
 
    if (first_char $search_path eq '+') { $search_path = substr $search_path, 1 }
-   else { $search_path = $conf->appclass."::${search_path}" }
+   else { $search_path = $config->{appclass}."::${search_path}" }
 
-   my $depth    = () = split m{ :: }mx, $search_path, -1;
-   my @depth    = (min_depth => $depth + 1, max_depth => $depth + 1);
+   my $depth    = () = split m{ :: }mx, $search_path, -1; $depth += 1;
    my $finder   = Module::Pluggable::Object->new
-      ( @depth, search_path => [ $search_path ], require => TRUE, );
-   my $monikers = $conf->monikers;
+      ( max_depth   => $depth,           min_depth => $depth,
+        search_path => [ $search_path ], require   => TRUE, );
+   my $monikers = $config->{monikers} // {};
    my $plugins  = {};
 
    for my $plugin ($finder->plugins) {
