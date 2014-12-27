@@ -86,7 +86,7 @@ sub render {
 
    my ($moniker, $method, undef, @args) = @{ $args }; my ($req, $res);
 
-   try   { $req = $self->request_class->new( $self->usul, @args ) }
+   try   { $req = $self->request_class->new( $self->usul, $moniker, @args ) }
    catch { $self->log->error( $_ ); throw $_ };
 
    try {

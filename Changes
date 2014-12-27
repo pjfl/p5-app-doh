@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added model_name to request object
           - API improvement ::Functions::load_components
           - Fixed search methods external call to ack
           - Made private functions and methods lexical subs

@@ -51,6 +51,9 @@ has 'locale'         => is => 'lazy', isa => NonEmptySimpleStr;
 
 has 'locales'        => is => 'lazy', isa => ArrayRef;
 
+has 'model_name'     => is => 'lazy', isa => NonEmptySimpleStr,
+   default           => sub { $_[ 0 ]->config->name };
+
 has 'method'         => is => 'lazy', isa => SimpleStr,
    builder           => sub { lc( $_[ 0 ]->_env->{ 'REQUEST_METHOD' } // NUL )};
 
@@ -186,7 +189,7 @@ around 'BUILDARGS' => sub {
 
    is_hashref $args[ 0 ] and return $args[ 0 ];
 
-   $attr->{builder} = shift @args;
+   $attr->{builder} = shift @args; $attr->{model_name} = shift @args;
    $attr->{env    } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{params } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
    $attr->{args   } = (defined $args[ 0 ] && blessed $args[ 0 ])
