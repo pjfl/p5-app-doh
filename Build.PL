@@ -38,6 +38,7 @@ my $prereqs  = {
     'HTML::Accessors' => 'v0.11.0',
     'HTTP::Body' => '1.11',
     'HTTP::Message' => '6.06',
+    'JSON::MaybeXS' => '1.002006',
     'Module::Pluggable' => '5.1',
     'Moo' => '1.005000',
     'Plack' => '1.0018',
@@ -53,7 +54,6 @@ my $prereqs  = {
     'URI' => '1.60',
     'Unexpected' => 'v0.27.0',
     'Web::Simple' => '0.028',
-    'XML::Simple' => '2.18',
     'YAML::Tiny' => '1.62',
     'namespace::autoclean' => '0.19',
     'perl' => '5.010001',
@@ -71,7 +71,7 @@ if ($] < $perl_ver) { # Not interested in reports below min perl ver
 
 my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
    'module_name' => $name,
-   'notes'       => { min_perl_version => $perl_ver },
+   'notes'       => { min_perl_version => $perl_ver, testing => testing },
    %{ $prereqs },
 
 );

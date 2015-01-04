@@ -38,7 +38,7 @@ lib/App/Doh/User.pm
 lib/App/Doh/View/HTML.pm
 lib/App/Doh/View/HTML/Markdown.pm
 lib/App/Doh/View/HTML/Pod.pm
-lib/App/Doh/View/XML.pm
+lib/App/Doh/View/JSON.pm
 lib/App/Doh/app-doh.json
 lib/strictures/defanged.pm
 t/01always_pass.t

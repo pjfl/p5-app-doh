@@ -75,3 +75,4 @@ Thumbs.db
 # Avoid archives of this distribution
 \bApp-Doh-v?[\d\.\_]+
 \bdocs/Projects
+\blocal/
