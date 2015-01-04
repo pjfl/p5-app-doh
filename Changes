@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Ajax requests now use JSON not XML
           - Added model_name to request object
           - API improvement ::Functions::load_components
           - Fixed search methods external call to ack

@@ -111,7 +111,7 @@ sub get_dialog : Role(anon) {
       $page->{username   } = $req->username;
    }
 
-   $stash->{view} = 'xml';
+   $stash->{view} = 'json';
    return $stash;
 }
 
@@ -175,10 +175,11 @@ sub update_profile_action : Role(any) {
    my ($self, $req) = @_;
 
    my $id      = $req->username;
-   my $binding = $req->body_params->( 'binding' );
-   my $email   = $req->body_params->( 'email',    { raw => TRUE } );
-   my $pass    = $req->body_params->( 'password', { raw => TRUE } );
-   my $again   = $req->body_params->( 'again',    { raw => TRUE } );
+   my $params  = $req->body_params;
+   my $binding = $params->( 'binding' );
+   my $email   = $params->( 'email',    { raw => TRUE } );
+   my $pass    = $params->( 'password', { raw => TRUE } );
+   my $again   = $params->( 'again',    { raw => TRUE } );
    my $user    = $self->users->find( $id );
    my $args    = { id => $id };
 
@@ -201,9 +202,10 @@ sub update_profile_action : Role(any) {
 sub update_user_action : Role(admin) {
    my ($self, $req) = @_;
 
-   my $id     = $req->body_params->( 'username' );
-   my $active = $req->body_params->( 'active', { optional => TRUE } ) // FALSE;
-   my $roles  = $req->body_params->( 'roles',  { multiple => TRUE } );
+   my $params = $req->body_params;
+   my $id     = $params->( 'username' );
+   my $active = $params->( 'active', { optional => TRUE } ) // FALSE;
+   my $roles  = $params->( 'roles',  { multiple => TRUE } );
    my $user   = $self->users->find( $id );
    my $args   = { id => $id, roles => $roles };
 

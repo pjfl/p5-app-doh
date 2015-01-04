@@ -175,7 +175,7 @@ sub dialog {
       $page->{literal_js} = $_copy_element_value->();
    }
 
-   $stash->{view} = 'xml';
+   $stash->{view} = 'json';
    return $stash;
 }
 

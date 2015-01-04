@@ -438,38 +438,16 @@ var LoadMore = new Class( {
 
       if (url.substring( 0, 4 ) != 'http') url = this.options.url + url;
 
-      new Request( { 'onSuccess': this._response.bind( this ), 'url': url } )
-             .get( { 'content-type': 'text/xml', 'id': id, 'val': val } );
+      new Request.JSON( { onSuccess: this._response.bind( this ), url: url } )
+                  .get( { 'id': id, 'val': val } );
    },
 
-   _response: function( text, xml ) {
-      var doc = xml.documentElement; var html = this._unpack_items( doc );
+   _response: function( resp ) {
+      $( resp.id ).set( 'html', resp.html.unescapeHTML() );
 
-      $( doc.getAttribute( 'id' ) ).set( 'html', html.unescapeHTML() );
+      if (resp.script) Browser.exec( resp.script );
 
-      $$( doc.getElementsByTagName( 'script' ) ).each( function( item ) {
-         var text = '';
-
-         for (var i = 0, il = item.childNodes.length; i < il; i++) {
-            text += item.childNodes[ i ].nodeValue;
-         }
-
-         if (text) Browser.exec( text );
-      } );
-
-      if (this.onComplete) this.onComplete.call( this.context, doc, html );
-   },
-
-   _unpack_items: function( doc ) {
-      var html = '';
-
-      $$( doc.getElementsByTagName( 'items' ) ).each( function( item ) {
-         for (var i = 0, il = item.childNodes.length; i < il; i++) {
-            html += item.childNodes[ i ].nodeValue;
-         }
-      } );
-
-      return html;
+      if (this.onComplete) this.onComplete.call( this.context, resp );
    }
 } );
 
