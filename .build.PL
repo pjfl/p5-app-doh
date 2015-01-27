@@ -24,16 +24,23 @@ if ($] < $perl_ver) { # Not interested in reports below min perl ver
 }
 
 my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
-   'module_name' => $name,
-   'notes'       => { min_perl_version => $perl_ver, testing => testing },
+   'add_to_cleanup' => [ 'debian' ],
+   'module_name'    => $name,
+   'notes'          => { min_perl_version => $perl_ver, testing => testing },
    %{ $prereqs },
 ##{ $plugin->get_default('share_dir') ##}
 );
 
-$bob->install_path( 'lib' => catdir( $bob->install_base, 'lib' ) );
-$bob->install_path( 'var' => catdir( $bob->install_base, 'var' ) );
+$bob->install_path( 'bin'    => catdir( $bob->install_base, 'bin'   ) );
+$bob->install_path( 'lib'    => catdir( $bob->install_base, 'lib'   ) );
+$bob->install_path( 'var'    => catdir( $bob->install_base, 'var'   ) );
+$bob->install_path( 'local'  => catdir( $bob->install_base, 'local' ) );
+$bob->install_path( 'script' => catdir( $bob->install_base, 'bin'   ) );
+$bob->install_path( 'bindoc' => catdir( $bob->install_base, 'man', 'man1' ) );
+$bob->install_path( 'libdoc' => catdir( $bob->install_base, 'man', 'man3' ) );
 $bob->add_build_element( 'config' );
-$bob->add_build_element( 'var' );
+$bob->add_build_element( 'local'  );
+$bob->add_build_element( 'var'    );
 $bob->create_build_script;
 exit 0;
 
@@ -51,6 +58,7 @@ sub ACTION_install {
    for my $dir (qw( logs run tmp )) {
       my $path = catdir( $self->install_path( 'var' ), $dir );
 
+      $self->destdir and $path = catdir( $self->destdir, $path );
       -d $path or make_path( $path, { mode => oct '0770' } );
    }
 
@@ -65,10 +73,14 @@ sub process_config_files {
    return $self->_process_files( catfile( $home, (lc $distname).'.json' ) );
 }
 
+sub process_local_files {
+   my $self = shift; return $self->_process_files( 'local' );
+}
+
 sub process_var_files {
    my $self = shift; my $pattern; umask oct '0027';
 
-   for (qw( .git logs tmp )) {
+   for (qw( .git logs run tmp )) {
       $pattern .= ($pattern ? '|' : q()).(catdir( q(), $_ ));
    }
 

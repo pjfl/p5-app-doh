@@ -1,0 +1,135 @@
+#!/usr/bin/env perl
+# If you have a $LOCAL_LIB directory then this script will set it up for
+# you as it executes
+
+# If used like /usr/bin/env then it will run other commands based on
+# your current path settings (with a local::lib environment if present)
+
+#  e.g. use FindBin qw( $Bin );
+#       BEGIN { do catfile( $Bin, q(<appname>_localenv) ) or croak $EVAL_ERROR }
+
+# The local::lib behavior can be explicitly enabled or disabled by setting
+# the <APPNAME>_LOCAL_LIB enviromnent variable to true or false.
+
+use strict;
+use warnings;
+use lib;
+
+use Config;
+use Cwd                   qw( abs_path );
+use English               qw( -no_match_vars );
+use File::Basename        qw( basename dirname );
+use File::Spec::Functions qw( catdir catfile );
+
+my $LOCAL_LIB  = 'local'; # This is the only configurable
+
+my $was_called = caller() ? 1 : 0;
+my $our_path   = $was_called ? (caller())[ 1 ] : $PROGRAM_NAME;
+my $bindir     = abs_path( dirname( $our_path ) );
+my $basedir    = -f catfile( $bindir, 'Build.PL' )
+              || -f catfile( $bindir, 'Makefile.PL' )
+               ? $bindir : dirname( $bindir );
+my $libdir     = catdir( $basedir, 'lib' );
+my $local_lib  = catdir( $basedir, $LOCAL_LIB );
+my $appname    = (split m{ [\-_] }mx, basename( $our_path, '.pl' ))[ 0 ];
+my $active_key = (uc $appname).'_LOCAL_LIB';
+my $path_sep   = $Config::Config{path_sep};
+my $active     = -d $local_lib;
+
+exists $ENV{ $active_key } and defined $ENV{ $active_key }
+   and $active = !! $ENV{ $active_key };
+
+if ($active) {
+   not -d $local_lib and warn "Path ${local_lib} not found from ${our_path}\n";
+
+   # So we can find local::lib when fully self contained
+   lib->import( catdir( $local_lib, 'lib', 'perl5' ) );
+
+   require local::lib; local::lib->import( $local_lib );
+
+   $ENV{PERL5_MB_OPT} .= ' INSTALLMAN1DIR=none INSTALLMAN3DIR=none';
+   $ENV{PERL5LIB    }  = $libdir.$path_sep.$ENV{PERL5LIB};
+}
+
+lib->import( $libdir );
+
+$ENV{PATH} = $bindir.$path_sep.$ENV{PATH};
+
+not $was_called and @ARGV and exec @ARGV;
+
+1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+doh-localenv - Set environment to use a local library of Perl modules
+
+=head1 SYNOPSIS
+
+   use English qw( -no_match_vars );
+   use FindBin qw( $Bin );
+   use File::Spec;
+
+   BEGIN {
+      my $path = File::Spec->catfile( $Bin, 'doh-localenv' );
+
+      do $path or die $EVAL_ERROR || "Path ${path} not done\n";
+   }
+
+=head1 DESCRIPTION
+
+Set environment to use a local library of Perl modules
+
+=head1 REQUIRED ARGUMENTS
+
+None
+
+=head1 OPTIONS
+
+None
+
+=head1 DIAGNOSTICS
+
+Prints errors to stderr
+
+=head1 EXIT STATUS
+
+None
+
+=head1 CONFIGURATION
+
+Edit the C<$LOCAL_LIB> variable definition if a directory other than
+F<local> is required
+
+=head1 DEPENDENCIES
+
+None
+
+=head1 INCOMPATIBILITIES
+
+None
+
+=head1 BUGS AND LIMITATIONS
+
+Send reports to address below
+
+=head1 AUTHOR
+
+Peter Flanigan, C<< <pjfl@cpan.org> >>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (c) 2015 Peter Flanigan
+
+This is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
+# Local Variables:
+# mode: perl
+# tab-width: 3
+# End:

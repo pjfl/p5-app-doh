@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Scripts sources a local env script
+          - Toolchain now builds a Debian file
+
 0.9.1     2015-01-04 16:01:57
           - Ajax requests now use JSON not XML
           - Added model_name to request object

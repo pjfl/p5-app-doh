@@ -8,6 +8,7 @@ README
 SIGNATURE
 bin/doh-cli
 bin/doh-daemon
+bin/doh-localenv
 bin/doh-server
 lib/App/Doh.pm
 lib/App/Doh/Attributes.pm

@@ -19,6 +19,7 @@ nytprof.out
 pm_to_blib
 README
 README.pod
+debian/*
 lib/perl5
 local/*
 t/ipc_srlock*
