@@ -232,7 +232,8 @@ sub post_install : method {
 
    my ($init, $kill) = $_init_files->( $appname );
 
-   $cmd  = [ $conf->binsdir->catfile( 'doh-daemon' ), 'get-init-file' ];
+   my $cmd = [ $conf->binsdir->catfile( 'doh-daemon' ), 'get-init-file' ];
+
    $init->exists or $self->run_cmd( $cmd, { out => $init } );
    $init->is_executable or $init->chmod( 0750 );
    $kill->exists or $self->run_cmd( [ 'update-rc.d', $appname, 'defaults' ] );

@@ -1,5 +1,5 @@
 requires "App::Ack" => "2.12";
-requires "Class::Usul" => "v0.45.0";
+requires "Class::Usul" => "v0.53.0";
 requires "Crypt::Eksblowfish" => "0.009";
 requires "Daemon::Control" => "0.000009";
 requires "Data::Validation" => "v0.15.0";

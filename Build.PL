@@ -29,7 +29,7 @@ my $prereqs  = {
   },
   'requires' => {
     'App::Ack' => '2.12',
-    'Class::Usul' => 'v0.45.0',
+    'Class::Usul' => 'v0.53.0',
     'Crypt::Eksblowfish' => '0.009',
     'Daemon::Control' => '0.000009',
     'Data::Validation' => 'v0.15.0',
