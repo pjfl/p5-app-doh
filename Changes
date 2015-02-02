@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added post_install and uninstall commands to CLI
           - Scripts sources a local env script
           - Toolchain now builds a Debian file
 

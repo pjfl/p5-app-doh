@@ -1,4 +1,6 @@
 {  "debian_depends" : [],
    "debian_build_depends" : [],
-   "debian_build_depends_indep" : []
+   "debian_build_depends_indep" : [],
+   "post_install_cmd": "doh-cli post-install",
+   "uninstall_cmd": "doh-cli uninstall"
 }

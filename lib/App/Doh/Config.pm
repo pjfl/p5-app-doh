@@ -18,7 +18,7 @@ Data::Validation::Constants->Exception_Class( 'Class::Usul::Exception' );
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
 
-my $SECRET      = subtype as Object;
+my $SECRET = subtype as Object;
 
 coerce $SECRET, from Str, via { App::Doh::_Secret->new( value => $_ ) };
 
@@ -27,9 +27,8 @@ has 'analytics'       => is => 'ro',   isa => SimpleStr, default => NUL;
 has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'assets/',
 
-has 'assetdir'        => is => 'lazy', isa => Path,
-   builder            => sub { $_[ 0 ]->file_root->catfile( $_[ 0 ]->assets ) },
-   coerce             => Path->coercion;
+has 'assetdir'        => is => 'lazy', isa => Path, coerce => TRUE,
+   builder            => sub { $_[ 0 ]->file_root->catfile( $_[ 0 ]->assets ) };
 
 has 'auth_roles'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    default            => sub { [ qw( admin editor user ) ] };
@@ -85,17 +84,15 @@ has 'deflate_types'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
 has 'description'     => is => 'ro',   isa => SimpleStr,
    default            => 'Site Description';
 
-has 'docs_path'       => is => 'lazy', isa => Directory,
-   builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) },
-   coerce             => Directory->coercion;
+has 'docs_path'       => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) };
 
 has 'extensions'      => is => 'ro',   isa => HashRef,
    builder            => sub { { markdown => [ qw( md mkdn )   ],
                                  pod      => [ qw( pl pm pod ) ], } };
 
-has 'file_root'       => is => 'lazy', isa => Directory,
-   builder            => sub { $_[ 0 ]->docs_path },
-   coerce             => Directory->coercion;
+has 'file_root'       => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder            => sub { $_[ 0 ]->docs_path };
 
 has 'float'           => is => 'ro',   isa => Bool, default => TRUE;
 
@@ -146,6 +143,9 @@ has 'no_index'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub {
       [ qw( \.git$ \.htpasswd$ \.json$ \.mtime$ \.svn$ assets$ posts$ ) ] };
 
+has 'owner'           => is => 'lazy', isa => NonEmptySimpleStr,
+   builder            => sub { $_[ 0 ]->prefix };
+
 has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
    default            => 8085;
 
@@ -165,14 +165,14 @@ has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
 has 'request_class'   => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'App::Doh::Request';
 
-has 'root_mtime'      => is => 'lazy', isa => Path, coerce => Path->coercion,
+has 'root_mtime'      => is => 'lazy', isa => Path, coerce => TRUE,
    builder            => sub { $_[ 0 ]->file_root->catfile( '.mtime' ) };
 
 has 'scrubber'        => is => 'ro',   isa => Str,
    default            => '[^ +\-\./0-9@A-Z\\_a-z~]';
 
-has 'secret'          => is => 'lazy', isa => $SECRET,
-   builder            => sub { 'hostname' }, coerce => $SECRET->coercion;
+has 'secret'          => is => 'lazy', isa => $SECRET, coerce => TRUE,
+   builder            => sub { 'hostname' };
 
 has 'serve_as_static' => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'css | favicon.ico | img | js | less';
@@ -204,6 +204,8 @@ has 'user'            => is => 'ro',   isa => SimpleStr, default => NUL;
 has 'user_attributes' => is => 'ro',   isa => HashRef, builder => sub { {
    path               => $_[ 0 ]->file_root->catfile( 'users.json' ), } };
 
+has 'user_home'       => is => 'lazy', isa => Path, coerce => TRUE;
+
 has '_colours'        => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'colours';
 
@@ -225,6 +227,13 @@ sub _build_colours {
 
 sub _build_links {
    return $_to_array_of_hash->( $_[ 0 ]->_links, 'name', 'url' );
+}
+
+sub _build_user_home {
+   my $appldir = $_[ 0 ]->appldir; my $verdir = $appldir->basename;
+
+   return $verdir =~ m{ \A v \d+ \. \d+ p (\d+) \z }msx
+        ? $appldir->dirname : $appldir;
 }
 
 package # Hide from indexer
@@ -477,6 +486,12 @@ which the application is mounted
 An array reference that defaults to C<[ .git .svn cgi-bin doh.json ]>. List of
 files and directories under the document root to ignore
 
+=item C<owner>
+
+A non empty simple string that defaults to the configuration C<prefix>
+attribute. Name of the user and group that should own all files and
+directories in the application when installed
+
 =item C<port>
 
 A lazily evaluated non zero positive integer that defaults to 8085. This
@@ -606,6 +621,11 @@ Defaults to F<var/root/docs/users.json>. A file object which contains the
 users and their profile used by the application
 
 =back
+
+=item C<user_home>
+
+The home directory of the user who owns the files and directories in the
+the application
 
 =back
 

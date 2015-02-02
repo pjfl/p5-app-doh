@@ -22,6 +22,7 @@ README.pod
 debian/*
 lib/perl5
 local/*
+local.bak/*
 t/ipc_srlock*
 var/logs
 var/run

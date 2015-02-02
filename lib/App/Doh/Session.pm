@@ -90,13 +90,13 @@ sub status_message {
 }
 
 sub update {
-   my $self = shift; my @attrs = qw( authenticated messages username );
-
-   my @messages = sort keys %{ $self->messages };
+   my $self = shift; my @messages = sort keys %{ $self->messages };
 
    while (@messages > $self->config->max_messages) {
       my $mid = shift @messages; delete $self->messages->{ $mid };
    }
+
+   my @attrs = qw( authenticated messages username );
 
    for my $k (@{ $self->config->preferences }, @attrs) {
       $self->_session->{ $k } = $self->{ $k };

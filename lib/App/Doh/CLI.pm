@@ -7,10 +7,13 @@ use App::Doh;
 use App::Doh::Functions    qw( env_var iterator load_components );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
-use Class::Usul::Functions qw( app_prefix io );
+use Class::Usul::Functions qw( app_prefix distname io );
 use Class::Usul::Options;
 use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object
                                PositiveInt );
+use File::DataClass::Types qw( Path );
+use User::grent;
+use User::pwent;
 
 extends q(Class::Usul::Programs);
 
@@ -20,6 +23,15 @@ our $VERSION = $App::Doh::VERSION;
 has '+config_class' => default => 'App::Doh::Config';
 
 # Public attributes
+option 'max_gen_time' => is => 'ro',   isa => PositiveInt,
+   documentation      => 'Maximum generation run time in seconds',
+   default            => 1_800, format => 'i', short => 'm';
+
+option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
+   documentation      => 'Name of the skin to operate on',
+   default            => sub { $_[ 0 ]->config->skin }, format => 's',
+   short              => 's';
+
 has 'less'  => is => 'lazy', isa => Object, builder => sub {
    my $self = shift;
    my $conf = $self->config;
@@ -30,20 +42,11 @@ has 'less'  => is => 'lazy', isa => Object, builder => sub {
                                   tmp_path      => $conf->tempdir, );
 };
 
-has 'less_class'      => is => 'lazy', isa => LoadableClass,
-   default            => 'CSS::LESS';
+has 'less_class' => is => 'lazy', isa => LoadableClass,
+   default       => 'CSS::LESS';
 
-option 'max_gen_time' => is => 'ro',   isa => PositiveInt,
-   documentation      => 'Maximum generation run time in seconds',
-   default            => 1_800, format => 'i', short => 'm';
-
-has 'models'          => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components    'Model', $_[ 0 ]->config, { builder  => $_[ 0 ], } };
-
-option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
-   documentation      => 'Name of the skin to operate on',
-   default            => sub { $_[ 0 ]->config->skin }, format => 's',
-   short              => 's';
+has 'models'     => is => 'lazy', isa => HashRef[Object], builder => sub {
+   load_components 'Model', $_[ 0 ]->config, { builder => $_[ 0 ], } };
 
 # Private functions
 my $_deep_copy = sub {
@@ -61,6 +64,13 @@ my $_deep_copy = sub {
    }
 
    return;
+};
+
+my $_init_files = sub {
+   my $appname = shift;
+
+   return io [ NUL, 'etc', 'init.d', $appname ],
+          io [ NUL, 'etc', 'rc0.d', "K01${appname}" ];
 };
 
 # Construction
@@ -106,7 +116,7 @@ my $_copy_assets = sub {
 my $_make_localised_static = sub {
    my ($self, $dest, $tree, $locale, $make_dirs) = @_;
 
-   my $conf = $self->config; my $iter = iterator( $tree );
+   my $conf = $self->config; my $iter = iterator $tree;
 
    while (my $node = $iter->()) {
       not $make_dirs and $node->{type} eq 'folder' and next;
@@ -198,6 +208,51 @@ sub make_static : method {
    return OK;
 }
 
+sub post_install : method {
+   my $self    = shift;
+   my $conf    = $self->config;
+   my $appname = lc distname $conf->appclass;
+   my $verdir  = $conf->appldir->basename;
+
+   if ($verdir =~ m{ \A v \d+ \. \d+ p (\d+) \z }msx) {
+      my $owner = $conf->owner;
+
+      getgr( $owner ) or $self->run_cmd( [ 'groupadd', '--system', $owner ] );
+
+      my $cmd  = [ 'useradd', '--home', $conf->user_home, '--gid',
+                   $owner, '--no-user-group', '--system', $owner ];
+
+      getpwnam( $owner ) or $self->run_cmd( $cmd );
+
+      my $appd = $conf->appldir->parent;
+
+      $self->run_cmd( [ 'chown', "${owner}:${owner}", $appd ] );
+      $self->run_cmd( [ 'chown', '-R', "${owner}:${owner}", $appd ] );
+   }
+
+   my ($init, $kill) = $_init_files->( $appname );
+
+   $cmd  = [ $conf->binsdir->catfile( 'doh-daemon' ), 'get-init-file' ];
+   $init->exists or $self->run_cmd( $cmd, { out => $init } );
+   $init->is_executable or $init->chmod( 0750 );
+   $kill->exists or $self->run_cmd( [ 'update-rc.d', $appname, 'defaults' ] );
+   return OK;
+}
+
+sub uninstall : method {
+   my $self    = shift;
+   my $conf    = $self->config;
+   my $appname = lc distname $conf->appclass;
+
+   my ($init, $kill) = $_init_files->( $appname );
+
+   $init->exists and $self->run_cmd( [ 'invoke-rc.d', $appname, 'stop' ],
+                                     { expected_rv => 1 } );
+   $kill->exists and $self->run_cmd( [ 'update-rc.d', $appname, 'remove' ] );
+   $init->unlink;
+   return OK;
+}
+
 1;
 
 __END__
@@ -236,14 +291,14 @@ A reference to the L<App::Doh::Model::Documentation> object
 
 =head2 C<make_css> - Compile CSS files from LESS files
 
-   bin/doh-cli make_css [theme]
+   bin/doh-cli make-css [theme]
 
 Creates CSS files under F<var/root/css> one for each colour theme. If a colour
 theme name is supplied only the C<LESS> for that theme is compiled
 
 =head2 C<make_skin> - Make a tarball of the files for a skin
 
-   bin/doh-cli -s name_of_skin make_skin
+   bin/doh-cli -s name_of_skin make-skin
 
 Creates a tarball in the current directory containing the C<LESS>
 files, templates, and JavaScript code for the named skin. Defaults to the
@@ -251,9 +306,22 @@ F<default> skin
 
 =head2 C<make_static> - Make a static HTML copy of the documentation
 
-   bin/doh-cli make_static
+   bin/doh-cli make-static
 
 Creates static HTML pages under F<var/root/static>
+
+=head2 C<post_install> - Perform post installation tasks
+
+   bin/doh-cli post-install
+
+Performs a sequence of tasks after installation of the applications files
+is complete
+
+=head2 C<uninstall> - Remove the application from the system
+
+   bin/doh-cli uninstall
+
+Uninstalls the application
 
 =head1 Diagnostics
 
