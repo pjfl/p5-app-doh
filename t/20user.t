@@ -7,16 +7,13 @@ use_ok 'App::Doh::Server';
 
 my $self  = App::Doh::Server->new( config => { appclass => 'App::Doh' } );
 my $users = $self->models->{admin}->users;
-
-$users->find( 'admin') and $users->delete( 'admin' );
-
-my $user  = $users->create( {
-   email    => 'Admin@example.com', id => 'admin',
-   password => 'admin123', roles => [ 'admin', 'editor', 'user' ] } );
+my $user  = $users->find( 'admin' ) || $users->create( {
+      email    => 'Admin@example.com', id => 'admin',
+      password => 'admin123', roles => [ 'admin', 'editor', 'user' ] } );
 
 is $user->email, 'Admin@example.com', 'Creates user';
 
-$users->update( { id => 'admin', active => 1 } );
+$user->active or $users->update( { id => 'admin', active => 1 } );
 
 ok $users->find( 'admin' )->active, 'Activates user';
 
