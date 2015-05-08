@@ -1,7 +1,6 @@
 package App::Doh::Model;
 
-use Moo;
-use App::Doh::Attributes;
+use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( show_node );
 use App::Doh::User;
 use Class::Usul::Constants qw( FALSE NUL );
@@ -11,6 +10,7 @@ use Class::Usul::Time      qw( str2time time2str );
 use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( blessed weaken );
+use Moo;
 
 with q(App::Doh::Role::Component);
 

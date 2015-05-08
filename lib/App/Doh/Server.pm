@@ -12,7 +12,34 @@ use Plack::Builder;
 use Unexpected::Functions  qw( Unspecified );
 use Web::Simple;
 
-has 'usul' => is => 'lazy', isa => BaseType, handles => [ 'log' ];
+my $_build_usul = sub {
+   my $self = shift;
+   my $attr = { config => $self->config, debug => env_var( 'DEBUG' ) // FALSE };
+   my $conf = $attr->{config};
+
+   $conf->{appclass    } or  throw Unspecified, args => [ 'application class' ];
+   $attr->{config_class} //= $conf->{appclass}.'::Config';
+   $conf->{name        } //= app_prefix   $conf->{appclass};
+   $conf->{home        }   = find_apphome $conf->{appclass}, $conf->{home};
+   $conf->{cfgfiles    }   = get_cfgfiles $conf->{appclass}, $conf->{home};
+
+   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
+
+   $bootconf->inflate_paths( $bootconf->projects );
+
+   my $port    = env_var( 'PORT' ) // $bootconf->port;
+   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
+   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
+
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{l10n_attributes}->{domains} = [ $conf->{name} ];
+   $conf->{file_root} = $docs;
+
+   return Class::Usul->new( $attr );
+};
+
+has 'usul' => is => 'lazy', isa => BaseType, builder => $_build_usul,
+   handles => [ 'log' ];
 
 with q(App::Doh::Role::ComponentLoading);
 
@@ -61,32 +88,6 @@ sub BUILD {
    $self->models->{posts}->posts;
    is_static or $self->log->debug( 'Document tree loaded' );
    return;
-}
-
-sub _build_usul {
-   my $self = shift;
-   my $attr = { config => $self->config, debug => env_var( 'DEBUG' ) // FALSE };
-   my $conf = $attr->{config};
-
-   $conf->{appclass    } or  throw Unspecified, args => [ 'application class' ];
-   $attr->{config_class} //= $conf->{appclass}.'::Config';
-   $conf->{name        } //= app_prefix   $conf->{appclass};
-   $conf->{home        }   = find_apphome $conf->{appclass}, $conf->{home};
-   $conf->{cfgfiles    }   = get_cfgfiles $conf->{appclass}, $conf->{home};
-
-   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
-
-   $bootconf->inflate_paths( $bootconf->projects );
-
-   my $port    = env_var( 'PORT' ) // $bootconf->port;
-   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
-   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
-
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
-   $conf->{l10n_attributes}->{domains} = [ $conf->{name} ];
-   $conf->{file_root} = $docs;
-
-   return Class::Usul->new( $attr );
 }
 
 # Public methods

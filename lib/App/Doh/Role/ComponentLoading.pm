@@ -28,7 +28,18 @@ has 'views'         => is => 'lazy', isa => HashRef[Object], builder => sub {
    load_components  'View', $_[ 0 ]->usul->config,
       {  builder    => $_[ 0 ]->usul, } };
 
+# Private functions
+my $_header = sub {
+   return [ 'Content-Type' => 'text/plain', @{ $_[ 0 ] || [] } ];
+};
+
 # Private methods
+my $_internal_server_error = sub {
+   my ($self, $e) = @_; $self->log->error( $e );
+
+   return [ HTTP_INTERNAL_SERVER_ERROR, $_header->(), [ $e ] ];
+};
+
 my $_redirect = sub {
    my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
 
@@ -72,7 +83,7 @@ my $_render_exception = sub {
 
       $res = $self->$_render_view( $moniker, 'exception_handler', $req, $stash);
    }
-   catch { throw $e };
+   catch { $res = $self->$_internal_server_error( $_ ) };
 
    return $res;
 };
@@ -87,7 +98,9 @@ sub render {
    my ($moniker, $method, undef, @args) = @{ $args }; my ($req, $res);
 
    try   { $req = $self->request_class->new( $self->usul, $moniker, @args ) }
-   catch { $self->log->error( $_ ); throw $_ };
+   catch { $res = $self->$_internal_server_error( $_ ) };
+
+   $res and return $res;
 
    try {
       $method eq 'from_request' and $method = $req->tunnel_method.'_action';

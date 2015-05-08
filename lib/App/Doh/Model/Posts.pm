@@ -2,10 +2,10 @@ package App::Doh::Model::Posts;
 
 use feature 'state';
 
-use Moo;
-use App::Doh::Attributes;
+use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );
+use Moo;
 
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::Authorization);

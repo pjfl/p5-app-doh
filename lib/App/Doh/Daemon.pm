@@ -2,7 +2,6 @@ package App::Doh::Daemon;
 
 use namespace::autoclean;
 
-use Moo;
 use App::Doh;
 use App::Doh::Functions    qw( env_var );
 use Class::Usul::Constants qw( EXCEPTION_CLASS OK TRUE );
@@ -14,6 +13,7 @@ use English                qw( -no_match_vars );
 use Plack::Runner;
 use Scalar::Util           qw( blessed );
 use Unexpected::Functions  qw( Unspecified );
+use Moo;
 
 extends q(Class::Usul::Programs);
 
@@ -36,14 +36,11 @@ option 'server'  => is => 'ro', isa => NonEmptySimpleStr,
    default       => sub { $_[ 0 ]->config->server }, format => 's',
    short         => 's';
 
-# Private attributes
-has '_daemon_control' => is => 'lazy', isa => Object;
-
 # Private methods
 my $_get_listener_args = sub {
    my $self = shift;
    my $conf = $self->config;
-   my $port = env_var( 'PORT', $self->port );
+   my $port = env_var 'PORT', $self->port;
    my $args = {
       '--port'       => $port,
       '--server'     => $self->server,
@@ -66,29 +63,14 @@ my $_stdio_file = sub {
 my $_daemon = sub {
    my $self = shift; $PROGRAM_NAME = $self->app;
 
-   env_var( 'DEBUG', $self->debug );
+   env_var 'DEBUG', $self->debug;
    $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
    Plack::Runner->run( $self->$_get_listener_args );
    exit OK;
 };
 
-# Construction
-around 'run' => sub {
-   my ($orig, $self) = @_; my $daemon = $self->_daemon_control;
-
-   $daemon->name     or throw Unspecified, [ 'name'     ];
-   $daemon->program  or throw Unspecified, [ 'program'  ];
-   $daemon->pid_file or throw Unspecified, [ 'pid file' ];
-
-   $daemon->uid and not $daemon->gid
-      and $daemon->gid( get_user( $daemon->uid )->gid );
-
-   $self->quiet( TRUE );
-
-   return $orig->( $self );
-};
-
-sub _build__daemon_control {
+# Attribute construction
+my $_build_daemon_control = sub {
    my $self = shift; my $conf = $self->config; my $name = $conf->name;
 
    my $args = {
@@ -113,7 +95,27 @@ sub _build__daemon_control {
    $conf->user and $args->{user} = $conf->user;
 
    return Daemon::Control->new( $args );
-}
+};
+
+# Private attributes
+has '_daemon_control' => is => 'lazy', isa => Object,
+   builder            => $_build_daemon_control;
+
+# Construction
+around 'run' => sub {
+   my ($orig, $self) = @_; my $daemon = $self->_daemon_control;
+
+   $daemon->name     or throw Unspecified, [ 'name'     ];
+   $daemon->program  or throw Unspecified, [ 'program'  ];
+   $daemon->pid_file or throw Unspecified, [ 'pid file' ];
+
+   $daemon->uid and not $daemon->gid
+      and $daemon->gid( get_user( $daemon->uid )->gid );
+
+   $self->quiet( TRUE );
+
+   return $orig->( $self );
+};
 
 # Public methods
 sub get_init_file : method {

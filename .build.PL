@@ -24,7 +24,7 @@ if ($] < $perl_ver) { # Not interested in reports below min perl ver
 }
 
 my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
-   'add_to_cleanup' => [ 'debian' ],
+   'add_to_cleanup' => [ 'debian', 'META.yml' ],
    'module_name'    => $name,
    'notes'          => { min_perl_version => $perl_ver, testing => testing },
    %{ $prereqs },

@@ -2,12 +2,12 @@ package App::Doh::Session;
 
 use namespace::autoclean;
 
-use Moo;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( bson64id merge_attributes );
 use Class::Usul::Types     qw( BaseType Bool HashRef NonEmptySimpleStr
                                NonZeroPositiveInt SimpleStr Undef );
 use Type::Utils            qw( enum );
+use Moo;
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
 
@@ -57,7 +57,7 @@ around 'BUILDARGS' => sub {
 };
 
 sub BUILD {
-   my $self = shift; my $max_time = $self->config->max_session_time;
+   my $self = shift; my $max_time = $self->config->max_sess_time;
 
    if ($self->authenticated and $max_time
        and time > $self->updated + $max_time) {

@@ -2,7 +2,6 @@ package App::Doh::Config;
 
 use namespace::autoclean;
 
-use Moo;
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( app_prefix );
 use Data::Validation;
@@ -11,17 +10,42 @@ use File::DataClass::Types qw( ArrayRef Bool Directory File HashRef
                                NonZeroPositiveInt Object Path
                                PositiveInt SimpleStr Str );
 use Type::Utils            qw( as coerce enum from subtype via );
+use Moo;
 
 extends q(Class::Usul::Config::Programs);
 
 Data::Validation::Constants->Exception_Class( 'Class::Usul::Exception' );
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
-
-my $SECRET = subtype as Object;
+my $SECRET      = subtype as Object;
 
 coerce $SECRET, from Str, via { App::Doh::_Secret->new( value => $_ ) };
 
+# Private functions
+my $_to_array_of_hash = sub {
+   my ($href, $key_key, $val_key) = @_;
+
+   return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
+            sort keys %{ $href } ],
+};
+
+# Attribute constructors
+my $_build_colours = sub {
+   return $_to_array_of_hash->( $_[ 0 ]->_colours, 'key', 'value' );
+};
+
+my $_build_links = sub {
+   return $_to_array_of_hash->( $_[ 0 ]->_links, 'name', 'url' );
+};
+
+my $_build_user_home = sub {
+   my $appldir = $_[ 0 ]->appldir; my $verdir = $appldir->basename;
+
+   return $verdir =~ m{ \A v \d+ \. \d+ p (\d+) \z }msx
+        ? $appldir->dirname : $appldir;
+};
+
+# Public attributes
 has 'analytics'       => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
@@ -65,7 +89,7 @@ has 'cdnjs'           => is => 'lazy', isa => HashRef, builder => sub {
 has 'code_blocks'     => is => 'ro',   isa => $BLOCK_MODES, default => 1;
 
 has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
-   init_arg           => undef;
+   builder            => $_build_colours, init_arg => undef;
 
 has 'common_links'    => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( assets css help_url images js less ) ] };
@@ -123,7 +147,7 @@ has 'less_files'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( blue editor green navy red ) ] };
 
 has 'links'           => is => 'lazy', isa => ArrayRef[HashRef],
-   init_arg           => undef;
+   builder            => $_build_links, init_arg => undef;
 
 has 'mdn_tab_width'   => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
@@ -131,7 +155,7 @@ has 'max_asset_size'  => is => 'ro',   isa => PositiveInt, default => 4_194_304;
 
 has 'max_messages'    => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
-has 'max_session_time' => is => 'ro',  isa => PositiveInt, default => 3_600;
+has 'max_sess_time'   => is => 'ro',  isa => PositiveInt, default => 3_600;
 
 has 'monikers'        => is => 'ro',   isa => HashRef[NonEmptySimpleStr],
    builder            => sub { {} };
@@ -204,48 +228,26 @@ has 'user'            => is => 'ro',   isa => SimpleStr, default => NUL;
 has 'user_attributes' => is => 'ro',   isa => HashRef, builder => sub { {
    path               => $_[ 0 ]->file_root->catfile( 'users.json' ), } };
 
-has 'user_home'       => is => 'lazy', isa => Path, coerce => TRUE;
+has 'user_home'       => is => 'lazy', isa => Path, coerce => TRUE,
+   builder            => $_build_user_home;
 
+# Private attributes
 has '_colours'        => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'colours';
 
 has '_links'          => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'links';
 
-# Private functions
-my $_to_array_of_hash = sub {
-   my ($href, $key_key, $val_key) = @_;
-
-   return [ map { my $v = $href->{ $_ }; +{ $key_key => $_, $val_key => $v } }
-            sort keys %{ $href } ],
-};
-
-# Construction
-sub _build_colours {
-   return $_to_array_of_hash->( $_[ 0 ]->_colours, 'key', 'value' );
-}
-
-sub _build_links {
-   return $_to_array_of_hash->( $_[ 0 ]->_links, 'name', 'url' );
-}
-
-sub _build_user_home {
-   my $appldir = $_[ 0 ]->appldir; my $verdir = $appldir->basename;
-
-   return $verdir =~ m{ \A v \d+ \. \d+ p (\d+) \z }msx
-        ? $appldir->dirname : $appldir;
-}
-
 package # Hide from indexer
    App::Doh::_Secret;
 
-use overload '""' => sub { $_[ 0 ]->evaluate }, fallback => 1;
-
-use Moo;
 use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Functions qw( io );
 use Class::Usul::Types     qw( NonEmptySimpleStr );
 use Sys::Hostname          qw( hostname );
+use Moo;
+
+use overload '""' => sub { $_[ 0 ]->evaluate }, fallback => 1;
 
 has 'value' => is => 'ro', isa => NonEmptySimpleStr, required => TRUE;
 
@@ -466,7 +468,7 @@ Integer defaults to 4Mb. Maximum size in bytes of the file upload
 Non zero positive integer defaults to 3. The maximum number of messages to
 store in the session between requests
 
-=item C<max_session_time>
+=item C<max_sess_time>
 
 Time in seconds before a session expires. Defaults to 15 minutes
 

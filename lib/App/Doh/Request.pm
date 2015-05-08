@@ -2,7 +2,6 @@ package App::Doh::Request;
 
 use namespace::autoclean;
 
-use Moo;
 use App::Doh::Functions    qw( extract_lang new_uri );
 use App::Doh::Session;
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC TRUE );
@@ -18,82 +17,7 @@ use HTTP::Status           qw( HTTP_EXPECTATION_FAILED
 use Scalar::Util           qw( blessed weaken );
 use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
-
-# Public attributes
-has 'args'           => is => 'ro',   isa => ArrayRef, default => sub { [] };
-
-has 'base'           => is => 'lazy', isa => Object,
-   builder           => sub { new_uri $_[ 0 ]->_base, $_[ 0 ]->scheme },
-   init_arg          => undef;
-
-has 'body'           => is => 'lazy', isa => Object;
-
-has 'content_length' => is => 'lazy', isa => PositiveInt,
-   builder           => sub { $_[ 0 ]->_env->{CONTENT_LENGTH} // 0 };
-
-has 'content_type'   => is => 'lazy', isa => SimpleStr,
-   builder           => sub { $_[ 0 ]->_env->{CONTENT_TYPE} // NUL };
-
-has 'domain'         => is => 'lazy', isa => NonEmptySimpleStr,
-   builder           => sub { (split m{ : }mx, $_[ 0 ]->host)[ 0 ] };
-
-has 'encoding'       => is => 'lazy', isa => NonEmptySimpleStr,
-   builder           => sub { $_[ 0 ]->config->encoding };
-
-has 'host'           => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
-   my $env           =  $_[ 0 ]->_env;
-      $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
-
-has 'language'       => is => 'lazy', isa => NonEmptySimpleStr,
-   builder           => sub { extract_lang $_[ 0 ]->locale };
-
-has 'locale'         => is => 'lazy', isa => NonEmptySimpleStr;
-
-has 'locales'        => is => 'lazy', isa => ArrayRef;
-
-has 'model_name'     => is => 'lazy', isa => NonEmptySimpleStr,
-   default           => sub { $_[ 0 ]->config->name };
-
-has 'method'         => is => 'lazy', isa => SimpleStr,
-   builder           => sub { lc( $_[ 0 ]->_env->{ 'REQUEST_METHOD' } // NUL )};
-
-has 'path'           => is => 'lazy', isa => SimpleStr, builder => sub {
-   my $v             =  $_[ 0 ]->_env->{ 'PATH_INFO' } // '/';
-      $v             =~ s{ \A / }{}mx; $v =~ s{ \? .* \z }{}mx; $v };
-
-has 'query'          => is => 'lazy', isa => SimpleStr, builder => sub {
-   my $v             =  $_[ 0 ]->_env->{ 'QUERY_STRING' }; $v ? "?${v}" : NUL };
-
-has 'scheme'         => is => 'lazy', isa => NonEmptySimpleStr,
-   builder           => sub { $_[ 0 ]->_env->{ 'psgi.url_scheme' } // 'http' };
-
-has 'script'         => is => 'lazy', isa => SimpleStr, builder => sub {
-   my $v             =  $_[ 0 ]->_env->{ 'SCRIPT_NAME' } // '/';
-      $v             =~ s{ / \z }{}gmx; $v };
-
-has 'session'        => is => 'lazy', isa => Object, builder => sub {
-   App::Doh::Session->new( builder => $_[ 0 ]->_usul, env => $_[ 0 ]->_env ) },
-   handles           => [ qw( authenticated username ) ];
-
-has 'tunnel_method'  => is => 'lazy', isa => NonEmptySimpleStr;
-
-has 'uri'            => is => 'lazy', isa => Object;
-
-# Private attributes
-has '_base'          => is => 'lazy', isa => NonEmptySimpleStr,
-   init_arg          => undef;
-
-has '_content'       => is => 'lazy', isa => Str, init_arg => undef;
-
-has '_env'           => is => 'ro',   isa => HashRef, default => sub { {} },
-   init_arg          => 'env';
-
-has '_params'        => is => 'ro',   isa => HashRef, default => sub { {} },
-   init_arg          => 'params';
-
-has '_usul'          => is => 'ro',   isa => BaseType,
-   handles           => [ qw( config l10n log ) ],
-   init_arg          => 'builder', required => TRUE;
+use Moo;
 
 # Private functions
 my $_defined_or_throw = sub {
@@ -183,6 +107,158 @@ my $_get_scrubbed_param = sub {
    return $opts->{raw} ? $v : $_scrub_value->( $name, $v, $opts );
 };
 
+# Attribute constructors
+my $_build_base = sub {
+   my $self = shift; my $base;
+
+   if ($self->mode eq 'static') {
+      my @path = split m{ / }mx, $self->path; $base = '../' x scalar @path;
+   }
+   else { $base = $self->scheme.'://'.$self->host.$self->script.'/' }
+
+   return $base;
+};
+
+my $_build_body = sub {
+   my $self = shift; my $env = $self->_env; my $content = $self->_content;
+
+   my $body = HTTP::Body->new( $self->content_type, length $content );
+
+   length $content and $body->add( $content );
+   $self->$_decode_hash( $body->param );
+   return $body;
+};
+
+my $_build_content = sub {
+   my $self = shift; my $env = $self->_env; my $content;
+
+   my $cl = $self->content_length  or return NUL;
+   my $fh = $env->{ 'psgi.input' } or return NUL;
+
+   try   { $fh->seek( 0, 0 ); $fh->read( $content, $cl, 0 ); $fh->seek( 0, 0 ) }
+   catch { $self->log->error( $_ ); $content = NUL };
+
+   return $content || NUL;
+};
+
+my $_build_locale = sub {
+   my $self   = shift;
+   my $locale = $self->query_params( 'locale', { optional => TRUE } );
+
+   $locale and is_member $locale, $self->config->locales and return $locale;
+
+   for my $locale (@{ $self->locales }) {
+      is_member $locale, $self->config->locales and return $locale;
+   }
+
+   return $self->config->locale;
+};
+
+my $_build_locales = sub {
+   my $self = shift; my $lang = $self->_env->{ 'HTTP_ACCEPT_LANGUAGE' } || NUL;
+
+   return [ map    { s{ _ \z }{}mx; $_ }
+            map    { join '_', $_->[ 0 ], uc $_->[ 1 ] }
+            map    { [ split m{ - }mx, $_ ] }
+            map    { ( split m{ ; }mx, $_ )[ 0 ] }
+            split m{ , }mx, lc $lang ];
+};
+
+my $_build_tunnel_method = sub {
+   return $_[ 0 ]->body_params->(  '_method', { optional => TRUE } )
+       || $_[ 0 ]->query_params->( '_method', { optional => TRUE } )
+       || 'not_found';
+};
+
+my $_build_uri = sub {
+   my $self = shift; my $uri;
+
+   if ($self->mode ne 'static') { $uri = $self->_base.$self->path }
+   else { $uri = $self->_base.$self->locale.'/'.$self->path.'.html' }
+
+   return new_uri $uri, $self->scheme;
+};
+
+# Public attributes
+has 'args'           => is => 'ro',   isa => ArrayRef, default => sub { [] };
+
+has 'base'           => is => 'lazy', isa => Object,
+   builder           => sub { new_uri $_[ 0 ]->_base, $_[ 0 ]->scheme },
+   init_arg          => undef;
+
+has 'body'           => is => 'lazy', isa => Object, builder => $_build_body;
+
+has 'content_length' => is => 'lazy', isa => PositiveInt,
+   builder           => sub { $_[ 0 ]->_env->{CONTENT_LENGTH} // 0 };
+
+has 'content_type'   => is => 'lazy', isa => SimpleStr,
+   builder           => sub { $_[ 0 ]->_env->{CONTENT_TYPE} // NUL };
+
+has 'domain'         => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => sub { (split m{ : }mx, $_[ 0 ]->host)[ 0 ] };
+
+has 'encoding'       => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => sub { $_[ 0 ]->config->encoding };
+
+has 'host'           => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
+   my $env           =  $_[ 0 ]->_env;
+      $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
+
+has 'language'       => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => sub { extract_lang $_[ 0 ]->locale };
+
+has 'locale'         => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => $_build_locale;
+
+has 'locales'        => is => 'lazy', isa => ArrayRef,
+   builder           => $_build_locales;
+
+has 'model_name'     => is => 'lazy', isa => NonEmptySimpleStr,
+   default           => sub { $_[ 0 ]->config->name };
+
+has 'method'         => is => 'lazy', isa => SimpleStr,
+   builder           => sub { lc( $_[ 0 ]->_env->{ 'REQUEST_METHOD' } // NUL )};
+
+has 'path'           => is => 'lazy', isa => SimpleStr, builder => sub {
+   my $v             =  $_[ 0 ]->_env->{ 'PATH_INFO' } // '/';
+      $v             =~ s{ \A / }{}mx; $v =~ s{ \? .* \z }{}mx; $v };
+
+has 'query'          => is => 'lazy', isa => SimpleStr, builder => sub {
+   my $v             =  $_[ 0 ]->_env->{ 'QUERY_STRING' }; $v ? "?${v}" : NUL };
+
+has 'scheme'         => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => sub { $_[ 0 ]->_env->{ 'psgi.url_scheme' } // 'http' };
+
+has 'script'         => is => 'lazy', isa => SimpleStr, builder => sub {
+   my $v             =  $_[ 0 ]->_env->{ 'SCRIPT_NAME' } // '/';
+      $v             =~ s{ / \z }{}gmx; $v };
+
+has 'session'        => is => 'lazy', isa => Object, builder => sub {
+   App::Doh::Session->new( builder => $_[ 0 ]->_usul, env => $_[ 0 ]->_env ) },
+   handles           => [ qw( authenticated username ) ];
+
+has 'tunnel_method'  => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => $_build_tunnel_method;
+
+has 'uri'            => is => 'lazy', isa => Object, builder => $_build_uri;
+
+# Private attributes
+has '_base'          => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => $_build_base, init_arg => undef;
+
+has '_content'       => is => 'lazy', isa => Str, builder => $_build_content,
+   init_arg          => undef;
+
+has '_env'           => is => 'ro',   isa => HashRef, default => sub { {} },
+   init_arg          => 'env';
+
+has '_params'        => is => 'ro',   isa => HashRef, default => sub { {} },
+   init_arg          => 'params';
+
+has '_usul'          => is => 'ro',   isa => BaseType,
+   handles           => [ qw( config l10n log ) ],
+   init_arg          => 'builder', required => TRUE;
+
 # Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = {};
@@ -207,77 +283,6 @@ sub BUILD {
       ( join SPC, (uc $self->method), $self->uri,
         ($self->authenticated ? $self->username : NUL) );
    return;
-}
-
-sub _build__base {
-   my $self = shift; my $base;
-
-   if ($self->mode eq 'static') {
-      my @path = split m{ / }mx, $self->path; $base = '../' x scalar @path;
-   }
-   else { $base = $self->scheme.'://'.$self->host.$self->script.'/' }
-
-   return $base;
-}
-
-sub _build_body {
-   my $self = shift; my $env = $self->_env; my $content = $self->_content;
-
-   my $body = HTTP::Body->new( $self->content_type, length $content );
-
-   length $content and $body->add( $content );
-   $self->$_decode_hash( $body->param );
-   return $body;
-}
-
-sub _build__content {
-   my $self = shift; my $env = $self->_env; my $content;
-
-   my $cl = $self->content_length  or return NUL;
-   my $fh = $env->{ 'psgi.input' } or return NUL;
-
-   try   { $fh->seek( 0, 0 ); $fh->read( $content, $cl, 0 ); $fh->seek( 0, 0 ) }
-   catch { $self->log->error( $_ ); $content = NUL };
-
-   return $content || NUL;
-}
-
-sub _build_locale {
-   my $self   = shift;
-   my $locale = $self->query_params( 'locale', { optional => TRUE } );
-
-   $locale and is_member $locale, $self->config->locales and return $locale;
-
-   for my $locale (@{ $self->locales }) {
-      is_member $locale, $self->config->locales and return $locale;
-   }
-
-   return $self->config->locale;
-}
-
-sub _build_locales {
-   my $self = shift; my $lang = $self->_env->{ 'HTTP_ACCEPT_LANGUAGE' } || NUL;
-
-   return [ map    { s{ _ \z }{}mx; $_ }
-            map    { join '_', $_->[ 0 ], uc $_->[ 1 ] }
-            map    { [ split m{ - }mx, $_ ] }
-            map    { ( split m{ ; }mx, $_ )[ 0 ] }
-            split m{ , }mx, lc $lang ];
-}
-
-sub _build_tunnel_method  {
-   return  $_[ 0 ]->body_params->(  '_method', { optional => TRUE } )
-        || $_[ 0 ]->query_params->( '_method', { optional => TRUE } )
-        || 'not_found';
-}
-
-sub _build_uri {
-   my $self = shift; my $uri;
-
-   if ($self->mode ne 'static') { $uri = $self->_base.$self->path }
-   else { $uri = $self->_base.$self->locale.'/'.$self->path.'.html' }
-
-   return new_uri $uri, $self->scheme;
 }
 
 # Public methods
@@ -343,7 +348,7 @@ Doh::Request - Represents the request sent from the client to the server
 
    use Doh::Request;
 
-   my $req = App::Doh::Request->new( $class_usul_object_ref, @args );
+   my $req = App::Doh::Request->new( $class_usul_ref, $model_moniker, @args );
 
 =head1 Description
 

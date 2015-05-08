@@ -1,6 +1,5 @@
 package App::Doh::Model::Administration;
 
-use Moo;
 use App::Doh::Attributes;
 use App::Doh::Functions    qw( set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
@@ -9,6 +8,7 @@ use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_I_AM_A_TEAPOT
                                HTTP_UNAUTHORIZED HTTP_UNPROCESSABLE_ENTITY );
 use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
+use Moo;
 
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::Authorization);

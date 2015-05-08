@@ -45,11 +45,11 @@
                 title: '[% loc( 'Register User' ) %]' } ] };
       behaviour.config.anchors[ 'delete-file' ]
          = { method  : 'confirmSubmit',
-             args    : [ 'delete',
+             args    : [ 'delete_file',
                 '[% loc( 'Are you sure you want to delete this file?' ) %]' ] };
       behaviour.config.anchors[ 'delete-user' ]
          = { method  : 'confirmSubmit',
-             args    : [ 'delete',
+             args    : [ 'delete_user',
                 '[% loc( 'Are you sure you want to delete this user?' ) %]' ] };
       behaviour.config.anchors[ 'login-user' ]
          = { method  : 'modalDialog',

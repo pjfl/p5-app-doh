@@ -2,11 +2,11 @@ package App::Doh::Model::Documentation;
 
 use feature 'state';
 
-use Moo;
-use App::Doh::Attributes;
+use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Functions qw( first_char io throw );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
+use Moo;
 
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::Authorization);

@@ -27,7 +27,7 @@ var Behaviour = new Class( {
       this.resize(); this.attach();
    },
 
-   attach: function() {
+   attach: function() { // Add the event handling
       var cblocks, el, opt = this.options, prefs;
 
       if ((prefs = document.forms[ 'preferences' ])
@@ -62,16 +62,6 @@ var Behaviour = new Class( {
          } );
       }
 
-      if (opt.editing && opt.useCodeMirror) {
-         this.editor    = new Editor( {
-            codeMirror  : { keyMap: opt.keyMap },
-            element     : $( 'markdown-editor' ) } );
-         this.editor.render();
-      }
-
-      if (opt.statusUpdPeriod && !opt.popup)
-         this.statusUpdater.periodical( opt.statusUpdPeriod, this );
-
       window.addEvent( 'load',   function() {
          this.load( opt.firstField ) }.bind( this ) );
 
@@ -84,6 +74,13 @@ var Behaviour = new Class( {
 
    load: function( first_field ) {
       var el, opt = this.options;
+
+      if (opt.editing && opt.useCodeMirror) {
+         this.editor    = new Editor( {
+            codeMirror  : { keyMap: opt.keyMap },
+            element     : $( 'markdown-editor' ) } );
+         this.editor.render();
+      }
 
       this.window       = new WindowUtils( {
          context        : this,
@@ -119,6 +116,9 @@ var Behaviour = new Class( {
          showDelay      : 666 } );
 
       if (opt.message) this.noticeBoard.create( opt.message );
+
+      if (opt.statusUpdPeriod && !opt.popup)
+         this.statusUpdater.periodical( opt.statusUpdPeriod, this );
 
       if (first_field && (el = $( first_field ))) el.focus();
    },

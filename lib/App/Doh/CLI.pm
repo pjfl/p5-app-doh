@@ -2,7 +2,6 @@ package App::Doh::CLI;
 
 use namespace::autoclean;
 
-use Moo;
 use App::Doh;
 use App::Doh::Functions    qw( env_var iterator load_components );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
@@ -14,6 +13,7 @@ use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object
 use File::DataClass::Types qw( Path );
 use User::grent;
 use User::pwent;
+use Moo;
 
 extends q(Class::Usul::Programs);
 

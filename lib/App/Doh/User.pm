@@ -2,12 +2,12 @@ package App::Doh::User;
 
 use namespace::autoclean;
 
-use Moo;
 use Class::Usul::Constants     qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions     qw( create_token is_hashref );
 use Class::Usul::Types         qw( NonZeroPositiveInt Object );
 use Crypt::Eksblowfish::Bcrypt qw( bcrypt en_base64 );
 use Data::Validation;
+use Moo;
 
 extends q(File::DataClass::Schema);
 
@@ -96,9 +96,9 @@ sub update {
 package # Hide from indexer
    App::Doh::User::Result;
 
-use Moo;
 use Class::Usul::Constants     qw( FALSE TRUE );
 use Crypt::Eksblowfish::Bcrypt qw( bcrypt );
+use Moo;
 
 extends q(File::DataClass::Result);
 
