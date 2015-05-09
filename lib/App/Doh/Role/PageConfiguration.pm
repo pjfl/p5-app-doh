@@ -3,10 +3,15 @@ package App::Doh::Role::PageConfiguration;
 use namespace::autoclean;
 
 use App::Doh::Functions    qw( extract_lang );
+use App::Doh::User;
 use Class::Usul::Constants qw( FALSE NUL TRUE );
+use Class::Usul::Types     qw( Object );
 use Moo::Role;
 
-requires qw( config load_page users );
+requires qw( config load_page usul );
+
+has 'users' => is => 'lazy', isa => Object,
+   builder  => sub { App::Doh::User->new( builder => $_[ 0 ]->usul ) };
 
 # Construction
 around 'load_page' => sub {

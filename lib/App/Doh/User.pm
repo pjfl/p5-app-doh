@@ -56,9 +56,10 @@ around 'BUILDARGS' => sub {
    my $builder = $args->{builder}; ($builder and $builder->can( 'config' ))
       or return $orig->( $self, @args );
 
-   my $attr    = { %{ $args }, %{ $builder->config->user_attributes } };
+   my $conf    = $builder->config; ($conf and $conf->can( 'user_attributes' ))
+      or return $orig->( $self, @args );
 
-   return $orig->( $self, $attr );
+   return $orig->( $self, { %{ $conf->user_attributes }, %{ $args } } );
 };
 
 # Public methods
@@ -95,6 +96,8 @@ sub update {
 
 package # Hide from indexer
    App::Doh::User::Result;
+
+use namespace::autoclean;
 
 use Class::Usul::Constants     qw( FALSE TRUE );
 use Crypt::Eksblowfish::Bcrypt qw( bcrypt );

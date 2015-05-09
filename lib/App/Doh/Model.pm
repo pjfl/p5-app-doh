@@ -2,31 +2,22 @@ package App::Doh::Model;
 
 use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( show_node );
-use App::Doh::User;
 use Class::Usul::Constants qw( FALSE NUL );
 use Class::Usul::Functions qw( is_member );
-use Class::Usul::IPC;
 use Class::Usul::Time      qw( str2time time2str );
-use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( blessed weaken );
 use Moo;
 
 with q(App::Doh::Role::Component);
 
-# Public attributes
-has 'ipc'   => is => 'lazy', isa => Object, builder => sub {
-   Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
-
-has 'users' => is => 'lazy', isa => Object, builder => sub {
-   App::Doh::User->new( builder => $_[ 0 ]->usul ) };
-
+# Public methods
 sub exception_handler {
    my ($self, $req, $e) = @_;
 
    my $stash  = $self->get_stash( $req );
    my $title  = $req->loc( 'Exception Handler' );
-   my $errors = '&nbsp;' x 40; $e->args->[ 0 ] and blessed $e->args->[ 0 ]
+   my $errors = '&nbsp;' x 40;  $e->args->[ 0 ] and blessed $e->args->[ 0 ]
       and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
 
    $stash->{code} =  $e->rv >= HTTP_OK ? $e->rv : HTTP_BAD_REQUEST;

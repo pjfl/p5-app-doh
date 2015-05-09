@@ -9,9 +9,9 @@ use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo;
 
 extends q(App::Doh::Model);
+with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::CommonLinks);
-with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
 with    q(App::Doh::Role::Templates);

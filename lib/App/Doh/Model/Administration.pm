@@ -1,9 +1,11 @@
 package App::Doh::Model::Administration;
 
-use App::Doh::Attributes;
+use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
+use Class::Usul::IPC;
+use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_I_AM_A_TEAPOT
                                HTTP_UNAUTHORIZED HTTP_UNPROCESSABLE_ENTITY );
 use Try::Tiny;
@@ -11,12 +13,16 @@ use Unexpected::Functions  qw( Unspecified );
 use Moo;
 
 extends q(App::Doh::Model);
+with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::CommonLinks);
-with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Preferences);
 
 has '+moniker' => default => 'admin';
+
+# Public attributes
+has 'ipc' => is => 'lazy', isa => Object, builder => sub {
+   Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
 # Private methods
 my $_authenticate = sub {

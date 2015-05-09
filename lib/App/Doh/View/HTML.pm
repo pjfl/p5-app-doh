@@ -18,7 +18,7 @@ has 'formatters' => is => 'lazy', isa => HashRef[Object], builder => sub {
    load_components 'View::HTML', $_[ 0 ]->usul->config,
       { builder => $_[ 0 ]->usul, } };
 
-has 'type_map' => is => 'lazy', isa => HashRef, builder => sub {
+has 'type_map'   => is => 'lazy', isa => HashRef, builder => sub {
    my $self = shift; my $map = { htm => 'html', html => 'html' };
 
    for my $format (keys %{ $self->formatters }) {

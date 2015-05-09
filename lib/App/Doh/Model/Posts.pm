@@ -8,9 +8,9 @@ use Class::Usul::Constants qw( TRUE );
 use Moo;
 
 extends q(App::Doh::Model);
+with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::CommonLinks);
-with    q(App::Doh::Role::PageConfiguration);
 with    q(App::Doh::Role::PageLoading);
 with    q(App::Doh::Role::Preferences);
 with    q(App::Doh::Role::Templates);

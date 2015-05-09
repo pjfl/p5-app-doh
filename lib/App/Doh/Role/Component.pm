@@ -3,17 +3,19 @@ package App::Doh::Role::Component;
 use namespace::autoclean;
 
 use Class::Usul::Constants qw( TRUE );
-use Class::Usul::Types     qw( BaseType NonEmptySimpleStr SimpleStr );
+use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr SimpleStr );
 use Moo::Role;
 
-has 'encoding' => is => 'lazy', isa => NonEmptySimpleStr,
-   builder     => sub { $_[ 0 ]->config->encoding };
+has 'components' => is => 'ro',   isa => HashRef, default => sub { {} };
 
-has 'moniker'  => is => 'ro',   isa => SimpleStr, required => TRUE;
+has 'encoding'   => is => 'lazy', isa => NonEmptySimpleStr,
+   builder       => sub { $_[ 0 ]->config->encoding };
 
-has 'usul'     => is => 'ro',   isa => BaseType,
-   handles     => [ qw( config l10n lock log ) ],
-   init_arg    => 'builder', required => TRUE;
+has 'moniker'    => is => 'ro',   isa => SimpleStr, required => TRUE;
+
+has 'usul'       => is => 'ro',   isa => BaseType,
+   handles       => [ qw( config l10n lock log ) ],
+   init_arg      => 'builder', required => TRUE;
 
 1;
 
