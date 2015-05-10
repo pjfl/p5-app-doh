@@ -46,6 +46,7 @@ cli
 doh
 filename
 inline
+localenv
 JavaScript
 JSON
 loc

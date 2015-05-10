@@ -51,6 +51,7 @@
 \#$
 \.#
 \.rej$
+local.bak
 
 # Avoid OS-specific files/dirs
 #   Mac OSX metadata

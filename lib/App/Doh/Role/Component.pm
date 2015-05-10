@@ -6,7 +6,8 @@ use Class::Usul::Constants qw( TRUE );
 use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr SimpleStr );
 use Moo::Role;
 
-has 'components' => is => 'ro',   isa => HashRef, default => sub { {} };
+has 'components' => is => 'ro',   isa => HashRef, default => sub { {} },
+   weak_ref      => TRUE;
 
 has 'encoding'   => is => 'lazy', isa => NonEmptySimpleStr,
    builder       => sub { $_[ 0 ]->config->encoding };

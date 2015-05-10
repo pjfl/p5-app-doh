@@ -7,13 +7,13 @@ use App::Doh::Functions    qw( env_var iterator load_components );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix distname io );
-use Class::Usul::Options;
 use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object
                                PositiveInt );
 use File::DataClass::Types qw( Path );
 use User::grent;
 use User::pwent;
 use Moo;
+use Class::Usul::Options;
 
 extends q(Class::Usul::Programs);
 

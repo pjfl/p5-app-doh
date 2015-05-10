@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Fixed memory leak in component DI
           - Made User class a model component and used DI
           - Implement dependency injection in components
           - ComponentLoading returns plain text 500 if Request->new fails
