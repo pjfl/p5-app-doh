@@ -14,7 +14,7 @@ requires qw( usul );
 
 has 'controllers'   => is => 'lazy', isa => ArrayRef[Object], builder => sub {
    my $controllers  =  load_components 'Controller', $_[ 0 ]->usul->config,
-      {  builder    => $_[ 0 ]->usul, models => $_[ 0 ]->models, };
+      {  builder    => $_[ 0 ]->usul, };
    return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] };
 
 has 'models'        => is => 'lazy', isa => HashRef[Object], builder => sub {

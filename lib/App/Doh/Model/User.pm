@@ -1,10 +1,11 @@
-package App::Doh::User;
+package App::Doh::Model::User;
 
 use namespace::autoclean;
 
 use Class::Usul::Constants     qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions     qw( create_token is_hashref );
-use Class::Usul::Types         qw( NonZeroPositiveInt Object );
+use Class::Usul::Types         qw( NonEmptySimpleStr
+                                   NonZeroPositiveInt Object );
 use Crypt::Eksblowfish::Bcrypt qw( bcrypt en_base64 );
 use Data::Validation;
 use Moo;
@@ -15,6 +16,9 @@ has 'load_factor'  => is => 'ro',   isa => NonZeroPositiveInt, default => 14;
 
 has 'min_pass_len' => is => 'ro',   isa => NonZeroPositiveInt, default => 8;
 
+has 'moniker'      => is => 'ro',   isa => NonEmptySimpleStr,
+   default         => 'user';
+
 has '+result_source_attributes' => default => sub { {
    users                   => {
       attributes           => [ qw( active binding email password roles ) ],
@@ -22,7 +26,7 @@ has '+result_source_attributes' => default => sub { {
          active            => FALSE,
          binding           => 'default',
          roles             => [ 'user' ], },
-      resultset_attributes => { result_class => 'App::Doh::User::Result' } },
+      resultset_attributes => { result_class => 'App::Doh::User' } },
 } };
 
 has 'validator'    => is => 'lazy', isa => Object, builder => sub {
@@ -54,10 +58,10 @@ around 'BUILDARGS' => sub {
    my $args    = (is_hashref $args[ 0 ]) ? $args[ 0 ] : { @args };
 
    my $builder = $args->{builder}; ($builder and $builder->can( 'config' ))
-      or return $orig->( $self, @args );
+      or return $orig->( $self, $args );
 
    my $conf    = $builder->config; ($conf and $conf->can( 'user_attributes' ))
-      or return $orig->( $self, @args );
+      or return $orig->( $self, $args );
 
    return $orig->( $self, { %{ $conf->user_attributes }, %{ $args } } );
 };
@@ -95,7 +99,7 @@ sub update {
 }
 
 package # Hide from indexer
-   App::Doh::User::Result;
+   App::Doh::User;
 
 use namespace::autoclean;
 

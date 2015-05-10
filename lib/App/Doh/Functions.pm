@@ -190,7 +190,7 @@ sub load_components ($$;$) {
       ( max_depth   => $depth,           min_depth => $depth,
         search_path => [ $search_path ], require   => TRUE, );
    my $monikers = $config->{monikers} // {};
-   my $compos   = $args->{components} = {}; # Dependency injection
+   my $compos   = $args->{components}  = {}; # Dependency injection
 
    for my $class ($finder->plugins) {
       exists $monikers->{ $class } and defined $monikers->{ $class }
