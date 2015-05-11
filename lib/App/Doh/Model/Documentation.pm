@@ -21,18 +21,17 @@ has '+moniker' => default => 'docs';
 
 # Private methods
 my $_find_first_url = sub {
-   my ($self, $locale) = @_;
-
-   my $iter = iterator $self->localised_tree( $locale );
+   my ($self, $tree) = @_; my $iter = iterator $tree;
 
    while (defined (my $node = $iter->())) {
       $node->{type} ne 'folder' and $node->{id} ne 'index'
          and return $node->{url};
    }
 
-   my $error = "Config Error: Unable to find the first page in\n"
-      ."the /docs folder. Double check you have at least one file in the root\n"
-      ."of the /docs folder. Also make sure you do not have any empty folders";
+   my $error = 'Config Error: Unable to find the first page in the /docs '
+             . 'folder. Double check you have at least one file in the root '
+             . 'of the /docs folder. Also make sure you do not have any empty '
+             . 'folders';
 
    $self->log->error( $error );
    return '/';
@@ -41,14 +40,14 @@ my $_find_first_url = sub {
 my $_docs_url = sub {
    my ($self, $locale) = @_; state $cache //= {};
 
-   my $node  = $self->localised_tree( $locale )
+   my $tree  = $self->localised_tree( $locale )
       or throw 'No document tree for locale [_1]', [ $locale ],
                rv => HTTP_NOT_FOUND;
-   my $mtime = mtime $node;
+   my $mtime = mtime $tree;
    my $tuple = $cache->{ $locale };
 
    (not $tuple or $mtime > $tuple->[ 0 ]) and $cache->{ $locale }
-      = $tuple = [ $mtime, $self->$_find_first_url( $locale ) ];
+      = $tuple = [ $mtime, $self->$_find_first_url( $tree ) ];
 
    return $tuple->[ 1 ];
 };

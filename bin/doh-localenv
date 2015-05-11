@@ -11,9 +11,9 @@
 # The local::lib behavior can be explicitly enabled or disabled by setting
 # the <APPNAME>_LOCAL_LIB enviromnent variable to true or false.
 
+use lib;
 use strict;
 use warnings;
-use lib;
 
 use Config;
 use Cwd                   qw( abs_path );
@@ -23,9 +23,16 @@ use File::Spec::Functions qw( catdir catfile );
 
 my $LOCAL_LIB  = 'local'; # This is the only configurable
 
+my $untaint    = sub {
+   my $v = shift;
+
+   $v = $v =~ m{ \A ([^\$%&\*;<>\`|]+) \z }mx ? $1 : die "Path ${v} tainted";
+
+   return $v;
+};
 my $was_called = caller() ? 1 : 0;
 my $our_path   = $was_called ? (caller())[ 1 ] : $PROGRAM_NAME;
-my $bindir     = abs_path( dirname( $our_path ) );
+my $bindir     = $untaint->( abs_path( dirname( $our_path ) ) );
 my $basedir    = -f catfile( $bindir, 'Build.PL' )
               || -f catfile( $bindir, 'Makefile.PL' )
                ? $bindir : dirname( $bindir );
@@ -48,12 +55,12 @@ if ($active) {
    require local::lib; local::lib->import( $local_lib );
 
    $ENV{PERL5_MB_OPT} .= ' INSTALLMAN1DIR=none INSTALLMAN3DIR=none';
-   $ENV{PERL5LIB    }  = $libdir.$path_sep.$ENV{PERL5LIB};
 }
 
-lib->import( $libdir );
+$ENV{PATH    } = $bindir.$path_sep.$ENV{PATH};
+$ENV{PERL5LIB} = $libdir.$path_sep.$ENV{PERL5LIB};
 
-$ENV{PATH} = $bindir.$path_sep.$ENV{PATH};
+lib->import( $libdir );
 
 not $was_called and @ARGV and exec @ARGV;
 

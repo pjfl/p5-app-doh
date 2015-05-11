@@ -6,7 +6,7 @@ use App::Doh;
 use App::Doh::Functions    qw( env_var iterator load_components );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
-use Class::Usul::Functions qw( app_prefix distname io );
+use Class::Usul::Functions qw( app_prefix distname ensure_class_loaded io );
 use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object
                                PositiveInt );
 use File::DataClass::Types qw( Path );
@@ -161,7 +161,7 @@ sub make_css : method {
 sub make_skin : method {
    my $self = shift; my $conf = $self->config; my $skin = $self->skin;
 
-   require Archive::Tar; my $arc = Archive::Tar->new;
+   ensure_class_loaded 'Archive::Tar'; my $arc = Archive::Tar->new;
 
    for my $path ($conf->root->catdir( $conf->less, $skin )->all_files) {
       $arc->add_files( $path->abs2rel( $conf->appldir ) );

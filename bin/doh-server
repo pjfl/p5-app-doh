@@ -5,7 +5,8 @@ use FindBin qw( $Bin );
 use File::Spec;
 
 BEGIN {
-   my $path = File::Spec->catfile( $Bin, 'doh-localenv' );
+   my $bind = $Bin; $bind =~ m{ \A ([^\$%&\*;<>\`|]+) \z }mx and $bind = $1;
+   my $path = File::Spec->catfile( $bind, 'doh-localenv' );
 
    do $path or die $EVAL_ERROR || "Path ${path} not done\n";
 }

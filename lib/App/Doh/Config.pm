@@ -319,7 +319,7 @@ C<editor>, and C<user>
 
 =item C<author>
 
-A non empty simple string that defaults to C<Dave>. The HTML meta attributes
+A non empty simple string that defaults to C<anon>. The HTML meta attributes
 author value
 
 =item C<blank_template>

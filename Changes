@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Updated prereqs
+          - Made program wrappers work in taint mode
+
 0.10.1    2015-05-11 00:39:33
           - Fixed memory leak in component DI
           - Made User class a model component and used DI
