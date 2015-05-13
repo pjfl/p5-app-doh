@@ -15,7 +15,7 @@ has 'encoding'   => is => 'lazy', isa => NonEmptySimpleStr,
 has 'moniker'    => is => 'ro',   isa => SimpleStr, required => TRUE;
 
 has 'usul'       => is => 'ro',   isa => BaseType,
-   handles       => [ qw( config l10n lock log ) ],
+   handles       => [ qw( config debug l10n lock log ) ],
    init_arg      => 'builder', required => TRUE;
 
 1;

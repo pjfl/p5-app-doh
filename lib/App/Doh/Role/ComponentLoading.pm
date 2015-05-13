@@ -71,7 +71,7 @@ my $_render_view = sub {
 };
 
 my $_render_exception = sub {
-   my ($self, $moniker, $req, $e) = @_; my $res; my $username = $req->username;
+   my ($self, $moniker, $req, $e) = @_; my $username = $req->username; my $res;
 
    my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
 
@@ -102,7 +102,7 @@ sub render {
 
    $res and return $res;
 
-   try {
+   try   {
       $method eq 'from_request' and $method = $req->tunnel_method.'_action';
 
       my $stash = $models->{ $moniker }->execute( $method, $req );

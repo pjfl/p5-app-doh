@@ -108,7 +108,7 @@ my $_get_scrubbed_param = sub {
 };
 
 # Attribute constructors
-my $_build_base = sub {
+my $_build__base = sub {
    my $self = shift; my $base;
 
    if ($self->mode eq 'static') {
@@ -129,7 +129,7 @@ my $_build_body = sub {
    return $body;
 };
 
-my $_build_content = sub {
+my $_build__content = sub {
    my $self = shift; my $env = $self->_env; my $content;
 
    my $cl = $self->content_length  or return NUL;
@@ -244,9 +244,9 @@ has 'uri'            => is => 'lazy', isa => Object, builder => $_build_uri;
 
 # Private attributes
 has '_base'          => is => 'lazy', isa => NonEmptySimpleStr,
-   builder           => $_build_base, init_arg => undef;
+   builder           => $_build__base, init_arg => undef;
 
-has '_content'       => is => 'lazy', isa => Str, builder => $_build_content,
+has '_content'       => is => 'lazy', isa => Str, builder => $_build__content,
    init_arg          => undef;
 
 has '_env'           => is => 'ro',   isa => HashRef, default => sub { {} },

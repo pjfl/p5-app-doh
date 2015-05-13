@@ -15,7 +15,7 @@ with q(App::Doh::Role::Component);
 sub exception_handler {
    my ($self, $req, $e) = @_;
 
-   my $stash  = $self->get_stash( $req );
+   my $stash  = $self->initialise_stash( $req );
    my $title  = $req->loc( 'Exception Handler' );
    my $errors = '&nbsp;' x 40;  $e->args->[ 0 ] and blessed $e->args->[ 0 ]
       and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
@@ -39,7 +39,7 @@ sub execute {
 }
 
 sub get_content : Role(any) {
-   my ($self, $req) = @_; my $stash = $self->get_stash( $req );
+   my ($self, $req) = @_; my $stash = $self->initialise_stash( $req );
 
    $stash->{page} = $self->load_page ( $req );
    $stash->{nav } = $self->navigation( $req, $stash );
@@ -47,7 +47,7 @@ sub get_content : Role(any) {
    return $stash;
 }
 
-sub get_stash {
+sub initialise_stash {
    my ($self, $req) = @_; weaken( $req );
 
    return { code         => HTTP_OK,

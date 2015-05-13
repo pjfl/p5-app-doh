@@ -2,7 +2,8 @@ package App::Doh::CLI;
 
 use namespace::autoclean;
 
-use App::Doh;
+use App::Doh; our $VERSION = $App::Doh::VERSION;
+
 use App::Doh::Functions    qw( env_var iterator load_components );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
@@ -16,8 +17,6 @@ use Moo;
 use Class::Usul::Options;
 
 extends q(Class::Usul::Programs);
-
-our $VERSION = $App::Doh::VERSION;
 
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';
@@ -126,7 +125,7 @@ my $_make_localised_static = sub {
       my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
       my $path = io( [ $dest, @path ] )->assert_filepath;
 
-      $self->info( "Writing ${locale}/".$node->{url} );
+      $self->info( 'Writing [_1]', { args => [ "${locale}/".$node->{url} ] } );
       $self->run_cmd( $cmd, { out => $path } );
    }
 
@@ -139,9 +138,12 @@ my $_write_theme = sub {
    my $skin = $self->skin;
    my $conf = $self->config;
    my $path = $conf->root->catfile( $conf->less, $skin, "${file}.less" );
+
+   $path->exists or return;
+
    my $css  = $self->less->compile( $path->all );
 
-   $self->info( "Writing ${skin}-${file} theme" );
+   $self->info( 'Writing theme file [_1]', { args => [ "${skin}-${file}" ] } );
    $cssd->catfile( "${skin}-${file}.css" )->println( $css );
    return;
 };
@@ -174,7 +176,7 @@ sub make_skin : method {
    my $path = $conf->root->catfile( $conf->js, "${skin}.js" );
 
    $arc->add_files( $path->abs2rel( $conf->appldir ) );
-   $self->info( "Generating tarball for the ${skin} skin" );
+   $self->info( 'Generating tarball for [_1] skin', { args => [ $skin ] } );
    $arc->write( "${skin}-skin.tgz", COMPRESS_GZIP );
    return OK;
 }
@@ -211,23 +213,23 @@ sub make_static : method {
 sub post_install : method {
    my $self    = shift;
    my $conf    = $self->config;
+   my $appldir = $conf->appldir;
+   my $verdir  = $appldir->basename;
    my $appname = lc distname $conf->appclass;
-   my $verdir  = $conf->appldir->basename;
 
    if ($verdir =~ m{ \A v \d+ \. \d+ p (\d+) \z }msx) {
-      my $owner = $conf->owner;
+      my $owner = my $group = $conf->owner;
 
-      getgr( $owner ) or $self->run_cmd( [ 'groupadd', '--system', $owner ] );
+      getgr( $group ) or $self->run_cmd( [ 'groupadd', '--system', $group ] );
 
-      my $cmd  = [ 'useradd', '--home', $conf->user_home, '--gid',
-                   $owner, '--no-user-group', '--system', $owner ];
+      unless (getpwnam( $owner )) {
+         $self->run_cmd( [ 'useradd', '--home', $conf->user_home, '--gid',
+                           $group, '--no-user-group', '--system', $owner  ] );
+         $self->run_cmd( [ 'chown', "${owner}:${group}", $conf->user_home ] );
+      }
 
-      getpwnam( $owner ) or $self->run_cmd( $cmd );
-
-      my $appd = $conf->appldir->parent;
-
-      $self->run_cmd( [ 'chown', "${owner}:${owner}", $appd ] );
-      $self->run_cmd( [ 'chown', '-R', "${owner}:${owner}", $appd ] );
+      $self->run_cmd( [ 'chown', "${owner}:${group}", $appldir ] );
+      $self->run_cmd( [ 'chown', '-R', "${owner}:${group}", $appldir ] );
    }
 
    my ($init, $kill) = $_init_files->( $appname );

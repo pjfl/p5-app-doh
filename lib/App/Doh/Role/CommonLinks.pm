@@ -4,9 +4,9 @@ use namespace::autoclean;
 
 use Moo::Role;
 
-requires qw( config get_stash );
+requires qw( config initialise_stash );
 
-around 'get_stash' => sub {
+around 'initialise_stash' => sub {
    my ($orig, $self, $req, @args) = @_;
 
    my $stash = $orig->( $self, $req, @args ); my $conf = $self->config;

@@ -5,9 +5,9 @@ use namespace::autoclean;
 use Try::Tiny;
 use Moo::Role;
 
-requires qw( config get_stash log );
+requires qw( config initialise_stash log );
 
-around 'get_stash' => sub {
+around 'initialise_stash' => sub {
    my ($orig, $self, $req, @args) = @_;
 
    my $stash  = $orig->( $self, $req, @args );

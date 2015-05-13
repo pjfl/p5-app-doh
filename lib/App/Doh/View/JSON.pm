@@ -27,13 +27,15 @@ my $_header = sub {
 sub serialize {
    my ($self, $req, $stash) = @_;
 
+   my $content = defined $stash->{content} ? $stash->{content}
+               : { html => $self->render_template( $req, $stash ) };
    my $meta    = $stash->{page}->{meta} // {};
-   my $js      = join "\n", @{ $stash->{page}->{literal_js} // [] };
-   my $content = { html => $self->render_template( $req, $stash ) };
 
    $content->{ $_ } = $meta->{ $_ } for (keys %{ $meta });
 
-   $js and $content->{script} = $js;
+   my $js; $js = join "\n", @{ $stash->{page}->{literal_js} // [] }
+      and $content->{script} = $js;
+
    $content = encode( $self->encoding, $self->_transcoder->encode( $content ) );
 
    return [ $stash->{code}, $_header->( $stash->{http_headers} ), [ $content ]];

@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Model get_stash was renamed to initialise_stash
           - Updated prereqs
           - Made program wrappers work in taint mode
 

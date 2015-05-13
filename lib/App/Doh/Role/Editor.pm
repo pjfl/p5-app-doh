@@ -15,7 +15,7 @@ use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
 use Unexpected::Functions  qw( Unspecified );
 use Moo::Role;
 
-requires qw( config find_node get_stash invalidate_cache
+requires qw( config find_node initialise_stash invalidate_cache
              load_page log navigation render_template usul );
 
 # Public attributes
@@ -162,7 +162,7 @@ sub dialog {
 
    my $params = $req->query_params;
    my $name   = $params->( 'name' );
-   my $stash  = $self->get_stash( $req );
+   my $stash  = $self->initialise_stash( $req );
    my $page   = $stash->{page} = { hint   => $req->loc( 'Hint' ),
                                    layout => "${name}-file",
                                    meta   => { id => $params->( 'id' ), }, };
@@ -222,7 +222,7 @@ sub save_file {
 }
 
 sub search {
-   my ($self, $req) = @_; my $stash = $self->get_stash( $req );
+   my ($self, $req) = @_; my $stash = $self->initialise_stash( $req );
 
    $stash->{page} = $self->load_page ( $req, $self->$_search_results( $req ) );
    $stash->{nav } = $self->navigation( $req, $stash );
