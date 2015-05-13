@@ -8,30 +8,18 @@ use App::Doh::Functions    qw( env_var iterator load_components );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix distname ensure_class_loaded io );
-use Class::Usul::Types     qw( HashRef LoadableClass NonEmptySimpleStr Object
-                               PositiveInt );
+use Class::Usul::Types     qw( Bool HashRef LoadableClass
+                               NonEmptySimpleStr Object PositiveInt );
 use File::DataClass::Types qw( Path );
 use User::grent;
 use User::pwent;
 use Moo;
-use Class::Usul::Options;
+use Class::Usul::Options;  # Requires around, has, and with
 
 extends q(Class::Usul::Programs);
 
-# Override default in base class
-has '+config_class' => default => 'App::Doh::Config';
-
-# Public attributes
-option 'max_gen_time' => is => 'ro',   isa => PositiveInt,
-   documentation      => 'Maximum generation run time in seconds',
-   default            => 1_800, format => 'i', short => 'm';
-
-option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
-   documentation      => 'Name of the skin to operate on',
-   default            => sub { $_[ 0 ]->config->skin }, format => 's',
-   short              => 's';
-
-has 'less'  => is => 'lazy', isa => Object, builder => sub {
+# Attribute constructors
+my $_build_less = sub {
    my $self = shift;
    my $conf = $self->config;
    my $incd = $conf->root->catdir( 'less' );
@@ -41,11 +29,40 @@ has 'less'  => is => 'lazy', isa => Object, builder => sub {
                                   tmp_path      => $conf->tempdir, );
 };
 
-has 'less_class' => is => 'lazy', isa => LoadableClass,
-   default       => 'CSS::LESS';
+# Public attributes
+option 'force'        => is => 'ro',   isa => Bool,
+   documentation      => 'Force the operation to take place',
+   default            => FALSE, short => 'f';
 
-has 'models'     => is => 'lazy', isa => HashRef[Object], builder => sub {
+option 'max_gen_time' => is => 'ro',   isa => PositiveInt,
+   documentation      => 'Maximum generation run time in seconds',
+   default            => 1_800, format => 'i', short => 'm';
+
+option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
+   documentation      => 'Name of the skin to operate on',
+   default            => sub { $_[ 0 ]->config->skin }, format => 's',
+   short              => 's';
+
+has '+config_class'   => default => 'App::Doh::Config';
+
+has 'less'            => is => 'lazy', isa => Object, builder => $_build_less;
+
+has 'less_class'      => is => 'lazy', isa => LoadableClass,
+   default            => 'CSS::LESS';
+
+has 'models'          => is => 'lazy', isa => HashRef[Object], builder => sub {
    load_components 'Model', $_[ 0 ]->config, { builder => $_[ 0 ], } };
+
+# Construction
+around 'BUILDARGS' => sub {
+   my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
+
+   my $conf = $attr->{config}; my $prefix = app_prefix $conf->{appclass};
+
+   $conf->{l10n_attributes}->{domains} = [ $prefix ];
+   $conf->{logfile} = "__LOGSDIR(${prefix}.log)__";
+   return $attr;
+};
 
 # Private functions
 my $_deep_copy = sub {
@@ -65,29 +82,14 @@ my $_deep_copy = sub {
    return;
 };
 
-my $_init_files = sub {
-   my $appname = shift;
-
-   return io [ NUL, 'etc', 'init.d', $appname ],
-          io [ NUL, 'etc', 'rc0.d', "K01${appname}" ];
-};
-
-# Construction
-around 'BUILDARGS' => sub {
-   my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
-
-   my $conf = $attr->{config}; my $prefix = app_prefix $conf->{appclass};
-
-   $conf->{l10n_attributes}->{domains} = [ $prefix ];
-   $conf->{logfile} = "__LOGSDIR(${prefix}.log)__";
-   return $attr;
+my $_list_init_files = sub {
+   return io [ NUL, 'etc', 'init.d', $_[ 0 ] ],
+          io [ NUL, 'etc', 'rc0.d', 'K01'.$_[ 0 ] ];
 };
 
 # Private methods
 my $_copy_assets = sub {
    my ($self, $dest) = @_; my $conf = $self->config; my $root = $conf->root;
-
-   $dest->exists or $dest->mkpath; $dest->rmtree( { keep_root => TRUE } );
 
    my ($unwanted_images, $unwanted_js, $unwanted_less);
 
@@ -120,10 +122,13 @@ my $_make_localised_static = sub {
    while (my $node = $iter->()) {
       not $make_dirs and $node->{type} eq 'folder' and next;
 
-      my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
-      my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
       my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
       my $path = io( [ $dest, @path ] )->assert_filepath;
+
+      $path->exists and $path->stat->{mtime} > $node->{date} and next;
+
+      my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
+      my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
 
       $self->info( 'Writing [_1]', { args => [ "${locale}/".$node->{url} ] } );
       $self->run_cmd( $cmd, { out => $path } );
@@ -181,8 +186,24 @@ sub make_skin : method {
    return OK;
 }
 
+sub make_site_tarball : method {
+   my $self = shift; my $conf = $self->config; $self->make_static;
+
+   ensure_class_loaded 'Archive::Tar'; my $arc = Archive::Tar->new;
+
+   my $static = $conf->root->catdir( $conf->static ); chdir "${static}";
+   my $filter = sub { $_ !~ m{ [/\\] \. }mx };
+
+   for my $path ($static->filter( $filter )->deep->all_files) {
+      $arc->add_files( $path->abs2rel( $static ) );
+   }
+
+   $self->info( 'Generating tarball site' );
+   $arc->write( $conf->appldir->catfile( 'site.tgz' ), COMPRESS_GZIP );
+   return OK;
+}
+
 sub make_static : method {
-   # TODO: Add caching to stop uneeded regeneration. Use mod times
    my $self = shift; my $conf = $self->config; my $models = $self->models;
 
    my $opts = { async => TRUE, k => 'make_static', t => $self->max_gen_time };
@@ -196,6 +217,8 @@ sub make_static : method {
    env_var( 'MAKE_STATIC', TRUE );
    $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io( $dest->rel2abs( $conf->root ) );
+   $dest->exists or $dest->mkpath;
+   $self->force and $dest->rmtree( { keep_root => TRUE } );
    $self->$_copy_assets( $dest );
 
    for my $locale ($models->{docs}->locales) {
@@ -232,7 +255,7 @@ sub post_install : method {
       $self->run_cmd( [ 'chown', '-R', "${owner}:${group}", $appldir ] );
    }
 
-   my ($init, $kill) = $_init_files->( $appname );
+   my ($init, $kill) = $_list_init_files->( $appname );
 
    my $cmd = [ $conf->binsdir->catfile( 'doh-daemon' ), 'get-init-file' ];
 
@@ -247,7 +270,7 @@ sub uninstall : method {
    my $conf    = $self->config;
    my $appname = lc distname $conf->appclass;
 
-   my ($init, $kill) = $_init_files->( $appname );
+   my ($init, $kill) = $_list_init_files->( $appname );
 
    $init->exists and $self->run_cmd( [ 'invoke-rc.d', $appname, 'stop' ],
                                      { expected_rv => 1 } );
@@ -298,6 +321,12 @@ A reference to the L<App::Doh::Model::Documentation> object
 
 Creates CSS files under F<var/root/css> one for each colour theme. If a colour
 theme name is supplied only the C<LESS> for that theme is compiled
+
+=head2 C<make_site_tarball> - Make a tarball of the static site
+
+   bin/doh-cli make-site-tarball
+
+Creates a tarball of the sites static files
 
 =head2 C<make_skin> - Make a tarball of the files for a skin
 

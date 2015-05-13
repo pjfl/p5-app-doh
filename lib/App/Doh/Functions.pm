@@ -10,6 +10,7 @@ use Class::Usul::Functions qw( first_char is_arrayref is_hashref
                                merge_attributes my_prefix split_on_dash throw );
 use English                qw( -no_match_vars );
 use Module::Pluggable::Object;
+use Scalar::Util           qw( blessed );
 use Unexpected::Functions  qw( Unspecified );
 use URI::Escape            qw( );
 use URI::http;
@@ -176,34 +177,35 @@ sub iterator ($) {
 }
 
 sub load_components ($$;$) {
-   my ($search_path, $config, $args) = @_; $args //= {};
+   my ($search_path, $config, $opts) = @_; $opts //= {};
 
-   $search_path or throw Unspecified,          [ 'search path' ];
-   $config = merge_attributes {}, $config, {}, [ 'appclass', 'monikers' ];
-   $config->{appclass} or throw Unspecified,   [ 'application class' ];
+   $search_path    or throw Unspecified,                 [ 'search path' ];
+   $config         or throw Unspecified,                 [ 'config' ];
+   blessed $config or throw 'Config [_1] not an object', [ $config ];
+
+   my $appclass = $config->appclass   or throw Unspecified, [ 'appclass' ];
+   my $comp_cfg = $config->components or throw Unspecified, [ 'components' ];
 
    if (first_char $search_path eq '+') { $search_path = substr $search_path, 1 }
-   else { $search_path = $config->{appclass}."::${search_path}" }
+   else { $search_path = "${appclass}::${search_path}" }
 
    my $depth    = () = split m{ :: }mx, $search_path, -1; $depth += 1;
    my $finder   = Module::Pluggable::Object->new
       ( max_depth   => $depth,           min_depth => $depth,
         search_path => [ $search_path ], require   => TRUE, );
-   my $monikers = $config->{monikers} // {};
-   my $compos   = $args->{components}  = {}; # Dependency injection
+   my $compos   = $opts->{components} = {}; # Dependency injection
 
    for my $class ($finder->plugins) {
-      exists $monikers->{ $class } and defined $monikers->{ $class }
-         and $args->{moniker} = $monikers->{ $class };
-
-      my $comp  = $class->new( $args ); $compos->{ $comp->moniker } = $comp;
+     (my $klass = $class) =~ s{ \A $appclass :: }{}mx;
+      my $attr  = { %{ $comp_cfg->{ $klass } // {} }, %{ $opts } };
+      my $comp  = $class->new( $attr ); $compos->{ $comp->moniker } = $comp;
    }
 
    return $compos;
 }
 
 sub localise_tree ($$) {
-   my ($tree, $locale) = @_;
+   my ($tree, $locale) = @_; ($tree and $locale) or return FALSE;
 
    exists $tree->{ $locale } and defined $tree->{ $locale }
       and return $tree->{ $locale };

@@ -94,6 +94,8 @@ has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
 has 'common_links'    => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( assets css help_url images js less ) ] };
 
+has 'components'  => is => 'ro',   isa => HashRef, builder => sub { {} };
+
 has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 
 has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
@@ -156,9 +158,6 @@ has 'max_asset_size'  => is => 'ro',   isa => PositiveInt, default => 4_194_304;
 has 'max_messages'    => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 
 has 'max_sess_time'   => is => 'ro',   isa => PositiveInt, default => 3_600;
-
-has 'monikers'        => is => 'ro',   isa => HashRef[NonEmptySimpleStr],
-   builder            => sub { {} };
 
 has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
    default            => '/';
@@ -358,6 +357,13 @@ An array reference that defaults to C<[ assets css help_url images less js ]>.
 The application pre-calculates URIs for these static directories for use
 in the HTML templates
 
+=item C<components>
+
+A hash reference containing component specific configuration options. Keyed
+by component classname with the leading application class removed. e.g.
+
+   $self->config->components->{ 'Controller::Root' };
+
 =item C<compress_css>
 
 Boolean default to true. Should the C<make_css> method compress it's output
@@ -471,12 +477,6 @@ store in the session between requests
 =item C<max_sess_time>
 
 Time in seconds before a session expires. Defaults to 15 minutes
-
-=item C<monikers>
-
-A hash reference of non empty simple strings that defaults empty. Keyed
-by class name the values will override the default monikers of components
-as they are instantiated
 
 =item C<mount_point>
 

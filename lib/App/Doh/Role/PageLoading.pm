@@ -35,8 +35,9 @@ around 'load_page' => sub {
       $seen{ $locale } and next; $seen{ $locale } = TRUE;
 
       my $node = $self->find_node( $locale, $req->args ) or next;
+      my $page = $self->initialise_page( $req, $node, $locale );
 
-      return $orig->( $self, $req, $self->get_page( $req, $node, $locale ) );
+      return $orig->( $self, $req, $page );
    }
 
    return $orig->( $self, $req, $self->not_found( $req ) );
@@ -58,7 +59,7 @@ sub find_node {
    return $node;
 }
 
-sub get_page {
+sub initialise_page {
    my ($self, $req, $node, $locale) = @_; my $page = clone $node;
 
    $page->{content} = delete $page->{path}; $page->{locale} = $locale;
@@ -83,7 +84,7 @@ sub get_page {
       my $locale = $self->config->locale; # Always index config default language
       my $root   = $self->config->file_root;
       my $node   = $self->localised_tree( $locale )
-         or throw 'No document tree for default locale [_1]',
+         or throw 'Default locale [_1] has no document tree',
                   args => [ $locale ], rv => HTTP_NOT_FOUND;
       my $wanted = $stash->{page}->{wanted} // NUL;
       my $nav    = $cache->{ $wanted };

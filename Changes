@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Added make-site-tarball
+          - Added caching to generate make function
+          - Config monikers was replace with components
           - Model get_stash was renamed to initialise_stash
           - Updated prereqs
           - Made program wrappers work in taint mode

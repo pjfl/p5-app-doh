@@ -41,8 +41,8 @@ my $_docs_url = sub {
    my ($self, $locale) = @_; state $cache //= {};
 
    my $tree  = $self->localised_tree( $locale )
-      or throw 'No document tree for locale [_1]', [ $locale ],
-               rv => HTTP_NOT_FOUND;
+      or throw 'Locale [_1] has no document tree',
+               args => [ $locale ], rv => HTTP_NOT_FOUND;
    my $mtime = mtime $tree;
    my $tuple = $cache->{ $locale };
 
@@ -53,7 +53,7 @@ my $_docs_url = sub {
 };
 
 # Construction
-around 'get_page' => sub {
+around 'initialise_page' => sub {
    my ($orig, $self, $req, $node, $locale) = @_;
 
    my $page = $orig->( $self, $req, $node, $locale );
