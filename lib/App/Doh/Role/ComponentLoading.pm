@@ -13,20 +13,17 @@ use Moo::Role;
 requires qw( usul );
 
 has 'controllers'   => is => 'lazy', isa => ArrayRef[Object], builder => sub {
-   my $controllers  =  load_components 'Controller', $_[ 0 ]->usul->config,
-      {  builder    => $_[ 0 ]->usul, };
+   my $controllers  =  load_components 'Controller', $_[ 0 ]->usul;
    return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] };
 
 has 'models'        => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components  'Model', $_[ 0 ]->usul->config,
-      {  builder    => $_[ 0 ]->usul, views => $_[ 0 ]->views, } };
+   load_components  'Model', $_[ 0 ]->usul, { views => $_[ 0 ]->views, } };
 
 has 'request_class' => is => 'lazy', isa => LoadableClass,
    builder          => sub { $_[ 0 ]->usul->config->request_class };
 
-has 'views'         => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components  'View', $_[ 0 ]->usul->config,
-      {  builder    => $_[ 0 ]->usul, } };
+has 'views'         => is => 'lazy', isa => HashRef[Object],
+   builder          => sub { load_components 'View', $_[ 0 ]->usul };
 
 # Private functions
 my $_header = sub {

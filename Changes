@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Simplified load_components signature
           - Added make-site-tarball
           - Added caching to generate make function
           - Config monikers was replace with components

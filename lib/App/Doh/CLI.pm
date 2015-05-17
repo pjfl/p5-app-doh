@@ -50,8 +50,8 @@ has 'less'            => is => 'lazy', isa => Object, builder => $_build_less;
 has 'less_class'      => is => 'lazy', isa => LoadableClass,
    default            => 'CSS::LESS';
 
-has 'models'          => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components 'Model', $_[ 0 ]->config, { builder => $_[ 0 ], } };
+has 'models'          => is => 'lazy', isa => HashRef[Object],
+   builder            => sub { load_components 'Model', $_[ 0 ] };
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -83,8 +83,8 @@ my $_deep_copy = sub {
 };
 
 my $_list_init_files = sub {
-   return io [ NUL, 'etc', 'init.d', $_[ 0 ] ],
-          io [ NUL, 'etc', 'rc0.d', 'K01'.$_[ 0 ] ];
+   return io[ NUL, 'etc', 'init.d', $_[ 0 ] ],
+          io[ NUL, 'etc', 'rc0.d', 'K01'.$_[ 0 ] ];
 };
 
 # Private methods

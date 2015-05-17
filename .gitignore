@@ -33,6 +33,7 @@ var/root/docs/assets
 var/root/docs/de
 var/root/docs/en/01_Examples/*
 var/root/docs/en/10_Plack_Handbook/*
+var/root/docs/en/20_Air_Gapped_Computer.md
 var/root/docs/en/Projects
 var/root/docs/en/posts
 var/root/js/jekyll.js

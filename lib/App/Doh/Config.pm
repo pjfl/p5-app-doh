@@ -246,6 +246,7 @@ use Class::Usul::Types     qw( NonEmptySimpleStr );
 use Sys::Hostname          qw( hostname );
 use Moo;
 
+use namespace::clean -except => [ 'hostname', 'meta' ];
 use overload '""' => sub { $_[ 0 ]->evaluate }, fallback => 1;
 
 has 'value' => is => 'ro', isa => NonEmptySimpleStr, required => TRUE;

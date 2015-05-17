@@ -177,12 +177,12 @@ sub iterator ($) {
 }
 
 sub load_components ($$;$) {
-   my ($search_path, $config, $opts) = @_; $opts //= {};
+   my ($search_path, $builder, $opts) = @_; $opts //= {};
 
-   $search_path    or throw Unspecified,                 [ 'search path' ];
-   $config         or throw Unspecified,                 [ 'config' ];
-   blessed $config or throw 'Config [_1] not an object', [ $config ];
+   $search_path     or throw Unspecified, [ 'search path' ];
+   blessed $builder or throw 'Builder [_1] not an object', [ $builder ];
 
+   my $config   = $builder->config;  $opts->{builder} //= $builder;
    my $appclass = $config->appclass   or throw Unspecified, [ 'appclass' ];
    my $comp_cfg = $config->components or throw Unspecified, [ 'components' ];
 

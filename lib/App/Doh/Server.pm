@@ -20,8 +20,8 @@ my $_build_usul = sub {
    $conf->{appclass    } or  throw Unspecified, args => [ 'application class' ];
    $attr->{config_class} //= $conf->{appclass}.'::Config';
    $conf->{name        } //= app_prefix   $conf->{appclass};
-   $conf->{home        }   = find_apphome $conf->{appclass}, $conf->{home};
-   $conf->{cfgfiles    }   = get_cfgfiles $conf->{appclass}, $conf->{home};
+   $conf->{home        } //= find_apphome $conf->{appclass}, $conf->{home};
+   $conf->{cfgfiles    } //= get_cfgfiles $conf->{appclass}, $conf->{home};
 
    my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
 
