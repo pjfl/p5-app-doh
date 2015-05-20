@@ -53,6 +53,8 @@ around 'to_psgi_app' => sub {
 
    return builder {
       mount "${point}" => builder {
+         enable 'ContentLength';
+         enable 'FixMissingBodyInRedirect';
          enable "ConditionalGET";
          enable 'Deflater',
             content_type => $conf->deflate_types, vary_user_agent => TRUE;

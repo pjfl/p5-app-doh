@@ -51,7 +51,7 @@ has 'less_class'      => is => 'lazy', isa => LoadableClass,
    default            => 'CSS::LESS';
 
 has 'models'          => is => 'lazy', isa => HashRef[Object],
-   builder            => sub { load_components 'Model', $_[ 0 ] };
+   builder            => sub { load_components $_[ 0 ], 'Model' };
 
 # Construction
 around 'BUILDARGS' => sub {

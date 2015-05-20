@@ -177,14 +177,13 @@ sub iterator ($) {
 }
 
 sub load_components ($$;$) {
-   my ($search_path, $builder, $opts) = @_; $opts //= {};
+   my ($builder, $search_path, $opts) = @_; $opts //= {};
 
-   $search_path     or throw Unspecified, [ 'search path' ];
    blessed $builder or throw 'Builder [_1] not an object', [ $builder ];
+   $search_path     or throw Unspecified, [ 'search path' ];
+   $opts->{builder} //= $builder;
 
-   my $config   = $builder->config;  $opts->{builder} //= $builder;
-   my $appclass = $config->appclass   or throw Unspecified, [ 'appclass' ];
-   my $comp_cfg = $config->components or throw Unspecified, [ 'components' ];
+   my $config   = $builder->config; my $appclass = $config->appclass;
 
    if (first_char $search_path eq '+') { $search_path = substr $search_path, 1 }
    else { $search_path = "${appclass}::${search_path}" }
@@ -197,7 +196,7 @@ sub load_components ($$;$) {
 
    for my $class ($finder->plugins) {
      (my $klass = $class) =~ s{ \A $appclass :: }{}mx;
-      my $attr  = { %{ $comp_cfg->{ $klass } // {} }, %{ $opts } };
+      my $attr  = { %{ $config->components->{ $klass } // {} }, %{ $opts } };
       my $comp  = $class->new( $attr ); $compos->{ $comp->moniker } = $comp;
    }
 

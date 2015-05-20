@@ -65,6 +65,7 @@ var/root/docs/en/00_Getting_Started.md
 var/root/docs/en/01_Examples/01_GitHub_Flavored_Markdown.md
 var/root/docs/en/01_Examples/05_Code_Highlighting.md
 var/root/docs/en/05_More_Examples/01_Hello_World.md
+var/root/docs/en/20_Air_Gapped_Computer.md
 var/root/docs/en/index.md
 var/root/docs/users.json
 var/root/img/app-editor.png

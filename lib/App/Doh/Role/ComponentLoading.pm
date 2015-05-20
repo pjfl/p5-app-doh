@@ -10,20 +10,20 @@ use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_FOUND
 use Try::Tiny;
 use Moo::Role;
 
-requires qw( usul );
+requires qw( log usul );
 
 has 'controllers'   => is => 'lazy', isa => ArrayRef[Object], builder => sub {
-   my $controllers  =  load_components 'Controller', $_[ 0 ]->usul;
+   my $controllers  =  load_components $_[ 0 ]->usul, 'Controller';
    return [ map { $controllers->{ $_ } } sort keys %{ $controllers } ] };
 
 has 'models'        => is => 'lazy', isa => HashRef[Object], builder => sub {
-   load_components  'Model', $_[ 0 ]->usul, { views => $_[ 0 ]->views, } };
+   load_components  $_[ 0 ]->usul, 'Model', { views => $_[ 0 ]->views, } };
 
 has 'request_class' => is => 'lazy', isa => LoadableClass,
    builder          => sub { $_[ 0 ]->usul->config->request_class };
 
 has 'views'         => is => 'lazy', isa => HashRef[Object],
-   builder          => sub { load_components 'View', $_[ 0 ]->usul };
+   builder          => sub { load_components $_[ 0 ]->usul, 'View' };
 
 # Private functions
 my $_header = sub {
@@ -68,19 +68,19 @@ my $_render_view = sub {
 };
 
 my $_render_exception = sub {
-   my ($self, $moniker, $req, $e) = @_; my $username = $req->username; my $res;
+   my ($self, $moniker, $req, $e) = @_; my $username = $req->username;
 
    my $msg = "${e}"; chomp $msg; $self->log->error( "${msg} (${username})" );
 
    ($e->can( 'rv' ) and $e->rv > HTTP_BAD_REQUEST)
       or $e = exception $e, { rv => HTTP_BAD_REQUEST };
 
-   try {
+   my $res = try {
       my $stash = $self->models->{ $moniker }->exception_handler( $req, $e );
 
-      $res = $self->$_render_view( $moniker, 'exception_handler', $req, $stash);
+      $self->$_render_view( $moniker, 'exception_handler', $req, $stash );
    }
-   catch { $res = $self->$_internal_server_error( $_ ) };
+   catch { $self->$_internal_server_error( $_ ) };
 
    return $res;
 };

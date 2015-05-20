@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added missing middleware dependecies
           - Simplified load_components signature
           - Added make-site-tarball
           - Added caching to generate make function
