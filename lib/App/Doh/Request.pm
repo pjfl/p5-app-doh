@@ -158,7 +158,7 @@ my $_build_locales = sub {
    my $self = shift; my $lang = $self->_env->{ 'HTTP_ACCEPT_LANGUAGE' } || NUL;
 
    return [ map    { s{ _ \z }{}mx; $_ }
-            map    { join '_', $_->[ 0 ], uc $_->[ 1 ] }
+            map    { join '_', $_->[ 0 ], uc $_->[ 1 ] // NUL }
             map    { [ split m{ - }mx, $_ ] }
             map    { ( split m{ ; }mx, $_ )[ 0 ] }
             split m{ , }mx, lc $lang ];
