@@ -1,5 +1,6 @@
 requires "App::Ack" => "2.12";
 requires "Class::Usul" => "v0.58.0";
+requires "Cpanel::JSON::XS" => "3.0115";
 requires "Crypt::Eksblowfish" => "0.009";
 requires "Daemon::Control" => "0.001006";
 requires "Data::Validation" => "v0.18.0";

@@ -30,6 +30,7 @@ my $prereqs  = {
   'requires' => {
     'App::Ack' => '2.12',
     'Class::Usul' => 'v0.58.0',
+    'Cpanel::JSON::XS' => '3.0115',
     'Crypt::Eksblowfish' => '0.009',
     'Daemon::Control' => '0.001006',
     'Data::Validation' => 'v0.18.0',
