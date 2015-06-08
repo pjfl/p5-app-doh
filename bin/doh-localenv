@@ -23,6 +23,11 @@ use File::Spec::Functions qw( catdir catfile );
 
 my $LOCAL_LIB  = 'local'; # This is the only configurable
 
+my $extend     = sub {
+   my ($k, $v, $sep) = @_; $sep //= $Config::Config{path_sep};
+
+   return $ENV{ $k } = $v.($ENV{ $k } ? $sep.$ENV{ $k } : q());
+};
 my $untaint    = sub {
    my $v = shift;
 
@@ -40,7 +45,6 @@ my $libdir     = catdir( $basedir, 'lib' );
 my $local_lib  = catdir( $basedir, $LOCAL_LIB );
 my $appname    = (split m{ [\-_] }mx, basename( $our_path, '.pl' ))[ 0 ];
 my $active_key = (uc $appname).'_LOCAL_LIB';
-my $path_sep   = $Config::Config{path_sep};
 my $active     = -d $local_lib;
 
 exists $ENV{ $active_key } and defined $ENV{ $active_key }
@@ -54,11 +58,11 @@ if ($active) {
 
    require local::lib; local::lib->import( $local_lib );
 
-   $ENV{PERL5_MB_OPT} .= ' INSTALLMAN1DIR=none INSTALLMAN3DIR=none';
+   $extend->( 'PATH', catdir( $local_lib, 'bin' ) );
+   $extend->( 'PERL5_MB_OPT', 'INSTALLMAN1DIR=none INSTALLMAN3DIR=none', q( ) );
 }
 
-$ENV{PATH    } = $bindir.$path_sep.$ENV{PATH};
-$ENV{PERL5LIB} = $libdir.$path_sep.$ENV{PERL5LIB};
+$extend->( 'PATH', $bindir ); $extend->( 'PERL5LIB', $libdir );
 
 lib->import( $libdir );
 

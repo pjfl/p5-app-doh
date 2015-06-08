@@ -10,6 +10,7 @@ bin/doh-cli
 bin/doh-daemon
 bin/doh-localenv
 bin/doh-server
+debian/app-doh.docs
 debian/changelog
 debian/compat
 debian/control

@@ -10,6 +10,7 @@ use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix class2appdir ensure_class_loaded io );
 use Class::Usul::Types     qw( Bool HashRef LoadableClass
                                NonEmptySimpleStr Object PositiveInt );
+use English                qw( -no_match_vars );
 use File::DataClass::Types qw( Path );
 use User::grent;
 use User::pwent;
@@ -198,7 +199,7 @@ sub make_site_tarball : method {
       $arc->add_files( $path->abs2rel( $static ) );
    }
 
-   $self->info( 'Generating tarball site' );
+   $self->info( 'Generating site tarball' );
    $arc->write( $conf->appldir->catfile( 'site.tgz' ), COMPRESS_GZIP );
    return OK;
 }
@@ -234,11 +235,19 @@ sub make_static : method {
 }
 
 sub post_install : method {
-   my $self    = shift;
-   my $conf    = $self->config;
-   my $appldir = $conf->appldir;
-   my $verdir  = $appldir->basename;
-   my $appname = class2appdir $conf->appclass;
+   my $self     = shift;
+   my $conf     = $self->config;
+   my $appldir  = $conf->appldir;
+   my $verdir   = $appldir->basename;
+   my $localdir = $appldir->catdir( 'local' );
+   my $appname  = class2appdir $conf->appclass;
+   my $inc      = $localdir->catdir( 'lib', 'perl5'   );
+   my $profile  = $localdir->catdir( 'etc', 'profile' );
+   my $cmd      = [ $EXECUTABLE_NAME, '-I', "${inc}", "-Mlocal::lib=${dir}" ];
+
+   $localdir->exists
+      and $profile->assert_filepath
+      and $self->run_cmd( $cmd, { err => 'stderr', out => $profile } );
 
    if ($verdir =~ m{ \A v \d+ \. \d+ p (\d+) \z }msx) {
       my $owner = my $group = $conf->owner;

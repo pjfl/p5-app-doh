@@ -41,4 +41,5 @@ var/root/less/jekyll
 var/root/templates/jekyll
 var/root/static
 App-Doh-*
+app-doh_*.deb
 *.tar.gz
