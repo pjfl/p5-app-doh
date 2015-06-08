@@ -80,5 +80,6 @@ Thumbs.db
 \bApp-Doh-v?[\d\.\_]+
 \bdocs/Projects
 \blocal/
-\bdebian/
-\bcpanfile.snapshot
+\bpackage/
+cpanfile.snapshot
+Dockerfile

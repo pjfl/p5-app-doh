@@ -10,6 +10,15 @@ bin/doh-cli
 bin/doh-daemon
 bin/doh-localenv
 bin/doh-server
+debian/changelog
+debian/compat
+debian/control
+debian/copyright
+debian/default
+debian/install
+debian/postinst
+debian/postrm
+debian/rules
 lib/App/Doh.pm
 lib/App/Doh/Attributes.pm
 lib/App/Doh/CLI.pm

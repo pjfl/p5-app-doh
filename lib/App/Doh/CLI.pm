@@ -7,7 +7,7 @@ use App::Doh; our $VERSION = $App::Doh::VERSION;
 use App::Doh::Functions    qw( env_var iterator load_components );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
-use Class::Usul::Functions qw( app_prefix distname ensure_class_loaded io );
+use Class::Usul::Functions qw( app_prefix class2appdir ensure_class_loaded io );
 use Class::Usul::Types     qw( Bool HashRef LoadableClass
                                NonEmptySimpleStr Object PositiveInt );
 use File::DataClass::Types qw( Path );
@@ -238,7 +238,7 @@ sub post_install : method {
    my $conf    = $self->config;
    my $appldir = $conf->appldir;
    my $verdir  = $appldir->basename;
-   my $appname = lc distname $conf->appclass;
+   my $appname = class2appdir $conf->appclass;
 
    if ($verdir =~ m{ \A v \d+ \. \d+ p (\d+) \z }msx) {
       my $owner = my $group = $conf->owner;
@@ -268,7 +268,7 @@ sub post_install : method {
 sub uninstall : method {
    my $self    = shift;
    my $conf    = $self->config;
-   my $appname = lc distname $conf->appclass;
+   my $appname = class2appdir $conf->appclass;
 
    my ($init, $kill) = $_list_init_files->( $appname );
 

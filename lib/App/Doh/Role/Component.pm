@@ -3,7 +3,8 @@ package App::Doh::Role::Component;
 use namespace::autoclean;
 
 use Class::Usul::Constants qw( TRUE );
-use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr SimpleStr );
+use Class::Usul::Types     qw( BaseType HashRef NonEmptySimpleStr
+                               NonNumericSimpleStr );
 use Moo::Role;
 
 has 'components' => is => 'ro',   isa => HashRef, default => sub { {} },
@@ -12,7 +13,7 @@ has 'components' => is => 'ro',   isa => HashRef, default => sub { {} },
 has 'encoding'   => is => 'lazy', isa => NonEmptySimpleStr,
    builder       => sub { $_[ 0 ]->config->encoding };
 
-has 'moniker'    => is => 'ro',   isa => SimpleStr, required => TRUE;
+has 'moniker'    => is => 'ro',   isa => NonNumericSimpleStr, required => TRUE;
 
 has 'usul'       => is => 'ro',   isa => BaseType,
    handles       => [ qw( config debug l10n lock log ) ],

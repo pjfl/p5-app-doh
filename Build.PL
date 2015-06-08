@@ -5,13 +5,8 @@ use warnings;
 use Module::Build 0.4004;
 use File::Spec::Functions qw( catdir );
 
-sub testing { $ENV{AUTOMATED_TESTING} || $ENV{PERL_CPAN_REPORTER_CONFIG}
-                                      || $ENV{PERL5_CPANPLUS_IS_VERSION} }
-
-sub whimper { print {*STDOUT} $_[ 0 ]."\n"; exit 0 }
-
 my $perl_ver = 5.010001;
-my $distname = 'App-Doh'; (my $name = $distname) =~ s{ - }{::}gmx;
+my $name     = 'App-Doh'; $name =~ s{ - }{::}gmx;
 my $prereqs  = {
   'build_requires' => {
     'Module::Build' => '0.4004',
@@ -33,10 +28,11 @@ my $prereqs  = {
     'Cpanel::JSON::XS' => '3.0115',
     'Crypt::Eksblowfish' => '0.009',
     'Daemon::Control' => '0.001006',
-    'Data::Validation' => 'v0.18.0',
+    'Data::Validation' => 'v0.20.0',
     'Exporter::Tiny' => '0.042',
-    'File::DataClass' => 'v0.61.0',
-    'HTML::Accessors' => 'v0.12.0',
+    'File::DataClass' => 'v0.62.0',
+    'HTML::Accessors' => 'v0.13.0',
+    'HTML::GenerateUtil' => '1.20',
     'HTTP::Body' => '1.19',
     'HTTP::Message' => '6.06',
     'JSON::MaybeXS' => '1.002006',
@@ -66,18 +62,25 @@ my $prereqs  = {
     'warnings::illegalproto' => '0.001002'
   },
 };
-
-if ($] < $perl_ver) { # Not interested in reports below min perl ver
-   testing or whimper "Minimum required Perl version is ${perl_ver}";
+my $testing  = sub { $ENV{AUTOMATED_TESTING}
+                  || $ENV{PERL_CPAN_REPORTER_CONFIG}
+                  || $ENV{PERL5_CPANPLUS_IS_VERSION} };
+my $whimper  = sub { print {*STDOUT} $_[ 0 ]."\n"; exit 0 };
+my $stop     = sub {
+   $testing->() or $whimper->( $_[ 0 ] );
    $prereqs->{build_requires} = { %{ $prereqs->{configure_requires} } };
    $prereqs->{build_requires}->{ 'Test::Requires' } = 0.06;
    delete $prereqs->{requires};
-}
+};
+
+# Not interested in reports below min perl ver
+$] < $perl_ver and $stop->( "Minimum required Perl version is ${perl_ver}" );
 
 my $bob = Module::Build->subclass( code => do { local $/; <DATA> } )->new(
    'add_to_cleanup' => [ 'debian', 'META.yml' ],
    'module_name'    => $name,
-   'notes'          => { min_perl_version => $perl_ver, testing => testing },
+   'notes'          => { min_perl_version => $perl_ver,
+                         testing          => $testing->() },
    %{ $prereqs },
 
 );

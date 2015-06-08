@@ -6,6 +6,7 @@ use App::Doh::Functions    qw( load_components );
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
 use File::DataClass::Types qw( HashRef Object );
+use HTML::GenerateUtil     qw( escape_html );
 use Moo;
 
 with q(App::Doh::Role::Component);
@@ -39,7 +40,7 @@ my $_serialize_microformat = sub {
    my ($self, $req, $page) = @_; defined $page->{format} or return;
 
    $page->{format} eq 'text'
-      and $page->{content} = '<pre>'.$page->{content}.'</pre>'
+      and $page->{content} = '<pre>'.escape_html( $page->{content} ).'</pre>'
       and $page->{format } = 'html'
       and return;
 

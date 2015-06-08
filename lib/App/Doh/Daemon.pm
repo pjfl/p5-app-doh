@@ -2,13 +2,15 @@ package App::Doh::Daemon;
 
 use namespace::autoclean;
 
-use App::Doh;
+use App::Doh; our $VERSION = $App::Doh::VERSION;
+
 use App::Doh::Functions    qw( env_var );
-use Class::Usul::Constants qw( EXCEPTION_CLASS OK TRUE );
-use Class::Usul::Functions qw( get_user throw );
+use Class::Usul::Constants qw( EXCEPTION_CLASS NUL OK TRUE );
+use Class::Usul::Functions qw( class2appdir get_user throw );
 use Class::Usul::Types     qw( NonEmptySimpleStr NonZeroPositiveInt Object );
 use Daemon::Control;
 use English                qw( -no_match_vars );
+use File::Spec::Functions  qw( catfile );
 use Plack::Runner;
 use Scalar::Util           qw( blessed );
 use Unexpected::Functions  qw( Unspecified );
@@ -17,24 +19,21 @@ use Class::Usul::Options;
 
 extends q(Class::Usul::Programs);
 
-our $VERSION = $App::Doh::VERSION;
-
 # Override default in base class
 has '+config_class' => default => 'App::Doh::Config';
 
 # Public attributes
-option 'app'     => is => 'ro', isa => NonEmptySimpleStr,
+option 'app'     => is => 'ro', isa => NonEmptySimpleStr, format => 's',
    documentation => 'Name of the PSGI file',
-   default       => 'doh-server', format => 's';
+   default       => 'doh-server';
 
-option 'port'    => is => 'ro', isa => NonZeroPositiveInt,
+option 'port'    => is => 'ro', isa => NonZeroPositiveInt, format => 'i',
    documentation => 'Port number for the server to listen on',
-   default       => sub { $_[ 0 ]->config->port }, format => 'i', short => 'p';
+   builder       => sub { $_[ 0 ]->config->port }, short => 'p';
 
-option 'server'  => is => 'ro', isa => NonEmptySimpleStr,
+option 'server'  => is => 'ro', isa => NonEmptySimpleStr, format => 's',
    documentation => 'Name of the Plack engine to use',
-   default       => sub { $_[ 0 ]->config->server }, format => 's',
-   short         => 's';
+   builder       => sub { $_[ 0 ]->config->server }, short => 's';
 
 # Private methods
 my $_get_listener_args = sub {
@@ -73,6 +72,7 @@ my $_daemon = sub {
 my $_build_daemon_control = sub {
    my $self = shift; my $conf = $self->config; my $name = $conf->name;
 
+   my $init = catfile( NUL, 'etc', 'default', class2appdir $conf->appclass );
    my $args = {
       name         => blessed $self || $self,
       lsb_start    => '$syslog $remote_fs',
@@ -80,6 +80,9 @@ my $_build_daemon_control = sub {
       lsb_sdesc    => 'Documentation Server',
       lsb_desc     => 'Manages the Documentation Server daemons',
       path         => $conf->pathname,
+
+      init_config  => $init,
+      init_code    => '# Init code',
 
       directory    => $conf->appldir,
       program      => sub { shift; $self->$_daemon( @_ ) },
