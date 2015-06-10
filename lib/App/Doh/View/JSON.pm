@@ -2,11 +2,11 @@ package App::Doh::View::JSON;
 
 use namespace::autoclean;
 
-use Moo;
 use Class::Usul::Constants qw( FALSE );
 use Class::Usul::Types     qw( Object );
 use Encode                 qw( encode );
 use JSON::MaybeXS          qw( );
+use Moo;
 
 with q(App::Doh::Role::Component);
 with q(App::Doh::Role::Templates);

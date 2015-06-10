@@ -21,8 +21,8 @@ with    q(App::Doh::Role::Preferences);
 has '+moniker' => default => 'admin';
 
 # Public attributes
-has 'ipc' => is => 'lazy', isa => Object, builder => sub {
-   Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
+has 'ipc'  => is => 'lazy', isa => Object, handles => [ 'run_cmd' ],
+   builder => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
 # Private methods
 my $_authenticate = sub {
@@ -85,7 +85,7 @@ sub generate_static_action : Role(admin) {
    my $cli  = $self->config->binsdir->catfile( 'doh-cli' );
    my $cmd  = [ "${cli}", 'make_static' ];
 
-   $self->log->debug( $self->ipc->run_cmd( $cmd, $opts )->out );
+   $self->log->debug( $self->run_cmd( $cmd, $opts )->out );
 
    my $message = [ 'Static page generation started in the background by [_1]',
                    $req->username ];

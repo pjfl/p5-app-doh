@@ -243,7 +243,8 @@ sub post_install : method {
    my $appname  = class2appdir $conf->appclass;
    my $inc      = $localdir->catdir( 'lib', 'perl5'   );
    my $profile  = $localdir->catdir( 'etc', 'profile' );
-   my $cmd      = [ $EXECUTABLE_NAME, '-I', "${inc}", "-Mlocal::lib=${dir}" ];
+   my $cmd      = [ $EXECUTABLE_NAME, '-I', "${inc}",
+                    "-Mlocal::lib=${localdir}" ];
 
    $localdir->exists
       and $profile->assert_filepath
@@ -266,7 +267,7 @@ sub post_install : method {
 
    my ($init, $kill) = $_list_init_files->( $appname );
 
-   my $cmd = [ $conf->binsdir->catfile( 'doh-daemon' ), 'get-init-file' ];
+   $cmd = [ $conf->binsdir->catfile( 'doh-daemon' ), 'get-init-file' ];
 
    $init->exists or $self->run_cmd( $cmd, { out => $init } );
    $init->is_executable or $init->chmod( 0750 );
