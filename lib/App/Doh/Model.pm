@@ -3,7 +3,7 @@ package App::Doh::Model;
 use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( show_node );
 use Class::Usul::Constants qw( FALSE NUL );
-use Class::Usul::Functions qw( is_member );
+use Class::Usul::Functions qw( is_member throw );
 use Class::Usul::Time      qw( str2time time2str );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
 use Scalar::Util           qw( blessed weaken );
@@ -35,7 +35,11 @@ sub exception_handler {
 }
 
 sub execute {
-   my ($self, $method, @args) = @_; return $self->$method( @args );
+   my ($self, $method, @args) = @_;
+
+   $self->can( $method ) and return $self->$method( @args );
+
+   throw 'Class [_1] has no method [_2]', [ blessed $self, $method ];
 }
 
 sub get_content : Role(any) {

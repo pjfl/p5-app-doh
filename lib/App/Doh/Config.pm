@@ -94,7 +94,7 @@ has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
 has 'common_links'    => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( assets css help_url images js less ) ] };
 
-has 'components'  => is => 'ro',   isa => HashRef, builder => sub { {} };
+has 'components'      => is => 'ro',   isa => HashRef, builder => sub { {} };
 
 has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 

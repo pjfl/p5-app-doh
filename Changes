@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Model execute now throws if method not found
           - Added support for making Debian packages
           - Added missing middleware dependecies
           - Simplified load_components signature
