@@ -104,7 +104,10 @@ sub render {
 
       my $stash = $models->{ $moniker }->execute( $method, $req );
 
-      if (exists $stash->{redirect}) { $res = $self->$_redirect( $req, $stash )}
+      if (is_arrayref $stash) { $res = $stash }
+      elsif (exists $stash->{redirect}) {
+         $res = $self->$_redirect( $req, $stash );
+      }
       else { $res = $self->$_render_view( $moniker, $method, $req, $stash ) }
    }
    catch { $res = $self->$_render_exception( $moniker, $req, $_ ) };

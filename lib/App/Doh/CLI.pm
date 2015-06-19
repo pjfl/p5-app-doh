@@ -17,7 +17,7 @@ use User::pwent;
 use Moo;
 use Class::Usul::Options;  # Requires around, has, and with
 
-extends q(Class::Usul::Programs);
+extends 'Class::Usul::Programs';
 
 # Attribute constructors
 my $_build_less = sub {
@@ -83,7 +83,7 @@ my $_deep_copy = sub {
    return;
 };
 
-my $_list_init_files = sub {
+my $_init_file_list = sub {
    return io[ NUL, 'etc', 'init.d', $_[ 0 ] ],
           io[ NUL, 'etc', 'rc0.d', 'K01'.$_[ 0 ] ];
 };
@@ -265,7 +265,7 @@ sub post_install : method {
       $self->run_cmd( [ 'chown', '-R', "${owner}:${group}", $appldir ] );
    }
 
-   my ($init, $kill) = $_list_init_files->( $appname );
+   my ($init, $kill) = $_init_file_list->( $appname );
 
    $cmd = [ $conf->binsdir->catfile( 'doh-daemon' ), 'get-init-file' ];
 
@@ -280,7 +280,7 @@ sub uninstall : method {
    my $conf    = $self->config;
    my $appname = class2appdir $conf->appclass;
 
-   my ($init, $kill) = $_list_init_files->( $appname );
+   my ($init, $kill) = $_init_file_list->( $appname );
 
    $init->exists and $self->run_cmd( [ 'invoke-rc.d', $appname, 'stop' ],
                                      { expected_rv => 1 } );

@@ -1,13 +1,13 @@
 # GNU Gettext Portable Object.
 # Copyright (C) 2014 RoxSoft.
-# Lazarus Long <Support@RoxSoft.co.uk>, 2014.
+# Lazarus Long <lazarus@RoxSoft.co.uk>, 2014.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: App::Doh 0.2.1\n"
 "PO-Revision-Date: 2014-04-28 12:30+0000\n"
-"Last-Translator: Lazarus Long <Support@RoxSoft.co.uk>\n"
+"Last-Translator: Lazarus Long <lazarus@RoxSoft.co.uk>\n"
 "Language-Team: English <Support@RoxSoft.co.uk>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
