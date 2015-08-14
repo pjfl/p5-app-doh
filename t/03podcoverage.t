@@ -22,8 +22,6 @@ pod_coverage_ok( 'App::Doh::Config' );
 pod_coverage_ok( 'App::Doh::Daemon' );
 pod_coverage_ok( 'App::Doh::Request' );
 pod_coverage_ok( 'App::Doh::Server' );
-pod_coverage_ok( 'App::Doh' );
-pod_coverage_ok( 'App::Doh' );
 
 done_testing;
 

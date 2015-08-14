@@ -77,7 +77,7 @@ Thumbs.db
 \bvar/logs
 
 # Avoid archives of this distribution
-\bapp-doh_*.deb
+app-doh_v?[\d\.\_]+.*.deb
 \bApp-Doh-v?[\d\.\_]+
 \bdocs/Projects
 \blocal/

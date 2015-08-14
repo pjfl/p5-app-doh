@@ -18,7 +18,7 @@ has 'code_blocks'   => is => 'rw',  isa => $BLOCK_MODES, default => 1;
 
 has 'float'         => is => 'rw',  isa => Bool, default => TRUE;
 
-has 'messages'      => is => 'ro',  isa => HashRef, default => sub { {} };
+has 'messages'      => is => 'ro',  isa => HashRef, builder => sub { {} };
 
 has 'query'         => is => 'rw',  isa => SimpleStr | Undef;
 
@@ -99,6 +99,7 @@ sub update {
    my @attrs = qw( authenticated messages username );
 
    for my $k (@{ $self->config->preferences }, @attrs) {
+      # TODO: Why is the rhs not using accessors
       $self->_session->{ $k } = $self->{ $k };
    }
 

@@ -1,10 +1,8 @@
 package App::Doh::Model::Documentation;
 
-use feature 'state';
-
 use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
-use Class::Usul::Functions qw( first_char io throw );
+use Class::Usul::Functions qw( first_char throw );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo;
 
@@ -18,6 +16,10 @@ with    q(App::Doh::Role::Templates);
 with    q(App::Doh::Role::Editor);
 
 has '+moniker' => default => 'docs';
+
+# Private package variables
+my $_docs_tree_cache = { _mtime => 0, };
+my $_docs_url_cache  = {};
 
 # Private methods
 my $_find_first_url = sub {
@@ -38,15 +40,15 @@ my $_find_first_url = sub {
 };
 
 my $_docs_url = sub {
-   my ($self, $locale) = @_; state $cache //= {};
+   my ($self, $locale) = @_;
 
    my $tree  = $self->localised_tree( $locale )
       or throw 'Locale [_1] has no document tree',
                args => [ $locale ], rv => HTTP_NOT_FOUND;
+   my $tuple = $_docs_url_cache->{ $locale };
    my $mtime = mtime $tree;
-   my $tuple = $cache->{ $locale };
 
-   (not $tuple or $mtime > $tuple->[ 0 ]) and $cache->{ $locale }
+   (not $tuple or $mtime > $tuple->[ 0 ]) and $_docs_url_cache->{ $locale }
       = $tuple = [ $mtime, $self->$_find_first_url( $tree ) ];
 
    return $tuple->[ 1 ];
@@ -86,19 +88,20 @@ sub delete_file_action : Role(editor) {
 }
 
 sub docs_tree {
-   my $self = shift; state $cache; my $filesys = $self->config->root_mtime;
+   my $self = shift; my $filesys = $self->config->root_mtime;
 
-   if (not defined $cache or $filesys->stat->{mtime} > $cache->{_mtime}) {
+   if (not defined $_docs_tree_cache
+       or  $filesys->stat->{mtime} > $_docs_tree_cache->{_mtime}) {
       my $conf     = $self->config;
       my $no_index = join '|', @{ $conf->no_index };
-      my $root     = io( $conf->file_root );
-      my $dir      = $root->filter( sub { not m{ (?: $no_index ) }mx } );
+      my $filter   = sub { not m{ (?: $no_index ) }mx };
+      my $dir      = $conf->file_root->clone->filter( $filter );
 
-      $cache = build_tree( $self->type_map, $dir );
-      $filesys->touch( $cache->{_mtime} );
+      $_docs_tree_cache = build_tree( $self->type_map, $dir );
+      $filesys->touch( $_docs_tree_cache->{_mtime} );
    }
 
-   return $cache;
+   return $_docs_tree_cache;
 }
 
 sub docs_url {

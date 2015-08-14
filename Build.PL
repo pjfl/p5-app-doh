@@ -61,6 +61,11 @@ my $prereqs  = {
     'strictures' => '1.005004',
     'warnings::illegalproto' => '0.001002'
   },
+  'test_requires' => {
+    'File::Spec' => '0',
+    'Module::Metadata' => '0',
+    'Sys::Hostname' => '0'
+  },
 };
 my $testing  = sub { $ENV{AUTOMATED_TESTING}
                   || $ENV{PERL_CPAN_REPORTER_CONFIG}

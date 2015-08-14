@@ -3,12 +3,12 @@ package App::Doh::Request;
 use namespace::autoclean;
 
 use App::Doh::Functions    qw( extract_lang new_uri );
-use App::Doh::Session;
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL SPC TRUE );
-use Class::Usul::Functions qw( first_char is_arrayref is_hashref
-                               is_member throw trim );
-use Class::Usul::Types     qw( ArrayRef BaseType HashRef NonEmptySimpleStr
-                               Object PositiveInt SimpleStr Str );
+use Class::Usul::Functions qw( first_char is_arrayref
+                               is_hashref is_member throw trim );
+use Class::Usul::Types     qw( ArrayRef BaseType HashRef LoadableClass
+                               NonEmptySimpleStr Object PositiveInt
+                               SimpleStr Str );
 use Encode                 qw( decode );
 use HTTP::Body;
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED
@@ -18,53 +18,6 @@ use Scalar::Util           qw( blessed weaken );
 use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
 use Moo;
-
-# Private functions
-my $_defined_or_throw = sub {
-   my ($k, $v, $opts) = @_;
-
-   defined $k or throw Unspecified, [ 'parameter name' ], level => 5,
-                       rv => HTTP_INTERNAL_SERVER_ERROR;
-
-   $opts->{optional} or defined $v
-      or throw Unspecified, [ $k ], level => 5, rv => HTTP_EXPECTATION_FAILED;
-   return $v;
-};
-
-my $_get_defined_value = sub {
-   my ($params, $name, $opts) = @_;
-
-   my $v = $_defined_or_throw->( $name, $params->{ $name }, $opts );
-
-   is_arrayref $v and $v = $v->[ -1 ];
-
-   return $_defined_or_throw->( $name, $v, $opts );
-};
-
-my $_get_defined_values = sub {
-   my ($params, $name, $opts) = @_;
-
-   my $v = $_defined_or_throw->( $name, $params->{ $name }, $opts );
-
-   is_arrayref $v or $v = [ $v ];
-
-   return $v;
-};
-
-my $_scrub_value = sub {
-   my ($name, $v, $opts) = @_; my $pattern = $opts->{scrubber}; my $len;
-
-   $pattern and defined $v and $v =~ s{ $pattern }{}gmx;
-
-   $opts->{optional} or $opts->{allow_null} or $len = length $v
-      or  throw Unspecified, [ $name ], level => 4,
-                rv => HTTP_EXPECTATION_FAILED;
-
-   $len and $len > $opts->{max_length}
-      and throw 'Parameter [_1] size [_2] too big', [ $name, $len ], level => 4,
-                rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
-   return $v;
-};
 
 # Private methods
 my $_decode_array = sub {
@@ -93,30 +46,13 @@ my $_decode_hash = sub {
    return;
 };
 
-my $_get_scrubbed_param = sub {
-   my ($self, $params, $name, $opts) = @_; $opts = { %{ $opts // {} } };
-
-   $opts->{max_length} //= $self->config->max_asset_size;
-   $opts->{scrubber  } //= $self->config->scrubber;
-   $opts->{multiple  } and return
-      [ map { $opts->{raw} ? $_ : $_scrub_value->( $name, $_, $opts ) }
-           @{ $_get_defined_values->( $params, $name, $opts ) } ];
-
-   my $v = $_get_defined_value->( $params, $name, $opts );
-
-   return $opts->{raw} ? $v : $_scrub_value->( $name, $v, $opts );
-};
-
 # Attribute constructors
 my $_build__base = sub {
-   my $self = shift; my $base;
+   my $self = shift;
 
-   if ($self->mode eq 'static') {
-      my @path = split m{ / }mx, $self->path; $base = '../' x scalar @path;
-   }
-   else { $base = $self->scheme.'://'.$self->host.$self->script.'/' }
-
-   return $base;
+   return $self->mode eq 'static'
+        ? '../' x scalar split m{ / }mx, $self->path
+        : $self->scheme.'://'.$self->hostport.$self->script.'/';
 };
 
 my $_build_body = sub {
@@ -147,15 +83,15 @@ my $_build_locale = sub {
 
    $locale and is_member $locale, $self->config->locales and return $locale;
 
-   for my $locale (@{ $self->locales }) {
-      is_member $locale, $self->config->locales and return $locale;
+   for (@{ $self->locales }) {
+      is_member $_, $self->config->locales and return $_;
    }
 
    return $self->config->locale;
 };
 
 my $_build_locales = sub {
-   my $self = shift; my $lang = $self->_env->{ 'HTTP_ACCEPT_LANGUAGE' } || NUL;
+   my $self = shift; my $lang = $self->_env->{ 'HTTP_ACCEPT_LANGUAGE' } // NUL;
 
    return [ map    { s{ _ \z }{}mx; $_ }
             map    { join '_', $_->[ 0 ], uc( $_->[ 1 ] // NUL ) }
@@ -171,16 +107,15 @@ my $_build_tunnel_method = sub {
 };
 
 my $_build_uri = sub {
-   my $self = shift; my $uri;
+   my $self = shift;
+   my $path = $self->mode ne 'static'
+            ? $self->path : $self->locale.'/'.$self->path.'.html';
 
-   if ($self->mode ne 'static') { $uri = $self->_base.$self->path }
-   else { $uri = $self->_base.$self->locale.'/'.$self->path.'.html' }
-
-   return new_uri $uri, $self->scheme;
+   return new_uri $self->_base.$path, $self->scheme;
 };
 
 # Public attributes
-has 'args'           => is => 'ro',   isa => ArrayRef, default => sub { [] };
+has 'args'           => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
 has 'base'           => is => 'lazy', isa => Object,
    builder           => sub { new_uri $_[ 0 ]->_base, $_[ 0 ]->scheme },
@@ -189,20 +124,22 @@ has 'base'           => is => 'lazy', isa => Object,
 has 'body'           => is => 'lazy', isa => Object, builder => $_build_body;
 
 has 'content_length' => is => 'lazy', isa => PositiveInt,
-   builder           => sub { $_[ 0 ]->_env->{CONTENT_LENGTH} // 0 };
+   builder           => sub { $_[ 0 ]->_env->{ 'CONTENT_LENGTH' } // 0 };
 
 has 'content_type'   => is => 'lazy', isa => SimpleStr,
-   builder           => sub { $_[ 0 ]->_env->{CONTENT_TYPE} // NUL };
+   builder           => sub { $_[ 0 ]->_env->{ 'CONTENT_TYPE' } // NUL };
 
 has 'domain'         => is => 'lazy', isa => NonEmptySimpleStr,
-   builder           => sub { (split m{ : }mx, $_[ 0 ]->host)[ 0 ] };
+   builder           => sub { $_[ 0 ]->config->name };
 
 has 'encoding'       => is => 'lazy', isa => NonEmptySimpleStr,
    builder           => sub { $_[ 0 ]->config->encoding };
 
-has 'host'           => is => 'lazy', isa => NonEmptySimpleStr, builder => sub {
-   my $env           =  $_[ 0 ]->_env;
-      $env->{ 'HTTP_HOST' } // $env->{ 'SERVER_NAME' } // 'localhost' };
+has 'host'           => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => sub { (split m{ : }mx, $_[ 0 ]->hostport)[ 0 ] };
+
+has 'hostport'       => is => 'lazy', isa => NonEmptySimpleStr,
+   builder           => sub { $_[ 0 ]->_env->{ 'HTTP_HOST' } // 'localhost' };
 
 has 'language'       => is => 'lazy', isa => NonEmptySimpleStr,
    builder           => sub { extract_lang $_[ 0 ]->locale };
@@ -212,9 +149,6 @@ has 'locale'         => is => 'lazy', isa => NonEmptySimpleStr,
 
 has 'locales'        => is => 'lazy', isa => ArrayRef,
    builder           => $_build_locales;
-
-has 'model_name'     => is => 'lazy', isa => NonEmptySimpleStr,
-   default           => sub { $_[ 0 ]->config->name };
 
 has 'method'         => is => 'lazy', isa => SimpleStr,
    builder           => sub { lc( $_[ 0 ]->_env->{ 'REQUEST_METHOD' } // NUL )};
@@ -233,9 +167,14 @@ has 'script'         => is => 'lazy', isa => SimpleStr, builder => sub {
    my $v             =  $_[ 0 ]->_env->{ 'SCRIPT_NAME' } // '/';
       $v             =~ s{ / \z }{}gmx; $v };
 
-has 'session'        => is => 'lazy', isa => Object, builder => sub {
-   App::Doh::Session->new( builder => $_[ 0 ]->_usul, env => $_[ 0 ]->_env ) },
+has 'session'        => is => 'lazy', isa => Object,
+   builder           => sub { $_[ 0 ]->session_class->new
+                                 ( builder => $_[ 0 ]->_usul,
+                                   env     => $_[ 0 ]->_env ) },
    handles           => [ qw( authenticated username ) ];
+
+has 'session_class'  => is => 'lazy', isa => LoadableClass,
+   default           => 'App::Doh::Session';
 
 has 'tunnel_method'  => is => 'lazy', isa => NonEmptySimpleStr,
    builder           => $_build_tunnel_method;
@@ -243,34 +182,31 @@ has 'tunnel_method'  => is => 'lazy', isa => NonEmptySimpleStr,
 has 'uri'            => is => 'lazy', isa => Object, builder => $_build_uri;
 
 # Private attributes
-has '_base'          => is => 'lazy', isa => NonEmptySimpleStr,
-   builder           => $_build__base, init_arg => undef;
+has '_base'    => is => 'lazy', isa => NonEmptySimpleStr,
+   builder     => $_build__base, init_arg => undef;
 
-has '_content'       => is => 'lazy', isa => Str, builder => $_build__content,
-   init_arg          => undef;
+has '_content' => is => 'lazy', isa => Str,
+   builder     => $_build__content, init_arg => undef;
 
-has '_env'           => is => 'ro',   isa => HashRef, default => sub { {} },
-   init_arg          => 'env';
+has '_env'     => is => 'ro',   isa => HashRef,
+   builder     => sub { {} }, init_arg => 'env';
 
-has '_params'        => is => 'ro',   isa => HashRef, default => sub { {} },
-   init_arg          => 'params';
+has '_params'  => is => 'ro',   isa => HashRef,
+   builder     => sub { {} }, init_arg => 'params';
 
-has '_usul'          => is => 'ro',   isa => BaseType,
-   handles           => [ qw( config l10n log ) ],
-   init_arg          => 'builder', required => TRUE;
+has '_usul'    => is => 'ro',   isa => BaseType, required => TRUE,
+   handles     => [ qw( config l10n log ) ], init_arg => 'builder';
 
 # Construction
 around 'BUILDARGS' => sub {
-   my ($orig, $self, @args) = @_; my $attr = {};
+   my ($orig, $self, $attr, @args) = @_; @args == 0 and return $attr;
 
-   is_hashref $args[ 0 ] and return $args[ 0 ];
+   $attr->{env   } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
+   $attr->{params} = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
+   $attr->{args  } = (defined $args[ 0 ] && blessed $args[ 0 ])
+                   ? [ $args[ 0 ] ] # Upload object
+                   : [ split m{ / }mx, trim $args[ 0 ] || NUL ];
 
-   $attr->{builder} = shift @args; $attr->{model_name} = shift @args;
-   $attr->{env    } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
-   $attr->{params } = ($args[ 0 ] and is_hashref $args[ -1 ]) ? pop @args : {};
-   $attr->{args   } = (defined $args[ 0 ] && blessed $args[ 0 ])
-                    ? [ $args[ 0 ] ] # Upload object
-                    : [ split m{ / }mx, trim $args[ 0 ] || NUL ];
    return $attr;
 };
 
@@ -285,13 +221,94 @@ sub BUILD {
    return;
 }
 
+# Private functions
+my $_defined_or_throw = sub {
+   my ($k, $v, $opts) = @_; $k =~ m{ \A \d+ \z }mx and $k = "arg[${k}]";
+
+   $opts->{optional} or defined $v
+      or throw 'Parameter [_1] undefined value', [ $k ],
+               level => 6, rv => HTTP_EXPECTATION_FAILED;
+
+   return $v;
+};
+
+my $_get_last_value = sub {
+   my ($k, $v, $opts) = @_; return $_defined_or_throw->( $k, $v->[-1], $opts );
+};
+
+my $_get_value_or_values = sub {
+   my ($params, $name, $opts) = @_;
+
+   defined $name or throw Unspecified, [ 'name' ],
+                          level => 5, rv => HTTP_INTERNAL_SERVER_ERROR;
+
+   my $v = (is_arrayref $params) ? $params->[ $name ] : $params->{ $name };
+
+   return $_defined_or_throw->( $name, $v, $opts );
+};
+
+my $_get_defined_value = sub {
+   my ($params, $name, $opts) = @_;
+
+   my $v = $_get_value_or_values->( $params, $name, $opts );
+
+   return (is_arrayref $v) ? $_get_last_value->( $name, $v, $opts ) : $v;
+};
+
+my $_get_defined_values = sub {
+   my ($params, $name, $opts) = @_;
+
+   my $v = $_get_value_or_values->( $params, $name, $opts );
+
+   return (is_arrayref $v) ? $v : [ $v ];
+};
+
+my $_scrub_value = sub {
+   my ($name, $v, $opts) = @_; my $pattern = $opts->{scrubber}; my $len;
+
+   $pattern and defined $v and $v =~ s{ $pattern }{}gmx;
+
+   $opts->{optional} or $opts->{allow_null} or $len = length $v
+      or  throw Unspecified, [ $name ], level => 4,
+                rv => HTTP_EXPECTATION_FAILED;
+
+   $name =~ m{ \A \d+ \z }mx and $name = "arg[${name}]";
+
+   $len and $len > $opts->{max_length}
+      and throw 'Parameter [_1] size [_2] too big', [ $name, $len ], level => 4,
+                rv => HTTP_REQUEST_ENTITY_TOO_LARGE;
+   return $v;
+};
+
+my $_get_scrubbed_param = sub {
+   my ($self, $params, $name, $opts) = @_; $opts = { %{ $opts // {} } };
+
+   $opts->{max_length} //= $self->config->max_asset_size;
+   $opts->{scrubber  } //= $self->config->scrubber;
+   $opts->{multiple  } and return
+      [ map { $opts->{raw} ? $_ : $_scrub_value->( $name, $_, $opts ) }
+           @{ $_get_defined_values->( $params, $name, $opts ) } ];
+
+   my $v = $_get_defined_value->( $params, $name, $opts );
+
+   return $opts->{raw} ? $v : $_scrub_value->( $name, $v, $opts );
+};
+
 # Public methods
+sub args_params {
+   my $self = shift; weaken( $self );
+
+   my $params = $self->args; weaken( $params );
+
+   return sub { $_get_scrubbed_param->( $self, $params, @_ ) };
+}
+
 sub body_params {
    my $self = shift; weaken( $self );
 
    my $params = $self->body->param; weaken( $params );
 
-   return sub { $self->$_get_scrubbed_param( $params, @_ ) };
+   return sub { $_get_scrubbed_param->( $self, $params, @_ ) };
 }
 
 sub loc {
@@ -311,7 +328,7 @@ sub query_params {
 
    my $params = $self->_params; weaken( $params );
 
-   return sub { $self->$_get_scrubbed_param( $params, @_ ) };
+   return sub { $_get_scrubbed_param->( $self, $params, @_ ) };
 }
 
 sub uri_for {
@@ -385,16 +402,21 @@ Mime type of the body content
 
 =item C<domain>
 
-A non empty simple string which is the domain of the request. The value of
-C<host> but without the port number
+The domain to which this request belongs. Can be used to select assets like
+translation files
+
+=item C<host>
+
+A non empty simple string which is the hostname in the request. The value of
+L</hostport> but without the port number
 
 =item C<encoding>
 
 The encoding used to decode all inputs, defaults to C<UTF-8>
 
-=item C<host>
+=item C<hostport>
 
-The domain name and port number of the request
+The hostname and port number in the request
 
 =item C<locale>
 

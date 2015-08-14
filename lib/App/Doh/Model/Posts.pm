@@ -1,7 +1,5 @@
 package App::Doh::Model::Posts;
 
-use feature 'state';
-
 use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Constants qw( TRUE );
@@ -17,6 +15,9 @@ with    q(App::Doh::Role::Templates);
 with    q(App::Doh::Role::Editor);
 
 has '+moniker' => default => 'posts';
+
+# Private package variables
+my $_posts_tree_cache = { _mtime => 0, };
 
 # Private methods
 my $_chain_nodes = sub {
@@ -64,10 +65,10 @@ sub localised_tree {
 }
 
 sub posts {
-   my $self = shift; state $cache; my $filesys = $self->config->root_mtime;
+   my $self = shift; my $filesys = $self->config->root_mtime;
 
-   if (not defined $cache or $filesys->stat->{mtime} > $cache->{_mtime}) {
-      my $max_mtime = defined $cache->{_mtime} ? $cache->{_mtime} : 0;
+   if ($filesys->stat->{mtime} > $_posts_tree_cache->{_mtime}) {
+      my $max_mtime = $_posts_tree_cache->{_mtime};
       my $conf      = $self->config;
       my $postd     = $conf->posts;
       my $no_index  = join '|', grep { not m{ $postd }mx } @{ $conf->no_index };
@@ -77,7 +78,9 @@ sub posts {
                         ->catdir( $locale, $postd, { reverse => TRUE } )
                         ->filter( sub { not m{ (?: $no_index ) }mx } );
 
-         $dir->exists or next; my $lcache = $cache->{ $locale } //= {};
+         $dir->exists or next;
+
+         my $lcache = $_posts_tree_cache->{ $locale } //= {};
 
          $lcache->{tree} = build_tree( $self->type_map, $dir, 1, 0, $postd );
          $lcache->{type} = 'folder';
@@ -86,10 +89,10 @@ sub posts {
          my $mtime = mtime $lcache; $mtime > $max_mtime and $max_mtime = $mtime;
       }
 
-      $filesys->touch( $cache->{_mtime} = $max_mtime );
+      $filesys->touch( $_posts_tree_cache->{_mtime} = $max_mtime );
    }
 
-   return $cache;
+   return $_posts_tree_cache;
 }
 
 sub rename_file_action : Role(editor) {

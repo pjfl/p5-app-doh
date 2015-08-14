@@ -38,15 +38,16 @@ my $_internal_server_error = sub {
 };
 
 my $_redirect = sub {
-   my ($self, $req, $stash) = @_; my $code = $stash->{code} || HTTP_FOUND;
+   my ($self, $req, $stash) = @_; my $code = $stash->{code} // HTTP_FOUND;
 
    my $redirect = $stash->{redirect}; my $message = $redirect->{message};
 
    if ($message) {
-      my $mid = $req->session->status_message( $message );
-
       $self->log->info( $req->loc_default( @{ $message } ) );
-      $redirect->{location}->query_form( 'mid', $mid );
+
+      my $mid; $req->can( 'session' )
+         and $mid = $req->session->status_message( $message )
+         and $redirect->{location}->query_form( 'mid', $mid );
    }
 
    return [ $code, [ 'Location', $redirect->{location} ], [] ];
@@ -54,6 +55,10 @@ my $_redirect = sub {
 
 my $_render_view = sub {
    my ($self, $moniker, $method, $req, $stash) = @_;
+
+   is_arrayref $stash and return $stash;
+
+   exists $stash->{redirect} and return $self->$_redirect( $req, $stash );
 
    $stash->{view}
       or throw 'Model [_1] method [_2] stashed no view', [ $moniker, $method ];
@@ -92,9 +97,10 @@ sub render {
    (is_arrayref $args and $args->[ 0 ] and exists $models->{ $args->[ 0 ] })
       or return $args;
 
-   my ($moniker, $method, undef, @args) = @{ $args }; my ($req, $res);
+   my ($moniker, $method, undef, @request_args) = @{ $args };
+   my $opts = { builder => $self->usul, domain => $moniker }; my ($req, $res);
 
-   try   { $req = $self->request_class->new( $self->usul, $moniker, @args ) }
+   try   { $req = $self->request_class->new( $opts, @request_args ) }
    catch { $res = $self->$_internal_server_error( $_ ) };
 
    $res and return $res;
@@ -104,15 +110,11 @@ sub render {
 
       my $stash = $models->{ $moniker }->execute( $method, $req );
 
-      if (is_arrayref $stash) { $res = $stash }
-      elsif (exists $stash->{redirect}) {
-         $res = $self->$_redirect( $req, $stash );
-      }
-      else { $res = $self->$_render_view( $moniker, $method, $req, $stash ) }
+      $res = $self->$_render_view( $moniker, $method, $req, $stash );
    }
    catch { $res = $self->$_render_exception( $moniker, $req, $_ ) };
 
-   $req->session->update;
+   $req->can( 'session' ) and $req->session->update;
 
    return $res;
 }

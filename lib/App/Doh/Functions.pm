@@ -2,7 +2,6 @@ package App::Doh::Functions;
 
 use 5.010001;
 use strictures;
-use feature 'state';
 use parent  'Exporter::Tiny';
 
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE LANG NUL TRUE );
@@ -19,21 +18,21 @@ use URI::https;
 our @EXPORT_OK = qw( build_navigation_list build_tree clone  env_var
                      extract_lang is_static iterator load_components
                      localise_tree make_id_from make_name_from mtime
-                     new_uri set_element_focus show_node );
+                     new_uri set_element_focus show_node  uri_escape );
 
 my $reserved   = q(;/?:@&=+$,[]);
 my $mark       = q(-_.!~*'());                                    #'; emacs
 my $unreserved = "A-Za-z0-9\Q${mark}\E";
-my $uric       = quotemeta( $reserved )."${unreserved}%";
+my $uric       = quotemeta( $reserved )."${unreserved}%\#";
 
 # Private functions
-my $_extension2format = sub {
+my $extension2format = sub {
    my ($map, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
 
    return $map->{ $extn } // 'text';
 };
 
-my $_get_tip_text = sub {
+my $get_tip_text = sub {
    my ($root, $node) = @_; my $text = $node->{path}->abs2rel( $root );
 
    $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ \. .+ \z }{}mx;
@@ -42,25 +41,17 @@ my $_get_tip_text = sub {
    return $text;
 };
 
-my $_sorted_keys = sub {
+my $sorted_keys = sub {
    my $node = shift;
 
    return [ sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
             grep { first_char $_ ne '_' } keys %{ $node } ];
 };
 
-my $_uric_escape = sub {
-    my $str = shift;
-
-    $str =~ s{([^$uric\#])}{ URI::Escape::escape_char($1) }ego;
-    utf8::downgrade( $str );
-    return \$str;
-};
-
-my $_make_tuple = sub {
+my $make_tuple = sub {
    my $node = shift; my $is_folder = $node && $node->{type} eq 'folder' ? 1 : 0;
 
-   return [ 0, $is_folder ? $_sorted_keys->( $node->{tree} ) : [], $node, ];
+   return [ 0, $is_folder ? $sorted_keys->( $node->{tree} ) : [], $node, ];
 };
 
 # Public functions
@@ -75,7 +66,7 @@ sub build_navigation_list ($$$$) {
       my $link = clone( $node ); delete $link->{tree};
 
       $link->{class}  = $node->{type} eq 'folder' ? 'folder-link' : 'file-link';
-      $link->{tip  }  = $_get_tip_text->( $root, $node );
+      $link->{tip  }  = $get_tip_text->( $root, $node );
       $link->{depth} -= 2;
 
       if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
@@ -90,13 +81,11 @@ sub build_navigation_list ($$$$) {
 }
 
 sub build_tree {
-   my ($map, $dir, $depth, $no_reset, $url_base, $parent) = @_;
+   my ($map, $dir, $depth, $node_order, $url_base, $parent) = @_;
 
-   $depth //= 0; $depth++; state $order; $no_reset or $order = 0;
+   $depth //= 0; $node_order //= 0; $url_base //= NUL; $parent //= NUL;
 
-   $url_base //= NUL; $parent //= NUL;
-
-   my $fcount = 0; my $max_mtime = 0; my $tree = {};
+   my $fcount = 0; my $max_mtime = 0; my $tree = {}; $depth++;
 
    for my $path ($dir->all) {
       my ($id, $pref) =  @{ make_id_from( $path->filename ) };
@@ -106,7 +95,7 @@ sub build_tree {
       my  $node       =  $tree->{ $id } = {
           date        => $mtime,
           depth       => $depth,
-          format      => $_extension2format->( $map, $path->pathname ),
+          format      => $extension2format->( $map, $path->pathname ),
           id          => $id,
           name        => $name,
           parent      => $parent,
@@ -115,15 +104,15 @@ sub build_tree {
           title       => ucfirst $name,
           type        => 'file',
           url         => $url,
-          _order      => $order++, };
+          _order      => $node_order++, };
 
       $path->is_file and ++$fcount and $mtime > $max_mtime
                                    and $max_mtime = $mtime;
       $path->is_dir or next;
       $node->{type} =  'folder';
       $node->{tree} =  $depth > 1 # Skip the language code directories
-                    ?  build_tree( $map, $path, $depth, $order, $url, $name )
-                    :  build_tree( $map, $path, $depth, $order, NUL,  NUL   );
+         ?  build_tree( $map, $path, $depth, $node_order, $url, $name )
+         :  build_tree( $map, $path, $depth, $node_order );
       $fcount += $node->{fcount} = $node->{tree}->{_fcount};
       mtime( $node ) > $max_mtime and $max_mtime = mtime( $node );
    }
@@ -156,7 +145,7 @@ sub is_static () {
 }
 
 sub iterator ($) {
-   my $tree = shift; my @folders = ( $_make_tuple->( $tree ) );
+   my $tree = shift; my @folders = ( $make_tuple->( $tree ) );
 
    return sub {
       while (my $tuple = $folders[ 0 ]) {
@@ -164,7 +153,7 @@ sub iterator ($) {
             my $node = $tuple->[ 2 ]->{tree}->{ $k };
 
             $node->{type} eq 'folder'
-               and unshift @folders, $_make_tuple->( $node );
+               and unshift @folders, $make_tuple->( $node );
 
             return $node;
          }
@@ -238,7 +227,7 @@ sub mtime ($) {
 }
 
 sub new_uri ($$) {
-   return bless $_uric_escape->( $_[ 0 ] ), 'URI::'.$_[ 1 ];
+   return bless uric_escape( $_[ 0 ] ), 'URI::'.$_[ 1 ];
 }
 
 sub set_element_focus ($$) {
@@ -256,6 +245,14 @@ sub show_node ($;$$) {
 
    return $node->{depth} >= $wanted_depth
        && $node->{url  } =~ m{ \A $wanted }mx ? TRUE : FALSE;
+}
+
+sub uric_escape ($;$) {
+   my ($v, $pattern) = @_; $pattern //= $uric;
+
+   $v =~ s{([^$pattern])}{ URI::Escape::escape_char($1) }ego;
+   utf8::downgrade( $v );
+   return \$v;
 }
 
 1;

@@ -42,7 +42,8 @@ lib/App/Doh/View/HTML/Pod.pm
 lib/App/Doh/View/JSON.pm
 lib/App/Doh/app-doh.json
 lib/strictures/defanged.pm
-t/01always_pass.t
+t/00report-metadata.dd
+t/00report-metadata.t
 t/02pod.t
 t/03podcoverage.t
 t/05kwalitee.t
