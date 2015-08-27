@@ -38,15 +38,16 @@ recommends "CSS::LESS" => "v0.0.3";
 
 on 'build' => sub {
   requires "Module::Build" => "0.4004";
-  requires "Test::Requires" => "0.06";
-  requires "Test::Warnings" => "0.014";
-  requires "version" => "0.88";
 };
 
 on 'test' => sub {
   requires "File::Spec" => "0";
+  requires "Module::Build" => "0.4004";
   requires "Module::Metadata" => "0";
   requires "Sys::Hostname" => "0";
+  requires "Test::Requires" => "0.06";
+  requires "Test::Warnings" => "0.014";
+  requires "version" => "0.88";
 };
 
 on 'test' => sub {

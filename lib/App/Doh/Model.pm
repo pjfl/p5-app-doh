@@ -12,7 +12,8 @@ use Moo;
 with q(Web::Components::Role);
 
 # Public attributes
-has 'application' => is => 'ro', isa => Plinth, required => TRUE;
+has 'application' => is => 'ro', isa => Plinth,
+   required       => TRUE,  weak_ref => TRUE;
 
 # Private attributes
 has '_ipc' => is => 'lazy', isa => ProcCommer, handles => [ 'run_cmd' ],

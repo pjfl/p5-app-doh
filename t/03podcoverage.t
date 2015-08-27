@@ -20,7 +20,6 @@ $EVAL_ERROR and plan skip_all => 'Test::Pod::Coverage 1.04 required';
 pod_coverage_ok( 'App::Doh' );
 pod_coverage_ok( 'App::Doh::Config' );
 pod_coverage_ok( 'App::Doh::Daemon' );
-pod_coverage_ok( 'App::Doh::Request' );
 pod_coverage_ok( 'App::Doh::Server' );
 
 done_testing;

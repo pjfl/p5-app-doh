@@ -92,6 +92,7 @@ sub BUILD {
 
    is_static $class or $self->log->info( "${server} Server started ${info}" );
    # Take the hit at application startup not on first request
+   $conf->root_mtime->unlink;
    $self->models->{docs }->docs_tree;
    $self->models->{posts}->posts;
    is_static $class or $self->log->info( 'Document tree loaded' );
@@ -104,7 +105,7 @@ __END__
 
 =pod
 
-=encoding utf8
+=encoding utf-8
 
 =head1 Name
 

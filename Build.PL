@@ -9,10 +9,7 @@ my $perl_ver = 5.010001;
 my $name     = 'App-Doh'; $name =~ s{ - }{::}gmx;
 my $prereqs  = {
   'build_requires' => {
-    'Module::Build' => '0.4004',
-    'Test::Requires' => '0.06',
-    'Test::Warnings' => '0.014',
-    'version' => '0.88'
+    'Module::Build' => '0.4004'
   },
   'configure_requires' => {
     'Module::Build' => '0.4004',
@@ -62,8 +59,12 @@ my $prereqs  = {
   },
   'test_requires' => {
     'File::Spec' => '0',
+    'Module::Build' => '0.4004',
     'Module::Metadata' => '0',
-    'Sys::Hostname' => '0'
+    'Sys::Hostname' => '0',
+    'Test::Requires' => '0.06',
+    'Test::Warnings' => '0.014',
+    'version' => '0.88'
   },
 };
 my $testing  = sub { $ENV{AUTOMATED_TESTING}

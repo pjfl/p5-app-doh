@@ -90,7 +90,7 @@ sub delete_file_action : Role(editor) {
 sub docs_tree {
    my $self = shift; my $filesys = $self->config->root_mtime;
 
-   if (not defined $_docs_tree_cache
+   if (not $filesys->exists
        or  $filesys->stat->{mtime} > $_docs_tree_cache->{_mtime}) {
       my $conf     = $self->config;
       my $no_index = join '|', @{ $conf->no_index };

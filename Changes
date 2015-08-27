@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Passing tests again
           - Switched to Web::Components
           - Enhanced type constraint names
           - Renamed Web::Components loader and role
