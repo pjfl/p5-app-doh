@@ -2,7 +2,7 @@ package App::Doh::Model::Help;
 
 use namespace::autoclean;
 
-use Class::Usul::Constants qw( NUL );
+use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( find_source );
 use Class::Usul::Types     qw( ArrayRef );
 use File::DataClass::IO;
@@ -46,9 +46,11 @@ around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
    my $parent  =  $req->loc( 'Help' );
-   my $want    =  $req->args->[ 0 ] || $self->config->appclass;
+   my $opts    =  { optional => TRUE, scrubber => '[^0-9A-Z_a-z:]' };
+   my $args0   =  $req->uri_params->( 0, $opts );
+   my $want    =  $args0 // $self->config->appclass;
    my $page    =  {
-      content  => io( find_source( $want ) || $req->args->[ 0 ] ),
+      content  => io( find_source( $want ) || $args0 ),
       format   => 'pod',
       name     => $want,
       parent   => $parent,

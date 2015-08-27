@@ -4,7 +4,6 @@ use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Functions    qw( set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
-use Class::Usul::IPC;
 use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_I_AM_A_TEAPOT
                                HTTP_UNAUTHORIZED HTTP_UNPROCESSABLE_ENTITY );
@@ -19,10 +18,6 @@ with    q(App::Doh::Role::CommonLinks);
 with    q(App::Doh::Role::Preferences);
 
 has '+moniker' => default => 'admin';
-
-# Public attributes
-has 'ipc'  => is => 'lazy', isa => Object, handles => [ 'run_cmd' ],
-   builder => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->usul ) };
 
 # Private methods
 my $_authenticate = sub {
@@ -96,26 +91,22 @@ sub generate_static_action : Role(admin) {
 sub get_dialog : Role(anon) {
    my ($self, $req) = @_;
 
-   my $params = $req->query_params;
-   my $name   = $params->( 'name' );
-   my $stash  = $self->initialise_stash( $req );
-   my $page   = $stash->{page} = { hint   => $req->loc( 'Hint' ),
-                                   layout => "${name}-user",
-                                   meta   => { id => $params->( 'id' ), }, };
-
-   $name eq 'login'   and $page->{username  } = $req->session->username;
-   $name ne 'profile' and $page->{literal_js}
-      = set_element_focus "${name}-user", 'username';
+   my $params  =  $req->query_params;
+   my $name    =  $params->( 'name' );
+   my $stash   =  $self->initialise_stash( $req );
+   my $page    =  $stash->{page} = $self->load_page( $req, {
+      layout   => "${name}-user",
+      meta     => { id => $params->( 'id' ), }, } );
 
    if ($name eq 'profile') {
-      my $user = $self->users->find( $req->username );
+      my $user = $self->users->find( $page->{username} );
 
       $page->{binding    } = $user->binding;
       $page->{email      } = $user->email;
       $page->{keybindings} = [ qw( default emacs sublime vim ) ];
       $page->{literal_js } = set_element_focus "${name}-user", 'email';
-      $page->{username   } = $req->username;
    }
+   else { $page->{literal_js} = set_element_focus "${name}-user", 'username' }
 
    $stash->{view} = 'json';
    return $stash;
@@ -124,7 +115,7 @@ sub get_dialog : Role(anon) {
 sub get_form : Role(admin) {
    my ($self, $req) = @_;
 
-   my $id    = $req->args->[ 0 ]
+   my $id    = $req->uri_params->( 0, { optional => TRUE } )
             // $req->query_params->( 'username', { optional => TRUE } );
    my $title = $req->loc( 'Administration' );
    my $stash = $self->get_content( $req );

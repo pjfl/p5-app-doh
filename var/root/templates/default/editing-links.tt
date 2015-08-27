@@ -1,4 +1,4 @@
-[% IF ! page.editing && page.mode != 'static' && req.authenticated -%]
+[% IF ! page.editing && page.mode != 'static' && page.authenticated -%]
             <!-- Editing Links -->
             <div class="well well-sidebar">
 [%    class = 'windows fade' -%]

@@ -39,7 +39,7 @@ option 'server'  => is => 'ro', isa => NonEmptySimpleStr, format => 's',
 my $_get_listener_args = sub {
    my $self = shift;
    my $conf = $self->config;
-   my $port = env_var 'PORT', $self->port;
+   my $port = env_var $conf->appclass, 'PORT', $self->port;
    my $args = {
       '--port'       => $port,
       '--server'     => $self->server,
@@ -62,7 +62,7 @@ my $_stdio_file = sub {
 my $_daemon = sub {
    my $self = shift; $PROGRAM_NAME = $self->app;
 
-   env_var 'DEBUG', $self->debug;
+   env_var $self->config->appclass, 'DEBUG', $self->debug;
    $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
    Plack::Runner->run( $self->$_get_listener_args );
    exit OK;

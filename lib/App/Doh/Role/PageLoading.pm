@@ -34,7 +34,7 @@ around 'load_page' => sub {
    for my $locale ($req->locale, @{ $req->locales }, $self->config->locale) {
       $seen{ $locale } and next; $seen{ $locale } = TRUE;
 
-      my $node = $self->find_node( $locale, $req->args ) or next;
+      my $node = $self->find_node( $locale, $req->uri_params->() ) or next;
       my $page = $self->initialise_page( $req, $node, $locale );
 
       return $orig->( $self, $req, $page );
@@ -45,10 +45,11 @@ around 'load_page' => sub {
 
 # Public methods
 sub find_node {
-   my ($self, $locale, $args) = @_;
+   my ($self, $locale, $ids) = @_;
 
    my $node = $self->localised_tree( $locale ) or return FALSE;
-   my $ids  = [ @{ $args } ]; $ids->[ 0 ] or $ids->[ 0 ] = 'index';
+
+   $ids //= []; $ids->[ 0 ] //= 'index';
 
    for my $node_id (@{ $ids }) {
       $node->{type} eq 'folder' and $node = $node->{tree};
@@ -80,18 +81,18 @@ sub initialise_page {
    sub navigation {
       my ($self, $req, $stash) = @_;
 
-      my @ids    = @{ $req->args };
       my $locale = $self->config->locale; # Always index config default language
       my $root   = $self->config->file_root;
       my $node   = $self->localised_tree( $locale )
-         or throw 'Default locale [_1] has no document tree',
-                  args => [ $locale ], rv => HTTP_NOT_FOUND;
+         or  throw 'Default locale [_1] has no document tree', [ $locale ],
+                   rv => HTTP_NOT_FOUND;
+      my $ids    = $req->uri_params->() // [];
       my $wanted = $stash->{page}->{wanted} // NUL;
       my $nav    = $cache->{ $wanted };
 
       (not $nav or mtime $node > $nav->{mtime})
          and $nav = $cache->{ $wanted }
-            = { list  => build_navigation_list( $root, $node, \@ids, $wanted ),
+            = { list  => build_navigation_list( $root, $node, $ids, $wanted ),
                 mtime => mtime( $node ), };
 
       return $nav->{list};

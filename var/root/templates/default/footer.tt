@@ -26,11 +26,11 @@
    <script>
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {
-         baseURI : '[% links.base_uri %]',
+         baseURI : "[% links.base_uri %]",
          editing : [% IF page.editing %]true[% ELSE %]false[% END %],
-         formName: '[% page.form_name %]',
-         keyMap  : '[% page.user.binding %]',
-         message : '[% page.status_message %]'
+         formName: "[% page.form_name %]",
+         keyMap  : "[% page.user.binding %]",
+         message : "[% page.status_message %]"
       } );
 [% IF ! page.editing && page.mode != 'static' -%]
       behaviour.config.anchors[ 'create-file' ]
@@ -102,7 +102,7 @@
            m.parentNode.insertBefore( e, m );
         } )( window, document, 'script',
                 '//www.google-analytics.com/analytics.js', 'ga' );
-      ga( 'create', '[% config.analytics %]', '[% req.domain %]' );
+      ga( 'create', '[% config.analytics %]', '[% page.host %]' );
       ga( 'send', 'pageview' );
    </script>
 [% END -%]

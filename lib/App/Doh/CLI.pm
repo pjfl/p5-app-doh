@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use App::Doh; our $VERSION = $App::Doh::VERSION;
 
-use App::Doh::Functions    qw( env_var iterator load_components );
+use App::Doh::Functions    qw( env_var iterator );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix class2appdir ensure_class_loaded io );
@@ -14,6 +14,7 @@ use English                qw( -no_match_vars );
 use File::DataClass::Types qw( Path );
 use User::grent;
 use User::pwent;
+use Web::Components::Util  qw( load_components );
 use Moo;
 use Class::Usul::Options;  # Requires around, has, and with
 
@@ -215,7 +216,7 @@ sub make_static : method {
 
    my $dest = io( $self->next_argv // $conf->static );
 
-   env_var( 'MAKE_STATIC', TRUE );
+   env_var( $conf->appclass, 'MAKE_STATIC', TRUE );
    $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io( $dest->rel2abs( $conf->root ) );
    $dest->exists or $dest->mkpath;

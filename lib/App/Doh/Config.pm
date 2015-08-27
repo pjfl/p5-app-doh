@@ -2,19 +2,21 @@ package App::Doh::Config;
 
 use namespace::autoclean;
 
-use Class::Usul::Constants qw( NUL TRUE );
-use Class::Usul::Functions qw( app_prefix );
+use Class::Usul::Constants       qw( NUL TRUE );
+use Class::Usul::Functions       qw( app_prefix );
 use Data::Validation;
-use File::DataClass::Types qw( ArrayRef Bool Directory File HashRef
-                               NonEmptySimpleStr NonNumericSimpleStr
-                               NonZeroPositiveInt Object Path
-                               PositiveInt SimpleStr Str );
-use Type::Utils            qw( as coerce enum from subtype via );
+use File::DataClass::Types       qw( ArrayRef Bool Directory File HashRef
+                                     NonEmptySimpleStr NonNumericSimpleStr
+                                     NonZeroPositiveInt Object Path
+                                     PositiveInt SimpleStr Str Undef );
+use Type::Utils                  qw( as coerce enum from subtype via );
+use Web::ComposableRequest::Util qw( extract_lang );
 use Moo;
 
 extends q(Class::Usul::Config::Programs);
 
 Data::Validation::Constants->Exception_Class( 'Class::Usul::Exception' );
+Web::ComposableRequest::Constants->Exception_Class( 'Class::Usul::Exception' );
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
 my $SECRET      = subtype as Object;
@@ -30,6 +32,13 @@ my $_to_array_of_hash = sub {
 };
 
 # Attribute constructors
+my $_build_cdnjs = sub {
+   my $self  = shift;
+   my %cdnjs = map { $_->[ 0 ] => $self->cdn.$_->[ 1 ] } @{ $self->jslibs };
+
+   return \%cdnjs;
+};
+
 my $_build_colours = sub {
    return $_to_array_of_hash->( $_[ 0 ]->_colours, 'key', 'value' );
 };
@@ -65,28 +74,10 @@ has 'blank_template'  => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'brand'           => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'cdn'             => is => 'ro',   isa => SimpleStr,
-   default            => 'http://cdnjs.cloudflare.com/ajax/libs/';
+has 'cdn'             => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'cdnjs'           => is => 'lazy', isa => HashRef, builder => sub {
-   my $self = shift; my %cdnjs = map { $_->[ 0 ] => $self->cdn.$_->[ 1 ] }
-   [ codemirror       => 'codemirror/4.5.0/codemirror.min.js' ],
-   [ continuelist     => 'codemirror/4.5.0/addon/edit/continuelist.min.js' ],
-   [ emacs_keymap     => 'codemirror/4.5.0/keymap/emacs.min.js' ],
-   [ highlight        => 'highlight.js/8.0/highlight.min.js' ],
-   [ less             => 'less.js/1.7.4/less.min.js' ],
-   [ markdown         => 'codemirror/4.5.0/mode/markdown/markdown.min.js' ],
-   [ match_brackets   => 'codemirror/4.5.0/addon/edit/matchbrackets.min.js' ],
-   [ moocore          => 'mootools/1.4.5/mootools-core-full-nocompat.min.js' ],
-   [ moomore          => 'mootools-more/1.4.0.1/mootools-more-yui-compressed.min.js' ],
-   [ sublime_keymap   => 'codemirror/4.5.0/keymap/sublime.min.js' ],
-   [ trailing_space   => 'codemirror/4.5.0/addon/edit/trailingspace.min.js' ],
-   [ vim_keymap       => 'codemirror/4.5.0/keymap/vim.min.js' ],
-   [ xml              => 'codemirror/4.5.0/mode/xml/xml.min.js' ];
-   return \%cdnjs;
-};
-
-has 'code_blocks'     => is => 'ro',   isa => $BLOCK_MODES, default => 1;
+has 'cdnjs'           => is => 'lazy', isa => HashRef,
+   builder            => $_build_cdnjs, init_arg => undef;
 
 has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
    builder            => $_build_colours, init_arg => undef;
@@ -94,7 +85,9 @@ has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
 has 'common_links'    => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( assets css help_url images js less ) ] };
 
-has 'components'      => is => 'ro',   isa => HashRef, builder => sub { {} };
+has 'components'      => is => 'ro',   isa => HashRef, builder => sub { {
+   'Model::User'      => {
+      path            => $_[ 0 ]->file_root->catfile( 'users.json' ), }, } };
 
 has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 
@@ -120,8 +113,6 @@ has 'extensions'      => is => 'ro',   isa => HashRef,
 has 'file_root'       => is => 'lazy', isa => Directory, coerce => TRUE,
    builder            => sub { $_[ 0 ]->docs_path };
 
-has 'float'           => is => 'ro',   isa => Bool, default => TRUE;
-
 has 'font'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'help_url'        => is => 'ro',   isa => SimpleStr, default => 'pod';
@@ -132,11 +123,12 @@ has 'images'          => is => 'ro',   isa => NonEmptySimpleStr,
 has 'js'              => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'js/';
 
+has 'jslibs'          => is => 'ro',   isa => ArrayRef, builder => sub { [] };
+
 has 'keywords'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'languages'       => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
-   builder            => sub {
-      [ map { (split m{ _ }mx, $_)[ 0 ] } @{ $_[ 0 ]->locales } ] },
+   builder            => sub { [ map { extract_lang $_ } @{ $_[0]->locales } ]},
    init_arg           => undef;
 
 has 'layout'          => is => 'ro',   isa => NonEmptySimpleStr,
@@ -175,18 +167,15 @@ has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
 has 'posts'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'posts';
 
-has 'preferences'     => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
-   builder            => sub {
-      [ qw( code_blocks float query skin theme use_flags ) ] };
+has 'preferences'     => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
+   builder            => sub { [ sort keys %{ $_[ 0 ]->session_attr } ] };
 
 has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
 
-has 'query'           => is => 'ro',   isa => SimpleStr, default => NUL;
-
 has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'request_class'   => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'App::Doh::Request';
+has 'request_roles'   => is => 'ro',   isa => ArrayRef,
+   builder            => sub { [ 'L10N', 'Session', 'Static' ] };
 
 has 'root_mtime'      => is => 'lazy', isa => Path, coerce => TRUE,
    builder            => sub { $_[ 0 ]->file_root->catfile( '.mtime' ) };
@@ -203,6 +192,15 @@ has 'serve_as_static' => is => 'ro',   isa => NonEmptySimpleStr,
 has 'server'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Starman';
 
+has 'session_attr'    => is => 'lazy', isa => HashRef[ArrayRef],
+   builder            => sub { {
+      code_blocks     => [ $BLOCK_MODES,      1             ],
+      float           => [ Bool,              TRUE          ],
+      query           => [ SimpleStr | Undef                ],
+      skin            => [ NonEmptySimpleStr, $_[ 0 ]->skin ],
+      theme           => [ NonEmptySimpleStr, 'green'       ],
+      use_flags       => [ Bool,              TRUE          ], } };
+
 has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
 
@@ -212,20 +210,12 @@ has 'static'          => is => 'ro',   isa => NonEmptySimpleStr,
 has 'template'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    default            => sub { [ 'docs', 'docs' ] };
 
-has 'theme'           => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'green';
-
 has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Documentation';
 
 has 'twitter'         => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
-has 'use_flags'       => is => 'ro',   isa => Bool, default => TRUE;
-
 has 'user'            => is => 'ro',   isa => SimpleStr, default => NUL;
-
-has 'user_attributes' => is => 'ro',   isa => HashRef, builder => sub { {
-   path               => $_[ 0 ]->file_root->catfile( 'users.json' ), } };
 
 has 'user_home'       => is => 'lazy', isa => Path, coerce => TRUE,
    builder            => $_build_user_home;
@@ -266,7 +256,7 @@ __END__
 
 =pod
 
-=encoding utf8
+=encoding utf-8
 
 =head1 Name
 
@@ -333,17 +323,14 @@ on the splash screen to represent the application
 
 =item C<cdn>
 
-A simple string containing the URI prefix for the content delivery network
+A simple string containing the URI prefix for the content delivery network.
+Defaults to null
 
 =item C<cdnjs>
 
-A hash reference of partial URIs for JavaScript libraries stored on the
-content delivery network
-
-=item C<code_blocks>
-
-An integer which defaults to 1. Can be 1 (shown code blocks), 2 (show
-code blocks inline), or 3 (hide code blocks)
+A hash reference of URIs for JavaScript libraries stored on the
+content delivery network. Created prepending L</cdn> to each of the
+L</jslibs> values
 
 =item C<colours>
 
@@ -364,6 +351,33 @@ A hash reference containing component specific configuration options. Keyed
 by component classname with the leading application class removed. e.g.
 
    $self->config->components->{ 'Controller::Root' };
+
+Defines attributes for these components;
+
+=over 3
+
+=item C<Model::User>
+
+Defines these attributes;
+
+=over 3
+
+=item C<load_factor>
+
+Defaults to 14. A non zero positive integer passed to the C<bcrypt> function
+
+=item C<min_pass_len>
+
+Defaults to 8. The minimum acceptable length for a password
+
+=item C<path>
+
+Defaults to F<var/root/docs/users.json>. A file object which contains the
+users and their profile used by the application
+
+=back
+
+=back
 
 =item C<compress_css>
 
@@ -404,11 +418,6 @@ render
 
 The project's document root. Lazily evaluated it defaults to C<docs_path>
 
-=item C<float>
-
-A non numeric simple string which defaults to C<float-view>. The default
-view mode
-
 =item C<font>
 
 A simple string that defaults to null. The default font used to
@@ -428,6 +437,12 @@ locates the static image files
 
 A non empty simple string that defaults to F<js/>. Relative URI path that
 locates the static JavaScript files
+
+=item C<jslibs>
+
+An array reference of tuples. The first element is the library name, the second
+is a partial URI for a JavaScript library stored on the content delivery
+network. Defaults to an empty list
 
 =item C<keywords>
 
@@ -509,10 +524,9 @@ directories. These are the blogs posts or news articles
 
 =item C<preferences>
 
-An array reference that defaults to
-C<[ code_blocks float skin theme use_flags ]>. List of attributes that can be
-specified as query parameters in URIs.  Their values are persisted between
-requests stored in cookie
+An array reference that defaults to the keys of the L</session_attr> hash
+reference. List of attributes that can be specified as query parameters in
+URIs.  Their values are persisted between requests stored in the session store
 
 =item C<projects>
 
@@ -522,14 +536,10 @@ projects. Multiple servers can be started on different port numbers each
 with their document root and local configuration file in that document root
 directory
 
-=item C<query>
+=item C<request_roles>
 
-Default search string
-
-=item C<request_class>
-
-Defaults to C<App::Doh::Request>. The lazy loaded class used as the per
-request object
+Defaults to C<L10N>, C<Session>, and C<Static>. The list of roles to apply to
+the default request base class
 
 =item C<repo_url>
 
@@ -563,6 +573,42 @@ by L<Plack::Middleware::Static>
 A non empty simple string that defaults to C<Starman>. The L<Plack> engine
 name to load when the documentation server is started in production mode
 
+=item C<session_attr>
+
+A hash reference of array references. These attributes are added to the ones
+in L<Web::ComposableRequest::Session> to created the session class. The hash
+key is the attribute name and the tuple consists of a type and a optional
+default value. The default list of attributes is;
+
+=over 3
+
+=item C<code_blocks>
+
+An integer which defaults to 1. Can be 1 (shown code blocks), 2 (show
+code blocks inline), or 3 (hide code blocks)
+
+=item C<float>
+
+A non numeric simple string which defaults to C<float-view>. The default
+view mode
+
+=item C<query>
+
+Default search string
+
+=item C<theme>
+
+A non empty simple string that defaults to C<green>. The name of the
+default colour scheme
+
+=item C<use_flags>
+
+Boolean which defaults to C<TRUE>. Display the language code, which is
+derived from browsers accept language header value, as a national flag. If
+false display as text
+
+=back
+
 =item C<skin>
 
 A non empty simple string that defaults to C<default>. The name of the default
@@ -578,11 +624,6 @@ contain the static HTML pages. Defaults to C<static>
 If the selected L<Template::Toolkit> layout is F<standard> then this
 attribute selects which left and right columns templates are rendered
 
-=item C<theme>
-
-A non empty simple string that defaults to C<green>. The name of the
-default colour scheme
-
 =item C<title>
 
 A non empty simple string that defaults to C<Documentation>. The documentation
@@ -593,37 +634,10 @@ project's title as displayed in the title bar of all pages
 An array reference that defaults to an empty array reference. List of
 Twitter follow buttons
 
-=item C<use_flags>
-
-Boolean which defaults to C<TRUE>. Display the language code, which is
-derived from browsers accept language header value, as a national flag. If
-false display as text
-
 =item C<user>
 
 Simple string that defaults to null. If set the daemon process will change
 to running as this user when it forks into the background
-
-=item C<user_attributes>
-
-Defines these attributes;
-
-=over 3
-
-=item C<load_factor>
-
-Defaults to 14. A non zero positive integer passed to the C<bcrypt> function
-
-=item C<min_pass_len>
-
-Defaults to 8. The minimum acceptable length for a password
-
-=item C<path>
-
-Defaults to F<var/root/docs/users.json>. A file object which contains the
-users and their profile used by the application
-
-=back
 
 =item C<user_home>
 

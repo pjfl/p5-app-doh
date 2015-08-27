@@ -36,8 +36,9 @@ around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
    my $page = $orig->( $self, $req, @args );
+   my @ids  = @{ $req->uri_params->() // [] };
 
-   my @ids = @{ $req->args }; $ids[ 0 ] and $ids[ 0 ] eq 'index' and @ids = ();
+   $ids[ 0 ] and $ids[ 0 ] eq 'index' and @ids = ();
 
    $page->{type} eq 'folder' and $page->{author} = $self->config->author;
 

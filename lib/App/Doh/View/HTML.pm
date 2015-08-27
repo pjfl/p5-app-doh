@@ -2,21 +2,21 @@ package App::Doh::View::HTML;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( load_components );
+use Web::Components::Util  qw( load_components );
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
 use File::DataClass::Types qw( HashRef Object );
 use HTML::GenerateUtil     qw( escape_html );
 use Moo;
 
-with q(App::Doh::Role::Component);
+with q(Web::Components::Role);
 with q(App::Doh::Role::Templates);
 
 # Public attributes
 has '+moniker'   => default => 'html';
 
 has 'formatters' => is => 'lazy', isa => HashRef[Object],
-   builder       => sub { load_components $_[ 0 ]->usul, 'View::HTML' };
+   builder       => sub { load_components 'View::HTML', application => $_[0] };
 
 has 'type_map'   => is => 'lazy', isa => HashRef, builder => sub {
    my $self = shift; my $map = { htm => 'html', html => 'html' };

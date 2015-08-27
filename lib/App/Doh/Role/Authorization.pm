@@ -3,7 +3,6 @@ package App::Doh::Role::Authorization;
 use attributes ();
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( is_static );
 use Class::Usul::Constants qw( NUL );
 use Class::Usul::Functions qw( is_member throw );
 use HTTP::Status           qw( HTTP_FORBIDDEN HTTP_NOT_FOUND
@@ -30,7 +29,7 @@ around 'execute' => sub {
       or throw 'Class [_1] method [_2] is private', [ $class, $method ],
                rv => HTTP_FORBIDDEN;
 
-   (is_static or is_member 'anon', $method_roles)
+   ($req->mode eq 'static' or is_member 'anon', $method_roles)
       and return $orig->( $self, $method, $req );
 
    $req->authenticated or throw 'Resource [_1] authentication required',

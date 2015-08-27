@@ -2,7 +2,7 @@ package App::Doh::Controller::Root;
 
 use Web::Simple;
 
-with q(App::Doh::Role::Component);
+with q(Web::Components::Role);
 
 has '+moniker' => default => 'root';
 
@@ -39,13 +39,7 @@ App::Doh::Controller::Root - Maps URIs onto model method calls
 
    use Web::Simple;
 
-   with q(App::Doh::Role::ComponentLoading);
-
-   sub dispatch_request {
-      my $f = sub () { my $self = shift; response_filter { $self->render( @_)}};
-
-      return $f, map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
-   }
+   with q(Web::Components::Loader);
 
 =head1 Description
 

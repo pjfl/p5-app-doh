@@ -1,36 +1,41 @@
 package App::Doh::Model;
 
 use App::Doh::Attributes;  # Will do cleaning
-use App::Doh::Functions    qw( show_node );
-use Class::Usul::Constants qw( FALSE NUL );
-use Class::Usul::Functions qw( is_member throw );
-use Class::Usul::Time      qw( str2time time2str );
+use Class::Usul::Constants qw( FALSE NUL TRUE );
+use Class::Usul::Functions qw( throw );
+use Class::Usul::IPC;
+use Class::Usul::Types     qw( Plinth ProcCommer );
 use HTTP::Status           qw( HTTP_BAD_REQUEST HTTP_OK );
-use Scalar::Util           qw( blessed weaken );
+use Scalar::Util           qw( blessed );
 use Moo;
 
-with q(App::Doh::Role::Component);
+with q(Web::Components::Role);
+
+# Public attributes
+has 'application' => is => 'ro', isa => Plinth, required => TRUE;
+
+# Private attributes
+has '_ipc' => is => 'lazy', isa => ProcCommer, handles => [ 'run_cmd' ],
+   builder => sub { Class::Usul::IPC->new( builder => $_[ 0 ]->application ) };
 
 # Public methods
 sub exception_handler {
    my ($self, $req, $e) = @_;
 
-   my $stash  = $self->initialise_stash( $req );
-   my $title  = $req->loc( 'Exception Handler' );
-   my $errors = '&nbsp;' x 40;  $e->args->[ 0 ] and blessed $e->args->[ 0 ]
+   my $title  =  $req->loc( 'Exception Handler' );
+   my $errors =  '&nbsp;' x 40;  $e->args->[ 0 ] and blessed $e->args->[ 0 ]
       and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
+   my $page   =  {
+      content => "${e}${errors}\n\n   Code: ".$e->rv,
+      editing => FALSE,
+      format  => 'markdown',
+      mtime   => time,
+      name    => $title,
+      title   => $title,
+      type    => 'generated' };
+   my $stash  =  $self->get_content( $req, $page );
 
-   $stash->{code} =  $e->rv >= HTTP_OK ? $e->rv : HTTP_BAD_REQUEST;
-   $stash->{page} =  $self->load_page( $req, {
-      content     => "${e}${errors}\n\n   Code: ".$e->rv,
-      editing     => FALSE,
-      format      => 'markdown',
-      mtime       => time,
-      name        => $title,
-      title       => $title,
-      type        => 'generated' } );
-   $stash->{nav } =  $self->navigation( $req, $stash );
-
+   $stash->{code} = $e->rv >= HTTP_OK ? $e->rv : HTTP_BAD_REQUEST;
    return $stash;
 }
 
@@ -43,32 +48,27 @@ sub execute {
 }
 
 sub get_content : Role(any) {
-   my ($self, $req) = @_; my $stash = $self->initialise_stash( $req );
+   my ($self, $req, $page) = @_; my $stash = $self->initialise_stash( $req );
 
-   $stash->{page} = $self->load_page ( $req );
+   $stash->{page} = $self->load_page ( $req, $page  );
    $stash->{nav } = $self->navigation( $req, $stash );
 
    return $stash;
 }
 
 sub initialise_stash {
-   my ($self, $req) = @_; weaken( $req );
-
-   return { code         => HTTP_OK,
-            functions    => {
-               is_member => \&is_member,
-               loc       => sub { $req->loc( @_ ) },
-               show_node => \&show_node,
-               str2time  => \&str2time,
-               time2str  => \&time2str,
-               ucfirst   => sub { ucfirst $_[ 0 ] },
-               uri_for   => sub { $req->uri_for( @_ ), }, },
-            req          => $req,
-            view         => $self->config->default_view, };
+   return { code => HTTP_OK, view => $_[ 0 ]->config->default_view, };
 }
 
 sub load_page {
-   my ($self, $req, $args) = @_; my $page = $args // {}; return $page;
+   my ($self, $req, $page) = @_; $page //= {};
+
+   for my $k (qw( authenticated host language mode username )) {
+      $page->{ $k } = $req->$k();
+   }
+
+   $page->{hint} = $req->loc( 'Hint' );
+   return $page;
 }
 
 sub navigation {

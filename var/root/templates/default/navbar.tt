@@ -2,7 +2,7 @@
    <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
          [% Link( page.homepage_url, 'brand pull-left', loc( config.title ) )-%]
-[% IF req.authenticated -%]
+[% IF page.authenticated -%]
          <div class="icon-container pull-right">
 [%    text = '<span class="tools_icon"></span>' -%]
 [%    tip  = loc( 'Configure user profile' ) -%]

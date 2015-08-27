@@ -2,17 +2,21 @@ package App::Doh::Role::Templates;
 
 use namespace::autoclean;
 
+use App::Doh::Functions    qw( show_node );
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL TRUE );
-use Class::Usul::Functions qw( throw );
-use File::DataClass::Types qw( Directory NonEmptySimpleStr Object );
+use Class::Usul::Functions qw( is_member throw );
+use Class::Usul::Time      qw( str2time time2str );
+use File::DataClass::Types qw( Directory Object );
 use File::Spec::Functions  qw( catfile );
+use Scalar::Util           qw( weaken );
 use Template;
 use Unexpected::Functions  qw( PathNotFound );
 use Moo::Role;
 
 requires qw( config );
 
-has 'encoder'      => is => 'lazy', isa => Object, builder => sub {
+# Attribute constructors
+my $_build_encoder =  sub {
    my $self        =  shift;
    my $args        =  {
       COMPILE_DIR  => $self->config->tempdir->catdir( 'ttc' ),
@@ -25,8 +29,10 @@ has 'encoder'      => is => 'lazy', isa => Object, builder => sub {
    return $template;
 };
 
-has 'templates'    => is => 'lazy', isa => Directory, coerce => TRUE,
-   builder         => sub { $_[ 0 ]->config->root->catdir( 'templates' ) };
+has 'encoder'   => is => 'lazy', isa => Object, builder => $_build_encoder;
+
+has 'templates' => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder      => sub { $_[ 0 ]->config->root->catdir( 'templates' ) };
 
 # Public methods
 sub render_template {
@@ -39,9 +45,6 @@ sub render_template {
    my $page   =  $stash->{page  } // {};
    my $layout = ($page->{layout} //= $conf->layout).'.tt';
    my $path   =  $self->templates->catdir( $skin )->catfile( $layout );
-   my $funcs  = (delete $stash->{functions}) // {};
-
-   $stash->{ $_ } = $funcs->{ $_ } for (keys %{ $funcs });
 
    $path->exists or throw PathNotFound, [ $path ];
    $self->encoder->process( catfile( $skin, $layout ), $stash, \$result )
@@ -49,6 +52,20 @@ sub render_template {
 
    return $result;
 }
+
+around 'render_template' => sub {
+   my ($orig, $self, $req, $stash) = @_; weaken( $req );
+
+   $stash->{is_member} = \&is_member;
+   $stash->{loc      } = sub { $req->loc( @_ ) };
+   $stash->{show_node} = \&show_node;
+   $stash->{str2time } = \&str2time;
+   $stash->{time2str } = \&time2str;
+   $stash->{ucfirst  } = sub { ucfirst $_[ 0 ] };
+   $stash->{uri_for  } = sub { $req->uri_for( @_ ), };
+
+   return $orig->( $self, $req, $stash );
+};
 
 1;
 

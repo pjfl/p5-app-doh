@@ -2,7 +2,7 @@ package App::Doh;
 
 use 5.010001;
 use strictures;
-use version; our $VERSION = qv( sprintf '0.10.%d', q$Rev: 16 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.10.%d', q$Rev: 17 $ =~ /\d+/gmx );
 
 1;
 
@@ -29,7 +29,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.10.$Rev: 16 $ of L<App::Doh>
+This documents version v0.10.$Rev: 17 $ of L<App::Doh>
 
 =head1 Description
 
@@ -45,24 +45,10 @@ The command line methods are documented in F<App::Doh::CLI>
 
 The production server options are detailed in F<App::Doh::Daemon>
 
-The request object F<App::Doh::Request> represents all that is now about the
-current request
-
 F<App::Doh::Server> is the L<Web::Simple> based application server
 
-Defines these attributes;
-
-=over 3
-
-=item C<moniker>
-
-The abbreviated component name
-
-=item C<usul>
-
-An instance of L<Class::Usul>
-
-=back
+The request object F<Web::ComposableRequest> represents all that is now about
+the current request
 
 =head1 Subroutines/Methods
 
@@ -70,7 +56,7 @@ None
 
 =head1 Diagnostics
 
-Exporting C<DOH_DEBUG> and setting it to true causes the development
+Exporting C<APP_DOH_DEBUG> and setting it to true causes the development
 server to start logging at the debug level to F<var/logs/app_doh.log>
 
 Starting the daemon with the C<-D> option will cause it to log debug
@@ -85,7 +71,7 @@ The production server logs requests to the file F<var/logs/access_8085.log>
 
 =item L<Class::Usul>
 
-=item L<Moo>
+=item L<Web::Simple>
 
 =back
 

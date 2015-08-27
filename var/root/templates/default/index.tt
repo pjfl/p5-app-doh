@@ -30,7 +30,7 @@
                <div class="text-center">
 [%    IF page.mode != 'static' -%]
 [%       class = 'btn btn-secondary btn-hero fade' -%]
-[%       IF req.authenticated -%]
+[%       IF page.authenticated -%]
 [%          LinkWithTips( uri_for( 'admin' ), class, loc( 'Admin' ),
                           page.hint, loc( 'Admininstration interface' ) ) -%]
 [%       ELSE -%]
@@ -38,7 +38,7 @@
                           page.hint, loc( 'Help pages for the application')) -%]
 [%       END -%]
 [%    END -%]
-[%    IF page.mode != 'static' && !req.authenticated -%]
+[%    IF page.mode != 'static' && !page.authenticated -%]
 [%       class = 'btn btn-primary btn-hero windows' -%]
 [%       text  = loc( 'Login' ) -%]
 [%       tip   = loc( 'Authenticate with the application' ) -%]

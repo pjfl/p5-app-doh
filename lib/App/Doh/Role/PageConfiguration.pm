@@ -2,7 +2,6 @@ package App::Doh::Role::PageConfiguration;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( extract_lang );
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Types     qw( Object );
 use Moo::Role;
@@ -16,27 +15,25 @@ has 'users' => is => 'lazy', isa => Object,
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $conf    = $self->config; my $page = $orig->( $self, $req, @args );
+   my $page = $orig->( $self, $req, @args ); my $conf = $self->config;
+
+   for my $k (qw( author description keywords template )) {
+      $page->{ $k } //= $conf->$k();
+   }
+
+   $page->{application_version} = $App::Doh::VERSION;
+   $page->{status_message     } = $req->session->collect_status_message( $req );
 
    my $editing = $req->query_params->( 'edit', { optional => TRUE } ) // FALSE;
 
-   for (qw( author description keywords template )) {
-      $page->{ $_ } //= $conf->$_();
-   }
+   $page->{editing     } //= $editing;
+   $page->{form_name   } //= 'markdown';
+   $page->{locale      } //= $req->locale;
+   $page->{wanted      } //= join '/', @{ $req->uri_params->() // [] };
+   $page->{homepage_url}   = $page->{mode} eq 'online'
+                           ? $req->base : $req->uri_for( 'index' );
 
-   $page->{application_version}   = $App::Doh::VERSION;
-   $page->{editing            } //= $editing;
-   $page->{form_name          }   = 'markdown';
-   $page->{hint               }   = $req->loc( 'Hint' );
-   $page->{locale             } //= $req->locale;
-   $page->{mode               }   = $req->mode;
-   $page->{status_message     }   = $req->session->clear_status_message( $req );
-   $page->{wanted             } //= join '/', @{ $req->args };
-   $page->{homepage_url       }   = $page->{mode} eq 'online'
-                                  ? $req->base : $req->uri_for( 'index' );
-   $page->{language           }   = extract_lang $page->{locale};
-
-   $page->{editing} and $page->{user} = $self->users->find( $req->username );
+   $page->{editing} and $page->{user} = $self->users->find( $page->{username} );
 
    return $page;
 };

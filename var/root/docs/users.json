@@ -1,7 +1,7 @@
 {
    "users" : {
       "admin" : {
-         "active" : "1",
+         "active" : 1,
          "binding" : "emacs",
          "email" : "Admin@example.com",
          "password" : "$2a$14$cmEE0iEJBiF2U.Qakol0XO8Q0.SDlJr7AqxlqECwm79LoXyE4iVGS",

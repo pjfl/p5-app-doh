@@ -8,7 +8,7 @@ use Encode                 qw( encode );
 use JSON::MaybeXS          qw( );
 use Moo;
 
-with q(App::Doh::Role::Component);
+with q(Web::Components::Role);
 with q(App::Doh::Role::Templates);
 
 # Public attributes

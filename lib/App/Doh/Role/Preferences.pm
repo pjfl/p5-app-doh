@@ -13,12 +13,13 @@ around 'initialise_stash' => sub {
    my $stash  = $orig->( $self, $req, @args );
    my $params = $req->query_params;
    my $sess   = $req->session;
-   my $conf   = $self->config;
 
-   for my $k (@{ $conf->preferences }) {
-      my $v = $params->( $k, { optional => 1 }) // $sess->{ $k } // $conf->$k();
+   for my $k (@{ $self->config->preferences }) {
+      try {
+         my $v = $params->( $k, { optional => 1 } );
 
-      try   { $stash->{prefs}->{ $k } = $sess->$k( $v ) }
+         $stash->{prefs}->{ $k } = defined $v ? $sess->$k( $v ) : $sess->$k();
+      }
       catch { $self->log->warn( $_ ) };
    }
 

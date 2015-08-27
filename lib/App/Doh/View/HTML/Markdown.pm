@@ -9,7 +9,7 @@ use Scalar::Util       qw( blessed );
 use YAML::Tiny;
 use Moo;
 
-with q(App::Doh::Role::Component);
+with q(Web::Components::Role);
 
 # Public attributes
 has '+moniker'   => default => 'markdown';

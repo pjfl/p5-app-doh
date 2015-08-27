@@ -4,26 +4,15 @@ use 5.010001;
 use strictures;
 use parent  'Exporter::Tiny';
 
-use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE LANG NUL TRUE );
-use Class::Usul::Functions qw( first_char is_arrayref is_hashref
-                               merge_attributes my_prefix split_on_dash throw );
-use English                qw( -no_match_vars );
-use Module::Pluggable::Object;
-use Scalar::Util           qw( blessed );
-use Unexpected::Functions  qw( Unspecified );
-use URI::Escape            qw( );
-use URI::http;
-use URI::https;
+use Class::Usul::Constants       qw( FALSE NUL TRUE );
+use Class::Usul::Functions       qw( env_prefix first_char is_arrayref
+                                     is_hashref );
+use English                      qw( -no_match_vars );
+use Web::ComposableRequest::Util qw( extract_lang );
 
-our @EXPORT_OK = qw( build_navigation_list build_tree clone  env_var
-                     extract_lang is_static iterator load_components
-                     localise_tree make_id_from make_name_from mtime
-                     new_uri set_element_focus show_node  uri_escape );
-
-my $reserved   = q(;/?:@&=+$,[]);
-my $mark       = q(-_.!~*'());                                    #'; emacs
-my $unreserved = "A-Za-z0-9\Q${mark}\E";
-my $uric       = quotemeta( $reserved )."${unreserved}%\#";
+our @EXPORT_OK = qw( build_navigation_list build_tree clone env_var is_static
+                     iterator localise_tree make_id_from make_name_from mtime
+                     set_element_focus show_node );
 
 # Private functions
 my $extension2format = sub {
@@ -88,7 +77,7 @@ sub build_tree {
    my $fcount = 0; my $max_mtime = 0; my $tree = {}; $depth++;
 
    for my $path ($dir->all) {
-      my ($id, $pref) =  @{ make_id_from( $path->filename ) };
+      my ($id, $pref) =  @{ make_id_from( $path->utf8->filename ) };
       my  $name       =  make_name_from( $id );
       my  $url        =  $url_base ? "${url_base}/${id}" : $id;
       my  $mtime      =  $path->stat->{mtime};
@@ -99,7 +88,7 @@ sub build_tree {
           id          => $id,
           name        => $name,
           parent      => $parent,
-          path        => $path->utf8,
+          path        => $path,
           prefix      => $pref,
           title       => ucfirst $name,
           type        => 'file',
@@ -130,18 +119,14 @@ sub clone (;$) {
    return $v;
 }
 
-sub env_var ($;$) {
-   my $k = (uc split_on_dash my_prefix $PROGRAM_NAME).'_'.$_[ 0 ];
+sub env_var ($$;$) {
+   my ($class, $var, $v) = @_; my $k = (env_prefix $class)."_${var}";
 
-   return defined $_[ 1 ] ? $ENV{ $k } = $_[ 1 ] : $ENV{ $k };
+   return defined $v ? $ENV{ $k } = $v : $ENV{ $k };
 }
 
-sub extract_lang ($) {
-   my $v = shift; return $v ? (split m{ _ }mx, $v)[ 0 ] : LANG;
-}
-
-sub is_static () {
-   return !!env_var( 'MAKE_STATIC' ) ? TRUE : FALSE;
+sub is_static ($) {
+   return !env_var( $_[ 0 ], 'MAKE_STATIC' ) ? FALSE : TRUE;
 }
 
 sub iterator ($) {
@@ -165,40 +150,13 @@ sub iterator ($) {
    };
 }
 
-sub load_components ($$;$) {
-   my ($builder, $search_path, $opts) = @_; $opts //= {};
-
-   blessed $builder or throw 'Builder [_1] not an object', [ $builder ];
-   $search_path     or throw Unspecified, [ 'search path' ];
-   $opts->{builder} //= $builder;
-
-   my $config   = $builder->config; my $appclass = $config->appclass;
-
-   if (first_char $search_path eq '+') { $search_path = substr $search_path, 1 }
-   else { $search_path = "${appclass}::${search_path}" }
-
-   my $depth    = () = split m{ :: }mx, $search_path, -1; $depth += 1;
-   my $finder   = Module::Pluggable::Object->new
-      ( max_depth   => $depth,           min_depth => $depth,
-        search_path => [ $search_path ], require   => TRUE, );
-   my $compos   = $opts->{components} = {}; # Dependency injection
-
-   for my $class ($finder->plugins) {
-     (my $klass = $class) =~ s{ \A $appclass :: }{}mx;
-      my $attr  = { %{ $config->components->{ $klass } // {} }, %{ $opts } };
-      my $comp  = $class->new( $attr ); $compos->{ $comp->moniker } = $comp;
-   }
-
-   return $compos;
-}
-
 sub localise_tree ($$) {
    my ($tree, $locale) = @_; ($tree and $locale) or return FALSE;
 
    exists $tree->{ $locale } and defined $tree->{ $locale }
       and return $tree->{ $locale };
 
-   my $lang = extract_lang( $locale );
+   my $lang = extract_lang $locale;
 
    exists $tree->{ $lang } and defined $tree->{ $lang }
       and return $tree->{ $lang };
@@ -226,10 +184,6 @@ sub mtime ($) {
    return $_[ 0 ]->{tree}->{_mtime};
 }
 
-sub new_uri ($$) {
-   return bless uric_escape( $_[ 0 ] ), 'URI::'.$_[ 1 ];
-}
-
 sub set_element_focus ($$) {
    my ($form, $name) = @_;
 
@@ -245,14 +199,6 @@ sub show_node ($;$$) {
 
    return $node->{depth} >= $wanted_depth
        && $node->{url  } =~ m{ \A $wanted }mx ? TRUE : FALSE;
-}
-
-sub uric_escape ($;$) {
-   my ($v, $pattern) = @_; $pattern //= $uric;
-
-   $v =~ s{([^$pattern])}{ URI::Escape::escape_char($1) }ego;
-   utf8::downgrade( $v );
-   return \$v;
 }
 
 1;

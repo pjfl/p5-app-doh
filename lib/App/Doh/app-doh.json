@@ -1,5 +1,21 @@
 {
    "brand": "app.png",
+   "cdn":   "http://cdnjs.cloudflare.com/ajax/libs/",
+   "jslibs": [
+      [ "codemirror",     "codemirror/4.5.0/codemirror.min.js" ],
+      [ "continuelist",   "codemirror/4.5.0/addon/edit/continuelist.min.js" ],
+      [ "emacs_keymap",   "codemirror/4.5.0/keymap/emacs.min.js" ],
+      [ "highlight",      "highlight.js/8.0/highlight.min.js" ],
+      [ "less",           "less.js/1.7.4/less.min.js" ],
+      [ "markdown",       "codemirror/4.5.0/mode/markdown/markdown.min.js" ],
+      [ "match_brackets", "codemirror/4.5.0/addon/edit/matchbrackets.min.js" ],
+      [ "moocore",        "mootools/1.4.5/mootools-core-full-nocompat.min.js" ],
+      [ "moomore",        "mootools-more/1.4.0.1/mootools-more-yui-compressed.min.js" ],
+      [ "sublime_keymap", "codemirror/4.5.0/keymap/sublime.min.js" ],
+      [ "trailing_space", "codemirror/4.5.0/addon/edit/trailingspace.min.js" ],
+      [ "vim_keymap",     "codemirror/4.5.0/keymap/vim.min.js" ],
+      [ "xml",            "codemirror/4.5.0/mode/xml/xml.min.js" ]
+   ],
    "mount_point": "/",
    "repo_url": "https://github.com/pjfl/p5-app-doh.git"
 }

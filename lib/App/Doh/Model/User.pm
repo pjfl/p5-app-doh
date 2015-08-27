@@ -12,12 +12,11 @@ use Moo;
 
 extends q(File::DataClass::Schema);
 
-has 'load_factor'  => is => 'ro',   isa => NonZeroPositiveInt, default => 14;
+has 'load_factor'  => is => 'ro', isa => NonZeroPositiveInt, default => 14;
 
-has 'min_pass_len' => is => 'ro',   isa => NonZeroPositiveInt, default => 8;
+has 'min_pass_len' => is => 'ro', isa => NonZeroPositiveInt, default => 8;
 
-has 'moniker'      => is => 'ro',   isa => NonEmptySimpleStr,
-   default         => 'user';
+has 'moniker'      => is => 'ro', isa => NonEmptySimpleStr,  default => 'user';
 
 has '+result_source_attributes' => default => sub { {
    users                   => {
@@ -55,15 +54,10 @@ my $_resultset = sub {
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_;
 
-   my $args    = (is_hashref $args[ 0 ]) ? $args[ 0 ] : { @args };
+   my $attr = (is_hashref $args[ 0 ]) ? $args[ 0 ] : { @args };
+   my $app  = delete $attr->{application}; $app and $attr->{builder} = $app;
 
-   my $builder = $args->{builder}; ($builder and $builder->can( 'config' ))
-      or return $orig->( $self, $args );
-
-   my $conf    = $builder->config; ($conf and $conf->can( 'user_attributes' ))
-      or return $orig->( $self, $args );
-
-   return $orig->( $self, { %{ $conf->user_attributes }, %{ $args } } );
+   return $orig->( $self, $attr );
 };
 
 # Public methods

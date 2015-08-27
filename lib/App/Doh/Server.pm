@@ -7,14 +7,15 @@ use Class::Usul;
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix ensure_class_loaded
                                find_apphome get_cfgfiles throw );
-use Class::Usul::Types     qw( BaseType );
+use Class::Usul::Types     qw( HashRef Plinth );
 use Plack::Builder;
 use Unexpected::Functions  qw( Unspecified );
 use Web::Simple;
 
-my $_build_usul = sub {
+# Attribute constructors
+my $_build__usul = sub {
    my $self = shift;
-   my $attr = { config => $self->config, debug => env_var( 'DEBUG' ) // FALSE };
+   my $attr = { config => $self->_config_attr };
    my $conf = $attr->{config};
 
    $conf->{appclass    } or  throw Unspecified, [ 'application class' ];
@@ -27,7 +28,7 @@ my $_build_usul = sub {
 
    $bootconf->inflate_paths( $bootconf->projects );
 
-   my $port    = env_var( 'PORT' ) // $bootconf->port;
+   my $port    = env_var( $bootconf->appclass, 'PORT' ) // $bootconf->port;
    my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 
@@ -38,24 +39,26 @@ my $_build_usul = sub {
    return Class::Usul->new( $attr );
 };
 
-has 'usul' => is => 'lazy', isa => BaseType, builder => $_build_usul,
-   handles => [ 'log' ];
+# Private attributes
+has '_config_attr' => is => 'ro',   isa => HashRef, builder => sub { {} },
+   init_arg        => 'config';
 
-with q(App::Doh::Role::ComponentLoading);
+has '_usul'        => is => 'lazy', isa => Plinth,  builder => $_build__usul,
+   handles         => [ 'config', 'debug', 'l10n', 'lock', 'log' ];
+
+with q(Web::Components::Loader);
 
 # Construction
 around 'to_psgi_app' => sub {
-   my ($orig, $self, @args) = @_; my $app = $orig->( $self, @args );
+  my ($orig, $self, @args) = @_; my $psgi_app = $orig->( $self, @args );
 
-   my $conf   = $self->usul->config;
-   my $point  = $conf->mount_point;
-   my $static = $conf->serve_as_static;
+   my $conf = $self->config; my $static = $conf->serve_as_static;
 
    return builder {
-      mount "${point}" => builder {
+      mount $conf->mount_point => builder {
          enable 'ContentLength';
          enable 'FixMissingBodyInRedirect';
-         enable "ConditionalGET";
+         enable 'ConditionalGET';
          enable 'Deflater',
             content_type => $conf->deflate_types, vary_user_agent => TRUE;
          enable 'Static',
@@ -67,36 +70,32 @@ around 'to_psgi_app' => sub {
             path => qr{ \A / assets }mx, pass_through => TRUE,
             root => $conf->file_root;
          enable 'Session::Cookie',
-            expires     => 7_776_000, httponly => TRUE,
-            path        => $point,    secret   => NUL.$conf->secret,
-            session_key => 'doh_session';
-         enable "LogDispatch", logger => $self->usul->log;
-         enable_if { $self->usul->debug } 'Debug';
-         $app;
+            expires     => 7_776_000,
+            httponly    => TRUE,
+            path        => $conf->mount_point,
+            secret      => $conf->secret.NUL,
+            session_key => $conf->prefix.'_session';
+         enable 'LogDispatch', logger => $self->log;
+         enable_if { $self->debug } 'Debug';
+         $psgi_app;
       };
    };
 };
 
 sub BUILD {
    my $self   = shift;
+   my $conf   = $self->config;
    my $server = ucfirst( $ENV{PLACK_ENV} // NUL );
-   my $port   = env_var( 'PORT' ) ? ' on port '.env_var( 'PORT' ) : NUL;
-   my $class  = $self->usul->config->appclass; ensure_class_loaded $class;
+   my $class  = $conf->appclass; ensure_class_loaded $class;
    my $ver    = $class->VERSION;
+   my $info   = "v${ver} on port ".(env_var( $class, 'PORT' ) // $conf->port);
 
-   is_static or $self->log->info( "${server} Server started v${ver}${port}" );
+   is_static $class or $self->log->info( "${server} Server started ${info}" );
    # Take the hit at application startup not on first request
    $self->models->{docs }->docs_tree;
    $self->models->{posts}->posts;
-   is_static or $self->log->debug( 'Document tree loaded' );
+   is_static $class or $self->log->info( 'Document tree loaded' );
    return;
-}
-
-# Public methods
-sub dispatch_request {
-   my $f = sub () { my $self = shift; response_filter { $self->render( @_ ) } };
-
-   return $f, map { $_->dispatch_request } @{ $_[ 0 ]->controllers };
 }
 
 1;
@@ -159,7 +158,7 @@ L<Plack> stack
 
 =head1 Diagnostics
 
-Exporting C<DOH_DEBUG> and setting it to true causes the development
+Exporting C<APP_DOH_DEBUG> and setting it to true causes the development
 server to start logging at the debug level
 
 The development server can be started using
@@ -175,11 +174,9 @@ information to the log file F<var/logs/daemon.log>
 
 =item L<Class::Usul>
 
-=item L<HTTP::Status>
-
 =item L<Plack>
 
-=item L<Try::Tiny>
+=item L<Web::Components>
 
 =item L<Web::Simple>
 

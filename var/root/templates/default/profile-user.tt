@@ -28,10 +28,10 @@
 [%    tip = loc( 'National flag of requested the language' ) -%]
          <div class="info-container tips"
               title="[% page.hint _ ' ~ ' _ tip %]">
-            <span class="flag_[% req.language %]"></span></div>
+            <span class="flag_[% page.language %]"></span></div>
 [% ELSE -%]
 [%    tip = loc( 'Requested language' ) -%]
          <div class="info-container tips"
-              title="[% page.hint _ ' ~ ' _ tip %]">[% req.language %]</div>
+              title="[% page.hint _ ' ~ ' _ tip %]">[% page.language %]</div>
 [% END -%]
 </form>
