@@ -23,7 +23,7 @@ has '_ipc' => is => 'lazy', isa => ProcCommer, handles => [ 'run_cmd' ],
 sub exception_handler {
    my ($self, $req, $e) = @_;
 
-   my $title  =  $req->loc( 'Exception Handler' );
+   my $name   =  $req->loc( 'Exception Handler' );
    my $errors =  '&nbsp;' x 40;  $e->args->[ 0 ] and blessed $e->args->[ 0 ]
       and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
    my $page   =  {
@@ -31,8 +31,8 @@ sub exception_handler {
       editing => FALSE,
       format  => 'markdown',
       mtime   => time,
-      name    => $title,
-      title   => $title,
+      name    => $name,
+      title   => ucfirst $name,
       type    => 'generated' };
    my $stash  =  $self->get_content( $req, $page );
 
@@ -62,14 +62,7 @@ sub initialise_stash {
 }
 
 sub load_page {
-   my ($self, $req, $page) = @_; $page //= {};
-
-   for my $k (qw( authenticated host language mode username )) {
-      $page->{ $k } = $req->$k();
-   }
-
-   $page->{hint} = $req->loc( 'Hint' );
-   return $page;
+   my ($self, $req, $page) = @_; $page //= {}; return $page;
 }
 
 sub navigation {

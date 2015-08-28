@@ -87,12 +87,12 @@ sub BUILD {
    my $conf   = $self->config;
    my $server = ucfirst( $ENV{PLACK_ENV} // NUL );
    my $class  = $conf->appclass; ensure_class_loaded $class;
-   my $ver    = $class->VERSION;
-   my $info   = "v${ver} on port ".(env_var( $class, 'PORT' ) // $conf->port);
+   my $port   = env_var $class, 'PORT';
+   my $info   = 'v'.$class->VERSION; $port and $info .= " on port ${port}";
 
    is_static $class or $self->log->info( "${server} Server started ${info}" );
    # Take the hit at application startup not on first request
-   $conf->root_mtime->unlink;
+   is_static $class or $conf->root_mtime->unlink;
    $self->models->{docs }->docs_tree;
    $self->models->{posts}->posts;
    is_static $class or $self->log->info( 'Document tree loaded' );

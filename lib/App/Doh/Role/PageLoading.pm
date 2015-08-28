@@ -103,15 +103,15 @@ sub not_found {
    my ($self, $req) = @_;
 
    my $rv      = HTTP_NOT_FOUND;
-   my $title   = $req->loc( 'Not Found' );
+   my $name    = $req->loc( 'Not Found' );
    my $content = '##### '.$req->loc( 'Page [_1] not found', $req->uri )
                  ."\n\n    Code: ${rv}\n\n";
 
    return { content => $content,
             format  => 'markdown',
             mtime   => time,
-            name    => $title,
-            title   => $title, };
+            name    => $name,
+            title   => ucfirst $name, };
 }
 
 1;

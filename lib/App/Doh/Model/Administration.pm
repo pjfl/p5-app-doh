@@ -115,19 +115,17 @@ sub get_dialog : Role(anon) {
 sub get_form : Role(admin) {
    my ($self, $req) = @_;
 
+   my $name  = $req->loc( 'Administration' );
    my $id    = $req->uri_params->( 0, { optional => TRUE } )
             // $req->query_params->( 'username', { optional => TRUE } );
-   my $title = $req->loc( 'Administration' );
-   my $stash = $self->get_content( $req );
-   my $page  = $stash->{page};
+   my $page  = { auth_roles => $self->config->auth_roles,
+                 form_name  => 'administration',
+                 name       => $name,
+                 template   => [ 'admin', 'admin' ],
+                 title      => ucfirst $name,
+                 users      => $self->users->list( $id ), };
 
-   $page->{auth_roles} = $self->config->auth_roles;
-   $page->{form_name } = 'administration';
-   $page->{name      } = $title;
-   $page->{template  } = [ 'admin', 'admin' ];
-   $page->{title     } = $title;
-   $page->{users     } = $self->users->list( $id );
-   return $stash;
+   return $self->get_content( $req, $page );
 }
 
 sub login_action : Role(anon) {
@@ -164,8 +162,8 @@ sub logout_action : Role(any) {
 }
 
 sub navigation {
-   return [ { depth => 0,      title => 'Administration',
-              type  => 'file', url   => 'admin' } ];
+   return [ {
+      depth => 0, title => 'Administration', type => 'file', url => 'admin' } ];
 }
 
 sub update_profile_action : Role(any) {

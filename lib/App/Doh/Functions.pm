@@ -84,7 +84,7 @@ sub build_tree {
       my  $node       =  $tree->{ $id } = {
           date        => $mtime,
           depth       => $depth,
-          format      => $extension2format->( $map, $path->pathname ),
+          format      => $extension2format->( $map, "${path}" ),
           id          => $id,
           name        => $name,
           parent      => $parent,
@@ -95,11 +95,11 @@ sub build_tree {
           url         => $url,
           _order      => $node_order++, };
 
-      $path->is_file and ++$fcount and $mtime > $max_mtime
+      $path->is_file and $fcount++ and $mtime > $max_mtime
                                    and $max_mtime = $mtime;
       $path->is_dir or next;
-      $node->{type} =  'folder';
-      $node->{tree} =  $depth > 1 # Skip the language code directories
+      $node->{type} = 'folder';
+      $node->{tree} = $depth > 1 # Skip the language code directories
          ?  build_tree( $map, $path, $depth, $node_order, $url, $name )
          :  build_tree( $map, $path, $depth, $node_order );
       $fcount += $node->{fcount} = $node->{tree}->{_fcount};

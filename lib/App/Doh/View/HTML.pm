@@ -2,11 +2,11 @@ package App::Doh::View::HTML;
 
 use namespace::autoclean;
 
-use Web::Components::Util  qw( load_components );
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
 use File::DataClass::Types qw( HashRef Object );
 use HTML::GenerateUtil     qw( escape_html );
+use Web::Components::Util  qw( load_components );
 use Moo;
 
 with q(Web::Components::Role);

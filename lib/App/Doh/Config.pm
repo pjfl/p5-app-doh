@@ -106,9 +106,10 @@ has 'description'     => is => 'ro',   isa => SimpleStr,
 has 'docs_path'       => is => 'lazy', isa => Directory, coerce => TRUE,
    builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) };
 
-has 'extensions'      => is => 'ro',   isa => HashRef,
-   builder            => sub { { markdown => [ qw( md mkdn )   ],
-                                 pod      => [ qw( pl pm pod ) ], } };
+has 'extensions'      => is => 'ro',   isa => HashRef[ArrayRef],
+   builder            => sub { {
+      markdown        => [ qw( md mkdn )   ],
+      pod             => [ qw( pl pm pod ) ], } };
 
 has 'file_root'       => is => 'lazy', isa => Directory, coerce => TRUE,
    builder            => sub { $_[ 0 ]->docs_path };
@@ -167,14 +168,11 @@ has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
 has 'posts'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'posts';
 
-has 'preferences'     => is => 'lazy', isa => ArrayRef[NonEmptySimpleStr],
-   builder            => sub { [ sort keys %{ $_[ 0 ]->session_attr } ] };
-
 has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
 
 has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'request_roles'   => is => 'ro',   isa => ArrayRef,
+has 'request_roles'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ 'L10N', 'Session', 'Static' ] };
 
 has 'root_mtime'      => is => 'lazy', isa => Path, coerce => TRUE,
@@ -204,11 +202,17 @@ has 'session_attr'    => is => 'lazy', isa => HashRef[ArrayRef],
 has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'default';
 
+has 'stash_attr'      => is => 'lazy', isa => HashRef[ArrayRef],
+   builder            => sub { {
+      config          => [ qw( author description keywords template ) ],
+      request         => [ qw( authenticated host language mode username ) ],
+      session         => [ sort keys %{ $_[ 0 ]->session_attr } ], } };
+
 has 'static'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'static';
 
 has 'template'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
-   default            => sub { [ 'docs', 'docs' ] };
+   builder            => sub { [ 'docs', 'docs' ] };
 
 has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Documentation';
@@ -522,12 +526,6 @@ A non empty simple string the defaults to F<posts>.  The directory
 name where dated markdown files are created in category
 directories. These are the blogs posts or news articles
 
-=item C<preferences>
-
-An array reference that defaults to the keys of the L</session_attr> hash
-reference. List of attributes that can be specified as query parameters in
-URIs.  Their values are persisted between requests stored in the session store
-
 =item C<projects>
 
 A hash reference that defaults to an empty hash reference. The keys are
@@ -613,6 +611,32 @@ false display as text
 
 A non empty simple string that defaults to C<default>. The name of the default
 skin used to theme the appearance of the application
+
+=item C<stash_attr>
+
+A hash reference of array references. The keys indicate a data source and the
+values are lists of attribute names. The values of the named attributes are
+copied into the stash. Defines the following keys and values;
+
+=over 3
+
+=item C<config>
+
+The list of configuration attributes whose values are copied to the C<page>
+hash reference in the stash
+
+=item C<request>
+
+The list of request attributes whose values are copied to the C<page> hash
+reference in the stash
+
+=item C<session>
+
+An array reference that defaults to the keys of the L</session_attr> hash
+reference. List of attributes that can be specified as query parameters in
+URIs. Their values are persisted between requests stored in the session store
+
+=back
 
 =item C<static>
 

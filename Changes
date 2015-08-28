@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Created Config stash_attr from preferences and lists in code
           - Passing tests again
           - Switched to Web::Components
           - Enhanced type constraint names

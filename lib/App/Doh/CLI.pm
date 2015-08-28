@@ -36,14 +36,13 @@ option 'force'        => is => 'ro',   isa => Bool,
    documentation      => 'Force the operation to take place',
    default            => FALSE, short => 'f';
 
-option 'max_gen_time' => is => 'ro',   isa => PositiveInt,
+option 'max_gen_time' => is => 'ro',   isa => PositiveInt, format => 'i',
    documentation      => 'Maximum generation run time in seconds',
-   default            => 1_800, format => 'i', short => 'm';
+   default            => 1_800, short => 'm';
 
-option 'skin'         => is => 'ro',   isa => NonEmptySimpleStr,
+option 'skin'         => is => 'lazy', isa => NonEmptySimpleStr, format => 's',
    documentation      => 'Name of the skin to operate on',
-   default            => sub { $_[ 0 ]->config->skin }, format => 's',
-   short              => 's';
+   builder            => sub { $_[ 0 ]->config->skin }, short => 's';
 
 has '+config_class'   => default => 'App::Doh::Config';
 
@@ -53,7 +52,7 @@ has 'less_class'      => is => 'lazy', isa => LoadableClass,
    default            => 'CSS::LESS';
 
 has 'models'          => is => 'lazy', isa => HashRef[Object],
-   builder            => sub { load_components $_[ 0 ], 'Model' };
+   builder            => sub { load_components 'Model', application => $_[0] };
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -216,7 +215,7 @@ sub make_static : method {
 
    my $dest = io( $self->next_argv // $conf->static );
 
-   env_var( $conf->appclass, 'MAKE_STATIC', TRUE );
+   env_var $conf->appclass, 'MAKE_STATIC', TRUE;
    $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io( $dest->rel2abs( $conf->root ) );
    $dest->exists or $dest->mkpath;

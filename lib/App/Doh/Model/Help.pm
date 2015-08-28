@@ -48,13 +48,13 @@ around 'load_page' => sub {
    my $parent  =  $req->loc( 'Help' );
    my $opts    =  { optional => TRUE, scrubber => '[^0-9A-Z_a-z:]' };
    my $args0   =  $req->uri_params->( 0, $opts );
-   my $want    =  $args0 // $self->config->appclass;
+   my $name    =  $args0 // $self->config->appclass;
    my $page    =  {
-      content  => io( find_source( $want ) || $args0 ),
+      content  => io( find_source( $name ) || $args0 ),
       format   => 'pod',
-      name     => $want,
+      name     => $name,
       parent   => $parent,
-      title    => ucfirst $want,
+      title    => ucfirst $name,
       url      => 'https://metacpan.org/module/%s', };
 
    return $orig->( $self, $req, $page );

@@ -17,21 +17,23 @@ around 'load_page' => sub {
 
    my $page = $orig->( $self, $req, @args ); my $conf = $self->config;
 
-   for my $k (qw( author description keywords template )) {
-      $page->{ $k } //= $conf->$k();
-   }
+   for my $k (@{ $conf->stash_attr->{request} }) { $page->{ $k }   = $req->$k  }
+
+   for my $k (@{ $conf->stash_attr->{config } }) { $page->{ $k } //= $conf->$k }
 
    $page->{application_version} = $App::Doh::VERSION;
    $page->{status_message     } = $req->session->collect_status_message( $req );
 
+   my $url = $page->{mode} eq 'online' ? $req->base : $req->uri_for( 'index' );
+
    my $editing = $req->query_params->( 'edit', { optional => TRUE } ) // FALSE;
 
+   $page->{homepage_url}   = $url;
    $page->{editing     } //= $editing;
    $page->{form_name   } //= 'markdown';
+   $page->{hint        } //= $req->loc( 'Hint' );
    $page->{locale      } //= $req->locale;
    $page->{wanted      } //= join '/', @{ $req->uri_params->() // [] };
-   $page->{homepage_url}   = $page->{mode} eq 'online'
-                           ? $req->base : $req->uri_for( 'index' );
 
    $page->{editing} and $page->{user} = $self->users->find( $page->{username} );
 

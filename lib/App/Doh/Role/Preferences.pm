@@ -14,7 +14,7 @@ around 'initialise_stash' => sub {
    my $params = $req->query_params;
    my $sess   = $req->session;
 
-   for my $k (@{ $self->config->preferences }) {
+   for my $k (@{ $self->config->stash_attr->{session} }) {
       try {
          my $v = $params->( $k, { optional => 1 } );
 

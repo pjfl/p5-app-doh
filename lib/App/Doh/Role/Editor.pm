@@ -102,13 +102,13 @@ my $_search_results = sub {
    my @tuples  = $_prepare_search_results->( $req, $langd, $results );
    my $content = join "\n\n", map { $_result_line->( $count++, $_ ) } @tuples;
    my $leader  = $req->loc( 'You searched for "[_1]"', $query )."\n\n";
-   my $title   = $req->loc( 'Search Results' );
+   my $name    = $req->loc( 'Search Results' );
 
    return { content => $leader.$content,
             format  => 'markdown',
             mtime   => time,
-            name    => $title,
-            title   => $title, };
+            name    => $name,
+            title   => ucfirst $name, };
 };
 
 # Public methods
