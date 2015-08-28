@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+0.11.1    2015-08-28 12:54:54
           - Created Config stash_attr from preferences and lists in code
           - Passing tests again
           - Switched to Web::Components
