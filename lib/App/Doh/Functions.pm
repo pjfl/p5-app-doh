@@ -4,15 +4,18 @@ use 5.010001;
 use strictures;
 use parent  'Exporter::Tiny';
 
-use Class::Usul::Constants       qw( FALSE NUL TRUE );
-use Class::Usul::Functions       qw( env_prefix first_char is_arrayref
-                                     is_hashref );
+use Class::Usul;
+use Class::Usul::Constants       qw( EXCEPTION_CLASS FALSE NUL TRUE );
+use Class::Usul::Functions       qw( app_prefix env_prefix find_apphome
+                                     first_char get_cfgfiles is_arrayref
+                                     is_hashref throw );
 use English                      qw( -no_match_vars );
+use Unexpected::Functions        qw( Unspecified );
 use Web::ComposableRequest::Util qw( extract_lang );
 
-our @EXPORT_OK = qw( build_navigation_list build_tree clone env_var is_static
-                     iterator localise_tree make_id_from make_name_from mtime
-                     set_element_focus show_node );
+our @EXPORT_OK = qw( build_navigation_list build_tree clone enhance env_var
+                     is_static iterator localise_tree make_id_from
+                     make_name_from mtime set_element_focus show_node );
 
 # Private functions
 my $extension2format = sub {
@@ -117,6 +120,30 @@ sub clone (;$) {
    is_arrayref $v and return [ @{ $v // [] } ];
    is_hashref  $v and return { %{ $v // {} } };
    return $v;
+}
+
+sub enhance ($) {
+   my $conf = shift;
+   my $attr = { config => { %{ $conf } } }; $conf = $attr->{config};
+
+   $conf->{appclass    } or  throw Unspecified, [ 'application class' ];
+   $attr->{config_class} //= $conf->{appclass}.'::Config';
+   $conf->{name        } //= app_prefix   $conf->{appclass};
+   $conf->{home        } //= find_apphome $conf->{appclass}, $conf->{home};
+   $conf->{cfgfiles    } //= get_cfgfiles $conf->{appclass}, $conf->{home};
+
+   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
+
+   $bootconf->inflate_paths( $bootconf->projects );
+
+   my $port    = env_var( $bootconf->appclass, 'PORT' ) // $bootconf->port;
+   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
+   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
+
+   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{l10n_attributes}->{domains} = [ $conf->{name} ];
+   $conf->{file_root} = $docs;
+   return $attr;
 }
 
 sub env_var ($$;$) {

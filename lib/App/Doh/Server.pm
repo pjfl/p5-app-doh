@@ -2,48 +2,20 @@ package App::Doh::Server;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( env_var is_static );
+use App::Doh::Functions    qw( enhance env_var is_static );
 use Class::Usul;
-use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions qw( app_prefix ensure_class_loaded
-                               find_apphome get_cfgfiles throw );
+use Class::Usul::Constants qw( NUL TRUE );
+use Class::Usul::Functions qw( ensure_class_loaded );
 use Class::Usul::Types     qw( HashRef Plinth );
 use Plack::Builder;
-use Unexpected::Functions  qw( Unspecified );
 use Web::Simple;
-
-# Attribute constructors
-my $_build__usul = sub {
-   my $self = shift;
-   my $attr = { config => $self->_config_attr };
-   my $conf = $attr->{config};
-
-   $conf->{appclass    } or  throw Unspecified, [ 'application class' ];
-   $attr->{config_class} //= $conf->{appclass}.'::Config';
-   $conf->{name        } //= app_prefix   $conf->{appclass};
-   $conf->{home        } //= find_apphome $conf->{appclass}, $conf->{home};
-   $conf->{cfgfiles    } //= get_cfgfiles $conf->{appclass}, $conf->{home};
-
-   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
-
-   $bootconf->inflate_paths( $bootconf->projects );
-
-   my $port    = env_var( $bootconf->appclass, 'PORT' ) // $bootconf->port;
-   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
-   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
-
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
-   $conf->{l10n_attributes}->{domains} = [ $conf->{name} ];
-   $conf->{file_root} = $docs;
-
-   return Class::Usul->new( $attr );
-};
 
 # Private attributes
 has '_config_attr' => is => 'ro',   isa => HashRef, builder => sub { {} },
    init_arg        => 'config';
 
-has '_usul'        => is => 'lazy', isa => Plinth,  builder => $_build__usul,
+has '_usul'        => is => 'lazy', isa => Plinth,
+   builder         => sub { Class::Usul->new( enhance $_[ 0 ]->_config_attr ) },
    handles         => [ 'config', 'debug', 'l10n', 'lock', 'log' ];
 
 with q(Web::Components::Loader);
@@ -91,8 +63,9 @@ sub BUILD {
    my $info   = 'v'.$class->VERSION; $port and $info .= " on port ${port}";
 
    is_static $class or $self->log->info( "${server} Server started ${info}" );
-   # Take the hit at application startup not on first request
+   # Stop tests failing after a restart
    is_static $class or $conf->root_mtime->unlink;
+   # Take the hit at application startup not on first request
    $self->models->{docs }->docs_tree;
    $self->models->{posts}->posts;
    is_static $class or $self->log->info( 'Document tree loaded' );
