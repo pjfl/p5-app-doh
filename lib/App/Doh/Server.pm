@@ -16,9 +16,9 @@ has '_config_attr' => is => 'ro',   isa => HashRef, builder => sub { {} },
 
 has '_usul'        => is => 'lazy', isa => Plinth,
    builder         => sub { Class::Usul->new( enhance $_[ 0 ]->_config_attr ) },
-   handles         => [ 'config', 'debug', 'l10n', 'lock', 'log' ];
+   handles         => [ 'config', 'debug', 'dumper', 'l10n', 'lock', 'log' ];
 
-with q(Web::Components::Loader);
+with 'Web::Components::Loader';
 
 # Construction
 around 'to_psgi_app' => sub {

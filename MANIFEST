@@ -20,11 +20,9 @@ lib/App/Doh/Model/Help.pm
 lib/App/Doh/Model/Posts.pm
 lib/App/Doh/Model/User.pm
 lib/App/Doh/Role/Authorization.pm
-lib/App/Doh/Role/CommonLinks.pm
 lib/App/Doh/Role/Editor.pm
 lib/App/Doh/Role/PageConfiguration.pm
 lib/App/Doh/Role/PageLoading.pm
-lib/App/Doh/Role/Preferences.pm
 lib/App/Doh/Role/Templates.pm
 lib/App/Doh/Server.pm
 lib/App/Doh/View/HTML.pm

@@ -7,7 +7,6 @@ use Class::Usul::Constants qw( EXCEPTION_CLASS NUL TRUE );
 use Class::Usul::Functions qw( is_member throw );
 use Class::Usul::Time      qw( str2time time2str );
 use File::DataClass::Types qw( Directory Object );
-use File::Spec::Functions  qw( catfile );
 use Scalar::Util           qw( weaken );
 use Template;
 use Unexpected::Functions  qw( PathNotFound );
@@ -16,7 +15,7 @@ use Moo::Role;
 requires qw( config );
 
 # Attribute constructors
-my $_build_encoder =  sub {
+my $_build__templater =  sub {
    my $self        =  shift;
    my $args        =  {
       COMPILE_DIR  => $self->config->tempdir->catdir( 'ttc' ),
@@ -29,26 +28,28 @@ my $_build_encoder =  sub {
    return $template;
 };
 
-has 'encoder'   => is => 'lazy', isa => Object, builder => $_build_encoder;
+# Public attributes
+has 'templates'  => is => 'lazy', isa => Directory, coerce => TRUE,
+   builder       => sub { $_[ 0 ]->config->root->catdir( 'templates' ) };
 
-has 'templates' => is => 'lazy', isa => Directory, coerce => TRUE,
-   builder      => sub { $_[ 0 ]->config->root->catdir( 'templates' ) };
+# Private attributes
+has '_templater' => is => 'lazy', isa => Object, builder => $_build__templater;
 
 # Public methods
 sub render_template {
    my ($self, $req, $stash) = @_;
 
    my $result =  NUL;
-   my $prefs  =  $stash->{prefs } // {};
-   my $conf   =  $stash->{config} = $self->config;
-   my $skin   =  $stash->{skin  } = $prefs->{skin} // $conf->skin;
-   my $page   =  $stash->{page  } // {};
-   my $layout = ($page->{layout} //= $conf->layout).'.tt';
-   my $path   =  $self->templates->catdir( $skin )->catfile( $layout );
+   my $conf   =  $stash->{config} //= $self->config;
+   my $skin   =  $stash->{skin  } //= $conf->skin;
+   my $page   =  $stash->{page  } //= {};
+   my $layout = ($page->{layout } //= $conf->layout).'.tt';
+   my $path   =  $self->templates->catfile( $skin, $layout );
 
    $path->exists or throw PathNotFound, [ $path ];
-   $self->encoder->process( catfile( $skin, $layout ), $stash, \$result )
-      or throw $self->encoder->error;
+   $self->_templater->process
+      ( $path->abs2rel( $self->templates ), $stash, \$result )
+      or throw $self->_templater->error;
 
    return $result;
 }

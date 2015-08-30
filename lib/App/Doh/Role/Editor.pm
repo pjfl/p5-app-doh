@@ -14,7 +14,9 @@ use Unexpected::Functions  qw( Unspecified );
 use Moo::Role;
 
 requires qw( config find_node get_content initialise_stash
-             invalidate_cache load_page log render_template run_cmd );
+             invalidate_cache load_page log run_cmd );
+
+with q(App::Doh::Role::Templates);
 
 # Private functions
 my $_append_suffix = sub {
