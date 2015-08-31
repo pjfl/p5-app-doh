@@ -122,11 +122,13 @@ around 'run' => sub {
 
 # Public methods
 sub get_init_file : method {
-   $_[ 0 ]->_daemon_control->do_get_init_file; return OK;
+   return $_[ 0 ]->_daemon_control->do_get_init_file;
 }
 
 sub restart : method {
-   $_[ 0 ]->_daemon_control->do_restart; return OK;
+   my $self = shift; $self->params->{restart} = [ { expected_rv => 1 } ];
+
+   return $self->_daemon_control->do_restart;
 }
 
 sub show_warnings : method {
@@ -134,15 +136,21 @@ sub show_warnings : method {
 }
 
 sub start : method {
-   $_[ 0 ]->_daemon_control->do_start; return OK;
+   my $self = shift; $self->params->{start} = [ { expected_rv => 1 } ];
+
+   return $self->_daemon_control->do_start;
 }
 
 sub status : method {
-   $_[ 0 ]->_daemon_control->do_status; return OK;
+   my $self = shift; $self->params->{status} = [ { expected_rv => 3 } ];
+
+   return $self->_daemon_control->do_status;
 }
 
 sub stop : method {
-   $_[ 0 ]->_daemon_control->do_stop; return OK;
+   my $self = shift; $self->params->{stop} = [ { expected_rv => 1 } ];
+
+   return $self->_daemon_control->do_stop;
 }
 
 1;

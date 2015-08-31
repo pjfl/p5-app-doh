@@ -5,13 +5,11 @@ use strictures;
 use parent  'Exporter::Tiny';
 
 use Class::Usul;
-use Class::Usul::Constants       qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions       qw( app_prefix env_prefix find_apphome
-                                     first_char get_cfgfiles is_arrayref
-                                     is_hashref throw );
-use English                      qw( -no_match_vars );
-use Unexpected::Functions        qw( Unspecified );
-use Web::ComposableRequest::Util qw( extract_lang );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
+use Class::Usul::Functions qw( app_prefix env_prefix find_apphome first_char
+                               get_cfgfiles is_arrayref is_hashref throw );
+use English                qw( -no_match_vars );
+use Unexpected::Functions  qw( Unspecified );
 
 our @EXPORT_OK = qw( build_navigation_list build_tree clone enhance env_var
                      is_static iterator localise_tree make_id_from
@@ -19,7 +17,7 @@ our @EXPORT_OK = qw( build_navigation_list build_tree clone enhance env_var
 
 # Private functions
 my $extension2format = sub {
-   my ($map, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] || NUL;
+   my ($map, $path) = @_; my $extn = (split m{ \. }mx, $path)[ -1 ] // NUL;
 
    return $map->{ $extn } // 'text';
 };
@@ -183,11 +181,6 @@ sub localise_tree ($$) {
    exists $tree->{ $locale } and defined $tree->{ $locale }
       and return $tree->{ $locale };
 
-   my $lang = extract_lang $locale;
-
-   exists $tree->{ $lang } and defined $tree->{ $lang }
-      and return $tree->{ $lang };
-
    return FALSE;
 }
 
@@ -196,7 +189,7 @@ sub make_id_from ($) {
 
    $v =~ s{ \A (\d+ [_\-])+ }{}mx; $v =~ s{ [_] }{-}gmx;
 
-   $v =~ s{ \. [a-zA-Z0-9_\+]+ \z }{}mx;
+   $v =~ s{ \. [a-zA-Z0-9\-\+]+ \z }{}mx;
 
    defined $p and $p =~ s{ [_\-]+ \z }{}mx;
 

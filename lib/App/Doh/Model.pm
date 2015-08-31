@@ -21,11 +21,13 @@ has '_ipc' => is => 'lazy', isa => ProcCommer, handles => [ 'run_cmd' ],
 
 # Public methods
 sub exception_handler {
-   my ($self, $req, $e) = @_;
+   my ($self, $req, $e) = @_; my $errors = '&nbsp;' x 40;
+
+   my $obj; $obj = $e->args->[ 0 ] and blessed $obj
+      and $obj->can( 'class' ) and $obj->class eq 'ValidationErrors'
+      and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
 
    my $name   =  $req->loc( 'Exception Handler' );
-   my $errors =  '&nbsp;' x 40;  $e->args->[ 0 ] and blessed $e->args->[ 0 ]
-      and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
    my $page   =  {
       content => "${e}${errors}\n\n   Code: ".$e->rv,
       editing => FALSE,

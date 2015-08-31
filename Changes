@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Merged Config common_links into stash_attr
+          - Fixed locale/language leaky abstraction from request object
+          - Added expected_rv parameters to Daemon
           - Merged Preference and CommonLinks roles into PageConfiguration
           - Moved Usul attribute constructor to Functions
 

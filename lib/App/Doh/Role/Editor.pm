@@ -5,7 +5,7 @@ use namespace::autoclean;
 use App::Doh::Functions    qw( make_id_from make_name_from mtime
                                set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
-use Class::Usul::Functions qw( io throw trim untaint_path );
+use Class::Usul::Functions qw( io is_member throw trim untaint_path );
 use Class::Usul::Time      qw( time2str );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
@@ -71,11 +71,10 @@ my $_result_line = sub {
 
 # Private methods
 my $_new_node = sub {
-   my ($self, $req, $pathname) = @_;
+   my ($self, $req, $pathname) = @_; my $conf = $self->config;
 
-   my $lang     = $req->language;
    my @pathname = $_prepare_path->( $_append_suffix->( untaint_path $pathname));
-   my $path     = $self->config->file_root->catfile( $lang, @pathname )->utf8;
+   my $path     = $conf->file_root->catfile( $req->locale, @pathname )->utf8;
    my @filepath = map { make_id_from( $_ )->[ 0 ] } @pathname;
    my $url      = join '/', @filepath;
    my $id       = pop @filepath;
@@ -84,7 +83,7 @@ my $_new_node = sub {
    $parent and $parent->{type} eq 'folder'
       and exists $parent->{tree}->{ $id }
       and $parent->{tree}->{ $id }->{path} eq $path
-      and throw 'Path [_1] already exists', [ join '/', $lang, @pathname ],
+      and throw 'Path [_1] already exists', [ $path ],
                 rv => HTTP_PRECONDITION_FAILED;
 
    return { path => $path, url => $url, };
@@ -95,13 +94,13 @@ my $_search_results = sub {
 
    my $count   = 1;
    my $query   = $req->query_params->( 'query' );
-   my $langd   = $self->config->file_root->catdir( $req->language );
+   my $localed = $self->config->file_root->catdir( $req->locale );
    my $resp    = $self->run_cmd
-                 ( [ 'ack', $query, "${langd}" ], { expected_rv => 1, } );
+                 ( [ 'ack', $query, "${localed}" ], { expected_rv => 1, } );
    my $results = $resp->rv == 1
-               ? $langd->catfile( $req->loc( 'Nothing found' ) ).'::'
+               ? $localed->catfile( $req->loc( 'Nothing found' ) ).'::'
                : $resp->stdout;
-   my @tuples  = $_prepare_search_results->( $req, $langd, $results );
+   my @tuples  = $_prepare_search_results->( $req, $localed, $results );
    my $content = join "\n\n", map { $_result_line->( $count++, $_ ) } @tuples;
    my $leader  = $req->loc( 'You searched for "[_1]"', $query )."\n\n";
    my $name    = $req->loc( 'Search Results' );
@@ -118,9 +117,8 @@ sub create_file {
    my ($self, $req) = @_;
 
    my $conf     = $self->config;
-   my $params   = $req->body_params;
-   my $new_node = $self->$_new_node( $req, $params->( 'pathname' ) );
-   my $created  = time2str( '%Y-%m-%d %H:%M:%S %z', time, 'UTC' );
+   my $new_node = $self->$_new_node( $req, $req->body_params->( 'pathname' ) );
+   my $created  = time2str '%Y-%m-%d %H:%M:%S %z', time, 'UTC';
    my $stash    = { page => { author  => $req->username,
                               created => $created,
                               layout  => $conf->blank_template, }, };

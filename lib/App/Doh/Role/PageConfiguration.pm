@@ -29,14 +29,15 @@ around 'initialise_stash' => sub {
       catch { $self->log->warn( $_ ) };
    }
 
-   $stash->{skin } = delete $stash->{prefs}->{skin};
-   $stash->{links}->{cdnjs   } = $conf->cdnjs;
-   $stash->{links}->{base_uri} = $req->base;
-   $stash->{links}->{req_uri } = $req->uri;
+   $stash->{skin} = delete $stash->{prefs}->{skin};
 
-   for my $k (@{ $conf->common_links }) {
+   for my $k (@{ $conf->stash_attr->{links} }) {
       $stash->{links}->{ $k } = $req->uri_for( $conf->$k() );
    }
+
+   $stash->{links}->{cdnjs   } = $conf->cdnjs; # TODO: Not a URI object ref
+   $stash->{links}->{base_uri} = $req->base;
+   $stash->{links}->{req_uri } = $req->uri;
 
    return $stash;
 };
@@ -64,7 +65,7 @@ around 'load_page' => sub {
    $page->{locale      } //= $req->locale;
    $page->{wanted      } //= join '/', @{ $req->uri_params->() // [] };
 
-   $page->{editing} and $page->{user} = $self->users->find( $page->{username} );
+   $page->{editing} and $page->{user} = $self->users->find( $req->username );
 
    return $page;
 };

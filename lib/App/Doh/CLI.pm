@@ -217,7 +217,7 @@ sub make_static : method {
 
    env_var $conf->appclass, 'MAKE_STATIC', TRUE;
    $self->info( 'Generating static pages' );
-   $dest->is_absolute or $dest = io( $dest->rel2abs( $conf->root ) );
+   $dest->is_absolute or $dest = io $dest->rel2abs( $conf->root );
    $dest->exists or $dest->mkpath;
    $self->force and $dest->rmtree( { keep_root => TRUE } );
    $self->$_copy_assets( $dest );
