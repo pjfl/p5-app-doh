@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+0.12.1    2015-08-31 18:12:16
           - Merged Config common_links into stash_attr
           - Fixed locale/language leaky abstraction from request object
           - Added expected_rv parameters to Daemon
