@@ -2,6 +2,7 @@ package App::Doh::View::HTML;
 
 use namespace::autoclean;
 
+use App::Doh::Util         qw( stash_functions );
 use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
 use File::DataClass::Types qw( HashRef Object );
@@ -9,8 +10,8 @@ use HTML::GenerateUtil     qw( escape_html );
 use Web::Components::Util  qw( load_components );
 use Moo;
 
-with q(Web::Components::Role);
-with q(App::Doh::Role::Templates);
+with 'Web::Components::Role';
+with 'App::Doh::Role::Templates';
 
 # Public attributes
 has '+moniker'   => default => 'html';
@@ -28,6 +29,15 @@ has 'type_map'   => is => 'lazy', isa => HashRef, builder => sub {
    }
 
    return $map;
+};
+
+# Construction
+around 'render_template' => sub {
+   my ($orig, $self, $req, $stash) = @_;
+
+   stash_functions $self, $req, $stash;
+
+   return $orig->( $self, $req, $stash );
 };
 
 # Private functions

@@ -2,12 +2,9 @@ package App::Doh::Role::Templates;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( show_node );
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL TRUE );
-use Class::Usul::Functions qw( is_member throw );
-use Class::Usul::Time      qw( str2time time2str );
+use Class::Usul::Functions qw( throw );
 use File::DataClass::Types qw( Directory Object );
-use Scalar::Util           qw( weaken );
 use Template;
 use Unexpected::Functions  qw( PathNotFound );
 use Moo::Role;
@@ -15,7 +12,7 @@ use Moo::Role;
 requires qw( config );
 
 # Attribute constructors
-my $_build__templater =  sub {
+my $_build__templater = sub {
    my $self        =  shift;
    my $args        =  {
       COMPILE_DIR  => $self->config->tempdir->catdir( 'ttc' ),
@@ -53,20 +50,6 @@ sub render_template {
 
    return $result;
 }
-
-around 'render_template' => sub {
-   my ($orig, $self, $req, $stash) = @_; weaken( $req );
-
-   $stash->{is_member} = \&is_member;
-   $stash->{loc      } = sub { $req->loc( @_ ) };
-   $stash->{show_node} = \&show_node;
-   $stash->{str2time } = \&str2time;
-   $stash->{time2str } = \&time2str;
-   $stash->{ucfirst  } = sub { ucfirst $_[ 0 ] };
-   $stash->{uri_for  } = sub { $req->uri_for( @_ ), };
-
-   return $orig->( $self, $req, $stash );
-};
 
 1;
 

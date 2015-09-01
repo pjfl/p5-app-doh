@@ -2,7 +2,7 @@ package App::Doh::Role::PageLoading;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( build_navigation_list clone mtime );
+use App::Doh::Util         qw( build_navigation_list clone mtime );
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
 use Class::Usul::Types     qw( HashRef );

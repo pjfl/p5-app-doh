@@ -1,4 +1,4 @@
-package App::Doh::Functions;
+package App::Doh::Util;
 
 use 5.010001;
 use strictures;
@@ -7,13 +7,17 @@ use parent  'Exporter::Tiny';
 use Class::Usul;
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( app_prefix env_prefix find_apphome first_char
-                               get_cfgfiles is_arrayref is_hashref throw );
+                               get_cfgfiles is_arrayref is_hashref is_member
+                               throw );
+use Class::Usul::Time      qw( str2time time2str );
 use English                qw( -no_match_vars );
+use Scalar::Util           qw( weaken );
 use Unexpected::Functions  qw( Unspecified );
 
 our @EXPORT_OK = qw( build_navigation_list build_tree clone enhance env_var
                      is_static iterator localise_tree make_id_from
-                     make_name_from mtime set_element_focus show_node );
+                     make_name_from mtime set_element_focus show_node
+                     stash_functions );
 
 # Private functions
 my $extension2format = sub {
@@ -219,6 +223,19 @@ sub show_node ($;$$) {
 
    return $node->{depth} >= $wanted_depth
        && $node->{url  } =~ m{ \A $wanted }mx ? TRUE : FALSE;
+}
+
+sub stash_functions ($$$) {
+   my ($app, $req, $stash) = @_; weaken( $req );
+
+   $stash->{is_member} = \&is_member;
+   $stash->{loc      } = sub { $req->loc( @_ ) };
+   $stash->{show_node} = \&show_node;
+   $stash->{str2time } = \&str2time;
+   $stash->{time2str } = \&time2str;
+   $stash->{ucfirst  } = sub { ucfirst $_[ 0 ] };
+   $stash->{uri_for  } = sub { $req->uri_for( @_ ), };
+   return;
 }
 
 1;

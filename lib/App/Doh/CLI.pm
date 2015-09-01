@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use App::Doh; our $VERSION = $App::Doh::VERSION;
 
-use App::Doh::Functions    qw( env_var iterator );
+use App::Doh::Util         qw( env_var iterator );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix class2appdir ensure_class_loaded io );

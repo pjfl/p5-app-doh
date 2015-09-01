@@ -2,8 +2,8 @@ package App::Doh::Role::Editor;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( make_id_from make_name_from mtime
-                               set_element_focus );
+use App::Doh::Util         qw( make_id_from make_name_from mtime
+                               set_element_focus stash_functions );
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( io is_member throw trim untaint_path );
 use Class::Usul::Time      qw( time2str );
@@ -16,7 +16,16 @@ use Moo::Role;
 requires qw( config find_node get_content initialise_stash
              invalidate_cache load_page log run_cmd );
 
-with q(App::Doh::Role::Templates);
+with 'App::Doh::Role::Templates';
+
+# Construction
+around 'render_template' => sub {
+   my ($orig, $self, $req, $stash) = @_;
+
+   stash_functions $self, $req, $stash;
+
+   return $orig->( $self, $req, $stash );
+};
 
 # Private functions
 my $_append_suffix = sub {

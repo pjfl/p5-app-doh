@@ -1,7 +1,7 @@
 package App::Doh::Model::Administration;
 
 use App::Doh::Attributes;  # Will do cleaning
-use App::Doh::Functions    qw( set_element_focus );
+use App::Doh::Util         qw( set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
 use Class::Usul::Types     qw( Object );

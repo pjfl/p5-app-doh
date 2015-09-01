@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Idiomatic rename of Functions to Util
+          - Moving Role::Template to own distribution
+
 0.13.1    2015-08-31 18:23:12
           - Updated prereqs
 

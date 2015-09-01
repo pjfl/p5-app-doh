@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use App::Doh; our $VERSION = $App::Doh::VERSION;
 
-use App::Doh::Functions    qw( env_var );
+use App::Doh::Util         qw( env_var );
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL OK TRUE );
 use Class::Usul::Functions qw( class2appdir get_user throw );
 use Class::Usul::Types     qw( NonEmptySimpleStr NonZeroPositiveInt Object );

@@ -2,7 +2,7 @@ package App::Doh::Server;
 
 use namespace::autoclean;
 
-use App::Doh::Functions    qw( enhance env_var is_static );
+use App::Doh::Util         qw( enhance env_var is_static );
 use Class::Usul;
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( ensure_class_loaded );

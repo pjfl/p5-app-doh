@@ -1,7 +1,7 @@
 package App::Doh::Model::Documentation;
 
 use App::Doh::Attributes;  # Will do cleaning
-use App::Doh::Functions    qw( build_tree iterator localise_tree mtime );
+use App::Doh::Util         qw( build_tree iterator localise_tree mtime );
 use Class::Usul::Functions qw( first_char throw );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo;

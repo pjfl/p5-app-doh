@@ -2,14 +2,15 @@ package App::Doh::View::JSON;
 
 use namespace::autoclean;
 
+use App::Doh::Util         qw( stash_functions );
 use Class::Usul::Constants qw( FALSE );
 use Class::Usul::Types     qw( Object );
 use Encode                 qw( encode );
 use JSON::MaybeXS          qw( );
 use Moo;
 
-with q(Web::Components::Role);
-with q(App::Doh::Role::Templates);
+with 'Web::Components::Role';
+with 'App::Doh::Role::Templates';
 
 # Public attributes
 has '+moniker' => default => 'json';
@@ -17,6 +18,15 @@ has '+moniker' => default => 'json';
 # Private attributes
 has '_transcoder' => is => 'lazy', isa => Object,
    builder        => sub { JSON::MaybeXS->new( utf8 => FALSE ) };
+
+# Construction
+around 'render_template' => sub {
+   my ($orig, $self, $req, $stash) = @_;
+
+   stash_functions $self, $req, $stash;
+
+   return $orig->( $self, $req, $stash );
+};
 
 # Private functions
 my $_header = sub {
