@@ -11,7 +11,6 @@ lib/App/Doh/CLI.pm
 lib/App/Doh/Config.pm
 lib/App/Doh/Controller/Root.pm
 lib/App/Doh/Daemon.pm
-lib/App/Doh/Functions.pm
 lib/App/Doh/Markdown.pm
 lib/App/Doh/Model.pm
 lib/App/Doh/Model/Administration.pm
@@ -23,8 +22,8 @@ lib/App/Doh/Role/Authorization.pm
 lib/App/Doh/Role/Editor.pm
 lib/App/Doh/Role/PageConfiguration.pm
 lib/App/Doh/Role/PageLoading.pm
-lib/App/Doh/Role/Templates.pm
 lib/App/Doh/Server.pm
+lib/App/Doh/Util.pm
 lib/App/Doh/View/HTML.pm
 lib/App/Doh/View/HTML/Markdown.pm
 lib/App/Doh/View/HTML/Pod.pm

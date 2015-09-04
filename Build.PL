@@ -41,12 +41,12 @@ my $prereqs  = {
     'Plack::Middleware::Session' => '0.21',
     'Pod::Xhtml' => '1.61',
     'Starman' => '0.3000',
-    'Template' => '2.26',
     'Text::MultiMarkdown' => '1.000034',
     'Try::Tiny' => '0.22',
     'Type::Tiny' => '1.000004',
     'Unexpected' => 'v0.39.0',
     'Web::Components' => 'v0.4.0',
+    'Web::Components::Role::TT' => 'v0.2.0',
     'Web::ComposableRequest' => 'v0.3.0',
     'Web::Simple' => '0.030',
     'YAML::Tiny' => '1.67',
@@ -74,7 +74,8 @@ my $whimper  = sub { print {*STDOUT} $_[ 0 ]."\n"; exit 0 };
 my $stop     = sub {
    $testing->() or $whimper->( $_[ 0 ] );
    $prereqs->{build_requires} = { %{ $prereqs->{configure_requires} } };
-   $prereqs->{build_requires}->{ 'Test::Requires' } = 0.06;
+   $prereqs->{test_requires } = { %{ $prereqs->{configure_requires} } };
+   $prereqs->{test_requires }->{ 'Test::Requires' } = 0.06;
    delete $prereqs->{requires};
 };
 

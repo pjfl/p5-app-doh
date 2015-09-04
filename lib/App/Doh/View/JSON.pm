@@ -4,13 +4,13 @@ use namespace::autoclean;
 
 use App::Doh::Util         qw( stash_functions );
 use Class::Usul::Constants qw( FALSE );
-use Class::Usul::Types     qw( Object );
+use Class::Usul::Types     qw( CodeRef Object );
 use Encode                 qw( encode );
 use JSON::MaybeXS          qw( );
 use Moo;
 
 with 'Web::Components::Role';
-with 'App::Doh::Role::Templates';
+with 'Web::Components::Role::TT';
 
 # Public attributes
 has '+moniker' => default => 'json';
@@ -19,15 +19,6 @@ has '+moniker' => default => 'json';
 has '_transcoder' => is => 'lazy', isa => Object,
    builder        => sub { JSON::MaybeXS->new( utf8 => FALSE ) };
 
-# Construction
-around 'render_template' => sub {
-   my ($orig, $self, $req, $stash) = @_;
-
-   stash_functions $self, $req, $stash;
-
-   return $orig->( $self, $req, $stash );
-};
-
 # Private functions
 my $_header = sub {
    return [ 'Content-Type' => 'application/json', @{ $_[ 0 ] // [] } ];
@@ -35,10 +26,10 @@ my $_header = sub {
 
 # Public methods
 sub serialize {
-   my ($self, $req, $stash) = @_;
+   my ($self, $req, $stash) = @_; stash_functions $self, $req, $stash;
 
    my $content = defined $stash->{content} ? $stash->{content}
-               : { html => $self->render_template( $req, $stash ) };
+               : { html => $self->render_template( $stash ) };
    my $meta    = $stash->{page}->{meta} // {};
 
    $content->{ $_ } = $meta->{ $_ } for (keys %{ $meta });

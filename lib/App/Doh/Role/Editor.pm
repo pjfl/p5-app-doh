@@ -7,6 +7,7 @@ use App::Doh::Util         qw( make_id_from make_name_from mtime
 use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
 use Class::Usul::Functions qw( io is_member throw trim untaint_path );
 use Class::Usul::Time      qw( time2str );
+use Class::Usul::Types     qw( CodeRef );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
                                HTTP_REQUEST_ENTITY_TOO_LARGE );
@@ -16,16 +17,7 @@ use Moo::Role;
 requires qw( config find_node get_content initialise_stash
              invalidate_cache load_page log run_cmd );
 
-with 'App::Doh::Role::Templates';
-
-# Construction
-around 'render_template' => sub {
-   my ($orig, $self, $req, $stash) = @_;
-
-   stash_functions $self, $req, $stash;
-
-   return $orig->( $self, $req, $stash );
-};
+with 'Web::Components::Role::TT';
 
 # Private functions
 my $_append_suffix = sub {
@@ -131,7 +123,10 @@ sub create_file {
    my $stash    = { page => { author  => $req->username,
                               created => $created,
                               layout  => $conf->blank_template, }, };
-   my $content  = $self->render_template( $req, $stash );
+
+   stash_functions $self, $req, $stash;
+
+   my $content  = $self->render_template( $stash );
    my $path     = $new_node->{path};
 
    $path->assert_filepath->println( $content )->close;

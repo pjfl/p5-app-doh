@@ -226,7 +226,7 @@ sub show_node ($;$$) {
 }
 
 sub stash_functions ($$$) {
-   my ($app, $req, $stash) = @_; weaken( $req );
+   my ($app, $req, $stash) = @_; weaken $req;
 
    $stash->{is_member} = \&is_member;
    $stash->{loc      } = sub { $req->loc( @_ ) };
