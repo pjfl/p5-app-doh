@@ -6,15 +6,15 @@ use parent  'Exporter::Tiny';
 
 use Class::Usul;
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions qw( app_prefix env_prefix find_apphome first_char
-                               get_cfgfiles is_arrayref is_hashref is_member
-                               throw );
+use Class::Usul::Functions qw( app_prefix ensure_class_loaded find_apphome
+                               first_char get_cfgfiles is_arrayref is_hashref
+                               is_member throw );
 use Class::Usul::Time      qw( str2time time2str );
 use English                qw( -no_match_vars );
 use Scalar::Util           qw( weaken );
 use Unexpected::Functions  qw( Unspecified );
 
-our @EXPORT_OK = qw( build_navigation_list build_tree clone enhance env_var
+our @EXPORT_OK = qw( build_navigation_list build_tree clone enhance
                      is_static iterator localise_tree make_id_from
                      make_name_from mtime set_element_focus show_node
                      stash_functions );
@@ -137,8 +137,9 @@ sub enhance ($) {
    my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
 
    $bootconf->inflate_paths( $bootconf->projects );
+   ensure_class_loaded $bootconf->appclass;
 
-   my $port    = env_var( $bootconf->appclass, 'PORT' ) // $bootconf->port;
+   my $port    = $bootconf->appclass->env_var( 'PORT' ) // $bootconf->port;
    my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 
@@ -148,14 +149,8 @@ sub enhance ($) {
    return $attr;
 }
 
-sub env_var ($$;$) {
-   my ($class, $var, $v) = @_; my $k = (env_prefix $class)."_${var}";
-
-   return defined $v ? $ENV{ $k } = $v : $ENV{ $k };
-}
-
 sub is_static ($) {
-   return !env_var( $_[ 0 ], 'MAKE_STATIC' ) ? FALSE : TRUE;
+   return $_[ 0 ]->env_var( 'MAKE_STATIC' ) ? TRUE : FALSE;
 }
 
 sub iterator ($) {

@@ -2,7 +2,7 @@ package App::Doh::Server;
 
 use namespace::autoclean;
 
-use App::Doh::Util         qw( enhance env_var is_static );
+use App::Doh::Util         qw( enhance is_static );
 use Class::Usul;
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( ensure_class_loaded );
@@ -59,7 +59,7 @@ sub BUILD {
    my $conf   = $self->config;
    my $server = ucfirst( $ENV{PLACK_ENV} // NUL );
    my $class  = $conf->appclass; ensure_class_loaded $class;
-   my $port   = env_var $class, 'PORT';
+   my $port   = $class->env_var( 'PORT' );
    my $info   = 'v'.$class->VERSION; $port and $info .= " on port ${port}";
 
    is_static $class or $self->log->info( "${server} Server started ${info}" );

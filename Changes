@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Made env_var into a class method
           - Uses Web::Components::Role::TT
           - Idiomatic rename of Functions to Util
           - Moving Role::Template to own distribution

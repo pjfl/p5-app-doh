@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use App::Doh; our $VERSION = $App::Doh::VERSION;
 
-use App::Doh::Util         qw( env_var iterator );
+use App::Doh::Util         qw( iterator );
 use Archive::Tar::Constant qw( COMPRESS_GZIP );
 use Class::Usul::Constants qw( FALSE NUL OK TRUE );
 use Class::Usul::Functions qw( app_prefix class2appdir ensure_class_loaded io );
@@ -215,7 +215,7 @@ sub make_static : method {
 
    my $dest = io( $self->next_argv // $conf->static );
 
-   env_var $conf->appclass, 'MAKE_STATIC', TRUE;
+   $conf->appclass->env_var( 'MAKE_STATIC', TRUE );
    $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io $dest->rel2abs( $conf->root );
    $dest->exists or $dest->mkpath;

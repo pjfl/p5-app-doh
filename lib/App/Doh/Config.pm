@@ -5,11 +5,13 @@ use namespace::autoclean;
 use Class::Usul::Constants       qw( NUL TRUE );
 use Class::Usul::Functions       qw( app_prefix );
 use Data::Validation::Constants  qw( );
-use File::DataClass::Types       qw( ArrayRef Bool Directory File HashRef
-                                     NonEmptySimpleStr NonNumericSimpleStr
+use File::DataClass::Types       qw( ArrayRef Bool CodeRef Directory File
+                                     HashRef NonEmptySimpleStr
+                                     NonNumericSimpleStr
                                      NonZeroPositiveInt Object Path
                                      PositiveInt SimpleStr Str Undef );
-use Type::Utils                  qw( as coerce enum from subtype via );
+use Sys::Hostname                qw( hostname );
+use Type::Utils                  qw( enum );
 use Web::ComposableRequest::Util qw( extract_lang );
 use Moo;
 
@@ -19,9 +21,6 @@ Data::Validation::Constants->Exception_Class( 'Class::Usul::Exception' );
 Web::ComposableRequest::Constants->Exception_Class( 'Class::Usul::Exception' );
 
 my $BLOCK_MODES = enum 'Block_Modes' => [ 1, 2, 3 ];
-my $SECRET      = subtype as Object;
-
-coerce $SECRET, from Str, via { App::Doh::_Secret->new( value => $_ ) };
 
 # Private functions
 my $_to_array_of_hash = sub {
@@ -178,8 +177,9 @@ has 'root_mtime'      => is => 'lazy', isa => Path, coerce => TRUE,
 has 'scrubber'        => is => 'ro',   isa => Str,
    default            => '[^ +\-\./0-9@A-Z\\_a-z~]';
 
-has 'secret'          => is => 'lazy', isa => $SECRET, coerce => TRUE,
-   builder            => sub { 'hostname' };
+has 'secret'          => is => 'lazy', isa => Object, builder => sub {
+   App::Doh::_Secret->new( config => $_[ 0 ], value => $_[ 0 ]->_secret, ) },
+   init_arg           => undef;
 
 has 'serve_as_static' => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'css | favicon.ico | img | js | less';
@@ -229,27 +229,42 @@ has '_colours'        => is => 'ro',   isa => HashRef,
 has '_links'          => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'links';
 
+has '_secret'         => is => 'ro',   isa => CodeRef|NonEmptySimpleStr,
+   builder            => sub { sub { hostname } }, init_arg => 'secret';
+
 package # Hide from indexer
    App::Doh::_Secret;
 
-use Class::Usul::Constants qw( TRUE );
-use Class::Usul::Functions qw( io );
-use Class::Usul::Types     qw( NonEmptySimpleStr );
-use Sys::Hostname          qw( hostname );
+use Class::Usul::Constants   qw( EXCEPTION_CLASS TRUE );
+use Class::Usul::Crypt::Util qw( decrypt_from_config is_encrypted );
+use Class::Usul::Functions   qw( is_coderef );
+use Class::Usul::Types       qw( CodeRef HashRef NonEmptySimpleStr Object );
+use File::DataClass::IO      qw( io );
+use Unexpected::Functions    qw( throw );
 use Moo;
 
-use namespace::clean -except => [ 'hostname', 'meta' ];
-use overload '""' => sub { $_[ 0 ]->as_string }, fallback => 1;
+use namespace::clean -except => [ 'meta' ];
+use overload '""' => sub { $_[ 0 ]->evaluate }, fallback => TRUE;
 
-has 'value' => is => 'ro', isa => NonEmptySimpleStr, required => TRUE;
+has 'config' => is => 'ro', isa => HashRef|Object, required => TRUE,
+   weak_ref  => TRUE;
 
-sub as_string {
-   my $v = $_[ 0 ]->value;
+has 'value'  => is => 'ro', isa => CodeRef|NonEmptySimpleStr, required => TRUE;
 
-   return -x $v             ? qx( $v )
-        : -r $v             ? io( $v )->all
-        : exists $ENV{ $v } ? $ENV{ $v }
-                            : eval $v;
+sub evaluate {
+   my $self = shift; my $conf = $self->config; my $v = $self->value;
+
+   is_coderef $v and ($v = $v->() or throw 'Secret coderef is not true');
+
+   my $file = io $v;
+   my $raw  = (exists $ENV{ $v } and defined $ENV{ $v }  ) ? $ENV{ $v }
+            : ($file->exists     and $file->is_executable) ? qx( $v )
+            : $file->exists                                ? $file->all
+                                                           : $v;
+
+   (defined $raw and length $raw) or throw 'Secret not defined or no length';
+
+   return (is_encrypted $raw) ? decrypt_from_config( $conf, $raw ) : $raw;
 }
 
 1;

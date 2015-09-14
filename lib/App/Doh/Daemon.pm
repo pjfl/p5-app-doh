@@ -4,7 +4,6 @@ use namespace::autoclean;
 
 use App::Doh; our $VERSION = $App::Doh::VERSION;
 
-use App::Doh::Util         qw( env_var );
 use Class::Usul::Constants qw( EXCEPTION_CLASS NUL OK TRUE );
 use Class::Usul::Functions qw( class2appdir get_user throw );
 use Class::Usul::Types     qw( NonEmptySimpleStr NonZeroPositiveInt Object );
@@ -39,7 +38,7 @@ option 'server'  => is => 'ro', isa => NonEmptySimpleStr, format => 's',
 my $_get_listener_args = sub {
    my $self = shift;
    my $conf = $self->config;
-   my $port = env_var $conf->appclass, 'PORT', $self->port;
+   my $port = $conf->appclass->env_var( 'PORT', $self->port );
    my $args = {
       '--port'       => $port,
       '--server'     => $self->server,
@@ -62,7 +61,7 @@ my $_stdio_file = sub {
 my $_daemon = sub {
    my $self = shift; $PROGRAM_NAME = $self->app;
 
-   env_var $self->config->appclass, 'DEBUG', $self->debug;
+   $self->config->appclass->env_var( 'DEBUG', $self->debug );
    $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
    Plack::Runner->run( $self->$_get_listener_args );
    exit OK;
