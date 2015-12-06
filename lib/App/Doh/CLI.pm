@@ -242,7 +242,7 @@ sub post_install : method {
    my $localdir = $appldir->catdir( 'local' );
    my $appname  = class2appdir $conf->appclass;
    my $inc      = $localdir->catdir( 'lib', 'perl5'   );
-   my $profile  = $localdir->catdir( 'etc', 'profile' );
+   my $profile  = $localdir->catdir( 'var', 'etc', 'profile' );
    my $cmd      = [ $EXECUTABLE_NAME, '-I', "${inc}",
                     "-Mlocal::lib=${localdir}" ];
 

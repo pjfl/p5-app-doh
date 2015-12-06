@@ -81,7 +81,7 @@ has 'cdnjs'           => is => 'lazy', isa => HashRef,
 has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
    builder            => $_build_colours, init_arg => undef;
 
-has 'components'      => is => 'ro',   isa => HashRef, builder => sub { {
+has 'components'      => is => 'lazy', isa => HashRef, builder => sub { {
    'Model::User'      => {
       path            => $_[ 0 ]->file_root->catfile( 'users.json' ), }, } };
 

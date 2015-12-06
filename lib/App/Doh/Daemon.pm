@@ -71,8 +71,8 @@ my $_daemon = sub {
 my $_build_daemon_control = sub {
    my $self = shift; my $conf = $self->config; my $name = $conf->name;
 
-   my $init = catfile( NUL, 'etc', 'default', class2appdir $conf->appclass );
-   my $args = {
+   my $appdir = class2appdir $conf->appclass;
+   my $args   = {
       name         => blessed $self || $self,
       lsb_start    => '$syslog $remote_fs',
       lsb_stop     => '$syslog',
@@ -80,7 +80,7 @@ my $_build_daemon_control = sub {
       lsb_desc     => 'Manages the Documentation Server daemons',
       path         => $conf->pathname,
 
-      init_config  => $init,
+      init_config  => catfile( NUL, 'etc', 'default', $appdir ),
       init_code    => '# Init code',
 
       directory    => $conf->appldir,
@@ -94,7 +94,7 @@ my $_build_daemon_control = sub {
       fork         => 2,
    };
 
-   $conf->user and $args->{user} = $conf->user;
+   $conf->user and $args->{user} = $args->{group} = $conf->user;
 
    return Daemon::Control->new( $args );
 };
