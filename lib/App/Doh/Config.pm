@@ -90,6 +90,11 @@ has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'css/';
 
+has 'default_route'   => is => 'lazy', isa => NonEmptySimpleStr,
+   builder            => sub {
+      (my $mp = $_[ 0 ]->mount_point) =~ s{ \A / \z }{}mx;
+      return "${mp}/".$_[ 0 ]->static.'/'.$_[ 0 ]->locale.'/index.html' };
+
 has 'default_view'    => is => 'ro',   isa => SimpleStr, default => 'html';
 
 has 'deflate_types'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
@@ -149,7 +154,7 @@ has 'max_messages'    => is => 'ro',   isa => NonZeroPositiveInt, default => 3;
 has 'max_sess_time'   => is => 'ro',   isa => PositiveInt, default => 3_600;
 
 has 'mount_point'     => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => '/';
+   default            => '/doh';
 
 has 'no_index'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub {
@@ -399,6 +404,12 @@ Boolean default to true. Should the C<make_css> method compress it's output
 A non empty simple string that defaults to F<css/>. Relative URI path
 that locates the static CSS files
 
+=item C<default_route>
+
+A non empty simple string that default to F</doh/static/en/index.html> assuming
+that the L</mount_point> is F</doh>. What to redirect to for all paths outside
+the mount point
+
 =item C<default_view>
 
 Simple string that default to C<html>. The moniker of the view that will be
@@ -507,7 +518,7 @@ Time in seconds before a session expires. Defaults to 15 minutes
 
 =item C<mount_point>
 
-A non empty simple string that defaults to F</>. The root of the URI on
+A non empty simple string that defaults to F</doh>. The root of the URI on
 which the application is mounted
 
 =item C<no_index>

@@ -7,6 +7,7 @@ use Class::Usul;
 use Class::Usul::Constants qw( NUL TRUE );
 use Class::Usul::Functions qw( ensure_class_loaded );
 use Class::Usul::Types     qw( HashRef Plinth );
+use HTTP::Status           qw( HTTP_FOUND );
 use Plack::Builder;
 use Web::Simple;
 
@@ -22,15 +23,15 @@ with 'Web::Components::Loader';
 
 # Construction
 around 'to_psgi_app' => sub {
-  my ($orig, $self, @args) = @_; my $psgi_app = $orig->( $self, @args );
+   my ($orig, $self, @args) = @_; my $psgi_app = $orig->( $self, @args );
 
    my $conf = $self->config; my $static = $conf->serve_as_static;
 
    return builder {
+      enable 'ContentLength';
+      enable 'FixMissingBodyInRedirect';
+      enable 'ConditionalGET';
       mount $conf->mount_point => builder {
-         enable 'ContentLength';
-         enable 'FixMissingBodyInRedirect';
-         enable 'ConditionalGET';
          enable 'Deflater',
             content_type => $conf->deflate_types, vary_user_agent => TRUE;
          enable 'Static',
@@ -50,6 +51,9 @@ around 'to_psgi_app' => sub {
          enable 'LogDispatch', logger => $self->log;
          enable_if { $self->debug } 'Debug';
          $psgi_app;
+      };
+      mount '/' => builder {
+         sub { [ HTTP_FOUND, [ 'Location', $conf->default_route ], [] ] }
       };
    };
 };

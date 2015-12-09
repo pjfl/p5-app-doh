@@ -14,7 +14,7 @@
 [% IF page.mode != 'static' -%]
 [%    tip  = loc( 'Help pages for the application' ); uri = links.help_url -%]
 [% ELSE -%]
-[%    tip  = loc( 'Site Description' ); uri = '/' -%]
+[%    tip  = loc( 'Site Description' ); uri = config.mount_point _ '/' -%]
 [% END -%]
 
 [%    LinkWithTips( uri, 'windows', text, page.hint, tip ) -%]

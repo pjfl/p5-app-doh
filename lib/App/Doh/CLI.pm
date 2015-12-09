@@ -118,7 +118,9 @@ my $_copy_assets = sub {
 my $_make_localised_static = sub {
    my ($self, $dest, $tree, $locale, $make_dirs) = @_;
 
-   my $conf = $self->config; my $iter = iterator $tree;
+   my $conf = $self->config;
+   my $iter = iterator $tree;
+   my $mp   = $conf->mount_point.'/'; $mp =~ s{ // }{/}mx;
 
    while (my $node = $iter->()) {
       not $make_dirs and $node->{type} eq 'folder' and next;
@@ -128,7 +130,7 @@ my $_make_localised_static = sub {
 
       $path->exists and $path->stat->{mtime} > $node->{date} and next;
 
-      my $url  = '/'.$node->{url}."?locale=${locale}\;mode=static";
+      my $url  = $mp.$node->{url}."?locale=${locale}\;mode=static";
       my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
 
       $self->info( 'Writing [_1]', { args => [ "${locale}/".$node->{url} ] } );

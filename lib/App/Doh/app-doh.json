@@ -16,6 +16,5 @@
       [ "vim_keymap",     "codemirror/4.5.0/keymap/vim.min.js" ],
       [ "xml",            "codemirror/4.5.0/mode/xml/xml.min.js" ]
    ],
-   "mount_point": "/",
    "repo_url": "https://github.com/pjfl/p5-app-doh.git"
 }

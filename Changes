@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Default mount point /doh allows for redirect to static index
           - Fixed Config components needed to be lazy
           - Made env_var into a class method
           - Uses Web::Components::Role::TT

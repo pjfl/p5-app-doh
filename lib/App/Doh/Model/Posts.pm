@@ -65,8 +65,9 @@ sub localised_tree {
 sub posts {
    my $self = shift; my $filesys = $self->config->root_mtime;
 
-   if (not $filesys->exists
-       or  $filesys->stat->{mtime} > $_posts_tree_cache->{_mtime}) {
+   my $mtime = $filesys->exists ? $filesys->stat->{mtime} // 0 : 0;
+
+   if ($mtime == 0 or $mtime > $_posts_tree_cache->{_mtime}) {
       my $max_mtime = $_posts_tree_cache->{_mtime};
       my $conf      = $self->config;
       my $postd     = $conf->posts;
