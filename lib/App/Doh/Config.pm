@@ -249,15 +249,10 @@ use Unexpected::Functions    qw( throw );
 use Moo;
 
 use namespace::clean -except => [ 'meta' ];
-use overload '""' => sub { $_[ 0 ]->evaluate }, fallback => TRUE;
+use overload '""' => sub { $_[ 0 ]->value }, fallback => TRUE;
 
-has 'config' => is => 'ro', isa => HashRef|Object, required => TRUE,
-   weak_ref  => TRUE;
-
-has 'value'  => is => 'ro', isa => CodeRef|NonEmptySimpleStr, required => TRUE;
-
-sub evaluate {
-   my $self = shift; my $conf = $self->config; my $v = $self->value;
+my $_build_value = sub {
+   my $self = shift; my $conf = $self->config; my $v = $self->_value;
 
    is_coderef $v and ($v = $v->() or throw 'Secret coderef is not true');
 
@@ -270,7 +265,15 @@ sub evaluate {
    (defined $raw and length $raw) or throw 'Secret not defined or no length';
 
    return (is_encrypted $raw) ? decrypt_from_config( $conf, $raw ) : $raw;
-}
+};
+
+has 'config' => is => 'ro',   isa => HashRef|Object, builder => sub { {} };
+
+has 'value'  => is => 'lazy', isa => NonEmptySimpleStr,
+   builder   => $_build_value, init_arg => undef;
+
+has '_value' => is => 'ro',   isa => CodeRef|NonEmptySimpleStr,
+   init_arg  => 'value', required => TRUE;
 
 1;
 
@@ -706,7 +709,7 @@ None
 
 =over 3
 
-=item L<Class::Usul>
+=item L<Class::Usul::Config>
 
 =item L<File::DataClass>
 

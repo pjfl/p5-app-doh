@@ -46,7 +46,7 @@ around 'to_psgi_app' => sub {
             expires     => 7_776_000,
             httponly    => TRUE,
             path        => $conf->mount_point,
-            secret      => $conf->secret.NUL,
+            secret      => $conf->salt.$conf->secret,
             session_key => $conf->prefix.'_session';
          enable 'LogDispatch', logger => $self->log;
          enable_if { $self->debug } 'Debug';

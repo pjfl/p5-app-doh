@@ -1,5 +1,8 @@
 Revision history for App-Doh
 
+          - Added salt to secret in Server to_psgi_app
+          - Added generate-token method to CLI
+
 0.14.1    2015-12-09 01:28:40
           - Default mount point /doh allows for redirect to static index
           - Fixed Config components needed to be lazy

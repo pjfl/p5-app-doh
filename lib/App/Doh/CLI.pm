@@ -4,17 +4,19 @@ use namespace::autoclean;
 
 use App::Doh; our $VERSION = $App::Doh::VERSION;
 
-use App::Doh::Util         qw( iterator );
-use Archive::Tar::Constant qw( COMPRESS_GZIP );
-use Class::Usul::Constants qw( FALSE NUL OK TRUE );
-use Class::Usul::Functions qw( app_prefix class2appdir ensure_class_loaded io );
-use Class::Usul::Types     qw( Bool HashRef LoadableClass
-                               NonEmptySimpleStr Object PositiveInt );
-use English                qw( -no_match_vars );
-use File::DataClass::Types qw( Path );
+use App::Doh::Util           qw( iterator );
+use Archive::Tar::Constant   qw( COMPRESS_GZIP );
+use Class::Usul::Constants   qw( FALSE NUL OK TRUE );
+use Class::Usul::Crypt::Util qw( encrypt_for_config );
+use Class::Usul::Functions   qw( app_prefix class2appdir create_token
+                                 ensure_class_loaded io );
+use Class::Usul::Types       qw( Bool HashRef LoadableClass
+                                 NonEmptySimpleStr Object PositiveInt );
+use English                  qw( -no_match_vars );
+use File::DataClass::Types   qw( Path );
 use User::grent;
 use User::pwent;
-use Web::Components::Util  qw( load_components );
+use Web::Components::Util    qw( load_components );
 use Moo;
 use Class::Usul::Options;  # Requires around, has, and with
 
@@ -157,6 +159,14 @@ my $_write_theme = sub {
 };
 
 # Public methods
+sub generate_token : method {
+   my $self = shift;
+
+   $self->output( encrypt_for_config $self->config, create_token );
+
+   return OK;
+}
+
 sub make_css : method {
    my $self = shift;
    my $conf = $self->config;
@@ -326,6 +336,13 @@ A reference to the L<App::Doh::Model::Documentation> object
 =back
 
 =head1 Subroutines/Methods
+
+=head2 C<generate_token> - Create an encrytion token
+
+   bin/doh-cli generate-token
+
+Create and output an encrytion token suitable for use as the C<secret> attribute
+value in the configuration
 
 =head2 C<make_css> - Compile CSS files from LESS files
 
