@@ -20,24 +20,19 @@ use Web::Components::Util    qw( load_components );
 use Moo;
 use Class::Usul::Options;  # Requires around, has, and with
 
-extends 'Class::Usul::Programs';
+extends q(Class::Usul::Programs);
 
 # Attribute constructors
 my $_build_less = sub {
-   my $self = shift;
-   my $conf = $self->config;
-   my $incd = $conf->root->catdir( 'less' );
+   my $self = shift; my $conf = $self->config;
 
-   return $self->less_class->new( compress      => $conf->compress_css,
-                                  include_paths => [ "${incd}" ],
-                                  tmp_path      => $conf->tempdir, );
+   return $self->less_class->new
+      ( compress      =>   $conf->compress_css,
+        include_paths => [ $conf->root->catdir( 'less' )->pathname ],
+        tmp_path      =>   $conf->tempdir, );
 };
 
 # Public attributes
-option 'force'        => is => 'ro',   isa => Bool,
-   documentation      => 'Force the operation to take place',
-   default            => FALSE, short => 'f';
-
 option 'max_gen_time' => is => 'ro',   isa => PositiveInt, format => 'i',
    documentation      => 'Maximum generation run time in seconds',
    default            => 1_800, short => 'm';
@@ -60,10 +55,10 @@ has 'models'          => is => 'lazy', isa => HashRef[Object],
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
 
-   my $conf = $attr->{config}; my $prefix = app_prefix $conf->{appclass};
+   my $conf = $attr->{config}; $conf->{name} //= class2appdir $conf->{appclass};
 
-   $conf->{l10n_attributes}->{domains} = [ $prefix ];
-   $conf->{logfile} = "__LOGSDIR(${prefix}.log)__";
+   $conf->{l10n_domains} = [ $conf->{name} ];
+
    return $attr;
 };
 
@@ -120,26 +115,28 @@ my $_copy_assets = sub {
 my $_make_localised_static = sub {
    my ($self, $dest, $tree, $locale, $make_dirs) = @_;
 
-   my $conf = $self->config;
-   my $iter = iterator $tree;
-   my $mp   = $conf->mount_point.'/'; $mp =~ s{ // }{/}mx;
+   my $count  = 0;
+   my $conf   = $self->config;
+   my $drafts = $conf->drafts;
+   my $posts  = $conf->posts;
+   my $iter   = iterator $tree;
+   my $mp     = $conf->mount_point.'/'; $mp =~ s{ // }{/}mx;
 
    while (my $node = $iter->()) {
       not $make_dirs and $node->{type} eq 'folder' and next;
+      $node->{url} =~ m{ \A $drafts \b }mx and next;
+      $node->{url} =~ m{ \A $posts / $drafts \b }mx and next;
 
       my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
       my $path = io( [ $dest, @path ] )->assert_filepath;
-
-      $path->exists and $path->stat->{mtime} > $node->{date} and next;
-
       my $url  = $mp.$node->{url}."?locale=${locale}\;mode=static";
       my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
 
       $self->info( 'Writing [_1]', { args => [ "${locale}/".$node->{url} ] } );
-      $self->run_cmd( $cmd, { out => $path } );
+      $self->run_cmd( $cmd, { out => $path } ); $count++;
    }
 
-   return;
+   return $count;
 };
 
 my $_write_theme = sub {
@@ -159,14 +156,6 @@ my $_write_theme = sub {
 };
 
 # Public methods
-sub generate_token : method {
-   my $self = shift;
-
-   $self->output( encrypt_for_config $self->config, create_token );
-
-   return OK;
-}
-
 sub make_css : method {
    my $self = shift;
    my $conf = $self->config;
@@ -225,23 +214,23 @@ sub make_static : method {
       $self->info( 'Static page generation already in progress' ); return OK;
    }
 
-   my $dest = io( $self->next_argv // $conf->static );
+   my $dest = io( $self->next_argv // $conf->static ); my $count = 0;
 
    $conf->appclass->env_var( 'MAKE_STATIC', TRUE );
    $self->info( 'Generating static pages' );
    $dest->is_absolute or $dest = io $dest->rel2abs( $conf->root );
-   $dest->exists or $dest->mkpath;
-   $self->force and $dest->rmtree( { keep_root => TRUE } );
+   $dest->exists or $dest->mkpath; $dest->rmtree( { keep_root => TRUE } );
    $self->$_copy_assets( $dest );
 
    for my $locale ($models->{docs}->locales) {
       my $tree = $models->{docs}->localised_tree( $locale );
 
-      $self->$_make_localised_static( $dest, $tree, $locale, FALSE );
+      $count += $self->$_make_localised_static( $dest, $tree, $locale, FALSE );
       $tree = $models->{posts}->localised_tree( $locale );
-      $self->$_make_localised_static( $dest, $tree, $locale, TRUE );
+      $count += $self->$_make_localised_static( $dest, $tree, $locale, TRUE );
    }
 
+   $self->info( "Total pages generated ${count}" );
    $self->lock->reset( k => 'make_static' );
    return OK;
 }
@@ -329,20 +318,21 @@ Defines the following attributes;
 
 =over 3
 
-=item C<model>
+=item C<max_gen_time>
 
-A reference to the L<App::Doh::Model::Documentation> object
+Maximum generation run time in seconds. Short command line option id C<-m>
+
+=item C<skin>
+
+Name of the skin to operate on. Short command line option is C<-s>
+
+=item C<models>
+
+A hash reference to the containing the model object references
 
 =back
 
 =head1 Subroutines/Methods
-
-=head2 C<generate_token> - Create an encrytion token
-
-   bin/doh-cli generate-token
-
-Create and output an encrytion token suitable for use as the C<secret> attribute
-value in the configuration
 
 =head2 C<make_css> - Compile CSS files from LESS files
 

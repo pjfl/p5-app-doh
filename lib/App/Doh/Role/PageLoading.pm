@@ -2,7 +2,7 @@ package App::Doh::Role::PageLoading;
 
 use namespace::autoclean;
 
-use App::Doh::Util         qw( build_navigation_list clone mtime );
+use App::Doh::Util         qw( build_navigation clone mtime );
 use Class::Usul::Constants qw( FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
 use Class::Usul::Types     qw( HashRef );
@@ -71,18 +71,21 @@ sub initialise_page {
 {  my $cache //= {};
 
    sub invalidate_cache {
-      my ($self, $mtime) = @_;
+      my ($self, $mtime) = @_; my $file = $self->config->root_mtime;
 
       $cache = {}; $self->log->debug( 'Cache invalidated' );
-      $self->config->root_mtime->touch( $mtime );
+
+      if ($mtime) { $file->touch( $mtime ) }
+      else { $file->exists and $file->unlink }
+
       return;
    }
 
    sub navigation {
       my ($self, $req, $stash) = @_;
 
-      my $locale = $self->config->locale; # Always index config default language
-      my $root   = $self->config->file_root;
+      my $conf   = $self->config;
+      my $locale = $conf->locale; # Always index config default language
       my $node   = $self->localised_tree( $locale )
          or  throw 'Default locale [_1] has no document tree', [ $locale ],
                    rv => HTTP_NOT_FOUND;
@@ -92,7 +95,7 @@ sub initialise_page {
 
       (not $nav or mtime $node > $nav->{mtime})
          and $nav = $cache->{ $wanted }
-            = { list  => build_navigation_list( $root, $node, $ids, $wanted ),
+            = { list  => build_navigation( $conf, $node, $ids, $wanted ),
                 mtime => mtime( $node ), };
 
       return $nav->{list};

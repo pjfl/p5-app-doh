@@ -85,12 +85,11 @@ sub delete_file_action : Role(editor) {
 }
 
 sub docs_tree {
-   my $self = shift; my $filesys = $self->config->root_mtime;
+   my $self = shift; my $conf = $self->config; my $filesys = $conf->root_mtime;
 
    my $mtime = $filesys->exists ? $filesys->stat->{mtime} // 0 : 0;
 
    if ($mtime == 0 or $mtime > $_docs_tree_cache->{_mtime}) {
-      my $conf     = $self->config;
       my $no_index = join '|', @{ $conf->no_index };
       my $filter   = sub { not m{ (?: $no_index ) }mx };
       my $dir      = $conf->file_root->clone->filter( $filter );

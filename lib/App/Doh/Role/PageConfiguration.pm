@@ -31,13 +31,16 @@ around 'initialise_stash' => sub {
 
    $stash->{skin} = delete $stash->{prefs}->{skin};
 
+   my $links = $stash->{links} //= {};
+
    for my $k (@{ $conf->stash_attr->{links} }) {
-      $stash->{links}->{ $k } = $req->uri_for( $conf->$k() );
+      $links->{ $k } = $req->uri_for( $conf->$k() );
    }
 
-   $stash->{links}->{cdnjs   } = $conf->cdnjs; # TODO: Not a URI object ref
-   $stash->{links}->{base_uri} = $req->base;
-   $stash->{links}->{req_uri } = $req->uri;
+   $links->{cdnjs   } = $conf->cdnjs; # TODO: Not a URI object ref
+   $links->{base_uri} = $req->base;
+   $links->{req_uri } = $req->uri;
+   $links->{edit_uri} = $req->uri_for( $req->path, [], edit => TRUE );
 
    return $stash;
 };

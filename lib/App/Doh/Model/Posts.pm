@@ -63,25 +63,22 @@ sub localised_tree {
 }
 
 sub posts {
-   my $self = shift; my $filesys = $self->config->root_mtime;
+   my $self = shift; my $conf = $self->config; my $filesys = $conf->root_mtime;
 
    my $mtime = $filesys->exists ? $filesys->stat->{mtime} // 0 : 0;
 
    if ($mtime == 0 or $mtime > $_posts_tree_cache->{_mtime}) {
-      my $max_mtime = $_posts_tree_cache->{_mtime};
-      my $conf      = $self->config;
       my $postd     = $conf->posts;
       my $no_index  = join '|', grep { not m{ $postd }mx } @{ $conf->no_index };
+      my $max_mtime = $_posts_tree_cache->{_mtime};
 
       for my $locale (@{ $conf->locales }) {
-         my $dir = $conf->file_root
-                        ->catdir( $locale, $postd, { reverse => TRUE } )
-                        ->filter( sub { not m{ (?: $no_index ) }mx } );
+         my $lcache = $_posts_tree_cache->{ $locale } //= {};
+         my $dir    = $conf->file_root
+                           ->catdir( $locale, $postd, { reverse => TRUE } )
+                           ->filter( sub { not m{ (?: $no_index ) }mx } );
 
          $dir->exists or next;
-
-         my $lcache = $_posts_tree_cache->{ $locale } //= {};
-
          $lcache->{tree} = build_tree( $self->type_map, $dir, 1, 0, $postd );
          $lcache->{type} = 'folder';
          $self->$_chain_nodes( $lcache );

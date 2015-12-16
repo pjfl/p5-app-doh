@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use App::Doh::Util         qw( make_id_from make_name_from mtime
                                set_element_focus stash_functions );
-use Class::Usul::Constants qw( EXCEPTION_CLASS TRUE );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE TRUE );
 use Class::Usul::Functions qw( io is_member throw trim untaint_path );
 use Class::Usul::Time      qw( time2str );
 use Class::Usul::Types     qw( CodeRef );
@@ -21,7 +21,7 @@ with 'Web::Components::Role::TT';
 
 # Private functions
 my $_append_suffix = sub {
-   my $path = shift;
+   my $path = untaint_path $_[ 0 ];
 
    $path !~ m{ \. [m][k]?[d][n]? \z }mx and $path .= '.md';
 
@@ -31,6 +31,16 @@ my $_append_suffix = sub {
 my $_copy_element_value = sub {
    return [ "\$( 'upload-btn' ).addEvent( 'change', function( ev ) {",
             "   ev.stop(); \$( 'upload-path' ).value = this.value } )", ];
+};
+
+my $_make_draft = sub {
+   my ($conf, @pathname) = @_;
+
+   if ($pathname[ 0 ] eq $conf->posts) {
+      shift @pathname; return $conf->posts, $conf->drafts, @pathname;
+   }
+
+   return $conf->drafts, @pathname;
 };
 
 my $_prepare_path = sub {
@@ -72,14 +82,17 @@ my $_result_line = sub {
 
 # Private methods
 my $_new_node = sub {
-   my ($self, $req, $pathname) = @_; my $conf = $self->config;
+   my ($self, $locale, $pathname, $draft) = @_; my $conf = $self->config;
 
-   my @pathname = $_prepare_path->( $_append_suffix->( untaint_path $pathname));
-   my $path     = $conf->file_root->catfile( $req->locale, @pathname )->utf8;
+   my @pathname = $_prepare_path->( $_append_suffix->( $pathname ) );
+
+   $draft and @pathname = $_make_draft->( $conf, @pathname );
+
+   my $path     = $conf->file_root->catfile( $locale, @pathname )->utf8;
    my @filepath = map { make_id_from( $_ )->[ 0 ] } @pathname;
    my $url      = join '/', @filepath;
    my $id       = pop @filepath;
-   my $parent   = $self->find_node( $req->locale, \@filepath );
+   my $parent   = $self->find_node( $locale, \@filepath );
 
    $parent and $parent->{type} eq 'folder'
       and exists $parent->{tree}->{ $id }
@@ -118,7 +131,10 @@ sub create_file {
    my ($self, $req) = @_;
 
    my $conf     = $self->config;
-   my $new_node = $self->$_new_node( $req, $req->body_params->( 'pathname' ) );
+   my $params   = $req->body_params;
+   my $pathname = $params->( 'pathname' );
+   my $draft    = $params->( 'draft', { optional => TRUE } ) || FALSE;
+   my $new_node = $self->$_new_node( $req->locale, $pathname, $draft );
    my $created  = time2str '%Y-%m-%d %H:%M:%S %z', time, 'UTC';
    my $stash    = { page => { author  => $req->username,
                               created => $created,
@@ -189,7 +205,7 @@ sub rename_file {
    my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
    my $node     = $self->find_node( $req->locale, $old_path )
       or throw 'Cannot find document tree node to rename', rv => HTTP_NOT_FOUND;
-   my $new_node = $self->$_new_node( $req, $params->( 'pathname' ) );
+   my $new_node = $self->$_new_node( $req->locale, $params->( 'pathname' ) );
 
    $new_node->{path}->assert_filepath;
    $node->{path}->close->move( $new_node->{path} ); $_prune->( $node->{path} );

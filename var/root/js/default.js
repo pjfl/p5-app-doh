@@ -65,6 +65,7 @@ var Behaviour = new Class( {
       window.addEvent( 'load',   function() {
          this.load( opt.firstField ) }.bind( this ) );
 
+      // TODO: Add debounce
       window.addEvent( 'resize', function() { this.resize() }.bind( this ) );
    },
 

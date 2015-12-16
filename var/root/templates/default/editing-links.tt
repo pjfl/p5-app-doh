@@ -15,7 +15,7 @@
 [%    LinkWithTips( '#', class, loc( 'Upload' ), page.hint,
                     loc( 'Upload an asset file' ), 'upload-file' ) -%]
                <br>
-[%    LinkWithTips( links.req_uri _ '?edit=1', 'fade', loc( 'Edit' ),
+[%    LinkWithTips( links.edit_uri, 'fade', loc( 'Edit' ),
                     page.hint, loc( 'Edit the markdown for this page' ) ) -%]
                <br>
 [%    class = 'btn fade submit' -%]

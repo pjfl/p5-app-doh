@@ -24,6 +24,7 @@ lib/perl5
 local/*
 local.bak/*
 t/ipc_srlock*
+var/etc/app-doh.json
 var/logs
 var/run
 var/tmp
@@ -35,6 +36,7 @@ var/root/docs/en/01_Examples/*
 var/root/docs/en/10_Plack_Handbook/*
 var/root/docs/en/20_Air_Gapped_Computer.md
 var/root/docs/en/Projects
+var/root/docs/en/drafts
 var/root/docs/en/posts
 var/root/js/jekyll.js
 var/root/less/jekyll

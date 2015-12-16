@@ -42,7 +42,7 @@ my $_get_listener_args = sub {
    my $args = {
       '--port'       => $port,
       '--server'     => $self->server,
-      '--access-log' => $conf->logsdir->catfile( "access_${port}.log" ),
+      '--access-log' => $conf->logsdir->catfile( "access-${port}.log" ),
       '--app'        => $conf->binsdir->catfile( $self->app ), };
 
    for my $k (keys %{ $self->options }) {
@@ -104,6 +104,17 @@ has '_daemon_control' => is => 'lazy', isa => Object,
    builder            => $_build_daemon_control;
 
 # Construction
+# Construction
+around 'BUILDARGS' => sub {
+   my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );
+
+   my $conf = $attr->{config}; $conf->{name} //= class2appdir $conf->{appclass};
+
+   $conf->{l10n_domains} = [ $conf->{name} ];
+
+   return $attr;
+};
+
 around 'run' => sub {
    my ($orig, $self) = @_; my $daemon = $self->_daemon_control;
 
@@ -158,7 +169,7 @@ __END__
 
 =pod
 
-=encoding utf8
+=encoding utf-8
 
 =head1 Name
 

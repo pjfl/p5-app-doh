@@ -3,14 +3,15 @@ package App::Doh::Config;
 use namespace::autoclean;
 
 use Class::Usul::Constants       qw( NUL TRUE );
-use Class::Usul::Functions       qw( app_prefix );
+use Class::Usul::Crypt::Util     qw( decrypt_from_config encrypt_for_config );
+use Class::Usul::File;
+use Class::Usul::Functions       qw( app_prefix create_token );
 use Data::Validation::Constants  qw( );
 use File::DataClass::Types       qw( ArrayRef Bool CodeRef Directory File
                                      HashRef NonEmptySimpleStr
                                      NonNumericSimpleStr
                                      NonZeroPositiveInt Object Path
                                      PositiveInt SimpleStr Str Undef );
-use Sys::Hostname                qw( hostname );
 use Type::Utils                  qw( enum );
 use Web::ComposableRequest::Util qw( extract_lang );
 use Moo;
@@ -46,6 +47,22 @@ my $_build_links = sub {
    return $_to_array_of_hash->( $_[ 0 ]->_links, 'name', 'url' );
 };
 
+my $_build_secret = sub {
+   my $self = shift; my $file = $self->ctlfile; my $data = {}; my $token;
+
+   if ($file->exists) {
+      $data  = Class::Usul::File->data_load( paths => [ $file ] ) // {};
+      $token = decrypt_from_config $self, $data->{ 'secret' };
+   }
+
+   unless ($token) {
+      $data->{ 'secret' } = encrypt_for_config $self, $token = create_token;
+      Class::Usul::File->data_dump( { path => $file->assert, data => $data } );
+   }
+
+   return $token;
+};
+
 my $_build_user_home = sub {
    my $appldir = $_[ 0 ]->appldir; my $verdir = $appldir->basename;
 
@@ -56,11 +73,11 @@ my $_build_user_home = sub {
 # Public attributes
 has 'analytics'       => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'assets/',
-
 has 'assetdir'        => is => 'lazy', isa => Path, coerce => TRUE,
    builder            => sub { $_[ 0 ]->file_root->catfile( $_[ 0 ]->assets ) };
+
+has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'assets/',
 
 has 'auth_roles'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    default            => sub { [ qw( admin editor user ) ] };
@@ -106,6 +123,9 @@ has 'description'     => is => 'ro',   isa => SimpleStr,
 
 has 'docs_path'       => is => 'lazy', isa => Directory, coerce => TRUE,
    builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) };
+
+has 'drafts'          => is => 'ro',   isa => NonEmptySimpleStr,
+   default            => 'drafts';
 
 has 'extensions'      => is => 'ro',   isa => HashRef[ArrayRef],
    builder            => sub { {
@@ -182,9 +202,8 @@ has 'root_mtime'      => is => 'lazy', isa => Path, coerce => TRUE,
 has 'scrubber'        => is => 'ro',   isa => Str,
    default            => '[^ +\-\./0-9@A-Z\\_a-z~]';
 
-has 'secret'          => is => 'lazy', isa => Object, builder => sub {
-   App::Doh::_Secret->new( config => $_[ 0 ], value => $_[ 0 ]->_secret, ) },
-   init_arg           => undef;
+has 'secret'          => is => 'lazy', isa => NonEmptySimpleStr,
+   builder            => $_build_secret;
 
 has 'serve_as_static' => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'css | favicon.ico | img | js | less';
@@ -234,47 +253,6 @@ has '_colours'        => is => 'ro',   isa => HashRef,
 has '_links'          => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'links';
 
-has '_secret'         => is => 'ro',   isa => CodeRef|NonEmptySimpleStr,
-   builder            => sub { sub { hostname } }, init_arg => 'secret';
-
-package # Hide from indexer
-   App::Doh::_Secret;
-
-use Class::Usul::Constants   qw( EXCEPTION_CLASS TRUE );
-use Class::Usul::Crypt::Util qw( decrypt_from_config is_encrypted );
-use Class::Usul::Functions   qw( is_coderef );
-use Class::Usul::Types       qw( CodeRef HashRef NonEmptySimpleStr Object );
-use File::DataClass::IO      qw( io );
-use Unexpected::Functions    qw( throw );
-use Moo;
-
-use namespace::clean -except => [ 'meta' ];
-use overload '""' => sub { $_[ 0 ]->value }, fallback => TRUE;
-
-my $_build_value = sub {
-   my $self = shift; my $conf = $self->config; my $v = $self->_value;
-
-   is_coderef $v and ($v = $v->() or throw 'Secret coderef is not true');
-
-   my $file = io $v;
-   my $raw  = (exists $ENV{ $v } and defined $ENV{ $v }  ) ? $ENV{ $v }
-            : ($file->exists     and $file->is_executable) ? qx( $v )
-            : $file->exists                                ? $file->all
-                                                           : $v;
-
-   (defined $raw and length $raw) or throw 'Secret not defined or no length';
-
-   return (is_encrypted $raw) ? decrypt_from_config( $conf, $raw ) : $raw;
-};
-
-has 'config' => is => 'ro',   isa => HashRef|Object, builder => sub { {} };
-
-has 'value'  => is => 'lazy', isa => NonEmptySimpleStr,
-   builder   => $_build_value, init_arg => undef;
-
-has '_value' => is => 'ro',   isa => CodeRef|NonEmptySimpleStr,
-   init_arg  => 'value', required => TRUE;
-
 1;
 
 __END__
@@ -317,15 +295,15 @@ Defines the following attributes;
 A simple string that defaults to null. Unique Google Analytics registration
 code
 
-=item C<assets>
-
-A non empty simple string that defaults to F<assets/>. Relative URI path
-that locates the assets files uploaded by users
-
 =item C<assetdir>
 
 Defaults to F<var/root/docs/assets>. Path object for the directory
 containing user uploaded files
+
+=item C<assets>
+
+A non empty simple string that defaults to F<assets/>. Relative URI path
+that locates the assets files uploaded by users
 
 =item C<auth_roles>
 
@@ -432,6 +410,11 @@ value
 
 A lazily evaluated directory that defaults to F<var/root/docs>. The document
 root for the microformat content pages
+
+=item C<drafts>
+
+A non empty simple string. Prepended to the pathanme of files created in
+draft mode. Draft mode files are ignored by the static site generator
 
 =item C<extensions>
 

@@ -5,8 +5,8 @@ use App::Doh::Util         qw( set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
 use Class::Usul::Types     qw( Object );
-use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_I_AM_A_TEAPOT
-                               HTTP_UNAUTHORIZED HTTP_UNPROCESSABLE_ENTITY );
+use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED
+                               HTTP_UNPROCESSABLE_ENTITY );
 use Try::Tiny;
 use Unexpected::Functions  qw( Unspecified );
 use Moo;
@@ -19,18 +19,16 @@ has '+moniker' => default => 'admin';
 
 # Private methods
 my $_authenticate = sub {
-   my ($self, $username, $password) = @_; my ($authenticated, $user);
+   my ($self, $username, $password) = @_; my $authenticated;
 
    $username or throw Unspecified, [ 'user name' ],
                       rv => HTTP_EXPECTATION_FAILED;
    $password or throw Unspecified, [ 'password' ],
                       rv => HTTP_EXPECTATION_FAILED;
 
-   try   { $user = $self->users->find( $username ) }
-   catch {
-      throw 'User [_1] unknown: [_2]', [ $username, $_ ],
-            rv => HTTP_EXPECTATION_FAILED;
-   };
+   my $user = $self->users->find( $username )
+      or throw 'User [_1] unknown', [ $username ],
+               rv => HTTP_EXPECTATION_FAILED;
 
    $user->active or throw 'User [_1] account inactive', [ $username ],
                           rv => HTTP_UNAUTHORIZED;
@@ -61,7 +59,7 @@ sub delete_user_action : Role(admin) {
    my $username = $req->body_params->( 'username' );
 
    $username eq $req->username
-      and throw 'Cannot self terminate', rv => HTTP_I_AM_A_TEAPOT;
+      and throw 'Cannot self terminate', rv => HTTP_UNPROCESSABLE_ENTITY;
    $self->users->delete( $username );
 
    my $location = $req->uri_for( 'admin' );
@@ -74,7 +72,7 @@ sub generate_static_action : Role(admin) {
    my ($self, $req) = @_;
 
    # Need to use system to avoid defunct process
-   my $opts = { async => TRUE, use_system => TRUE, };
+   my $opts = { async => TRUE, err => 'out', use_system => TRUE, };
    my $cli  = $self->config->binsdir->catfile( 'doh-cli' );
    my $cmd  = [ "${cli}", 'make_static' ];
 

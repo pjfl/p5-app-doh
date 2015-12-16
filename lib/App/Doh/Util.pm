@@ -6,18 +6,18 @@ use parent  'Exporter::Tiny';
 
 use Class::Usul;
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions qw( app_prefix ensure_class_loaded find_apphome
-                               first_char get_cfgfiles is_arrayref is_hashref
-                               is_member throw );
+use Class::Usul::Functions qw( class2appdir ensure_class_loaded
+                               find_apphome first_char get_cfgfiles
+                               is_arrayref is_hashref is_member throw );
 use Class::Usul::Time      qw( str2time time2str );
 use English                qw( -no_match_vars );
 use Scalar::Util           qw( weaken );
 use Unexpected::Functions  qw( Unspecified );
 
-our @EXPORT_OK = qw( build_navigation_list build_tree clone enhance
+our @EXPORT_OK = qw( build_navigation build_tree clone enhance
                      is_static iterator localise_tree make_id_from
-                     make_name_from mtime set_element_focus show_node
-                     stash_functions );
+                     make_name_from mtime set_element_focus
+                     show_node stash_functions );
 
 # Private functions
 my $extension2format = sub {
@@ -27,7 +27,10 @@ my $extension2format = sub {
 };
 
 my $get_tip_text = sub {
-   my ($root, $node) = @_; my $text = $node->{path}->abs2rel( $root );
+   my ($root, $node) = @_;
+
+   my $path = $node->{path} or return NUL;
+   my $text = $path->abs2rel( $root );
 
    $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ \. .+ \z }{}mx;
    $text =~ s{ [/] }{ / }gmx;     $text =~ s{ [_] }{ }gmx;
@@ -49,18 +52,25 @@ my $make_tuple = sub {
 };
 
 # Public functions
-sub build_navigation_list ($$$$) {
-   my ($root, $tree, $ids, $wanted) = @_;
+sub build_navigation ($$$$) {
+   my ($conf, $tree, $ids, $wanted) = @_;
 
    my $iter = iterator( $tree ); my @nav = ();
 
+   my $drafts = $conf->drafts; my $posts = $conf->posts;
+
    while (defined (my $node = $iter->())) {
       $node->{id} eq 'index' and next;
+      exists $node->{no_index} and $node->{no_index} and next;
+      is_static( $conf->appclass )
+         and $node->{url} =~ m{ \A $drafts \b }mx and next;
+      is_static( $conf->appclass )
+         and $node->{url} =~ m{ \A $posts / $drafts \b }mx and next;
 
       my $link = clone( $node ); delete $link->{tree};
 
       $link->{class}  = $node->{type} eq 'folder' ? 'folder-link' : 'file-link';
-      $link->{tip  }  = $get_tip_text->( $root, $node );
+      $link->{tip  }  = $get_tip_text->( $conf->file_root, $node );
       $link->{depth} -= 2;
 
       if (defined $ids->[ 0 ] and $ids->[ 0 ] eq $node->{id}) {
@@ -81,11 +91,11 @@ sub build_tree {
 
    my $fcount = 0; my $max_mtime = 0; my $tree = {}; $depth++;
 
-   for my $path ($dir->all) {
+   for my $path (grep { defined $_->stat } $dir->all) {
       my ($id, $pref) =  @{ make_id_from( $path->utf8->filename ) };
       my  $name       =  make_name_from( $id );
       my  $url        =  $url_base ? "${url_base}/${id}" : $id;
-      my  $mtime      =  $path->stat->{mtime};
+      my  $mtime      =  $path->stat->{mtime} // 0;
       my  $node       =  $tree->{ $id } = {
           date        => $mtime,
           depth       => $depth,
@@ -128,9 +138,9 @@ sub enhance ($) {
    my $conf = shift;
    my $attr = { config => { %{ $conf } } }; $conf = $attr->{config};
 
-   $conf->{appclass    } or  throw Unspecified, [ 'application class' ];
+   $conf->{appclass    } //= 'App::Doh';
    $attr->{config_class} //= $conf->{appclass}.'::Config';
-   $conf->{name        } //= app_prefix   $conf->{appclass};
+   $conf->{name        } //= class2appdir $conf->{appclass};
    $conf->{home        } //= find_apphome $conf->{appclass}, $conf->{home};
    $conf->{cfgfiles    } //= get_cfgfiles $conf->{appclass}, $conf->{home};
 
@@ -143,9 +153,9 @@ sub enhance ($) {
    my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
    my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
 
-   $conf->{cfgfiles} = get_cfgfiles $conf->{appclass}, $cfgdirs;
-   $conf->{l10n_attributes}->{domains} = [ $conf->{name} ];
-   $conf->{file_root} = $docs;
+   $conf->{cfgfiles    } = get_cfgfiles $conf->{appclass}, $cfgdirs;
+   $conf->{l10n_domains} = [ $conf->{name} ];
+   $conf->{file_root   } = $docs;
    return $attr;
 }
 
