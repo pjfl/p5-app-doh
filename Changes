@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Merged docs path config into main file
+          - Moved users.json to ctrldir
           - Switch log and po filenames to class2appdir appclass
           - Randomised secret generation
 

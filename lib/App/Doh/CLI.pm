@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 use App::Doh; our $VERSION = $App::Doh::VERSION;
 
-use App::Doh::Util           qw( iterator );
+use App::Doh::Util           qw( is_draft iterator );
 use Archive::Tar::Constant   qw( COMPRESS_GZIP );
 use Class::Usul::Constants   qw( FALSE NUL OK TRUE );
 use Class::Usul::Crypt::Util qw( encrypt_for_config );
@@ -106,7 +106,7 @@ my $_copy_assets = sub {
       $_deep_copy->( $root->catdir( $conf->css ), $dest );
    }
 
-   $_deep_copy->( $conf->file_root->catdir( $conf->assets ), $dest );
+   $_deep_copy->( $conf->assetdir, $dest );
    $_deep_copy->( $root->catdir( $conf->images ), $dest, $unwanted_images );
    $_deep_copy->( $root->catdir( $conf->js     ), $dest, $unwanted_js );
    return;
@@ -115,17 +115,14 @@ my $_copy_assets = sub {
 my $_make_localised_static = sub {
    my ($self, $dest, $tree, $locale, $make_dirs) = @_;
 
-   my $count  = 0;
-   my $conf   = $self->config;
-   my $drafts = $conf->drafts;
-   my $posts  = $conf->posts;
-   my $iter   = iterator $tree;
-   my $mp     = $conf->mount_point.'/'; $mp =~ s{ // }{/}mx;
+   my $count = 0;
+   my $conf  = $self->config;
+   my $iter  = iterator $tree;
+   my $mp    = $conf->mount_point.'/'; $mp =~ s{ // }{/}mx;
 
    while (my $node = $iter->()) {
       not $make_dirs and $node->{type} eq 'folder' and next;
-      $node->{url} =~ m{ \A $drafts \b }mx and next;
-      $node->{url} =~ m{ \A $posts / $drafts \b }mx and next;
+      is_draft( $conf, $node->{url} ) and next;
 
       my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
       my $path = io( [ $dest, @path ] )->assert_filepath;

@@ -15,7 +15,7 @@ with    q(App::Doh::Role::PageConfiguration);
 has '+moniker'    => default => 'help';
 
 has 'excluding'   => is => 'ro', isa => ArrayRef, builder => sub {
-   [ qw( Attributes Auth Functions Markdown Model Role Session View ) ] };
+   [ qw( Attributes Auth Markdown Model Role Session Util View ) ] };
 
 # Private attributes
 has '_navigation' => is => 'lazy', isa => ArrayRef, builder => sub {

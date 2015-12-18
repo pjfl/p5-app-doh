@@ -1,6 +1,9 @@
 {
+   "analytics": "UA-XXXXXXXX-XX",
    "brand": "app.png",
    "cdn":   "http://cdnjs.cloudflare.com/ajax/libs/",
+   "float": true,
+   "font": "http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100",
    "jslibs": [
       [ "codemirror",     "codemirror/4.5.0/codemirror.min.js" ],
       [ "continuelist",   "codemirror/4.5.0/addon/edit/continuelist.min.js" ],
@@ -16,5 +19,15 @@
       [ "vim_keymap",     "codemirror/4.5.0/keymap/vim.min.js" ],
       [ "xml",            "codemirror/4.5.0/mode/xml/xml.min.js" ]
    ],
-   "repo_url": "https://github.com/pjfl/p5-app-doh.git"
+   "links": {
+      "Built Using Perl": "http://www.perl.org",
+      "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
+      "Github Repo": "https://github.com/pjfl/p5-app-doh.git",
+      "Issues/Wishlist": "http://github.com/pjfl/p5-app-doh/issues",
+      "Markdown Syntax": "http://daringfireball.net/projects/markdown/syntax"
+   },
+   "locales": [ "en", "de" ],
+   "repo_url": "https://github.com/pjfl/p5-app-doh.git",
+   "title": "Doh!",
+   "twitter": [ "perl" ]
 }

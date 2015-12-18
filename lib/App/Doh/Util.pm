@@ -14,7 +14,7 @@ use English                qw( -no_match_vars );
 use Scalar::Util           qw( weaken );
 use Unexpected::Functions  qw( Unspecified );
 
-our @EXPORT_OK = qw( build_navigation build_tree clone enhance
+our @EXPORT_OK = qw( build_navigation build_tree clone enhance is_draft
                      is_static iterator localise_tree make_id_from
                      make_name_from mtime set_element_focus
                      show_node stash_functions );
@@ -51,21 +51,16 @@ my $make_tuple = sub {
    return [ 0, $is_folder ? $sorted_keys->( $node->{tree} ) : [], $node, ];
 };
 
+
 # Public functions
 sub build_navigation ($$$$) {
    my ($conf, $tree, $ids, $wanted) = @_;
 
    my $iter = iterator( $tree ); my @nav = ();
 
-   my $drafts = $conf->drafts; my $posts = $conf->posts;
-
    while (defined (my $node = $iter->())) {
       $node->{id} eq 'index' and next;
-      exists $node->{no_index} and $node->{no_index} and next;
-      is_static( $conf->appclass )
-         and $node->{url} =~ m{ \A $drafts \b }mx and next;
-      is_static( $conf->appclass )
-         and $node->{url} =~ m{ \A $posts / $drafts \b }mx and next;
+      is_static( $conf->appclass ) and is_draft( $conf, $node->{url} ) and next;
 
       my $link = clone( $node ); delete $link->{tree};
 
@@ -143,20 +138,18 @@ sub enhance ($) {
    $conf->{name        } //= class2appdir $conf->{appclass};
    $conf->{home        } //= find_apphome $conf->{appclass}, $conf->{home};
    $conf->{cfgfiles    } //= get_cfgfiles $conf->{appclass}, $conf->{home};
+   $conf->{l10n_domains} //= [ $conf->{name} ];
 
-   my $bootstrap = Class::Usul->new( $attr ); my $bootconf = $bootstrap->config;
-
-   $bootconf->inflate_paths( $bootconf->projects );
-   ensure_class_loaded $bootconf->appclass;
-
-   my $port    = $bootconf->appclass->env_var( 'PORT' ) // $bootconf->port;
-   my $docs    = $bootconf->projects->{ $port } // $bootconf->docs_path;
-   my $cfgdirs = [ $conf->{home}, -d $docs ? $docs : () ];
-
-   $conf->{cfgfiles    } = get_cfgfiles $conf->{appclass}, $cfgdirs;
-   $conf->{l10n_domains} = [ $conf->{name} ];
-   $conf->{file_root   } = $docs;
    return $attr;
+}
+
+sub is_draft ($$) {
+   my ($conf, $url) = @_; my $drafts = $conf->drafts; my $posts = $conf->posts;
+
+   $url =~ m{ \A $drafts \b }mx and return TRUE;
+   $url =~ m{ \A $posts / $drafts \b }mx and return TRUE;
+
+   return FALSE;
 }
 
 sub is_static ($) {

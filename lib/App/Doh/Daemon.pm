@@ -34,16 +34,30 @@ option 'server'  => is => 'ro', isa => NonEmptySimpleStr, format => 's',
    documentation => 'Name of the Plack engine to use',
    builder       => sub { $_[ 0 ]->config->server }, short => 's';
 
+option 'workers' => is => 'ro', isa => NonZeroPositiveInt, format => 'i',
+   documentation => 'Number of workers to start in pre-forking servers',
+   builder       => sub { $_[ 0 ]->config->workers }, short => 'w';
+
 # Private methods
 my $_get_listener_args = sub {
    my $self = shift;
    my $conf = $self->config;
-   my $port = $conf->appclass->env_var( 'PORT', $self->port );
-   my $args = {
-      '--port'       => $port,
-      '--server'     => $self->server,
-      '--access-log' => $conf->logsdir->catfile( "access-${port}.log" ),
-      '--app'        => $conf->binsdir->catfile( $self->app ), };
+   my $logs = $conf->logsdir;
+   my $args = { '--app'    => $conf->binsdir->catfile( $self->app ),
+                '--server' => $self->server, };
+
+   if ($self->server eq 'FCGI') {
+      $args->{ '--access-log' } = $logs->catfile( 'access.log' );
+      $args->{ '--listen'     } = $conf->tempdir->catfile( 'fastcgi.sock' );
+      $args->{ '--nprocs'     } = $self->workers;
+   }
+   else {
+      $conf->appclass->env_var( 'PORT', my $port = $self->port );
+      $args->{ '--access-log' } = $logs->catfile( 'access-${port}.log' );
+      $args->{ '--port'       } = $port;
+
+      $self->server eq 'Starman' and $args->{ '--workers' } = $self->workers;
+   }
 
    for my $k (keys %{ $self->options }) {
       $args->{ "--${k}" } = $self->options->{ $k };

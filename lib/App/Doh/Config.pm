@@ -100,7 +100,7 @@ has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
 
 has 'components'      => is => 'lazy', isa => HashRef, builder => sub { {
    'Model::User'      => {
-      path            => $_[ 0 ]->file_root->catfile( 'users.json' ), }, } };
+      path            => $_[ 0 ]->ctrldir->catfile( 'users.json' ), }, } };
 
 has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 
@@ -121,9 +121,6 @@ has 'deflate_types'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
 has 'description'     => is => 'ro',   isa => SimpleStr,
    default            => 'Site Description';
 
-has 'docs_path'       => is => 'lazy', isa => Directory, coerce => TRUE,
-   builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) };
-
 has 'drafts'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'drafts';
 
@@ -133,7 +130,7 @@ has 'extensions'      => is => 'ro',   isa => HashRef[ArrayRef],
       pod             => [ qw( pl pm pod ) ], } };
 
 has 'file_root'       => is => 'lazy', isa => Directory, coerce => TRUE,
-   builder            => sub { $_[ 0 ]->docs_path };
+   builder            => sub { $_[ 0 ]->root->catdir( 'docs' ) };
 
 has 'font'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
@@ -245,6 +242,8 @@ has 'user'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'user_home'       => is => 'lazy', isa => Path, coerce => TRUE,
    builder            => $_build_user_home;
+
+has 'workers'         => is => 'ro',   isa => NonZeroPositiveInt, default => 5;
 
 # Private attributes
 has '_colours'        => is => 'ro',   isa => HashRef,
@@ -406,11 +405,6 @@ deflate in L<Plack> middleware
 A simple string that defaults to null. The HTML meta attributes description
 value
 
-=item C<docs_path>
-
-A lazily evaluated directory that defaults to F<var/root/docs>. The document
-root for the microformat content pages
-
 =item C<drafts>
 
 A non empty simple string. Prepended to the pathanme of files created in
@@ -424,7 +418,8 @@ render
 
 =item C<file_root>
 
-The project's document root. Lazily evaluated it defaults to C<docs_path>
+The project's document root.  A lazily evaluated directory that defaults to
+F<var/root/docs>. The document root for the microformat content pages
 
 =item C<font>
 
@@ -677,6 +672,11 @@ to running as this user when it forks into the background
 
 The home directory of the user who owns the files and directories in the
 the application
+
+=item C<workers>
+
+A non zero positive integer. The number of processes to start when running
+under a pre-forking server. Defaults to 5
 
 =back
 
