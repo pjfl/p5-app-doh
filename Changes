@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+0.15.1    2015-12-18 16:25:27
           - Merged docs path config into main file
           - Moved users.json to ctrldir
           - Switch log and po filenames to class2appdir appclass

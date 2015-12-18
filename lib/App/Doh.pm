@@ -2,7 +2,7 @@ package App::Doh;
 
 use 5.010001;
 use strictures;
-use version; our $VERSION = qv( sprintf '0.14.%d', q$Rev: 4 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.15.%d', q$Rev: 1 $ =~ /\d+/gmx );
 
 use Class::Usul::Functions  qw( env_prefix );
 
@@ -37,7 +37,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.14.$Rev: 4 $ of L<App::Doh>
+This documents version v0.15.$Rev: 1 $ of L<App::Doh>
 
 =head1 Description
 
@@ -60,7 +60,13 @@ the current request
 
 =head1 Subroutines/Methods
 
-None
+=head2 C<env_var>
+
+   $value = App::Doh->env_var( 'name', 'value' );
+
+Class method which is an accessor / mutator for the environment variables
+used by this application. Providing a value is optional always returns the
+current value
 
 =head1 Diagnostics
 

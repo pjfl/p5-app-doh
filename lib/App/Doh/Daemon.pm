@@ -223,11 +223,19 @@ The port number for the server to listen on
 
 The name of the L<Plack> engine used by the server
 
+=item C<workers>
+
+The number of worker processes to start in pre-forking servers. Defaults to 5
+
 =back
 
 =head1 Subroutines/Methods
 
-Defines the following methods
+Defines the following methods;
+
+=head2 C<BUILDARGS>
+
+Constructor signature processing
 
 =head2 C<get_init_file> - Dump SYSV initialisation script to stdout
 

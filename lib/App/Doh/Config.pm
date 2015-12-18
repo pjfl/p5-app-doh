@@ -407,7 +407,7 @@ value
 
 =item C<drafts>
 
-A non empty simple string. Prepended to the pathanme of files created in
+A non empty simple string. Prepended to the pathname of files created in
 draft mode. Draft mode files are ignored by the static site generator
 
 =item C<extensions>
