@@ -53,7 +53,7 @@ my $_get_listener_args = sub {
    }
    else {
       $conf->appclass->env_var( 'PORT', my $port = $self->port );
-      $args->{ '--access-log' } = $logs->catfile( 'access-${port}.log' );
+      $args->{ '--access-log' } = $logs->catfile( "access-${port}.log" );
       $args->{ '--port'       } = $port;
 
       $self->server eq 'Starman' and $args->{ '--workers' } = $self->workers;
@@ -101,7 +101,7 @@ my $_build_daemon_control = sub {
       program      => sub { shift; $self->$_daemon( @_ ) },
       program_args => [],
 
-      pid_file     => $conf->rundir->catfile( "${name}_".$self->port.'.pid' ),
+      pid_file     => $conf->rundir->catfile( "${name}.pid" ),
       stderr_file  => $self->$_stdio_file( 'err' ),
       stdout_file  => $self->$_stdio_file( 'out' ),
 
@@ -117,7 +117,6 @@ my $_build_daemon_control = sub {
 has '_daemon_control' => is => 'lazy', isa => Object,
    builder            => $_build_daemon_control;
 
-# Construction
 # Construction
 around 'BUILDARGS' => sub {
    my ($orig, $self, @args) = @_; my $attr = $orig->( $self, @args );

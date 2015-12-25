@@ -47,7 +47,6 @@ my $prereqs  = {
     'Unexpected' => 'v0.43.0',
     'Web::Components' => 'v0.5.0',
     'Web::Components::Role::TT' => 'v0.4.0',
-    'Web::ComposableRequest' => 'v0.4.0',
     'Web::Simple' => '0.030',
     'YAML::Tiny' => '1.67',
     'local::lib' => '2.000014',

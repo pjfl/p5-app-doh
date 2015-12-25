@@ -74,7 +74,7 @@ my $_build_user_home = sub {
 has 'analytics'       => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'assetdir'        => is => 'lazy', isa => Path, coerce => TRUE,
-   builder            => sub { $_[ 0 ]->file_root->catfile( $_[ 0 ]->assets ) };
+   builder            => sub { $_[ 0 ]->file_root->catdir( $_[ 0 ]->assets ) };
 
 has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'assets/',

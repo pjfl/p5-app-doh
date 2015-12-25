@@ -39,6 +39,8 @@ t/08memory_leak.t
 t/10test_script.t
 t/20user.t
 t/boilerplate.pm
+var/etc/dockerfile
+var/etc/nginx.conf
 var/etc/users.json
 var/locale/de/LC_MESSAGES/app-doh.po
 var/locale/en/LC_MESSAGES/app-doh.po

@@ -25,7 +25,6 @@ requires "Type::Tiny" => "1.000004";
 requires "Unexpected" => "v0.43.0";
 requires "Web::Components" => "v0.5.0";
 requires "Web::Components::Role::TT" => "v0.4.0";
-requires "Web::ComposableRequest" => "v0.4.0";
 requires "Web::Simple" => "0.030";
 requires "YAML::Tiny" => "1.67";
 requires "local::lib" => "2.000014";
