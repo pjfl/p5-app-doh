@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Fixed renaming posts
           - Fixed configuration assetdir attribute default value
           - Fixed daemon access log and pid file names
 

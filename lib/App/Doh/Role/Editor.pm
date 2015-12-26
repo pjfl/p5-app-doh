@@ -176,6 +176,8 @@ sub dialog {
    my $params =  $req->query_params;
    my $name   =  $params->( 'name' );
    my $stash  =  $self->initialise_stash( $req );
+   my $links  =  $stash->{links};
+   my $postd  =  $self->config->posts;
    my $page   =  $stash->{page} = $self->load_page( $req, {
       layout  => "${name}-file",
       meta    => { id => $params->( 'id' ), }, } );
@@ -184,8 +186,10 @@ sub dialog {
       $page->{literal_js} = set_element_focus "${name}-file", 'pathname';
    }
    elsif ($name eq 'rename') {
-      $page->{literal_js} = set_element_focus "${name}-file", 'pathname';
-      $page->{old_path  } = $params->( 'val' );
+      $page->{literal_js } = set_element_focus "${name}-file", 'pathname';
+      $page->{old_path   } = $params->( 'val' );
+      $links->{rename_uri} = $page->{old_path} =~ m{ \A $postd }mx
+                           ? $req->uri_for( $postd ) : $links->{base_uri};
    }
    elsif ($name eq 'search') {
       $page->{literal_js} = set_element_focus "${name}-file", 'query';
@@ -203,6 +207,9 @@ sub rename_file {
 
    my $params   = $req->body_params;
    my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
+
+   $old_path->[ 0 ] eq $self->config->posts and shift @{ $old_path };
+
    my $node     = $self->find_node( $req->locale, $old_path )
       or throw 'Cannot find document tree node to rename', rv => HTTP_NOT_FOUND;
    my $new_node = $self->$_new_node( $req->locale, $params->( 'pathname' ) );
