@@ -19,6 +19,9 @@
       [ "vim_keymap",     "codemirror/4.5.0/keymap/vim.min.js" ],
       [ "xml",            "codemirror/4.5.0/mode/xml/xml.min.js" ]
    ],
+   "l10n_attributes": {
+      "gettext_catagory": ""
+   },
    "links": {
       "Built Using Perl": "http://www.perl.org",
       "Download": "https://github.com/pjfl/p5-app-doh/archive/master.zip",
