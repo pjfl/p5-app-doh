@@ -65,6 +65,8 @@ __END__
 
 =pod
 
+=encoding utf-8
+
 =head1 NAME
 
 doh-localenv - Set environment to use a local library of Perl modules
@@ -76,9 +78,10 @@ doh-localenv - Set environment to use a local library of Perl modules
    use File::Spec;
 
    BEGIN {
-      my $path = File::Spec->catfile( $Bin, 'doh-localenv' );
+      my $bind = $Bin; $bind =~ m{ \A ([^\$%&\*;<>\`|]+) \z }mx and $bind = $1;
+      my $path = File::Spec->catfile( $bind, 'doh-localenv' );
 
-      do $path or die $EVAL_ERROR || "Path ${path} not done\n";
+      -f $path and (do $path or die $EVAL_ERROR || "Path ${path} not done\n");
    }
 
 =head1 DESCRIPTION
@@ -124,7 +127,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2015 Peter Flanigan
+Copyright (c) 2016 Peter Flanigan
 
 This is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

@@ -21,7 +21,7 @@ __END__
 
 =pod
 
-=encoding utf8
+=encoding utf-8
 
 =head1 NAME
 
@@ -90,7 +90,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2015 Peter Flanigan
+Copyright (c) 2016 Peter Flanigan
 
 This is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

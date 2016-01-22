@@ -7,26 +7,12 @@ use Moo;
 
 extends q(App::Doh::Model);
 with    q(App::Doh::Role::PageConfiguration);
-with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::PageLoading);
+with    q(App::Doh::Role::Authorization);
 with    q(App::Doh::Role::Editor);
+with    q(App::Doh::Role::RSS);
 
 has '+moniker' => default => 'posts';
-
-# Private package variables
-my $_posts_tree_cache = { _mtime => 0, };
-
-# Private methods
-my $_chain_nodes = sub {
-   my ($self, $tree) = @_; my $iter = iterator $tree; my $prev;
-
-   while (defined (my $node = $iter->())) {
-      ($node->{type} eq 'folder' or $node->{id} eq 'index') and next;
-      $prev and $prev->{next} = $node; $node->{prev} = $prev; $prev = $node;
-   }
-
-   return;
-};
 
 # Construction
 around 'load_page' => sub {
@@ -46,7 +32,26 @@ around 'load_page' => sub {
    return $page;
 };
 
+# Private package variables
+my $_posts_tree_cache = { _mtime => 0, };
+
+# Private methods
+my $_chain_nodes = sub {
+   my ($self, $tree) = @_; my $iter = iterator $tree; my $prev;
+
+   while (defined (my $node = $iter->())) {
+      ($node->{type} eq 'folder' or $node->{id} eq 'index') and next;
+      $prev and $prev->{next} = $node; $node->{prev} = $prev; $prev = $node;
+   }
+
+   return;
+};
+
 # Public methods
+sub base_uri {
+   return $_[ 1 ]->uri_for( $_[ 0 ]->config->posts );
+}
+
 sub create_file_action : Role(editor) {
    return shift->create_file( @_ );
 }
@@ -59,10 +64,22 @@ sub delete_file_action : Role(editor) {
 }
 
 sub localised_tree {
-   return localise_tree $_[ 0 ]->posts, $_[ 1 ];
+   return localise_tree $_[ 0 ]->tree_root, $_[ 1 ];
 }
 
-sub posts {
+sub rename_file_action : Role(editor) {
+   return shift->rename_file( @_ );
+}
+
+sub rss_feed : Role(anon) {
+   return shift->get_rss_feed( @_ );
+}
+
+sub save_file_action : Role(editor) {
+   return shift->save_file( @_ );
+}
+
+sub tree_root {
    my $self = shift; my $conf = $self->config; my $filesys = $conf->root_mtime;
 
    my $mtime = $filesys->exists ? $filesys->stat->{mtime} // 0 : 0;
@@ -90,14 +107,6 @@ sub posts {
    }
 
    return $_posts_tree_cache;
-}
-
-sub rename_file_action : Role(editor) {
-   return shift->rename_file( @_ );
-}
-
-sub save_file_action : Role(editor) {
-   return shift->save_file( @_ );
 }
 
 1;

@@ -4,7 +4,6 @@ use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Util         qw( set_element_focus );
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( throw );
-use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_UNAUTHORIZED
                                HTTP_UNPROCESSABLE_ENTITY );
 use Try::Tiny;
@@ -68,23 +67,7 @@ sub delete_user_action : Role(admin) {
    return { redirect => { location => $location, message => $message } };
 }
 
-sub generate_static_action : Role(admin) {
-   my ($self, $req) = @_;
-
-   # Need to use system to avoid defunct process
-   my $opts = { async => TRUE, err => 'out', use_system => TRUE, };
-   my $cli  = $self->config->binsdir->catfile( 'doh-cli' );
-   my $cmd  = [ "${cli}", 'make_static' ];
-
-   $self->log->debug( $self->run_cmd( $cmd, $opts )->out );
-
-   my $message = [ 'Static page generation started in the background by [_1]',
-                   $req->username ];
-
-   return { redirect => { location => $req->uri, message => $message } };
-}
-
-sub get_dialog : Role(anon) {
+sub dialog : Role(anon) {
    my ($self, $req) = @_;
 
    my $params  =  $req->query_params;
@@ -106,6 +89,22 @@ sub get_dialog : Role(anon) {
 
    $stash->{view} = 'json';
    return $stash;
+}
+
+sub generate_static_action : Role(admin) {
+   my ($self, $req) = @_;
+
+   # Need to use system to avoid defunct process
+   my $opts = { async => TRUE, err => 'out', use_system => TRUE, };
+   my $cli  = $self->config->binsdir->catfile( 'doh-cli' );
+   my $cmd  = [ "${cli}", 'make_static' ];
+
+   $self->log->debug( $self->run_cmd( $cmd, $opts )->out );
+
+   my $message = [ 'Static page generation started in the background by [_1]',
+                   $req->username ];
+
+   return { redirect => { location => $req->uri, message => $message } };
 }
 
 sub get_form : Role(admin) {
@@ -267,7 +266,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2015 Peter Flanigan. All rights reserved
+Copyright (c) 2016 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>

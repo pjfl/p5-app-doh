@@ -2,15 +2,11 @@ package App::Doh::Role::PageConfiguration;
 
 use namespace::autoclean;
 
-use Class::Usul::Constants qw( FALSE NUL TRUE );
-use Class::Usul::Types     qw( Object );
+use Class::Usul::Constants qw( TRUE );
 use Try::Tiny;
 use Moo::Role;
 
-requires qw( components config initialise_stash load_page log );
-
-has 'users' => is => 'lazy', isa => Object,
-   builder  => sub { $_[ 0 ]->components->{user} };
+requires qw( config initialise_stash load_page log );
 
 # Construction
 around 'initialise_stash' => sub {
@@ -59,16 +55,11 @@ around 'load_page' => sub {
 
    my $url = $page->{mode} eq 'online' ? $req->base : $req->uri_for( 'index' );
 
-   my $editing = $req->query_params->( 'edit', { optional => TRUE } ) // FALSE;
-
    $page->{homepage_url}   = $url;
-   $page->{editing     } //= $editing;
    $page->{form_name   } //= 'markdown';
    $page->{hint        } //= $req->loc( 'Hint' );
    $page->{locale      } //= $req->locale;
    $page->{wanted      } //= join '/', @{ $req->uri_params->() // [] };
-
-   $page->{editing} and $page->{user} = $self->users->find( $req->username );
 
    return $page;
 };

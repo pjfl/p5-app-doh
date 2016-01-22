@@ -99,6 +99,12 @@ has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
    builder            => $_build_colours, init_arg => undef;
 
 has 'components'      => is => 'lazy', isa => HashRef, builder => sub { {
+   'Model::Documentation' => {
+      feed_subtitle   => 'Recent updates to the documentation set',
+      feed_title      => 'Documentation Feed', },
+   'Model::Posts'     => {
+      feed_subtitle   => 'Recents news and blog posts',
+      feed_title      => 'Posts Feed', },
    'Model::User'      => {
       path            => $_[ 0 ]->ctrldir->catfile( 'users.json' ), }, } };
 
@@ -720,7 +726,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2015 Peter Flanigan. All rights reserved
+Copyright (c) 2016 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>

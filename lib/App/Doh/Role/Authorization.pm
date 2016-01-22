@@ -5,12 +5,16 @@ use namespace::autoclean;
 
 use Class::Usul::Constants qw( NUL );
 use Class::Usul::Functions qw( is_member throw );
+use Class::Usul::Types     qw( Object );
 use HTTP::Status           qw( HTTP_FORBIDDEN HTTP_NOT_FOUND
                                HTTP_UNAUTHORIZED );
 use Scalar::Util           qw( blessed );
 use Moo::Role;
 
-requires qw( config execute users );
+requires qw( components config execute );
+
+has 'users' => is => 'lazy', isa => Object,
+   builder  => sub { $_[ 0 ]->components->{user} };
 
 # Private functions
 my $_list_roles_of = sub {

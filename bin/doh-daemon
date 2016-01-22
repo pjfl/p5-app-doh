@@ -22,7 +22,7 @@ __END__
 
 =pod
 
-=encoding utf8
+=encoding utf-8
 
 =head1 NAME
 
@@ -32,11 +32,11 @@ doh-daemon - Control the Documentation Server daemon
 
 =over 3
 
-=item B<doh-daemon> I<start | stop | restart | status | show_warnings>
+=item B<doh-daemon> I<start | stop | restart | status | show-warnings>
 
 Start / stop the documentation server
 
-=item B<doh-daemon> I<get_init_file>
+=item B<doh-daemon> I<get-init-file>
 
 Prints a SYSV initialisation script to stdout
 
@@ -44,7 +44,7 @@ Prints a SYSV initialisation script to stdout
 
 Display man page / method help  / usage strings
 
-=item B<doh-daemon> I<list_methods>
+=item B<doh-daemon> I<list-methods>
 
 Lists the methods available in this program
 
@@ -78,11 +78,19 @@ Turn debugging on
 
 Set the port number for the server to listen on
 
+=item B<-s --server>
+
+Name of the Plack engine to use
+
+=item B<-w --workers>
+
+Number of workers to start in pre-forking servers
+
 =back
 
 =head1 DIAGNOSTICS
 
-Prints errors to stderr
+Prints errors to standard error
 
 =head1 EXIT STATUS
 
@@ -114,7 +122,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2015 Peter Flanigan
+Copyright (c) 2016 Peter Flanigan
 
 This is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

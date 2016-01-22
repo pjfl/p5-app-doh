@@ -9,17 +9,19 @@ has '+moniker' => default => 'root';
 sub dispatch_request {
    sub (POST + /admin  | /admin/*  + ?*) { [ 'admin', 'from_request', @_ ] },
    sub (GET  + /admin  | /admin/*  + ?*) { [ 'admin', 'get_form',     @_ ] },
-   sub (POST + /assets + *file~    + ?*) { [ 'docs',  'upload_asset', @_ ] },
-   sub (GET  + /dialog             + ?*) { [ 'docs',  'get_dialog',   @_ ] },
+   sub (POST + /assets + *file~    + ?*) { [ 'docs',  'upload',       @_ ] },
+   sub (GET  + /dialog             + ?*) { [ 'docs',  'dialog',       @_ ] },
    sub (POST + /login  | /logout   + ?*) { [ 'admin', 'from_request', @_ ] },
    sub (GET  + /pod    | /pod/**   + ?*) { [ 'help',  'get_content',  @_ ] },
    sub (POST + /posts  | /posts/** + ?*) { [ 'posts', 'from_request', @_ ] },
+   sub (GET  + /posts/rss          + ?*) { [ 'posts', 'rss_feed',     @_ ] },
    sub (GET  + /posts  | /posts/** + ?*) { [ 'posts', 'get_content',  @_ ] },
-   sub (GET  + /search             + ?*) { [ 'docs',  'search_tree',  @_ ] },
+   sub (GET  + /rss                + ?*) { [ 'docs',  'rss_feed',     @_ ] },
+   sub (GET  + /search             + ?*) { [ 'docs',  'search',       @_ ] },
    sub (POST + /user   | /user/*   + ?*) { [ 'admin', 'from_request', @_ ] },
-   sub (GET  + /user   | /user/*   + ?*) { [ 'admin', 'get_dialog',   @_ ] },
+   sub (GET  + /user   | /user/*   + ?*) { [ 'admin', 'dialog',       @_ ] },
    sub (POST + /       | /**       + ?*) { [ 'docs',  'from_request', @_ ] },
-   sub (GET  + /       | /index    + ?*) { [ 'docs',  'get_index',    @_ ] },
+   sub (GET  + /       | /index    + ?*) { [ 'docs',  'index',        @_ ] },
    sub (GET  + /**                 + ?*) { [ 'docs',  'get_content',  @_ ] };
 }
 
@@ -101,7 +103,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2015 Peter Flanigan. All rights reserved
+Copyright (c) 2016 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>

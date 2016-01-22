@@ -21,6 +21,7 @@ README
 README.pod
 debian/*
 lib/perl5
+lib/App/Doh/app-doh_local.json
 local/*
 local.bak/*
 t/ipc_srlock*

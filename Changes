@@ -1,6 +1,9 @@
 Revision history for App-Doh
 
+          - POD updates to script files
           - Switch to using SysV locking
+            You will need to alter the default configuration to run
+            on mswin32
           - Remove unecessary directory in locale file paths
           - Fixed renaming posts
           - Fixed configuration assetdir attribute default value

@@ -10,8 +10,8 @@ use HTML::GenerateUtil     qw( escape_html );
 use Web::Components::Util  qw( load_components );
 use Moo;
 
-with 'Web::Components::Role';
-with 'Web::Components::Role::TT';
+with q(Web::Components::Role);
+with q(Web::Components::Role::TT);
 
 # Public attributes
 has '+moniker'   => default => 'html';
@@ -33,7 +33,7 @@ has 'type_map'   => is => 'lazy', isa => HashRef, builder => sub {
 
 # Private functions
 my $_header = sub {
-   return [ 'Content-Type' => 'text/html', @{ $_[ 0 ] || [] } ];
+   return [ 'Content-Type' => 'text/html', @{ $_[ 0 ] // [] } ];
 };
 
 # Public methods

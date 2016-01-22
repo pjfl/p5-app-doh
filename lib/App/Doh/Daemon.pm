@@ -22,19 +22,19 @@ extends q(Class::Usul::Programs);
 has '+config_class' => default => 'App::Doh::Config';
 
 # Public attributes
-option 'app'     => is => 'ro', isa => NonEmptySimpleStr, format => 's',
+option 'app'     => is => 'ro',   isa => NonEmptySimpleStr, format => 's',
    documentation => 'Name of the PSGI file',
    default       => 'doh-server';
 
-option 'port'    => is => 'ro', isa => NonZeroPositiveInt, format => 'i',
+option 'port'    => is => 'lazy', isa => NonZeroPositiveInt, format => 'i',
    documentation => 'Port number for the server to listen on',
    builder       => sub { $_[ 0 ]->config->port }, short => 'p';
 
-option 'server'  => is => 'ro', isa => NonEmptySimpleStr, format => 's',
+option 'server'  => is => 'lazy', isa => NonEmptySimpleStr, format => 's',
    documentation => 'Name of the Plack engine to use',
    builder       => sub { $_[ 0 ]->config->server }, short => 's';
 
-option 'workers' => is => 'ro', isa => NonZeroPositiveInt, format => 'i',
+option 'workers' => is => 'lazy', isa => NonZeroPositiveInt, format => 'i',
    documentation => 'Number of workers to start in pre-forking servers',
    builder       => sub { $_[ 0 ]->config->workers }, short => 'w';
 
@@ -302,7 +302,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2015 Peter Flanigan. All rights reserved
+Copyright (c) 2016 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>

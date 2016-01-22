@@ -62,6 +62,7 @@ local.bak
 # Avoid other crap
 TAGS
 Thumbs.db
+\bapp-doh_local.json
 \bipc_srlock
 \bvar/etc/META.json
 \bvar/etc/app-doh.json

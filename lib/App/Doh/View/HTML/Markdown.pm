@@ -41,6 +41,8 @@ sub serialize {
       $page->{ $_ } = $data->{ $_ } for (keys %{ $data });
    }
 
+   $page->{filter} and $markdown = $page->{filter}->( $self, $markdown );
+
    return $self->tm->markdown( $markdown );
 }
 

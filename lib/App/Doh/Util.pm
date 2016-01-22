@@ -29,8 +29,7 @@ my $extension2format = sub {
 my $get_tip_text = sub {
    my ($root, $node) = @_;
 
-   my $path = $node->{path} or return NUL;
-   my $text = $path->abs2rel( $root );
+   my $path = $node->{path} or return NUL; my $text = $path->abs2rel( $root );
 
    $text =~ s{ \A [a-z]+ / }{}mx; $text =~ s{ \. .+ \z }{}mx;
    $text =~ s{ [/] }{ / }gmx;     $text =~ s{ [_] }{ }gmx;

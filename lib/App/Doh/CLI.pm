@@ -18,7 +18,7 @@ use User::grent;
 use User::pwent;
 use Web::Components::Util    qw( load_components );
 use Moo;
-use Class::Usul::Options;  # Requires around, has, and with
+use Class::Usul::Options;
 
 extends q(Class::Usul::Programs);
 
@@ -407,7 +407,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2015 Peter Flanigan. All rights reserved
+Copyright (c) 2016 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>

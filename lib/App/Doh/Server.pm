@@ -70,8 +70,8 @@ sub BUILD {
    # Stop tests failing after a restart
    is_static $class or $conf->root_mtime->unlink;
    # Take the hit at application startup not on first request
-   $self->models->{docs }->docs_tree;
-   $self->models->{posts}->posts;
+   $self->models->{docs }->tree_root;
+   $self->models->{posts}->tree_root;
    is_static $class or $self->log->info( 'Document tree loaded' );
    return;
 }
@@ -180,7 +180,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 License and Copyright
 
-Copyright (c) 2015 Peter Flanigan. All rights reserved
+Copyright (c) 2016 Peter Flanigan. All rights reserved
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself. See L<perlartistic>

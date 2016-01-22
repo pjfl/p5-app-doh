@@ -4,10 +4,9 @@ use namespace::autoclean;
 
 use App::Doh::Util         qw( make_id_from make_name_from mtime
                                set_element_focus stash_functions );
-use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE TRUE );
+use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
 use Class::Usul::Functions qw( io is_member throw trim untaint_path );
 use Class::Usul::Time      qw( time2str );
-use Class::Usul::Types     qw( CodeRef );
 use HTTP::Status           qw( HTTP_EXPECTATION_FAILED HTTP_NOT_FOUND
                                HTTP_PRECONDITION_FAILED
                                HTTP_REQUEST_ENTITY_TOO_LARGE );
@@ -15,9 +14,22 @@ use Unexpected::Functions  qw( Unspecified );
 use Moo::Role;
 
 requires qw( config find_node get_content initialise_stash
-             invalidate_cache load_page log run_cmd );
+             invalidate_cache load_page log run_cmd users );
 
 with 'Web::Components::Role::TT';
+
+# Construction
+around 'load_page' => sub {
+   my ($orig, $self, $req, @args) = @_;
+
+   my $page    = $orig->( $self, $req, @args );
+   my $editing = $req->query_params->( 'edit', { optional => TRUE } ) // FALSE;
+
+   $page->{editing} //= $editing;
+   $page->{editing} and $page->{user} = $self->users->find( $req->username );
+
+   return $page;
+};
 
 # Private functions
 my $_append_suffix = sub {
@@ -170,7 +182,7 @@ sub delete_file {
    return { redirect => { location => $req->base, message => $message } };
 }
 
-sub dialog {
+sub get_dialog {
    my ($self, $req) = @_;
 
    my $params =  $req->query_params;
@@ -241,13 +253,13 @@ sub save_file {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-sub search {
+sub search_files {
    my ($self, $req) = @_;
 
    return $self->get_content( $req, $self->$_search_results( $req ) );
 }
 
-sub upload {
+sub upload_file {
    my ($self, $req) = @_; my $conf = $self->config;
 
    $req->has_upload and my $upload = $req->upload

@@ -21,7 +21,7 @@ __END__
 
 =pod
 
-=encoding utf8
+=encoding utf-8
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ Run the specified method with the given options
 
 Display man page / method help  / usage strings
 
-=item B<doh-cli> B<list_methods>
+=item B<doh-cli> B<list-methods>
 
 Lists the methods available in this program
 
@@ -67,6 +67,14 @@ The name of the method to call in the L<App::Doh::CLI> class
 =item B<-D>
 
 Turn debugging on
+
+=item B<-m --max-gen-time>
+
+Maximum generation run time in seconds
+
+=item B<-s --skin>
+
+Name of the skin to operate on
 
 =back
 
@@ -105,7 +113,7 @@ Peter Flanigan, C<< <pjfl@cpan.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (c) 2015 Peter Flanigan
+Copyright (c) 2016 Peter Flanigan
 
 This is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
