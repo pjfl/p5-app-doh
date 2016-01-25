@@ -48,6 +48,7 @@ my $_copy_element_value = sub {
 my $_make_draft = sub {
    my ($conf, @pathname) = @_;
 
+   # TODO: Editor should not contain references to posts
    if ($pathname[ 0 ] eq $conf->posts) {
       shift @pathname; return $conf->posts, $conf->drafts, @pathname;
    }
@@ -217,10 +218,11 @@ sub get_dialog {
 sub rename_file {
    my ($self, $req) = @_;
 
+   my $conf     = $self->config;
    my $params   = $req->body_params;
    my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
 
-   $old_path->[ 0 ] eq $self->config->posts and shift @{ $old_path };
+   $old_path->[ 0 ] eq $conf->posts and shift @{ $old_path };
 
    my $node     = $self->find_node( $req->locale, $old_path )
       or throw 'Cannot find document tree node to rename', rv => HTTP_NOT_FOUND;
@@ -230,7 +232,7 @@ sub rename_file {
    $node->{path}->close->move( $new_node->{path} ); $_prune->( $node->{path} );
    $self->invalidate_cache;
 
-   my $rel_path = $node->{path}->abs2rel( $self->config->file_root );
+   my $rel_path = $node->{path}->abs2rel( $conf->file_root );
    my $message  = [ 'File [_1] renamed by [_2]', $rel_path, $req->username ];
    my $location = $req->uri_for( $new_node->{url} );
 

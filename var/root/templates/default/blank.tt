@@ -1,5 +1,5 @@
 ---
 author: [% page.author %]
-date: [% page.created %]
+created: [% page.created %]
 ---
 Page intentionally created blank

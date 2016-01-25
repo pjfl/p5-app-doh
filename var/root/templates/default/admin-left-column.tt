@@ -42,7 +42,7 @@
 [%    FormWithButton( links.req_uri, class, loc( 'Generate' ),
                       'markdown', loc( 'Generate the static pages' ),
                       'generate-static', 'generate_static' ) -%]
-[%    href = links.base_uri _ 'static/' _ page.language _ '/index.html' -%]
+[%    href = links.base_uri _ config.static _ '/' _ page.language _ '/index.html' -%]
 [%    LinkWithTips( href, 'btn fade', loc( 'View Static' ), page.hint,
                     loc( 'View the static pages' ) ) -%]
 [%    FormWithButton( uri_for( 'logout' ), class, loc( 'Logout' ),

@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Added RSS feeds
           - POD updates to script files
           - Switch to using SysV locking
             You will need to alter the default configuration to run

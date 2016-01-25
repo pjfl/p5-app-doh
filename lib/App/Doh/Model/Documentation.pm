@@ -2,6 +2,7 @@ package App::Doh::Model::Documentation;
 
 use App::Doh::Attributes;  # Will do cleaning
 use App::Doh::Util         qw( build_tree iterator localise_tree mtime );
+use Class::Usul::Constants qw( NUL );
 use Class::Usul::Functions qw( first_char throw );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo;
@@ -24,6 +25,16 @@ around 'initialise_page' => sub {
    $page->{docs_url} = $self->docs_url( $req, $locale );
 
    return $page;
+};
+
+around 'initialise_stash' => sub {
+   my ($orig, $self, $req, @args) = @_;
+
+   my $stash = $orig->( $self, $req, @args );
+
+   $stash->{links}->{rss_uri} = $req->uri_for( 'rss', { extension => '.xml' } );
+
+   return $stash;
 };
 
 around 'load_page' => sub {
@@ -75,7 +86,7 @@ my $_docs_url = sub {
 
 # Public methods
 sub base_uri {
-   return $_[ 1 ]->base;
+   return $_[ 1 ]->uri_for( NUL, $_[ 2 ] );
 }
 
 sub create_file_action : Role(editor) {

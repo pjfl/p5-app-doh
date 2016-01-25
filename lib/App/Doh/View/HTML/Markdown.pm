@@ -36,7 +36,7 @@ sub serialize {
    if ($yaml) {
       my $data = $self->yt->read_string( $yaml )->[ 0 ];
 
-      exists $data->{date} and $data->{date} = str2time $data->{date};
+      exists $data->{created} and $data->{created} = str2time $data->{created};
 
       $page->{ $_ } = $data->{ $_ } for (keys %{ $data });
    }

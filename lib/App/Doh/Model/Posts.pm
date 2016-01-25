@@ -15,6 +15,17 @@ with    q(App::Doh::Role::RSS);
 has '+moniker' => default => 'posts';
 
 # Construction
+around 'initialise_stash' => sub {
+   my ($orig, $self, $req, @args) = @_;
+
+   my $stash = $orig->( $self, $req, @args ); my $postd = $self->config->posts;
+
+   $stash->{links}->{rss_uri}
+      = $req->uri_for( "${postd}/rss", { extension => '.xml' } );
+
+   return $stash;
+};
+
 around 'load_page' => sub {
    my ($orig, $self, $req, @args) = @_;
 
@@ -49,7 +60,7 @@ my $_chain_nodes = sub {
 
 # Public methods
 sub base_uri {
-   return $_[ 1 ]->uri_for( $_[ 0 ]->config->posts );
+   return $_[ 1 ]->uri_for( $_[ 0 ]->config->posts, $_[ 2 ] );
 }
 
 sub create_file_action : Role(editor) {

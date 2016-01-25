@@ -85,6 +85,12 @@ my $_init_file_list = sub {
           io[ NUL, 'etc', 'rc0.d', 'K01'.$_[ 0 ] ];
 };
 
+my $_make_path = sub {
+   my ($dest, $locale, $url, $extn) = @_;
+
+   return io[ $dest, $locale, (split m{ / }mx, $url.$extn) ];
+};
+
 # Private methods
 my $_copy_assets = sub {
    my ($self, $dest) = @_; my $conf = $self->config; my $root = $conf->root;
@@ -112,26 +118,45 @@ my $_copy_assets = sub {
    return;
 };
 
-my $_make_localised_static = sub {
-   my ($self, $dest, $tree, $locale, $make_dirs) = @_;
+my $_create_page = sub {
+   my ($self, $locale, $node_url, $path) = @_;
 
-   my $count = 0;
-   my $conf  = $self->config;
-   my $iter  = iterator $tree;
-   my $mp    = $conf->mount_point.'/'; $mp =~ s{ // }{/}mx;
+   my $conf = $self->config;
+   my $mp   = $conf->mount_point.'/'; $mp =~ s{ // }{/}mx;
+   my $url  = "${mp}${node_url}?locale=${locale}\;mode=static";
+   my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
+
+   $self->run_cmd( $cmd, { out => $path->assert_filepath } );
+   return;
+};
+
+my $_localised_static = sub {
+   my ($self, $tree, $dest, $locale, $make_dirs) = @_;
+
+   my $count = 0; my $iter = iterator $tree;
 
    while (my $node = $iter->()) {
       not $make_dirs and $node->{type} eq 'folder' and next;
-      is_draft( $conf, $node->{url} ) and next;
+      is_draft( $self->config, $node->{url} ) and next;
 
-      my @path = split m{ / }mx, "${locale}/".$node->{url}.'.html';
-      my $path = io( [ $dest, @path ] )->assert_filepath;
-      my $url  = $mp.$node->{url}."?locale=${locale}\;mode=static";
-      my $cmd  = [ $conf->binsdir->catfile( 'doh-server' ), $url ];
+      my $path = $_make_path->( $dest, $locale, $node->{url}, '.html' );
 
       $self->info( 'Writing [_1]', { args => [ "${locale}/".$node->{url} ] } );
-      $self->run_cmd( $cmd, { out => $path } ); $count++;
+      $self->$_create_page( $locale, $node->{url}, $path );
+      $count++;
    }
+
+   return $count;
+};
+
+my $_make_static = sub {
+   my ($self, $moniker, $dest, $locale, $url, $make_dirs) = @_; my $count = 0;
+
+   my $tree; $tree = $self->models->{ $moniker }->localised_tree( $locale ) and
+      $count = $self->$_localised_static( $tree, $dest, $locale, $make_dirs );
+
+   $self->$_create_page
+      ( $locale, $url, $_make_path->( $dest, $locale, $url, '.xml' ) );
 
    return $count;
 };
@@ -203,7 +228,7 @@ sub make_site_tarball : method {
 }
 
 sub make_static : method {
-   my $self = shift; my $conf = $self->config; my $models = $self->models;
+   my $self = shift; my $conf = $self->config;
 
    my $opts = { async => TRUE, k => 'make_static', t => $self->max_gen_time };
 
@@ -211,7 +236,7 @@ sub make_static : method {
       $self->info( 'Static page generation already in progress' ); return OK;
    }
 
-   my $dest = io( $self->next_argv // $conf->static ); my $count = 0;
+   my $dest = io( $self->next_argv // $conf->static );
 
    $conf->appclass->env_var( 'MAKE_STATIC', TRUE );
    $self->info( 'Generating static pages' );
@@ -219,12 +244,11 @@ sub make_static : method {
    $dest->exists or $dest->mkpath; $dest->rmtree( { keep_root => TRUE } );
    $self->$_copy_assets( $dest );
 
-   for my $locale ($models->{docs}->locales) {
-      my $tree = $models->{docs}->localised_tree( $locale );
+   my $count = 0; my $feed = $conf->posts.'/rss';
 
-      $count += $self->$_make_localised_static( $dest, $tree, $locale, FALSE );
-      $tree = $models->{posts}->localised_tree( $locale );
-      $count += $self->$_make_localised_static( $dest, $tree, $locale, TRUE );
+   for my $locale ($self->models->{docs}->locales) {
+      $count += $self->$_make_static( 'docs',  $dest, $locale, 'rss', FALSE );
+      $count += $self->$_make_static( 'posts', $dest, $locale, $feed, TRUE  );
    }
 
    $self->info( "Total pages generated ${count}" );

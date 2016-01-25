@@ -43,6 +43,20 @@ my $_build_colours = sub {
    return $_to_array_of_hash->( $_[ 0 ]->_colours, 'key', 'value' );
 };
 
+my $_build_components = sub {
+   my $self = shift;
+   my $conf = {
+      'Model::User' => { path => $self->ctrldir->catfile( 'users.json' ), }, };
+
+   for my $name (keys %{ $self->_components } ) {
+      for my $k (keys %{ $self->_components->{ $name } }) {
+         $conf->{ $name }->{ $k } = $self->_components->{ $name }->{ $k };
+      }
+   }
+
+   return $conf;
+};
+
 my $_build_links = sub {
    return $_to_array_of_hash->( $_[ 0 ]->_links, 'name', 'url' );
 };
@@ -52,11 +66,11 @@ my $_build_secret = sub {
 
    if ($file->exists) {
       $data  = Class::Usul::File->data_load( paths => [ $file ] ) // {};
-      $token = decrypt_from_config $self, $data->{ 'secret' };
+      $token = decrypt_from_config $self, $data->{secret};
    }
 
    unless ($token) {
-      $data->{ 'secret' } = encrypt_for_config $self, $token = create_token;
+      $data->{secret} = encrypt_for_config $self, $token = create_token;
       Class::Usul::File->data_dump( { path => $file->assert, data => $data } );
    }
 
@@ -98,15 +112,8 @@ has 'cdnjs'           => is => 'lazy', isa => HashRef,
 has 'colours'         => is => 'lazy', isa => ArrayRef[HashRef],
    builder            => $_build_colours, init_arg => undef;
 
-has 'components'      => is => 'lazy', isa => HashRef, builder => sub { {
-   'Model::Documentation' => {
-      feed_subtitle   => 'Recent updates to the documentation set',
-      feed_title      => 'Documentation Feed', },
-   'Model::Posts'     => {
-      feed_subtitle   => 'Recents news and blog posts',
-      feed_title      => 'Posts Feed', },
-   'Model::User'      => {
-      path            => $_[ 0 ]->ctrldir->catfile( 'users.json' ), }, } };
+has 'components'      => is => 'lazy', isa => HashRef,
+   builder            => $_build_components, init_arg => undef;
 
 has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 
@@ -192,8 +199,6 @@ has 'port'            => is => 'lazy', isa => NonZeroPositiveInt,
 has 'posts'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'posts';
 
-has 'projects'        => is => 'ro',   isa => HashRef,   default => sub { {} };
-
 has 'repo_url'        => is => 'ro',   isa => SimpleStr, default => NUL;
 
 has 'request_roles'   => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
@@ -254,6 +259,14 @@ has 'workers'         => is => 'ro',   isa => NonZeroPositiveInt, default => 5;
 # Private attributes
 has '_colours'        => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'colours';
+
+has '_components'     => is => 'ro',   isa => HashRef, builder => sub { {
+   'Model::Documentation' => {
+      feed_subtitle   => 'Recent updates to the documentation set',
+      feed_title      => 'Doh! Documentation', },
+   'Model::Posts'     => {
+      feed_subtitle   => 'Recent news and blog posts',
+      feed_title      => 'Doh! News', }, } }, init_arg => 'components';
 
 has '_links'          => is => 'ro',   isa => HashRef,
    builder            => sub { {} }, init_arg => 'links';
@@ -530,14 +543,6 @@ when started by the control daemon
 A non empty simple string the defaults to F<posts>.  The directory
 name where dated markdown files are created in category
 directories. These are the blogs posts or news articles
-
-=item C<projects>
-
-A hash reference that defaults to an empty hash reference. The keys are
-port numbers and the values are paths to the document roots of different
-projects. Multiple servers can be started on different port numbers each
-with their document root and local configuration file in that document root
-directory
 
 =item C<request_roles>
 

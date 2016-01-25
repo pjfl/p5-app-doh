@@ -45,9 +45,14 @@ my $sorted_keys = sub {
 };
 
 my $make_tuple = sub {
-   my $node = shift; my $is_folder = $node && $node->{type} eq 'folder' ? 1 : 0;
+   my $node = shift;
 
-   return [ 0, $is_folder ? $sorted_keys->( $node->{tree} ) : [], $node, ];
+   ($node and exists $node->{type} and defined $node->{type})
+      or return [ 0, [], $node ];
+
+   my $keys = $node->{type} eq 'folder' ? $sorted_keys->( $node->{tree} ) : [];
+
+   return [ 0, $keys, $node ];
 };
 
 
@@ -91,10 +96,10 @@ sub build_tree {
       my  $url        =  $url_base ? "${url_base}/${id}" : $id;
       my  $mtime      =  $path->stat->{mtime} // 0;
       my  $node       =  $tree->{ $id } = {
-          date        => $mtime,
           depth       => $depth,
           format      => $extension2format->( $map, "${path}" ),
           id          => $id,
+          modified    => $mtime,
           name        => $name,
           parent      => $parent,
           path        => $path,
