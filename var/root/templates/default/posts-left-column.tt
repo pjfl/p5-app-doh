@@ -13,13 +13,8 @@
 [% depth = 0; folder_title = loc( 'Folder Path' ) -%]
             <ul class="nav nav-list">
                <li>
-[% IF page.mode != 'static' -%]
-[%    uri = links.posts _ 'index' -%]
-[% ELSE -%]
-[%    uri = links.posts _ 'index.html' -%]
-[% END -%]
-[% tip = loc( 'Landing page' ) -%]
-[% LinkWithTips( uri, 'folder', loc( 'Posts' ), page.hint, tip ) -%]
+[% href = uri_for( config.posts _ '/index' ); tip = loc( 'Landing page' ) -%]
+[%         LinkWithTips( href, 'folder', loc( 'Posts' ), page.hint, tip ) -%]
                </li>
 [% FOREACH node = nav -%]
 [%    WHILE node.depth < depth; depth = depth - 1 -%]
@@ -28,8 +23,8 @@
 [%    END -%]
 [%    IF node.type == 'folder'; depth = depth + 1 -%]
             <li class="[% node.class %]">
-[%       uri = uri_for( node.url ) -%]
-[%         LinkWithTips( uri, 'folder', node.title, folder_title, node.tip ) -%]
+[%       href = uri_for( node.url ) -%]
+[%       LinkWithTips( href, 'folder', node.title, folder_title, node.tip ) -%]
                <ul class="nav nav-list">
 [%    END -%]
 [% END -%]

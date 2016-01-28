@@ -234,7 +234,7 @@ has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
 has 'stash_attr'      => is => 'lazy', isa => HashRef[ArrayRef],
    builder            => sub { {
       config          => [ qw( author description keywords template ) ],
-      links           => [ qw( assets css help images js less posts static ) ],
+      links           => [ qw( assets css help images js less static ) ],
       request         => [ qw( authenticated host language mode username ) ],
       session         => [ sort keys %{ $_[ 0 ]->session_attr } ], } };
 

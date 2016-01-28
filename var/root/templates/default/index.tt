@@ -51,7 +51,8 @@
 [%       text  = loc( 'Documentation' ) -%]
 [%       tip   = loc( 'Documentation tree' ) -%]
 [%       LinkWithTips( page.docs_url, class, text, page.hint, tip ) -%]
-[%       LinkWithTips( links.posts _ 'index', class, loc( 'Posts' ),
+[%       href = uri_for( config.posts _ '/index' ) -%]
+[%       LinkWithTips( href, class, loc( 'Posts' ),
                        page.hint, loc( 'Posts, blogs, and news articles' ) ) -%]
 [%    END -%]
 [%    IF page.mode != 'static' -%]

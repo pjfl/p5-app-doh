@@ -12,7 +12,7 @@ sub dispatch_request {
    sub (POST + /assets + *file~    + ?*) { [ 'docs',  'upload',       @_ ] },
    sub (GET  + /dialog             + ?*) { [ 'docs',  'dialog',       @_ ] },
    sub (POST + /login  | /logout   + ?*) { [ 'admin', 'from_request', @_ ] },
-   sub (GET  + /pod    | /pod/**   + ?*) { [ 'help',  'get_content',  @_ ] },
+   sub (GET  + /pod/   | /pod/**   + ?*) { [ 'help',  'get_content',  @_ ] },
    sub (POST + /posts  | /posts/** + ?*) { [ 'posts', 'from_request', @_ ] },
    sub (GET  + /posts/dialog       + ?*) { [ 'posts', 'dialog',       @_ ] },
    sub (GET  + /posts/rss          + ?*) { [ 'posts', 'rss_feed',     @_ ] },
