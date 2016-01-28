@@ -1,7 +1,7 @@
-[% PROCESS 'default/macros.tt' -%]
-[% WRAPPER 'default/wrapper.tt' -%]
-[%    INCLUDE 'default/navbar.tt' -%]
-[%    INCLUDE 'default/fork-me.tt' -%]
+[% PROCESS 'classic/macros.tt' -%]
+[% WRAPPER 'classic/wrapper.tt' -%]
+[%    INCLUDE 'classic/navbar.tt' -%]
+[%    INCLUDE 'classic/fork-me.tt' -%]
 <!-- Index -->
 <div class="container-fluid fluid-height wrapper">
    <div class="row-fluid columns content-area">
@@ -89,7 +89,7 @@
                </div>
                <div class="span5">
                   <div class="pull-right">
-[%    INCLUDE 'default/social-links.tt' -%]
+[%    INCLUDE 'classic/social-links.tt' -%]
                   </div>
                </div>
             </div>
@@ -97,5 +97,5 @@
       </div>
    </div>
 </div>
-[%    INCLUDE 'default/footer.tt' -%]
+[%    INCLUDE 'classic/footer.tt' -%]
 [% END -%]

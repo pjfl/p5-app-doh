@@ -229,7 +229,7 @@ has 'session_attr'    => is => 'lazy', isa => HashRef[ArrayRef],
       use_flags       => [ Bool,              TRUE          ], } };
 
 has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'default';
+   default            => 'classic';
 
 has 'stash_attr'      => is => 'lazy', isa => HashRef[ArrayRef],
    builder            => sub { {

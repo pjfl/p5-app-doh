@@ -4,9 +4,9 @@
          <div class="content-page">
 [% IF page.format == 'html' -%]
             <article>
-[%    INCLUDE 'default/header.tt' -%]
+[%    INCLUDE 'classic/header.tt' -%]
 [%    IF page.editing -%]
-[%    INCLUDE 'default/editor.tt' -%]
+[%    INCLUDE 'classic/editor.tt' -%]
 [%    ELSE -%]
                   [% page.content | eval -%]
                <div class="hero-buttons container-fluid">

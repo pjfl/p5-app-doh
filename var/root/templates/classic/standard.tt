@@ -1,0 +1,13 @@
+[% PROCESS 'classic/macros.tt' -%]
+[% WRAPPER 'classic/wrapper.tt' -%]
+[%    INCLUDE 'classic/navbar.tt' -%]
+[%    INCLUDE 'classic/fork-me.tt' -%]
+   <!-- Layout [% page.layout %] -->
+   <div class="container-fluid fluid-height wrapper">
+      <div class="row-fluid columns content">
+[% path = 'classic/' _ page.template.0  _ '-left-column.tt';  INCLUDE $path -%]
+[% path = 'classic/' _ page.template.1  _ '-right-column.tt'; INCLUDE $path -%]
+      </div>
+   </div>
+[%    INCLUDE 'classic/footer.tt' -%]
+[% END -%]

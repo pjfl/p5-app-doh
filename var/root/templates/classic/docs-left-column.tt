@@ -1,4 +1,4 @@
-      <!-- Posts Left Column -->
+      <!-- Docs Left Column -->
       <div class="left-column article-tree span2p5">
          <!-- For Mobile -->
          <div class="responsive-collapse">
@@ -10,22 +10,25 @@
             </button>
          </div>
          <div id="sub-nav-collapse" class="collapse in">
-[% depth = 0; folder_title = loc( 'Folder Path' ) -%]
+            <!-- Navigation -->
+[% depth        = 0 -%]
+[% class        = 'aj-nav folder fade' -%]
+[% file_title   = loc( 'File Path' ) -%]
+[% folder_title = loc( 'Folder Path' ) -%]
             <ul class="nav nav-list">
-               <li>
-[% href = uri_for( config.posts _ '/index' ); tip = loc( 'Landing page' ) -%]
-[%         LinkWithTips( href, 'folder', loc( 'Posts' ), page.hint, tip ) -%]
-               </li>
 [% FOREACH node = nav -%]
 [%    WHILE node.depth < depth; depth = depth - 1 -%]
                </ul>
             </li>
 [%    END -%]
-[%    IF node.type == 'folder'; depth = depth + 1 -%]
             <li class="[% node.class %]">
-[%       href = uri_for( node.url ) -%]
-[%       LinkWithTips( href, 'folder', node.title, folder_title, node.tip ) -%]
+[%    IF node.type == 'folder'; depth = depth + 1 -%]
+[%       LinkWithTips( '#', class, node.title, folder_title, node.tip ) -%]
                <ul class="nav nav-list">
+[%    ELSE -%]
+[%       uri = uri_for( node.url ) -%]
+[%       LinkWithTips( uri, 'fade', node.title, file_title, node.tip ) -%]
+            </li>
 [%    END -%]
 [% END -%]
 [% WHILE depth > 0; depth = depth - 1 -%]
@@ -33,11 +36,12 @@
             </li>
 [% END -%]
             </ul>
+[% INCLUDE 'classic/code-blocks.tt' -%]
             <!-- Links -->
-[% INCLUDE 'default/editing-links.tt' -%]
-[% INCLUDE 'default/config-links.tt' -%]
+[% INCLUDE 'classic/editing-links.tt' -%]
+[% INCLUDE 'classic/config-links.tt' -%]
             <div class="well well-sidebar">
-[% INCLUDE 'default/social-links.tt' -%]
+[% INCLUDE 'classic/social-links.tt' -%]
             </div>
          </div>
       </div>

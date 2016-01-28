@@ -3,7 +3,7 @@
       <div class="right-column [% col_class %] content-area span9p5">
          <div class="content-page">
             <article>
-[% INCLUDE 'default/header.tt' -%]
+[% INCLUDE 'classic/header.tt' -%]
 [% depth        = page.wanted_depth -%]
 [% file_title   = loc( 'File Path' ) -%]
 [% folder_title = loc( 'Folder Path' ) -%]

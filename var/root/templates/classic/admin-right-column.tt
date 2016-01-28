@@ -3,7 +3,7 @@
       <div class="right-column [% col_class %] content-area span9p5">
          <div class="content-page">
             <article>
-[%    INCLUDE 'default/header.tt' -%]
+[%    INCLUDE 'classic/header.tt' -%]
                <div class="container span9p5">
 [% IF !page.users.result.id -%]
                   <form action="[% uri_for( 'admin' ) %]"
