@@ -13,7 +13,12 @@
 [% depth = 0; folder_title = loc( 'Folder Path' ) -%]
             <ul class="nav nav-list">
                <li>
-[% uri = uri_for( config.posts _ '/index' ); tip = loc( 'Landing page' ) -%]
+[% IF page.mode != 'static' -%]
+[%    uri = links.posts _ 'index' -%]
+[% ELSE -%]
+[%    uri = links.posts _ 'index.html' -%]
+[% END -%]
+[% tip = loc( 'Landing page' ) -%]
 [% LinkWithTips( uri, 'folder', loc( 'Posts' ), page.hint, tip ) -%]
                </li>
 [% FOREACH node = nav -%]

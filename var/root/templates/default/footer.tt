@@ -22,7 +22,7 @@
    <script src="[% links.cdnjs.markdown %]"></script>
    <script src="[% links.js %]editor.js"></script>
 [% END -%]
-   <script src="[% links.js; skin %].js"></script>
+   <script src="[% links.js %][% skin %].js"></script>
    <script>
       hljs.initHighlightingOnLoad();
       var behaviour = new Behaviour( {
@@ -35,7 +35,7 @@
 [% IF ! page.editing && page.mode != 'static' -%]
       behaviour.config.anchors[ 'create-file' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'dialog' ) %]?name=create', {
+             args    : [ '[% links.dialog %]?name=create', {
                 name : 'create_file',
                 title: '[% loc( 'Create File' ) %]' } ] };
       behaviour.config.anchors[ 'create-user' ]
@@ -58,18 +58,18 @@
                 title: '[% loc( 'Login User' ) %]' } ] };
       behaviour.config.anchors[ 'rename-file' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'dialog' ) %]?name=rename', {
+             args    : [ '[% links.dialog %]?name=rename', {
                 name : 'rename_file',
                 title: '[% loc( 'Rename File' ) %]',
                 value: '[% page.url %]' } ] };
       behaviour.config.anchors[ 'search-file' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'dialog' ) %]?name=search', {
+             args    : [ '[% links.dialog %]?name=search', {
                 name : 'search-file',
                 title: '[% loc( 'Search Documents' ) %]' } ] };
       behaviour.config.anchors[ 'upload-file' ]
          = { method  : 'modalDialog',
-             args    : [ '[% uri_for( 'dialog' ) %]?name=upload', {
+             args    : [ '[% links.dialog %]?name=upload', {
                 name : 'upload_file',
                 title: '[% loc( 'Upload File' ) %]',
                 value: '[% page.url %]' } ] };

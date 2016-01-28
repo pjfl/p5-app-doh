@@ -1,5 +1,5 @@
 <!-- Create User -->
-<form action="[% links.base_uri %]user"
+<form action="[% uri_for( 'user' ) %]"
      enctype="application/x-www-form-urlencoded"
       method="post" name="create-user">
    <label  class="label" for="username">[% loc( 'User name' ) %]</label>

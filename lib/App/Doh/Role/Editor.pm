@@ -14,7 +14,7 @@ use Unexpected::Functions  qw( Unspecified );
 use Moo::Role;
 
 requires qw( config find_node get_content initialise_stash
-             invalidate_cache load_page log run_cmd users );
+             invalidate_cache load_page log make_draft run_cmd users );
 
 with 'Web::Components::Role::TT';
 
@@ -25,7 +25,7 @@ around 'load_page' => sub {
    my $page    = $orig->( $self, $req, @args );
    my $editing = $req->query_params->( 'edit', { optional => TRUE } ) // FALSE;
 
-   $page->{editing} //= $editing;
+   $page->{editing} //= !!$editing;
    $page->{editing} and $page->{user} = $self->users->find( $req->username );
 
    return $page;
@@ -43,17 +43,6 @@ my $_append_suffix = sub {
 my $_copy_element_value = sub {
    return [ "\$( 'upload-btn' ).addEvent( 'change', function( ev ) {",
             "   ev.stop(); \$( 'upload-path' ).value = this.value } )", ];
-};
-
-my $_make_draft = sub {
-   my ($conf, @pathname) = @_;
-
-   # TODO: Editor should not contain references to posts
-   if ($pathname[ 0 ] eq $conf->posts) {
-      shift @pathname; return $conf->posts, $conf->drafts, @pathname;
-   }
-
-   return $conf->drafts, @pathname;
 };
 
 my $_prepare_path = sub {
@@ -99,7 +88,7 @@ my $_new_node = sub {
 
    my @pathname = $_prepare_path->( $_append_suffix->( $pathname ) );
 
-   $draft and @pathname = $_make_draft->( $conf, @pathname );
+   $draft and @pathname = $self->make_draft( @pathname );
 
    my $path     = $conf->file_root->catfile( $locale, @pathname )->utf8;
    my @filepath = map { make_id_from( $_ )->[ 0 ] } @pathname;
@@ -190,25 +179,23 @@ sub get_dialog {
    my $name   =  $params->( 'name' );
    my $stash  =  $self->initialise_stash( $req );
    my $links  =  $stash->{links};
-   my $postd  =  $self->config->posts;
    my $page   =  $stash->{page} = $self->load_page( $req, {
       layout  => "${name}-file",
       meta    => { id => $params->( 'id' ), }, } );
 
    if    ($name eq 'create') {
-      $page->{literal_js} = set_element_focus "${name}-file", 'pathname';
+      $page->{literal_js } = set_element_focus "${name}-file", 'pathname';
    }
    elsif ($name eq 'rename') {
       $page->{literal_js } = set_element_focus "${name}-file", 'pathname';
       $page->{old_path   } = $params->( 'val' );
-      $links->{rename_uri} = $page->{old_path} =~ m{ \A $postd }mx
-                           ? $req->uri_for( $postd ) : $links->{base_uri};
+      $links->{rename_uri} = $self->base_uri( $req );
    }
    elsif ($name eq 'search') {
-      $page->{literal_js} = set_element_focus "${name}-file", 'query';
+      $page->{literal_js } = set_element_focus "${name}-file", 'query';
    }
    elsif ($name eq 'upload') {
-      $page->{literal_js} = $_copy_element_value->();
+      $page->{literal_js } = $_copy_element_value->();
    }
 
    $stash->{view} = 'json';
@@ -220,10 +207,8 @@ sub rename_file {
 
    my $conf     = $self->config;
    my $params   = $req->body_params;
-   my $old_path = [ split m{ / }mx, $params->( 'old_path' ) ];
-
-   $old_path->[ 0 ] eq $conf->posts and shift @{ $old_path };
-
+   my $old_path = $self->rename_file_path_fix
+      ( [ split m{ / }mx, $params->( 'old_path' ) ] );
    my $node     = $self->find_node( $req->locale, $old_path )
       or throw 'Cannot find document tree node to rename', rv => HTTP_NOT_FOUND;
    my $new_node = $self->$_new_node( $req->locale, $params->( 'pathname' ) );
@@ -280,8 +265,9 @@ sub upload_file {
 
    my $rel_path = $dest->abs2rel( $conf->assetdir );
    my $message  = [ 'File [_1] uploaded by [_2]', $rel_path, $req->username ];
+   my $location = $self->base_uri( $req );
 
-   return { redirect => { location => $req->base, message => $message } };
+   return { redirect => { location => $location, message => $message } };
 }
 
 1;

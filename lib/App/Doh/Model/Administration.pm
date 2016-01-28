@@ -107,22 +107,6 @@ sub generate_static_action : Role(admin) {
    return { redirect => { location => $req->uri, message => $message } };
 }
 
-sub get_form : Role(admin) {
-   my ($self, $req) = @_;
-
-   my $name  = $req->loc( 'Administration' );
-   my $id    = $req->uri_params->( 0, { optional => TRUE } )
-            // $req->query_params->( 'username', { optional => TRUE } );
-   my $page  = { auth_roles => $self->config->auth_roles,
-                 form_name  => 'administration',
-                 name       => $name,
-                 template   => [ 'admin', 'admin' ],
-                 title      => ucfirst $name,
-                 users      => $self->users->list( $id ), };
-
-   return $self->get_content( $req, $page );
-}
-
 sub login_action : Role(anon) {
    my ($self, $req) = @_; my $message;
 
@@ -205,6 +189,22 @@ sub update_user_action : Role(admin) {
    my $message = [ 'User [_1] updated by [_2]', $id, $req->username ];
 
    return { redirect => { location => $req->uri, message => $message } };
+}
+
+sub user_form : Role(admin) {
+   my ($self, $req) = @_;
+
+   my $name  = $req->loc( 'Administration' );
+   my $id    = $req->uri_params->( 0, { optional => TRUE } )
+            // $req->query_params->( 'username', { optional => TRUE } );
+   my $page  = { auth_roles => $self->config->auth_roles,
+                 form_name  => 'administration',
+                 name       => $name,
+                 template   => [ 'admin', 'admin' ],
+                 title      => ucfirst $name,
+                 users      => $self->users->list( $id ), };
+
+   return $self->get_content( $req, $page );
 }
 
 1;

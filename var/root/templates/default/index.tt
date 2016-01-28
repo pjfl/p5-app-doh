@@ -31,11 +31,11 @@
 [%    IF page.mode != 'static' -%]
 [%       class = 'btn btn-secondary btn-hero fade' -%]
 [%       IF page.authenticated -%]
-[%          LinkWithTips( uri_for( 'admin' ), class, loc( 'Admin' ),
-                          page.hint, loc( 'Admininstration interface' ) ) -%]
+[%          LinkWithTips( uri_for( 'admin' ), class, loc( 'Admin' ), page.hint,
+                          loc( 'Admininstration interface' ) ) -%]
 [%       ELSE -%]
-[%          LinkWithTips( links.help_url, class, loc( 'Help' ),
-                          page.hint, loc( 'Help pages for the application')) -%]
+[%          LinkWithTips( links.help, class, loc( 'Help' ), page.hint,
+                          loc( 'Help pages for the application')) -%]
 [%       END -%]
 [%    END -%]
 [%    IF page.mode != 'static' && !page.authenticated -%]
@@ -51,14 +51,11 @@
 [%       text  = loc( 'Documentation' ) -%]
 [%       tip   = loc( 'Documentation tree' ) -%]
 [%       LinkWithTips( page.docs_url, class, text, page.hint, tip ) -%]
-[%       IF   page.mode != 'static'; href = uri_for( config.posts ) -%]
-[%       ELSE; href = uri_for( config.posts _ '/index' ); END -%]
-[%       LinkWithTips( href, class, loc( 'Posts' ),
+[%       LinkWithTips( links.posts _ 'index', class, loc( 'Posts' ),
                        page.hint, loc( 'Posts, blogs, and news articles' ) ) -%]
 [%    END -%]
 [%    IF page.mode != 'static' -%]
-[%       href  = links.base_uri _ config.static _ '/'
-                 _ page.language _ '/index.html' -%]
+[%       href  = links.static _ page.language _ '/index.html' -%]
 [%       LinkWithTips( href, 'btn btn-secondary btn-hero fade', loc( 'Static' ),
                        page.hint, loc( 'View the static pages' ) ) -%]
 [%    END -%]

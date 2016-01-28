@@ -30,7 +30,7 @@ around 'initialise_stash' => sub {
    my $links = $stash->{links} //= {};
 
    for my $k (@{ $conf->stash_attr->{links} }) {
-      $links->{ $k } = $req->uri_for( $conf->$k() );
+      $links->{ $k } = $req->uri_for( $conf->$k().'/' );
    }
 
    $links->{cdnjs   } = $conf->cdnjs; # TODO: Not a URI object ref
@@ -53,13 +53,10 @@ around 'load_page' => sub {
    $page->{application_version} = $conf->appclass->VERSION;
    $page->{status_message     } = $req->session->collect_status_message( $req );
 
-   my $url = $page->{mode} eq 'online' ? $req->base : $req->uri_for( 'index' );
-
-   $page->{homepage_url}   = $url;
-   $page->{form_name   } //= 'markdown';
-   $page->{hint        } //= $req->loc( 'Hint' );
-   $page->{locale      } //= $req->locale;
-   $page->{wanted      } //= join '/', @{ $req->uri_params->() // [] };
+   $page->{form_name} //= 'markdown';
+   $page->{hint     } //= $req->loc( 'Hint' );
+   $page->{locale   } //= $req->locale;
+   $page->{wanted   } //= join '/', @{ $req->uri_params->() // [] };
 
    return $page;
 };

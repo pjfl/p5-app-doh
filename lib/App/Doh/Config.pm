@@ -91,7 +91,7 @@ has 'assetdir'        => is => 'lazy', isa => Path, coerce => TRUE,
    builder            => sub { $_[ 0 ]->file_root->catdir( $_[ 0 ]->assets ) };
 
 has 'assets'          => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'assets/',
+   default            => 'assets',
 
 has 'auth_roles'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    default            => sub { [ qw( admin editor user ) ] };
@@ -118,7 +118,7 @@ has 'components'      => is => 'lazy', isa => HashRef,
 has 'compress_css'    => is => 'ro',   isa => Bool, default => TRUE;
 
 has 'css'             => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'css/';
+   default            => 'css';
 
 has 'default_route'   => is => 'lazy', isa => NonEmptySimpleStr,
    builder            => sub {
@@ -147,13 +147,13 @@ has 'file_root'       => is => 'lazy', isa => Directory, coerce => TRUE,
 
 has 'font'            => is => 'ro',   isa => SimpleStr, default => NUL;
 
-has 'help_url'        => is => 'ro',   isa => SimpleStr, default => 'pod';
+has 'help'            => is => 'ro',   isa => SimpleStr, default => 'pod';
 
 has 'images'          => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'img/';
+   default            => 'img';
 
 has 'js'              => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'js/';
+   default            => 'js';
 
 has 'jslibs'          => is => 'ro',   isa => ArrayRef, builder => sub { [] };
 
@@ -167,7 +167,7 @@ has 'layout'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'standard';
 
 has 'less'            => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'less/';
+   default            => 'less';
 
 has 'less_files'      => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
    builder            => sub { [ qw( blue editor green navy red ) ] };
@@ -234,7 +234,7 @@ has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
 has 'stash_attr'      => is => 'lazy', isa => HashRef[ArrayRef],
    builder            => sub { {
       config          => [ qw( author description keywords template ) ],
-      links           => [ qw( assets css help_url images js less ) ],
+      links           => [ qw( assets css help images js less posts static ) ],
       request         => [ qw( authenticated host language mode username ) ],
       session         => [ sort keys %{ $_[ 0 ]->session_attr } ], } };
 
@@ -320,7 +320,7 @@ containing user uploaded files
 
 =item C<assets>
 
-A non empty simple string that defaults to F<assets/>. Relative URI path
+A non empty simple string that defaults to F<assets>. Relative URI path
 that locates the assets files uploaded by users
 
 =item C<auth_roles>
@@ -400,7 +400,7 @@ Boolean default to true. Should the C<make_css> method compress it's output
 
 =item C<css>
 
-A non empty simple string that defaults to F<css/>. Relative URI path
+A non empty simple string that defaults to F<css>. Relative URI path
 that locates the static CSS files
 
 =item C<default_route>
@@ -445,19 +445,19 @@ F<var/root/docs>. The document root for the microformat content pages
 A simple string that defaults to null. The default font used to
 display text headings
 
-=item C<help_url>
+=item C<help_uri>
 
 A simple string that defaults to C<pod>. The partial URI path which locates
 this POD when rendered as HTML and served by this application
 
 =item C<images>
 
-A non empty simple string that defaults to F<img/>. Relative URI path that
+A non empty simple string that defaults to F<img>. Relative URI path that
 locates the static image files
 
 =item C<js>
 
-A non empty simple string that defaults to F<js/>. Relative URI path that
+A non empty simple string that defaults to F<js>. Relative URI path that
 locates the static JavaScript files
 
 =item C<jslibs>
@@ -484,7 +484,7 @@ template will be wrapped by F<wrapper.tt>
 
 =item C<less>
 
-A non empty simple string that defaults to F<less/>. Relative URI path that
+A non empty simple string that defaults to F<less>. Relative URI path that
 locates the static Less files
 
 =item C<less_files>
@@ -637,9 +637,9 @@ hash reference in the stash
 
 =item C<common_links>
 
-An array reference that defaults to C<[ assets css help_url images less js ]>.
-The application pre-calculates URIs for these static directories for use
-in the HTML templates
+An array reference that defaults to
+C<[ assets css images less js posts static ]>.  The application pre-calculates
+URIs for these static directories for use in the HTML templates
 
 =item C<request>
 

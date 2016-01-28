@@ -11,7 +11,7 @@ use Moo::Role;
 
 requires qw( config load_page localised_tree );
 
-has 'type_map' => is => 'lazy', isa => HashRef, builder => sub { {} };
+has 'type_map' => is => 'ro', isa => HashRef, builder => sub { {} };
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -19,9 +19,7 @@ around 'BUILDARGS' => sub {
 
    my $views = $attr->{views} or return $attr;
 
-   for my $view (values %{ $views }) {
-      $view->can( 'type_map' ) and $attr->{type_map} = $view->type_map and last;
-   }
+   exists $views->{html} and $attr->{type_map} = $views->{html}->type_map;
 
    return $attr;
 };

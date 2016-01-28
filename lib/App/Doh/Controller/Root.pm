@@ -8,12 +8,13 @@ has '+moniker' => default => 'root';
 
 sub dispatch_request {
    sub (POST + /admin  | /admin/*  + ?*) { [ 'admin', 'from_request', @_ ] },
-   sub (GET  + /admin  | /admin/*  + ?*) { [ 'admin', 'get_form',     @_ ] },
+   sub (GET  + /admin  | /admin/*  + ?*) { [ 'admin', 'user_form',    @_ ] },
    sub (POST + /assets + *file~    + ?*) { [ 'docs',  'upload',       @_ ] },
    sub (GET  + /dialog             + ?*) { [ 'docs',  'dialog',       @_ ] },
    sub (POST + /login  | /logout   + ?*) { [ 'admin', 'from_request', @_ ] },
    sub (GET  + /pod    | /pod/**   + ?*) { [ 'help',  'get_content',  @_ ] },
    sub (POST + /posts  | /posts/** + ?*) { [ 'posts', 'from_request', @_ ] },
+   sub (GET  + /posts/dialog       + ?*) { [ 'posts', 'dialog',       @_ ] },
    sub (GET  + /posts/rss          + ?*) { [ 'posts', 'rss_feed',     @_ ] },
    sub (GET  + /posts  | /posts/** + ?*) { [ 'posts', 'get_content',  @_ ] },
    sub (GET  + /rss                + ?*) { [ 'docs',  'rss_feed',     @_ ] },

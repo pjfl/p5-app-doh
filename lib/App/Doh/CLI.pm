@@ -118,7 +118,7 @@ my $_copy_assets = sub {
    return;
 };
 
-my $_create_page = sub {
+my $_create_static_page = sub {
    my ($self, $locale, $node_url, $path) = @_;
 
    my $conf = $self->config;
@@ -142,7 +142,7 @@ my $_localised_static = sub {
       my $path = $_make_path->( $dest, $locale, $node->{url}, '.html' );
 
       $self->info( 'Writing [_1]', { args => [ "${locale}/".$node->{url} ] } );
-      $self->$_create_page( $locale, $node->{url}, $path );
+      $self->$_create_static_page( $locale, $node->{url}, $path );
       $count++;
    }
 
@@ -155,7 +155,7 @@ my $_make_static = sub {
    my $tree; $tree = $self->models->{ $moniker }->localised_tree( $locale ) and
       $count = $self->$_localised_static( $tree, $dest, $locale, $make_dirs );
 
-   $self->$_create_page
+   $self->$_create_static_page
       ( $locale, $url, $_make_path->( $dest, $locale, $url, '.xml' ) );
 
    return $count;

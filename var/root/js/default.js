@@ -62,11 +62,12 @@ var Behaviour = new Class( {
          } );
       }
 
-      window.addEvent( 'load',   function() {
+      window.addEvent( 'load', function() {
          this.load( opt.firstField ) }.bind( this ) );
 
-      // TODO: Add debounce
-      window.addEvent( 'resize', function() { this.resize() }.bind( this ) );
+      this.resizer = new Debouncer( this.resize );
+
+      window.addEvent( 'resize', this.resizer.handleEvent.bind( this.resizer ));
    },
 
    collect: function( object ) {

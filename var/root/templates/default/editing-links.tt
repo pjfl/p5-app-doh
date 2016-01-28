@@ -22,7 +22,7 @@
 [%    FormWithButton( links.req_uri, class, loc( 'Delete' ),
                       page.form_name, loc( 'Delete this markdown file' ),
                       'delete-file', 'delete_file' ) -%]
-[%    href  = links.base_uri _ config.static _ '/' _ page.language _ '/index.html' -%]
+[%    href  = links.static _ page.language _ '/index.html' -%]
 [%    LinkWithTips( href, 'btn fade', loc( 'View Static' ),
                     page.hint, loc( 'View the static pages' ) ) -%]
 [%    FormWithButton( uri_for( 'logout' ), class, loc( 'Logout' ),

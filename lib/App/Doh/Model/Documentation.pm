@@ -30,9 +30,10 @@ around 'initialise_page' => sub {
 around 'initialise_stash' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $stash = $orig->( $self, $req, @args );
+   my $stash = $orig->( $self, $req, @args ); my $links = $stash->{links};
 
-   $stash->{links}->{rss_uri} = $req->uri_for( 'rss', { extension => '.xml' } );
+   $links->{rss_uri} = $req->uri_for( 'rss', { extension => '.xml' } );
+   $links->{dialog } = $req->uri_for( 'dialog' );
 
    return $stash;
 };
@@ -120,8 +121,16 @@ sub localised_tree {
    return localise_tree $_[ 0 ]->tree_root, $_[ 1 ];
 }
 
+sub make_draft {
+   my ($self, @pathname) = @_; return $self->config->drafts, @pathname;
+}
+
 sub rename_file_action : Role(editor) {
    return shift->rename_file( @_ );
+}
+
+sub rename_file_path_fix {
+   return $_[ 1 ];
 }
 
 sub rss_feed : Role(anon) {

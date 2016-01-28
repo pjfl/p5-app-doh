@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Fixed leaky abstraction between Editor Docs and Posts
           - Added RSS feeds
           - POD updates to script files
           - Switch to using SysV locking

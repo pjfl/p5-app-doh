@@ -18,10 +18,12 @@ has '+moniker' => default => 'posts';
 around 'initialise_stash' => sub {
    my ($orig, $self, $req, @args) = @_;
 
-   my $stash = $orig->( $self, $req, @args ); my $postd = $self->config->posts;
+   my $stash = $orig->( $self, $req, @args );
+   my $posts = $self->config->posts;
+   my $links = $stash->{links};
 
-   $stash->{links}->{rss_uri}
-      = $req->uri_for( "${postd}/rss", { extension => '.xml' } );
+   $links->{rss_uri} = $req->uri_for( "${posts}/rss", { extension => '.xml' } );
+   $links->{dialog } = $req->uri_for( "${posts}/dialog" );
 
    return $stash;
 };
@@ -31,15 +33,14 @@ around 'load_page' => sub {
 
    my $page = $orig->( $self, $req, @args );
    my @ids  = @{ $req->uri_params->() // [] };
+   my $type = $page->{type} // 'folder';
 
    $ids[ 0 ] and $ids[ 0 ] eq 'index' and @ids = ();
-
-   $page->{type} eq 'folder' and $page->{author} = $self->config->author;
-
-   $page->{template    } =
-      [ 'posts', $page->{type} eq 'folder' ? 'posts-index' : 'posts' ];
-   $page->{wanted      } = join '/', $self->config->posts, @ids;
+   $type eq 'folder' and $page->{author} = $self->config->author;
+   $page->{template} = [ 'posts', $type eq 'folder' ? 'posts-index' : 'posts' ];
+   $page->{wanted} = join '/', $self->config->posts, @ids;
    $page->{wanted_depth} = () = @ids;
+
    return $page;
 };
 
@@ -74,12 +75,26 @@ sub delete_file_action : Role(editor) {
    return $res;
 }
 
+sub dialog : Role(any) {
+   return shift->get_dialog( @_ );
+}
+
 sub localised_tree {
    return localise_tree $_[ 0 ]->tree_root, $_[ 1 ];
 }
 
+sub make_draft {
+   my ($self, @pathname) = @_; my $posts = shift @pathname;
+
+   return $posts, $self->config->drafts, @pathname;
+}
+
 sub rename_file_action : Role(editor) {
    return shift->rename_file( @_ );
+}
+
+sub rename_file_path_fix {
+   my ($self, $path) = @_; shift @{ $path }; return $path;
 }
 
 sub rss_feed : Role(anon) {

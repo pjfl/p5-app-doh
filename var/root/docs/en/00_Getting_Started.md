@@ -23,8 +23,10 @@ documentation in a developer friendly way.
 * Optional code float layout
 * CodeMirror markdown editor and file management
 * Multi-language support
-* Static site generator
 * Text searching
+* Static site generator
+* Posts / News / Blog support
+* RSS feeds
 
 ## Acknowledgements
 
