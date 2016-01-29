@@ -2,20 +2,14 @@ package App::Doh;
 
 use 5.010001;
 use strictures;
-use version; our $VERSION = qv( sprintf '0.15.%d', q$Rev: 10 $ =~ /\d+/gmx );
+use version; our $VERSION = qv( sprintf '0.15.%d', q$Rev: 11 $ =~ /\d+/gmx );
 
-use Class::Usul::Functions  qw( env_prefix );
+# TODO: Switch to Class::Usul::Function when new Class::Usul is out
+use App::Doh::Util qw( ns_environment );
 
 sub env_var {
-   my ($class, $var, $v) = @_; my $k = (env_prefix __PACKAGE__)."_${var}";
-
-   return defined $v ? $ENV{ $k } = $v : $ENV{ $k };
+   return ns_environment __PACKAGE__, $_[ 1 ], $_[ 2 ];
 }
-
-# TODO: Switch to this once new Class::Usul is out
-#sub env_var {
-#   return ns_environment __PACKAGE__, $_[ 1 ], $_[ 2 ];
-#}
 
 1;
 
@@ -42,7 +36,7 @@ App::Doh - An easy way to document a project using Markdown
 
 =head1 Version
 
-This documents version v0.15.$Rev: 10 $ of L<App::Doh>
+This documents version v0.15.$Rev: 11 $ of L<App::Doh>
 
 =head1 Description
 

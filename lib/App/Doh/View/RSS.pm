@@ -24,6 +24,7 @@ my $_template = do { local $RS = undef; <DATA> };
 sub serialize {
    my ($self, $req, $stash) = @_; stash_functions $self, $req, $stash;
 
+   # TODO: Change to $stash->{template}->{layout} when WC::R::TT 0.6 is out
    $stash->{page}->{layout} = \$_template;
 
    my $xml = encode( $self->encoding, $self->render_template( $stash ) );

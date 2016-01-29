@@ -1,5 +1,6 @@
 Revision history for App-Doh
 
+          - Daemon::Control now passes all args to script
           - Fixed leaky abstraction between Editor Docs and Posts
           - Added RSS feeds
           - POD updates to script files

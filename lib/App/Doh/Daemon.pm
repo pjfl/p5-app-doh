@@ -110,7 +110,7 @@ my $_build_daemon_control = sub {
 
    $conf->user and $args->{user} = $args->{group} = $conf->user;
 
-   return Daemon::Control->new( $args );
+   return App::Doh::Daemon::Control->new( $args );
 };
 
 # Private attributes
@@ -174,6 +174,20 @@ sub stop : method {
    my $self = shift; $self->params->{stop} = [ { expected_rv => 1 } ];
 
    return $self->_daemon_control->do_stop;
+}
+
+package # Hide from indexer
+   App::Doh::Daemon::Control;
+
+use parent 'Daemon::Control';
+
+sub run_template {
+   my ($self, $content, $conf) = @_;
+
+   $content =~ s{\[% (.*?) %\]}{$conf->{$1}}g;
+   $content =~ s{ [ ] \$1 $ }{ \$\*}mx;
+
+   return $content;
 }
 
 1;

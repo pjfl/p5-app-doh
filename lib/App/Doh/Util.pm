@@ -6,7 +6,7 @@ use parent  'Exporter::Tiny';
 
 use Class::Usul;
 use Class::Usul::Constants qw( EXCEPTION_CLASS FALSE NUL TRUE );
-use Class::Usul::Functions qw( class2appdir ensure_class_loaded
+use Class::Usul::Functions qw( class2appdir ensure_class_loaded env_prefix
                                find_apphome first_char get_cfgfiles
                                is_arrayref is_hashref is_member throw );
 use Class::Usul::Time      qw( str2time time2str );
@@ -16,7 +16,7 @@ use Unexpected::Functions  qw( Unspecified );
 
 our @EXPORT_OK = qw( build_navigation build_tree clone enhance is_draft
                      is_static iterator localise_tree make_id_from
-                     make_name_from mtime set_element_focus
+                     make_name_from mtime ns_environment set_element_focus
                      show_node stash_functions );
 
 # Private functions
@@ -54,7 +54,6 @@ my $make_tuple = sub {
 
    return [ 0, $keys, $node ];
 };
-
 
 # Public functions
 sub build_navigation ($$$$) {
@@ -208,6 +207,12 @@ sub make_name_from ($) {
 
 sub mtime ($) {
    return $_[ 0 ]->{tree}->{_mtime};
+}
+
+sub ns_environment ($$;$) {
+   my ($class, $k, $v) = @_; $k = (env_prefix $class).'_'.(uc $k);
+
+   return defined $v ? $ENV{ $k } = $v : $ENV{ $k };
 }
 
 sub set_element_focus ($$) {
