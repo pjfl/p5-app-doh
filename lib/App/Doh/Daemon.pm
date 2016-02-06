@@ -52,7 +52,7 @@ my $_get_listener_args = sub {
       $args->{ '--nprocs'     } = $self->workers;
    }
    else {
-      $conf->appclass->env_var( 'PORT', my $port = $self->port );
+      $conf->appclass->env_var( 'port', my $port = $self->port );
       $args->{ '--access-log' } = $logs->catfile( "access-${port}.log" );
       $args->{ '--port'       } = $port;
 
@@ -66,6 +66,16 @@ my $_get_listener_args = sub {
    return %{ $args };
 };
 
+my $_load_template = sub {
+   my $data;
+
+   while (my $line = <DATA>) {
+      $line =~ m{ ^ __END__ $ }mx and last; $data .= $line;
+   }
+
+   return $data;
+};
+
 my $_stdio_file = sub {
    my ($self, $extn, $name) = @_; $name ||= $self->config->name;
 
@@ -75,7 +85,7 @@ my $_stdio_file = sub {
 my $_daemon = sub {
    my $self = shift; $PROGRAM_NAME = $self->app;
 
-   $self->config->appclass->env_var( 'DEBUG', $self->debug );
+   $self->config->appclass->env_var( 'debug', $self->debug );
    $self->server ne 'HTTP::Server::PSGI' and $ENV{PLACK_ENV} = 'production';
    Plack::Runner->run( $self->$_get_listener_args );
    exit OK;
@@ -94,8 +104,8 @@ my $_build_daemon_control = sub {
       lsb_desc     => 'Manages the Documentation Server daemons',
       path         => $conf->pathname,
 
+      init_code    => "# Init code\nDAEMON_ARGS=",
       init_config  => catfile( NUL, 'etc', 'default', $appdir ),
-      init_code    => '# Init code',
 
       directory    => $conf->appldir,
       program      => sub { shift; $self->$_daemon( @_ ) },
@@ -105,12 +115,13 @@ my $_build_daemon_control = sub {
       stderr_file  => $self->$_stdio_file( 'err' ),
       stdout_file  => $self->$_stdio_file( 'out' ),
 
+      data         => $_load_template->(),
       fork         => 2,
    };
 
    $conf->user and $args->{user} = $args->{group} = $conf->user;
 
-   return App::Doh::Daemon::Control->new( $args );
+   return Daemon::Control->new( $args );
 };
 
 # Private attributes
@@ -136,7 +147,7 @@ around 'run' => sub {
    $daemon->pid_file or throw Unspecified, [ 'pid file' ];
 
    $daemon->uid and not $daemon->gid
-      and $daemon->gid( get_user( $daemon->uid )->gid );
+                and $daemon->gid( get_user( $daemon->uid )->gid );
 
    $self->quiet( TRUE );
 
@@ -176,22 +187,35 @@ sub stop : method {
    return $self->_daemon_control->do_stop;
 }
 
-package # Hide from indexer
-   App::Doh::Daemon::Control;
-
-use parent 'Daemon::Control';
-
-sub run_template {
-   my ($self, $content, $conf) = @_;
-
-   $content =~ s{\[% (.*?) %\]}{$conf->{$1}}g;
-   $content =~ s{ [ ] \$1 $ }{ \$\*}mx;
-
-   return $content;
-}
-
 1;
 
+__DATA__
+#!/bin/sh
+
+# [% HEADER %]
+
+### BEGIN INIT INFO
+# Provides:          [% NAME %]
+# Required-Start:    [% REQUIRED_START %]
+# Required-Stop:     [% REQUIRED_STOP %]
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: [% SHORT_DESCRIPTION %]
+# Description:       [% DESCRIPTION %]
+### END INIT INFO
+
+[% INIT_CODE_BLOCK %]
+
+[% INIT_SOURCE_FILE %]
+
+if [ ! -x [% SCRIPT %] ]; then
+   echo "Required program [% SCRIPT %] cannot execute!"
+   exit 1
+fi
+
+[% SCRIPT %] ${DAEMON_ARGS} ${*}
+
+exit ${?}
 __END__
 
 =pod

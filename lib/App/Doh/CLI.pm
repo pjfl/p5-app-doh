@@ -95,26 +95,25 @@ my $_make_path = sub {
 my $_copy_assets = sub {
    my ($self, $dest) = @_; my $conf = $self->config; my $root = $conf->root;
 
-   my ($unwanted_images, $unwanted_js, $unwanted_less);
+   my ($unwanted_images, $unwanted_less);
 
    if ($conf->colours->[ 0 ]) {
       my $files = join '|', @{ $conf->less_files };
 
       $unwanted_images = qr{ favicon \- (?: $files ) }mx;
-      $unwanted_less   = qr{ theme   \- (?: $files ) }mx;
+      $unwanted_less   = qr{ (?: $files ) }mx;
 
       $_deep_copy->( $root->catdir( $conf->less ), $dest, $unwanted_less );
    }
    else {
       $unwanted_images = qr{ favicon\.png  }mx;
-      $unwanted_js     = qr{ less\.min\.js }mx;
 
       $_deep_copy->( $root->catdir( $conf->css ), $dest );
    }
 
-   $_deep_copy->( $conf->assetdir, $dest );
    $_deep_copy->( $root->catdir( $conf->images ), $dest, $unwanted_images );
-   $_deep_copy->( $root->catdir( $conf->js     ), $dest, $unwanted_js );
+   $_deep_copy->( $root->catdir( $conf->js     ), $dest );
+   $_deep_copy->( $conf->assetdir,                $dest );
    return;
 };
 

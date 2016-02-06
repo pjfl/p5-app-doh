@@ -16,7 +16,7 @@ use Unexpected::Functions  qw( Unspecified );
 
 our @EXPORT_OK = qw( build_navigation build_tree clone enhance is_draft
                      is_static iterator localise_tree make_id_from
-                     make_name_from mtime ns_environment set_element_focus
+                     make_name_from mtime set_element_focus
                      show_node stash_functions );
 
 # Private functions
@@ -82,6 +82,7 @@ sub build_navigation ($$$$) {
    return \@nav;
 }
 
+# TODO: Read each file and parse the yaml. Merge into each node
 sub build_tree {
    my ($map, $dir, $depth, $node_order, $url_base, $parent) = @_;
 
@@ -207,12 +208,6 @@ sub make_name_from ($) {
 
 sub mtime ($) {
    return $_[ 0 ]->{tree}->{_mtime};
-}
-
-sub ns_environment ($$;$) {
-   my ($class, $k, $v) = @_; $k = (env_prefix $class).'_'.(uc $k);
-
-   return defined $v ? $ENV{ $k } = $v : $ENV{ $k };
 }
 
 sub set_element_focus ($$) {

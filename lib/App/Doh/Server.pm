@@ -25,7 +25,9 @@ with 'Web::Components::Loader';
 around 'to_psgi_app' => sub {
    my ($orig, $self, @args) = @_; my $psgi_app = $orig->( $self, @args );
 
-   my $conf = $self->config; my $static = $conf->serve_as_static;
+   my $conf = $self->config; my $assets = $conf->assets;
+
+   my $serve_as_static = $conf->serve_as_static; my $static = $conf->static;
 
    return builder {
       enable 'ContentLength';
@@ -35,12 +37,12 @@ around 'to_psgi_app' => sub {
          enable 'Deflater',
             content_type => $conf->deflate_types, vary_user_agent => TRUE;
          enable 'Static',
-            path => qr{ \A / (?: $static ) }mx, root => $conf->root;
+            path => qr{ \A / (?: $serve_as_static ) }mx, root => $conf->root;
          enable 'Static',
-            path => qr{ \A / static }mx, pass_through => TRUE,
+            path => qr{ \A / $static }mx, pass_through => TRUE,
             root => $conf->root;
          enable 'Static',
-            path => qr{ \A / assets }mx, pass_through => TRUE,
+            path => qr{ \A / $assets }mx, pass_through => TRUE,
             root => $conf->file_root;
          enable 'Session::Cookie',
             expires     => 7_776_000,
@@ -63,7 +65,7 @@ sub BUILD {
    my $conf   = $self->config;
    my $server = ucfirst( $ENV{PLACK_ENV} // NUL );
    my $class  = $conf->appclass; ensure_class_loaded $class;
-   my $port   = $class->env_var( 'PORT' );
+   my $port   = $class->env_var( 'port' );
    my $info   = 'v'.$class->VERSION; $port and $info .= " on port ${port}";
 
    is_static $class or $self->log->info( "${server} Server started ${info}" );

@@ -14,7 +14,7 @@ use Unexpected::Functions  qw( Unspecified );
 use Moo::Role;
 
 requires qw( config find_node get_content initialise_stash
-             invalidate_cache load_page log make_draft run_cmd users );
+             invalidate_docs_cache load_page log make_draft run_cmd users );
 
 with 'Web::Components::Role::TT';
 
@@ -148,7 +148,7 @@ sub create_file {
    my $path     = $new_node->{path};
 
    $path->assert_filepath->println( $content )->close;
-   $self->invalidate_cache( $path->stat->{mtime} );
+   $self->invalidate_docs_cache( $path->stat->{mtime} );
 
    my $rel_path = $path->abs2rel( $conf->file_root );
    my $message  = [ 'File [_1] created by [_2]', $rel_path, $req->username ];
@@ -164,7 +164,8 @@ sub delete_file {
       or throw 'Cannot find document tree node to delete', rv => HTTP_NOT_FOUND;
    my $path     = $node->{path};
 
-   $path->exists and $path->unlink; $_prune->( $path ); $self->invalidate_cache;
+   $path->exists and $path->unlink; $_prune->( $path );
+   $self->invalidate_docs_cache;
 
    my $rel_path = $path->abs2rel( $self->config->file_root );
    my $message  = [ 'File [_1] deleted by [_2]', $rel_path, $req->username ];
@@ -215,7 +216,7 @@ sub rename_file {
 
    $new_node->{path}->assert_filepath;
    $node->{path}->close->move( $new_node->{path} ); $_prune->( $node->{path} );
-   $self->invalidate_cache;
+   $self->invalidate_docs_cache;
 
    my $rel_path = $node->{path}->abs2rel( $conf->file_root );
    my $message  = [ 'File [_1] renamed by [_2]', $rel_path, $req->username ];

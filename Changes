@@ -1,5 +1,7 @@
 Revision history for App-Doh
 
+          - Daemon now has it's own init file template
+          - Added site_data directory and data loading
           - Daemon::Control now passes all args to script
           - Fixed leaky abstraction between Editor Docs and Posts
           - Added RSS feeds

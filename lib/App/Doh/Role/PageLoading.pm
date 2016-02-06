@@ -4,14 +4,62 @@ use namespace::autoclean;
 
 use App::Doh::Util         qw( build_navigation clone mtime );
 use Class::Usul::Constants qw( FALSE NUL TRUE );
+use Class::Usul::File;
 use Class::Usul::Functions qw( throw );
 use Class::Usul::Types     qw( HashRef );
 use HTTP::Status           qw( HTTP_NOT_FOUND );
 use Moo::Role;
 
-requires qw( config load_page localised_tree );
+requires qw( config initialise_stash load_page localised_tree );
 
 has 'type_map' => is => 'ro', isa => HashRef, builder => sub { {} };
+
+# Private class attributes
+my $_docs_cache = {};
+my $_site_data_cache = { _mtime => 0 };
+
+# Private functions
+my $_cache_mtime_file = sub {
+   return $_[ 0 ]->catfile( '.mtime' );
+};
+
+# Private methods
+my $_load_site_data = sub {
+   my $self = shift; my $site_data = $self->config->site_data;
+
+   ($site_data->exists and $site_data->is_dir) or return {};
+
+   my $filesys = $_cache_mtime_file->( $site_data );
+   my $mtime   = $filesys->exists ? $filesys->stat->{mtime} // 0 : 0;
+
+   if ($mtime == 0 or $mtime > $_site_data_cache->{_mtime}) {
+      my $max_mtime = 0; my $no_dot_files = sub { not m{  \.mtime \z }mx };
+
+      for my $file ($site_data->filter( $no_dot_files )->all_files) {
+         (my $name = $file->basename) =~ s{ \. [a-zA-Z0-9_]+ \z }{}mx;
+
+         $_site_data_cache->{data}->{ $name }
+            = Class::Usul::File->data_load( paths => [ $file ] ) // {};
+         $mtime = $file->stat->{mtime};
+         $mtime > $max_mtime and $max_mtime = $mtime;
+      }
+
+      $filesys->touch( $_site_data_cache->{_mtime} = $max_mtime );
+   }
+
+   return $_site_data_cache->{data} // {};
+};
+
+my $_update_filesys = sub {
+   my ($self, $text, $file, $mtime) = @_;
+
+   if ($mtime) { $file->touch( $mtime ) }
+   else { $file->exists and $file->unlink }
+
+   $self->log->debug( $text );
+
+   return;
+};
 
 # Construction
 around 'BUILDARGS' => sub {
@@ -22,6 +70,14 @@ around 'BUILDARGS' => sub {
    exists $views->{html} and $attr->{type_map} = $views->{html}->type_map;
 
    return $attr;
+};
+
+around 'initialise_stash' => sub {
+   my ($orig, $self, @args) = @_; my $stash = $orig->( $self, @args );
+
+   $stash->{site} = $self->$_load_site_data;
+
+   return $stash;
 };
 
 around 'load_page' => sub {
@@ -66,38 +122,45 @@ sub initialise_page {
    return $page;
 }
 
-{  my $cache //= {};
+sub invalidate_docs_cache {
+   my ($self, $mtime) = @_; $_docs_cache = {};
 
-   sub invalidate_cache {
-      my ($self, $mtime) = @_; my $file = $self->config->root_mtime;
+   my $filesys = $self->config->root_mtime;
 
-      $cache = {}; $self->log->debug( 'Cache invalidated' );
+   $self->$_update_filesys( 'Document cache invalidated', $filesys, $mtime );
 
-      if ($mtime) { $file->touch( $mtime ) }
-      else { $file->exists and $file->unlink }
+   return;
+}
 
-      return;
-   }
+# TODO: Work out where / how to call this
+sub invalidate_site_data_cache {
+   my ($self, $mtime) = @_; $_site_data_cache = { _mtime => 0 };
 
-   sub navigation {
-      my ($self, $req, $stash) = @_;
+   my $filesys = $_cache_mtime_file->( $self->config->site_data );
 
-      my $conf   = $self->config;
-      my $locale = $conf->locale; # Always index config default language
-      my $node   = $self->localised_tree( $locale )
-         or  throw 'Default locale [_1] has no document tree', [ $locale ],
-                   rv => HTTP_NOT_FOUND;
-      my $ids    = $req->uri_params->() // [];
-      my $wanted = $stash->{page}->{wanted} // NUL;
-      my $nav    = $cache->{ $wanted };
+   $self->$_update_filesys( 'Site data cache invalidated', $filesys, $mtime );
 
-      (not $nav or mtime $node > $nav->{mtime})
-         and $nav = $cache->{ $wanted }
-            = { list  => build_navigation( $conf, $node, $ids, $wanted ),
-                mtime => mtime( $node ), };
+   return;
+}
 
-      return $nav->{list};
-   }
+sub navigation {
+   my ($self, $req, $stash) = @_;
+
+   my $conf   = $self->config;
+   my $locale = $conf->locale; # Always index config default language
+   my $node   = $self->localised_tree( $locale )
+      or  throw 'Default locale [_1] has no document tree', [ $locale ],
+                rv => HTTP_NOT_FOUND;
+   my $ids    = $req->uri_params->() // [];
+   my $wanted = $stash->{page}->{wanted} // NUL;
+   my $tuple  = $_docs_cache->{ $wanted };
+
+   (not $tuple or mtime $node > $tuple->{mtime})
+    and $tuple = $_docs_cache->{ $wanted }
+               = { list  => build_navigation( $conf, $node, $ids, $wanted ),
+                   mtime => mtime( $node ), };
+
+   return $tuple->{list};
 }
 
 sub not_found {

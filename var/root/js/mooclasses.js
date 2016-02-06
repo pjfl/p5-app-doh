@@ -176,7 +176,7 @@ var Dialog = new Class( {
 
       if (opt.useMask) this.mask = new Mask( el, opt.maskOpts );
 
-      this.parent = this.mask ? this.mask.element : $( document.body );
+      this.parent = this.mask ? this.mask.element : $( 'body' );
       this.dialog = new Element( 'div', { 'class': opt.klass } ).hide()
           .inject( this.parent );
 
@@ -954,7 +954,7 @@ this.Tips = new Class( {
          'styles': { 'left'      : 0,
                      'position'  : 'absolute',
                      'top'       : 0,
-                     'visibility': 'hidden' } } ).inject( document.body );
+                     'visibility': 'hidden' } } ).inject( $( 'body' ) );
 
       if (opt.showMark) {
          this.mark = []; [ 0, 1 ].each( function( idx ) {

@@ -39,9 +39,11 @@ var/root/docs/en/20_Air_Gapped_Computer.md
 var/root/docs/en/Projects
 var/root/docs/en/drafts
 var/root/docs/en/posts
-var/root/js/jekyll.js
-var/root/less/jekyll
-var/root/templates/jekyll
+var/root/docs/site_data
+var/root/img/logo.jpg
+var/root/js/hyde.js
+var/root/less/hyde
+var/root/templates/hyde
 var/root/static
 App-Doh-*
 app-doh_*.deb

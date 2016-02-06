@@ -228,6 +228,9 @@ has 'session_attr'    => is => 'lazy', isa => HashRef[ArrayRef],
       theme           => [ NonEmptySimpleStr, 'green'       ],
       use_flags       => [ Bool,              TRUE          ], } };
 
+has 'site_data'       => is => 'ro',   isa => Path, coerce => TRUE,
+   builder            => sub { $_[ 0 ]->file_root->catdir( 'site_data' ) };
+
 has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'classic';
 
@@ -445,7 +448,7 @@ F<var/root/docs>. The document root for the microformat content pages
 A simple string that defaults to null. The default font used to
 display text headings
 
-=item C<help_uri>
+=item C<help>
 
 A simple string that defaults to C<pod>. The partial URI path which locates
 this POD when rendered as HTML and served by this application
@@ -616,6 +619,12 @@ derived from browsers accept language header value, as a national flag. If
 false display as text
 
 =back
+
+=item C<site_data>
+
+A path that defaults to F<var/root/docs/site_data>.  The name of the directory
+used to store data files loaded at startup. The contents of the data files are
+available in the templates as C<< site.<filename>.<attribute> >>
 
 =item C<skin>
 
