@@ -13,6 +13,7 @@ use Class::Usul::Time      qw( str2time time2str );
 use English                qw( -no_match_vars );
 use Scalar::Util           qw( weaken );
 use Unexpected::Functions  qw( Unspecified );
+use YAML::Tiny;
 
 our @EXPORT_OK = qw( build_navigation build_tree clone enhance is_draft
                      is_static iterator localise_tree make_id_from
@@ -42,6 +43,22 @@ my $sorted_keys = sub {
 
    return [ sort { $node->{ $a }->{_order} <=> $node->{ $b }->{_order} }
             grep { first_char $_ ne '_' } keys %{ $node } ];
+};
+
+my $transcoder = YAML::Tiny->new;
+
+my $load_file_data = sub {
+   my $node = shift; my $markdown = $node->{path}->all;
+
+   my $yaml; $markdown =~ s{ \A --- $ ( .* ) ^ --- $ }{}msx and $yaml = $1;
+
+   $yaml or return TRUE; my $data = $transcoder->read_string( $yaml )->[ 0 ];
+
+   exists $data->{created} and $data->{created} = str2time $data->{created};
+
+   $node->{ $_ } = $data->{ $_ } for (keys %{ $data });
+
+   return TRUE;
 };
 
 my $make_tuple = sub {
@@ -82,7 +99,6 @@ sub build_navigation ($$$$) {
    return \@nav;
 }
 
-# TODO: Read each file and parse the yaml. Merge into each node
 sub build_tree {
    my ($map, $dir, $depth, $node_order, $url_base, $parent) = @_;
 
@@ -109,9 +125,9 @@ sub build_tree {
           url         => $url,
           _order      => $node_order++, };
 
-      $path->is_file and $fcount++ and $mtime > $max_mtime
-                                   and $max_mtime = $mtime;
-      $path->is_dir or next;
+      $path->is_file and ++$fcount and $load_file_data->( $node )
+                     and $mtime > $max_mtime and $max_mtime = $mtime;
+      $path->is_dir  or  next;
       $node->{type} = 'folder';
       $node->{tree} = $depth > 1 # Skip the language code directories
          ?  build_tree( $map, $path, $depth, $node_order, $url, $name )

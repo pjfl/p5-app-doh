@@ -36,10 +36,11 @@ around 'load_page' => sub {
    my $type = $page->{type} // 'folder';
 
    $ids[ 0 ] and $ids[ 0 ] eq 'index' and @ids = ();
-   $type eq 'folder' and $page->{author} = $self->config->author;
-   $page->{template} = [ 'posts', $type eq 'folder' ? 'posts-index' : 'posts' ];
-   $page->{wanted} = join '/', $self->config->posts, @ids;
-   $page->{wanted_depth} = () = @ids;
+   $page->{author      } //= $self->config->author;
+   $page->{wanted_depth}   = () = @ids;
+   $page->{wanted      }   = join '/', $self->config->posts, @ids;
+   $page->{template    } //= [ 'posts', 'posts' ];
+   $type eq 'folder' and $page->{template}->[ 1 ] = 'posts-index';
 
    return $page;
 };

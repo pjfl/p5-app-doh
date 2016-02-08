@@ -3,10 +3,8 @@ package App::Doh::View::HTML::Markdown;
 use namespace::autoclean;
 
 use App::Doh::Markdown;
-use Class::Usul::Time  qw( str2time );
 use Class::Usul::Types qw( ArrayRef Object );
 use Scalar::Util       qw( blessed );
-use YAML::Tiny;
 use Moo;
 
 with q(Web::Components::Role);
@@ -17,11 +15,8 @@ has '+moniker'   => default => 'markdown';
 has 'extensions' => is => 'lazy', isa => ArrayRef,
    builder       => sub { $_[ 0 ]->config->extensions->{markdown} };
 
-has 'tm'         => is => 'lazy', isa => Object, builder => sub {
+has 'formatter'  => is => 'lazy', isa => Object, builder => sub {
    App::Doh::Markdown->new( tab_width => $_[ 0 ]->config->mdn_tab_width ) };
-
-has 'yt'         => is => 'lazy', isa => Object,
-   builder       => sub { YAML::Tiny->new };
 
 # Public methods
 sub serialize {
@@ -31,19 +26,11 @@ sub serialize {
 
    $page->{editing} and return $markdown;
 
-   my $yaml; $markdown =~ s{ \A --- $ ( .* ) ^ --- $ }{}msx and $yaml = $1;
-
-   if ($yaml) {
-      my $data = $self->yt->read_string( $yaml )->[ 0 ];
-
-      exists $data->{created} and $data->{created} = str2time $data->{created};
-
-      $page->{ $_ } = $data->{ $_ } for (keys %{ $data });
-   }
+   $markdown =~ s{ \A --- $ ( .* ) ^ --- $ }{}msx;
 
    $page->{filter} and $markdown = $page->{filter}->( $self, $markdown );
 
-   return $self->tm->markdown( $markdown );
+   return $self->formatter->markdown( $markdown );
 }
 
 1;

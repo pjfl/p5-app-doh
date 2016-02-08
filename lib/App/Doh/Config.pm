@@ -236,16 +236,13 @@ has 'skin'            => is => 'ro',   isa => NonEmptySimpleStr,
 
 has 'stash_attr'      => is => 'lazy', isa => HashRef[ArrayRef],
    builder            => sub { {
-      config          => [ qw( author description keywords template ) ],
+      config          => [ qw( author description keywords ) ],
       links           => [ qw( assets css help images js less static ) ],
       request         => [ qw( authenticated host language mode username ) ],
       session         => [ sort keys %{ $_[ 0 ]->session_attr } ], } };
 
 has 'static'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'static';
-
-has 'template'        => is => 'ro',   isa => ArrayRef[NonEmptySimpleStr],
-   builder            => sub { [ 'docs', 'docs' ] };
 
 has 'title'           => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Documentation';
@@ -667,11 +664,6 @@ URIs. Their values are persisted between requests stored in the session store
 
 The default name for the sub-directory of the C<root> directory that will
 contain the static HTML pages. Defaults to C<static>
-
-=item C<template>
-
-If the selected L<Template::Toolkit> layout is F<standard> then this
-attribute selects which left and right columns templates are rendered
 
 =item C<title>
 

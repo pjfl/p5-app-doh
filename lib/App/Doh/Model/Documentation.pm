@@ -43,6 +43,7 @@ around 'load_page' => sub {
 
    my $page = $orig->( $self, $req, @args );
 
+   $page->{template} //= [ 'docs', 'docs' ];
    $page->{docs_url} //= $self->docs_url( $req );
 
    return $page;

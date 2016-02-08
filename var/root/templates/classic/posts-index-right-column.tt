@@ -25,7 +25,9 @@
 [%                LinkWithTips( uri, '', node.title, file_title, node.tip ) -%]
                   <br>
                   <span class="sub-text">
-[%-            time2str( '%A, %B %e, %Y', node.modified ) -%]</span>
+[%-                  time2str( '%A, %B %e, %Y', node.modified ) -%]</span>
+                  <span class="sub-text pull-right">
+                     &nbsp;[% node.author %]</span>
                </li>
 [%          END -%]
 [%       END -%]
