@@ -214,7 +214,7 @@ has 'secret'          => is => 'lazy', isa => NonEmptySimpleStr,
    builder            => $_build_secret;
 
 has 'serve_as_static' => is => 'ro',   isa => NonEmptySimpleStr,
-   default            => 'css | favicon.ico | img | js | less';
+   default            => 'css | favicon.ico | fonts | img | js | less';
 
 has 'server'          => is => 'ro',   isa => NonEmptySimpleStr,
    default            => 'Starman';
@@ -238,7 +238,8 @@ has 'stash_attr'      => is => 'lazy', isa => HashRef[ArrayRef],
    builder            => sub { {
       config          => [ qw( author description keywords ) ],
       links           => [ qw( assets css help images js less static ) ],
-      request         => [ qw( authenticated host language mode username ) ],
+      request         => [ qw( authenticated host language
+                               locale mode username ) ],
       session         => [ sort keys %{ $_[ 0 ]->session_attr } ], } };
 
 has 'static'          => is => 'ro',   isa => NonEmptySimpleStr,
@@ -498,11 +499,6 @@ hash reference in the configuration file. Each hash has a single
 key / value pair, the link name and it's URI. The links are displayed in
 the navigation panel and the footer in the default templates
 
-=item C<mdn_tab_width>
-
-Non zero positive integer defaults to 3. The number of spaces required to
-indent a code block in the markdown class
-
 =item C<max_asset_size>
 
 Integer defaults to 4Mb. Maximum size in bytes of the file upload
@@ -515,6 +511,11 @@ store in the session between requests
 =item C<max_sess_time>
 
 Time in seconds before a session expires. Defaults to 15 minutes
+
+=item C<mdn_tab_width>
+
+Non zero positive integer defaults to 3. The number of spaces required to
+indent a code block in the markdown class
 
 =item C<mount_point>
 
@@ -544,15 +545,15 @@ A non empty simple string the defaults to F<posts>.  The directory
 name where dated markdown files are created in category
 directories. These are the blogs posts or news articles
 
-=item C<request_roles>
-
-Defaults to C<L10N>, C<Session>, and C<Static>. The list of roles to apply to
-the default request base class
-
 =item C<repo_url>
 
 A simple string that defaults to null. The URI of the source code repository
 for this project
+
+=item C<request_roles>
+
+Defaults to C<L10N>, C<Session>, and C<Static>. The list of roles to apply to
+the default request base class
 
 =item C<root_mtime>
 

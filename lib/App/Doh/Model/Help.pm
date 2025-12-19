@@ -52,6 +52,7 @@ around 'load_page' => sub {
       format   => 'pod',
       name     => $name,
       parent   => $parent,
+      template => [ 'docs', 'docs' ],
       title    => ucfirst $name,
       url      => 'https://metacpan.org/module/%s', };
 

@@ -23,8 +23,10 @@ documentation in a developer friendly way.
 * Optional code float layout
 * CodeMirror markdown editor and file management
 * Multi-language support
-* Static site generator
 * Text searching
+* Static site generator
+* Posts / News / Blog support
+* RSS feeds
 
 ## Acknowledgements
 
@@ -92,6 +94,9 @@ Install **App-Doh** with:
 ```shell
    cpanm --notest git://github.com/pjfl/p5-app-doh.git
 ```
+
+Watch out for broken Github download URIs, the one above is the correct
+format
 
 Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,

@@ -81,8 +81,8 @@ my $_deep_copy = sub {
 };
 
 my $_init_file_list = sub {
-   return io[ NUL, 'etc', 'init.d', $_[ 0 ] ],
-          io[ NUL, 'etc', 'rc0.d', 'K01'.$_[ 0 ] ];
+   return io( [ NUL, 'etc', 'init.d', $_[ 0 ] ] ),
+          io( [ NUL, 'etc', 'rc0.d', 'K01'.$_[ 0 ] ] );
 };
 
 my $_make_path = sub {

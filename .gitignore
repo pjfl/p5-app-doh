@@ -40,7 +40,9 @@ var/root/docs/en/Projects
 var/root/docs/en/drafts
 var/root/docs/en/posts
 var/root/docs/site_data
-var/root/img/logo.jpg
+var/root/fonts
+var/root/img/article-footer.png
+var/root/img/logo.png
 var/root/js/hyde.js
 var/root/less/hyde
 var/root/templates/hyde

@@ -123,6 +123,94 @@ String.implement( {
    }
 } );
 
+var Cookies = new Class( {
+   Implements: [ Options ],
+
+   options  : {
+      domain: '',
+      expire: 90,
+      name  : 'state',
+      path  : '/',
+      prefix: '',
+      secure: false
+   },
+
+   initialize: function( options ) {
+      this.setOptions( options ); var opt = this.options;
+
+      var cookie_name = (opt.prefix ? opt.prefix + '_' : '') + opt.name;
+      var cookie_opts = { domain: opt.domain, duration: opt.expire,
+                          path  : opt.path,   secure  : opt.secure };
+
+      this.cookie = new Cookie( cookie_name, cookie_opts );
+   },
+
+   get: function( name ) {
+      var cookie  = this.cookie.read(); if (! (name && cookie)) return cookie;
+
+      var cookies = cookie.split( '+' );
+
+      for (var i = 0, cl = cookies.length; i < cl; i++) {
+         var pair = cookies[ i ].split( '~' );
+
+         if (unescape( pair[ 0 ] ) == name)
+            return pair[ 1 ] != 'null' ? unescape( pair[ 1 ] ) : null;
+      }
+
+      return '';
+   },
+
+   remove: function( name ) {
+      var i, cookie = this.cookie.read();
+
+      if (cookie && name) name = escape( name );
+      else return false;
+
+      if ((i = cookie.indexOf( name + '~' )) < 0) return false;
+
+      var j = cookie.substring( i ).indexOf( '+' );
+
+      if (i == 0) cookie = (j < 0) ? '' : cookie.substring( j + 1 );
+
+      if (i > 0) {
+         cookie = (j < 0)
+                ? cookie.substring( 0, i - 1 )
+                : cookie.substring( 0, i - 1 ) + cookie.substring( i + j );
+      }
+
+      return this.cookie.write( cookie );
+   },
+
+   set: function( name, value ) {
+      var cookie = this.cookie.read(), i;
+
+      if (name) name = escape( name );
+      else return;
+
+      if (value) value = escape( value );
+
+      if (cookie) {
+         if ((i = cookie.indexOf( name + '~' )) >= 0) {
+            var j = cookie.substring( i ).indexOf( '+' );
+
+            if (i == 0) {
+               cookie = (j < 0) ? name + '~' + value
+                                : name + '~' + value + cookie.substring( j );
+            }
+            else {
+               cookie = (j < 0) ? cookie.substring( 0, i ) + name + '~' + value
+                                : cookie.substring( 0, i ) + name + '~' + value
+                                + cookie.substring( i + j );
+            }
+         }
+         else { cookie += '+' + name + '~' + value }
+      }
+      else { cookie = name + '~' + value }
+
+      return this.cookie.write( cookie );
+   }
+} );
+
 var Debouncer = new Class( {
    initialize: function( cb ) {
       this.callback    = cb;
@@ -158,6 +246,7 @@ var Dialog = new Class( {
       klass   : 'dialog',
       maskOpts: {},
       title   : 'Options',
+      useIcon : false,
       useMask : true,
    },
 
@@ -183,8 +272,14 @@ var Dialog = new Class( {
       var title   = new Element( 'div', { 'class': opt.klass + '-title' } )
           .appendText( opt.title ).inject( this.dialog );
 
-      this.close  = new Element( 'span', { 'class': opt.klass + '-close' } )
-          .appendText( 'x' ).inject( title );
+      if (opt.useIcon) {
+         this.close = new Element( 'i', {
+            'class': opt.klass + '-close close-icon' } ).inject( title );
+      }
+      else {
+         this.close = new Element( 'span', {
+            'class': opt.klass + '-close' } ).appendText( 'x' ).inject( title );
+      }
 
       body.addClass( opt.klass + '-body' ).inject( this.dialog );
       return this.close;
@@ -499,7 +594,7 @@ var NoticeBoard = new Class( {
       var el = new Element( 'div', { class: 'notice' } ).set( 'html', content );
 
       if (opt.canClose) {
-         new Element( 'div', { class: 'close_icon' } ).inject( el, 'top' );
+         new Element( 'div', { class: 'close-icon' } ).inject( el, 'top' );
       }
 
       el.store( 'notice:options', opt ); this.attach( el );
@@ -536,7 +631,7 @@ var NoticeBoard = new Class( {
          }.bind( this )
       } );
 
-      var icon; if (icon = el.getChildren( '.close_icon' )[ 0 ]) {
+      var icon; if (icon = el.getChildren( '.close-icon' )[ 0 ]) {
          icon.addEvent( 'click', function( ev ) { // Close button
             ev.stop(); this.hide( el ) }.bind( this ) );
       }
@@ -1128,6 +1223,54 @@ this.Tips = new Class( {
 } );
 } )();
 
+var Togglers = new Class( {
+   Implements: [ Options ],
+
+   options: { config_attr: 'anchors', selector: '.togglers' },
+
+   initialize: function( options ) {
+      this.aroundSetOptions( options ); this.build();
+
+      this.resize = this.context.resize.bind( this.context );
+   },
+
+   attach: function( el ) {
+      var cfg; if (! (cfg = this.config[ el.id ])) return;
+
+      el.addEvent( cfg.event || 'click', function( ev ) {
+         ev.stop(); this[ cfg.method ].apply( this, cfg.args ) }.bind( this ) );
+   },
+
+   toggle: function( id, name ) {
+      var el = $( id ); if (! el) return;
+
+      var toggler = el.retrieve( name ); if (! toggler) return;
+
+      toggler.toggle( this.context.cookies ); this.resize();
+   },
+
+   toggleSwapText: function( id, name, s1, s2 ) {
+      var el = $( id ); if (! el) return; var cookies = this.context.cookies;
+
+      if (cookies.get( name ) == 'true') {
+         cookies.set( name, 'false' );
+
+         if (el) el.set( 'html', s2 );
+
+         if (el = $( name + 'Disp' )) el.hide();
+      }
+      else {
+         cookies.set( name, 'true' );
+
+         if (el) el.set( 'html', s1 );
+
+         if (el = $( name + 'Disp' )) el.show();
+      }
+
+      this.resize();
+   }
+} );
+
 var WindowUtils = new Class( {
    Implements: [ Options, LoadMore ],
 
@@ -1135,6 +1278,7 @@ var WindowUtils = new Class( {
       config_attr: 'anchors',
       customLogFn: false,
       height     : 600,
+      maskOpts   : {},
       quiet      : false,
       selector   : '.windows',
       target     : null,
@@ -1193,7 +1337,11 @@ var WindowUtils = new Class( {
       if (! (dialog = this.dialogs[ opt.name ])) {
          var content = new Element( 'div', {
             'id': id } ).appendText( 'Loading...' );
+         var win     = window.getScrollSize();
 
+         opt.maskOpts.id     = 'mask-' + opt.name;
+         opt.maskOpts.height = window.getHeight();
+         opt.maskOpts.width  = window.getWidth();
          dialog = this.dialogs[ opt.name ]
                 = new Dialog( undefined, content, opt );
       }

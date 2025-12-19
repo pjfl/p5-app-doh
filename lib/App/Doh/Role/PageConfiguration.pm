@@ -55,7 +55,6 @@ around 'load_page' => sub {
 
    $page->{form_name} //= 'markdown';
    $page->{hint     } //= $req->loc( 'Hint' );
-   $page->{locale   } //= $req->locale;
    $page->{wanted   } //= join '/', @{ $req->uri_params->() // [] };
 
    return $page;

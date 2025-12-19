@@ -16,6 +16,15 @@ with    q(App::Doh::Role::Authorization);
 
 has '+moniker' => default => 'admin';
 
+# Construction
+around 'exception_handler' => sub {
+   my ($orig, $self, @args) = @_; my $stash = $orig->( $self, @args );
+
+   $stash->{page}->{template} = [ 'docs', 'docs' ];
+
+   return $stash;
+};
+
 # Private methods
 my $_authenticate = sub {
    my ($self, $username, $password) = @_; my $authenticated;

@@ -95,6 +95,9 @@ Install **App-Doh** with:
    cpanm --notest git://github.com/pjfl/p5-app-doh.git
 ```
 
+Watch out for broken Github download URIs, the one above is the correct
+format
+
 Although this is a *simple* application it is composed of many CPAN
 distributions and, depending on how many of them are already available,
 installation may take a while to complete. The flip side is that there are no

@@ -3,7 +3,6 @@ package App::Doh::View::HTML;
 use namespace::autoclean;
 
 use App::Doh::Util         qw( stash_functions );
-use Class::Usul::Constants qw( TRUE );
 use Encode                 qw( encode );
 use File::DataClass::Types qw( CodeRef HashRef Object );
 use HTML::GenerateUtil     qw( escape_html );

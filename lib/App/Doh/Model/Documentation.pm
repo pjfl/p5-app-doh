@@ -17,6 +17,14 @@ with    q(App::Doh::Role::RSS);
 has '+moniker' => default => 'docs';
 
 # Construction
+around 'exception_handler' => sub {
+   my ($orig, $self, @args) = @_; my $stash = $orig->( $self, @args );
+
+   $stash->{page}->{template} = [ 'docs', 'docs' ];
+
+   return $stash;
+};
+
 around 'initialise_page' => sub {
    my ($orig, $self, $req, $node, $locale) = @_;
 

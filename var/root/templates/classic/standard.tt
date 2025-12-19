@@ -10,4 +10,5 @@
       </div>
    </div>
 [%    INCLUDE 'classic/footer.tt' -%]
+<!-- End of application templates -->
 [% END -%]

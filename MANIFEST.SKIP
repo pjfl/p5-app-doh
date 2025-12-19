@@ -75,7 +75,9 @@ Thumbs.db
 \bvar/root/docs/en/drafts
 \bvar/root/docs/en/posts
 \bvar/root/docs/site_data
-\bvar/root/img/logo.jpg
+\bvar/root/fonts
+\bvar/root/img/article-footer.png
+\bvar/root/img/logo.png
 \bvar/root/static
 \bvar/run
 \bvar/tmp

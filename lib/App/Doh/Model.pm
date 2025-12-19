@@ -23,8 +23,7 @@ has '_ipc' => is => 'lazy', isa => ProcCommer, handles => [ 'run_cmd' ],
 sub exception_handler {
    my ($self, $req, $e) = @_; my $errors = '&nbsp;' x 40;
 
-   my $obj; $obj = $e->args->[ 0 ] and blessed $obj
-      and $obj->can( 'class' ) and $obj->class eq 'ValidationErrors'
+   blessed $e and $e->can( 'class' ) and $e->class eq 'ValidationErrors'
       and $errors = "\n\n".( join "\n\n", map { "${_}" } @{ $e->args } );
 
    my $name   =  $req->loc( 'Exception Handler' );
